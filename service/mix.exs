@@ -15,7 +15,8 @@ defmodule PlumMail.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      # NOTE gleam_http should be required by cowboy
+      extra_applications: [:logger, :gleam_http],
       mod: {PlumMail.Application, []}
     ]
   end
