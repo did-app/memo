@@ -4,7 +4,7 @@ defmodule PlumMail.Application do
   use Application
 
   def start(_type, _args) do
-    port = 8000
+    port = port()
 
     children = [
       %{id: :cowboy, start: {:gleam@http@cowboy, :start, [&:plum_mail@web@router.handle/1, port]}}
@@ -12,5 +12,13 @@ defmodule PlumMail.Application do
 
     opts = [strategy: :one_for_one, name: PlumMail.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp port() do
+    with raw when is_binary(raw) <- System.get_env("PORT"), {port, ""} = Integer.parse(raw) do
+      port
+    else
+      _ -> throw(ArgumentError)
+    end
   end
 end
