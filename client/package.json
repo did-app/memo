@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "sirv-cli": "^1.0.6"
+  }
+}
