@@ -1,4 +1,4 @@
-FROM gleamlang/gleam:0.10.1
+FROM gleamlang/gleam:0.11.0-rc1
 
 # NOTE these two should not be needed if using the midas container
 WORKDIR /opt/app
