@@ -5,8 +5,12 @@ defmodule PlumMail.Application do
 
   def start(_type, _args) do
     port = port()
+    {:ok, db_config} = :gleam@pgo.url_config(System.get_env("DATABASE_URL"))
+    db_ssl = System.get_env("DATABASE_SSL") != "FALSE"
+    db_config = [{:ssl, db_ssl} | db_config]
 
     children = [
+      %{id: :pgo, start: {:gleam@pgo, :start_link, [:default, db_config]}, type: :supervisor},
       %{id: :cowboy, start: {:gleam@http@cowboy, :start, [&:plum_mail@web@router.handle/1, port]}}
     ]
 

@@ -31,3 +31,15 @@ services:
     network_mode: host
     environment:
       PORT: 8000
+      DATABASE_URL: postgres://eEj8ar4O:OTnrE1n7D392DnbovK@localhost:6543/plum_mail
+      DATABASE_SSL: "FALSE"
+    depends_on:
+      - db
+  db:
+    image: "postgres:12.4"
+    environment:
+      - POSTGRES_USER=eEj8ar4O
+      - POSTGRES_PASSWORD=OTnrE1n7D392DnbovK
+      - POSTGRES_DB=plum_mail
+    ports:
+      - 6543:5432

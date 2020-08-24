@@ -1,9 +1,26 @@
+FROM rust:1.45.2 AS build
+
+RUN cargo install diesel_cli --no-default-features --features postgres
+
 FROM gleamlang/gleam:0.11.0-rc1
 
-# NOTE these two should not be needed if using the midas container
+COPY --from=build /usr/local/cargo/bin/diesel /bin
+RUN diesel --version
+
+# NOTE the WORKDIR should not be the users home dir as the will copy container cookie into host machine
 WORKDIR /opt/app
 RUN mix local.hex --force && mix local.rebar --force
 
+# --------
+# FIXME revert to midas once 0.11.0 stable
+
+# FROM gleamlang/gleam:0.11.0-rc1
+#
+# # NOTE these two should not be needed if using the midas container
+# WORKDIR /opt/app
+# RUN mix local.hex --force && mix local.rebar --force
+
+# ------------
 
 COPY . .
 RUN mix deps.get

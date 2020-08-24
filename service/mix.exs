@@ -25,7 +25,8 @@ defmodule PlumMail.MixProject do
     [
       {:mix_gleam, "~> 0.1.0"},
       {:gleam_cowboy, github: "gleam-experiments/cowboy", manager: :rebar3, branch: :main},
-      {:gleam_json, "~> 0.1.0"}
+      {:gleam_json, "~> 0.1.0"},
+      {:gleam_pgo, github: "midas-framework/pgo", branch: "wrapper"}
     ]
   end
 end

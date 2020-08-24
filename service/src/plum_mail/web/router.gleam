@@ -8,6 +8,7 @@ import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/json
 // Web/utils let session = utils.extractsession
+import plum_mail/authentication
 import plum_mail/web/session
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
@@ -75,6 +76,19 @@ pub fn route(request) {
         |> bit_builder.from_bit_string
       http.response(200)
       |> http.set_resp_body(body)
+      |> Ok
+    }
+    ["sign_in"] -> {
+      try form = parse_form(request)
+      try email_address = map.get(form, "email_address")
+      let Ok(identifier_id) =
+        authentication.identifier_from_email(email_address)
+      redirect("/")
+      |> http.set_resp_cookie(
+        "session",
+        int.to_string(identifier_id),
+        http.cookie_defaults(request.scheme),
+      )
       |> Ok
     }
     ["c", "create"] -> {

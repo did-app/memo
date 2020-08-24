@@ -1,12 +1,17 @@
 %{
+  "backoff": {:hex, :backoff, "1.1.6", "83b72ed2108ba1ee8f7d1c22e0b4a00cfe3593a67dbc792799e8cce9f42f796b", [:rebar3], [], "hexpm", "cf0cfff8995fb20562f822e5cc47d8ccf664c5ecdc26a684cbe85c225f9d7c39"},
   "cowboy": {:hex, :cowboy, "2.8.0", "f3dc62e35797ecd9ac1b50db74611193c29815401e53bac9a5c0577bd7bc667d", [:rebar3], [{:cowlib, "~> 2.9.1", [hex: :cowlib, repo: "hexpm", optional: false]}, {:ranch, "~> 1.7.1", [hex: :ranch, repo: "hexpm", optional: false]}], "hexpm", "4643e4fba74ac96d4d152c75803de6fad0b3fa5df354c71afdd6cbeeb15fac8a"},
   "cowlib": {:hex, :cowlib, "2.9.1", "61a6c7c50cf07fdd24b2f45b89500bb93b6686579b069a89f88cb211e1125c78", [:rebar3], [], "hexpm", "e4175dc240a70d996156160891e1c62238ede1729e45740bdd38064dad476170"},
   "gleam_cowboy": {:git, "https://github.com/gleam-experiments/cowboy.git", "2cce83e7af9b9796c4ac73c684a18b1aabd51eb0", [branch: :main]},
   "gleam_http": {:hex, :gleam_http, "1.3.0", "dc84d787cb49550d7e98834a966a4f07ee90fe863a6088e752e8f1a208ab41c1", [:rebar3], [{:gleam_stdlib, "~> 0.10.0", [hex: :gleam_stdlib, repo: "hexpm", optional: false]}], "hexpm", "11b3815d1275847f7357a0eb94856e5627d5aa85080aac770d480db1f9240a0a"},
   "gleam_json": {:hex, :gleam_json, "0.1.0", "8740eb85e079f38a15f2627d53c306491d90c43c423aae56a4abc371319cc346", [:rebar3], [{:gleam_stdlib, "0.10.1", [hex: :gleam_stdlib, repo: "hexpm", optional: false]}, {:jsone, "1.5.2", [hex: :jsone, repo: "hexpm", optional: false]}], "hexpm", "8c6f144bc4f2ddcb0347a84c4dee134bd771a8a7c95c135a31d373d5ea95652b"},
   "gleam_otp": {:git, "https://github.com/gleam-lang/otp", "aaf4ee6cda39ca32f952e1e794687cb00ad43934", [branch: "main"]},
+  "gleam_pgo": {:git, "https://github.com/midas-framework/pgo.git", "f0946594d731f249fa4c9a283093251f4b89c63d", [branch: "wrapper"]},
   "gleam_stdlib": {:hex, :gleam_stdlib, "0.10.1", "f123f33e03b5cdf5e19fc179b9ee81269deb93f7defadb17ef2930e4db9011e7", [:rebar3], [], "hexpm", "8acd5d8ae1bd013b848f22745be39e6d25968bf29899a87eb5d7057f4ed89dd0"},
   "jsone": {:hex, :jsone, "1.5.2", "87adea283c9cf24767b4deed44602989a5331156df5d60a2660e9c9114d54046", [:rebar3], [], "hexpm", "170c171ce7f6dd70c858065154a3305b8564833c6dcca17e10b676ca31ea976f"},
   "mix_gleam": {:hex, :mix_gleam, "0.1.0", "a0cee5d30de865124a32ca6cd53b64c3e2ac57f12adf6e47b88fb673f47c716e", [:mix], [], "hexpm", "9ff518e6aab444c7f2e74038f9383020ef89810cf1f4402911f33b202ffd72e7"},
+  "pg_types": {:hex, :pg_types, "0.3.0", "1ce19c32851e2e59a3de17a88920ffe0566041fce81be5f4537f1db01d4267aa", [:rebar3], [], "hexpm", "59d1e306d704314979a468268aa3d07da4e791b3d72c7fbfc881b458ca14c0c8"},
+  "pgo": {:hex, :pgo, "0.11.1", "4b699096e0c5009610ab063f68b97d1b45fd4bafa286ed5ffc6744da07f7b6a6", [:rebar3], [{:backoff, "~> 1.1.6", [hex: :backoff, repo: "hexpm", optional: false]}, {:pg_types, "~> 0.3", [hex: :pg_types, repo: "hexpm", optional: false]}, {:telemetry, "~> 0.4.0", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "30f38ca823a98c41ef23967d133e91b45ad14aee0766f4773e88bccf46ba17a5"},
   "ranch": {:hex, :ranch, "1.7.1", "6b1fab51b49196860b733a49c07604465a47bdb78aa10c1c16a3d199f7f8c881", [:rebar3], [], "hexpm", "451d8527787df716d99dc36162fca05934915db0b6141bbdac2ea8d3c7afc7d7"},
+  "telemetry": {:hex, :telemetry, "0.4.2", "2808c992455e08d6177322f14d3bdb6b625fbcfd233a73505870d8738a2f4599", [:rebar3], [], "hexpm", "2d1419bd9dda6a206d7b5852179511722e2b18812310d304620c7bd92a13fcef"},
 }
