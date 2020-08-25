@@ -1,10 +1,19 @@
 import gleam/int
 import gleam/list
-import gleam/option.{Option}
+import gleam/option.{Option, Some}
 import gleam/http
 
 pub opaque type Session {
   Session(identifier_id: Option(Int))
+}
+
+pub fn authenticated(identifier_id) {
+  Session(Some(identifier_id))
+}
+
+pub fn to_string(session) {
+  let Session(Some(identifier_id)) = session
+  int.to_string(identifier_id)
 }
 
 fn extract_user_id(request) {

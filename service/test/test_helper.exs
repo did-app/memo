@@ -25,7 +25,8 @@ for test_file <- test_files do
 
   tests =
     for {{gleam_name, test_name}, i} <- Enum.with_index(tests) do
-      quote line: i do
+      quote line: i + 1 do
+        @tag [{unquote(test_name), true}]
         test unquote(test_name) do
           # Kernel.apply(unquote(gleam_name), unquote(test_name), [])
           unquote(gleam_name).unquote(test_name)()

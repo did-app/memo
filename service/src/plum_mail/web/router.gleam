@@ -41,6 +41,11 @@ fn create_conversation_params(request) {
   map.get(form, "topic")
 }
 
+fn add_participant_params(request) {
+  try form = parse_form(request)
+  map.get(form, "email_address")
+}
+
 pub type Conversation {
   Conversation(id: Int)
 }
@@ -53,6 +58,10 @@ fn find_conversation(id) {
   Ok(Conversation(id: 1))
 }
 
+fn add_participant(conversation, email_address) {
+  Ok(Conversation(id: 1))
+}
+
 fn can_view(conversation, session) {
   let identifier_id = 1
   Ok(identifier_id)
@@ -60,7 +69,13 @@ fn can_view(conversation, session) {
 
 fn to_json(conversation: Conversation) {
   json.object([
-    tuple("conversation", json.object([tuple("id", json.int(conversation.id))])),
+    tuple(
+      "conversation",
+      json.object([
+        tuple("id", json.int(conversation.id)),
+        tuple("participants", json.list([])),
+      ]),
+    ),
   ])
   |> json.encode()
   |> bit_string.from_string
@@ -108,10 +123,19 @@ pub fn route(request) {
       |> Ok
     }
     // AND corresponding delete
-    ["c", id, "pin"] -> todo("Post pint")
+    ["c", id, "participant"] -> {
+      try conversation = find_conversation(id)
+      try author_id = can_view(conversation, session.extract(request))
+      try email_address = add_participant_params(request)
+      try conversation = add_participant(conversation, email_address)
+      // FIXME do we need to update http
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
+    }
     // FIXME should add concurrency control
     ["c", id, "message"] -> todo("Post message")
-    ["c", id, "participant"] -> todo("Post participant")
+    ["c", id, "pin"] -> todo("Post pint")
   }
 }
 
