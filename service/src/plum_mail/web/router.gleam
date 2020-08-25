@@ -10,6 +10,9 @@ import gleam/json
 // Web/utils let session = utils.extractsession
 import plum_mail/authentication
 import plum_mail/web/session
+import plum_mail/discuss/conversation
+import plum_mail/discuss/start_conversation
+import plum_mail/discuss/add_participant
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -46,40 +49,9 @@ fn add_participant_params(request) {
   map.get(form, "email_address")
 }
 
-pub type Conversation {
-  Conversation(id: Int)
-}
-
-fn create_conversation(topic, owner_id) {
-  Ok(Conversation(id: 1))
-}
-
-fn find_conversation(id) {
-  Ok(Conversation(id: 1))
-}
-
-fn add_participant(conversation, email_address) {
-  Ok(Conversation(id: 1))
-}
-
 fn can_view(conversation, session) {
   let identifier_id = 1
   Ok(identifier_id)
-}
-
-fn to_json(conversation: Conversation) {
-  json.object([
-    tuple(
-      "conversation",
-      json.object([
-        tuple("id", json.int(conversation.id)),
-        tuple("participants", json.list([])),
-      ]),
-    ),
-  ])
-  |> json.encode()
-  |> bit_string.from_string
-  |> bit_builder.from_bit_string
 }
 
 pub fn route(request) {
@@ -110,24 +82,26 @@ pub fn route(request) {
       try topic = create_conversation_params(request)
       try identifier_id =
         session.require_authentication(session.extract(request))
-      try conversation = create_conversation(topic, identifier_id)
+      try conversation = start_conversation.execute(topic, identifier_id)
       redirect(string.append("/c/", int.to_string(conversation.id)))
       |> Ok
     }
     ["c", id] -> {
-      try conversation = find_conversation(id)
-      try author_id = can_view(conversation, session.extract(request))
-      let body = to_json(conversation)
+      assert Ok(id) = int.parse(id)
+      try c = conversation.fetch_by_id(id)
+      try author_id = can_view(c, session.extract(request))
+      let body = conversation.to_json(c)
       http.response(200)
       |> http.set_resp_body(body)
       |> Ok
     }
     // AND corresponding delete
     ["c", id, "participant"] -> {
-      try conversation = find_conversation(id)
+      assert Ok(id) = int.parse(id)
+      try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
       try email_address = add_participant_params(request)
-      try conversation = add_participant(conversation, email_address)
+      try conversation = add_participant.execute(conversation, email_address)
       // FIXME do we need to update http
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
