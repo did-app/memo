@@ -48,5 +48,15 @@ pub fn get_conversation(id, session) {
         Ok(tuple(id_inner, email_address))
       },
     )
-  tuple(id, topic, participants)
+  assert Ok(messages) = dynamic.field(data, "messages")
+  assert Ok(messages) =
+    dynamic.typed_list(
+      messages,
+      fn(message) { // try id_inner = dynamic.field(participant, "id")
+        // try id_inner = dynamic.int(id_inner)
+        try content = dynamic.field(message, "content")
+        try content = dynamic.string(content)
+        Ok(tuple(content)) },
+    )
+  tuple(id, topic, participants, messages)
 }

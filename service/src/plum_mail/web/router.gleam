@@ -9,7 +9,9 @@ import gleam/uri
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/json
+import gleam/pgo
 // Web/utils let session = utils.extractsession
+import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/web/session
 import plum_mail/discuss/conversation
@@ -47,15 +49,33 @@ fn create_conversation_params(request) {
 }
 
 fn add_participant_params(request: http.Request(BitString)) {
-    try body = bit_string.to_string(request.body)
-  try data = json.decode(body)
-  |> result.map_error(fn(_) { todo })
+  try body = bit_string.to_string(request.body)
+  try data =
+    json.decode(body)
+    |> result.map_error(fn(_) { todo })
   let data = dynamic.from(data)
-  try email_address = dynamic.field(data, "email_address")
-  |> result.map_error(fn(_) { todo })
-  try email_address = dynamic.string(email_address)
-  |> result.map_error(fn(_) { todo })
+  try email_address =
+    dynamic.field(data, "email_address")
+    |> result.map_error(fn(_) { todo })
+  try email_address =
+    dynamic.string(email_address)
+    |> result.map_error(fn(_) { todo })
   Ok(email_address)
+}
+
+fn write_message_params(request: http.Request(BitString)) {
+  try body = bit_string.to_string(request.body)
+  try data =
+    json.decode(body)
+    |> result.map_error(fn(_) { todo })
+  let data = dynamic.from(data)
+  try content =
+    dynamic.field(data, "content")
+    |> result.map_error(fn(_) { todo })
+  try content =
+    dynamic.string(content)
+    |> result.map_error(fn(_) { todo })
+  Ok(content)
 }
 
 fn can_view(conversation, session) {
@@ -121,7 +141,27 @@ pub fn route(request) {
       |> Ok
     }
     // FIXME should add concurrency control
-    ["c", id, "message"] -> todo("Post message")
+    ["c", id, "message"] -> {
+      assert Ok(id) = int.parse(id)
+      try conversation = conversation.fetch_by_id(id)
+      try author_id = can_view(conversation, session.extract(request))
+      try content = write_message_params(request)
+      // try conversation = .execute(conversation, email_address)
+      let sql =
+        "
+        INSERT INTO messages (conversation_id, content, author_id)
+        VALUES ($1, $2, $3)
+        "
+      let args = [
+        pgo.int(conversation.id),
+        pgo.text(content),
+        pgo.int(author_id),
+      ]
+      run_sql.execute(sql, args, fn(x) { x })
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
+    }
     ["c", id, "pin"] -> todo("Post pint")
   }
 }
@@ -133,7 +173,7 @@ pub fn handle(request: Request(BitString)) -> Response(BitBuilder) {
     Error(reason) -> error_response(reason)
   }
   |> http.prepend_resp_header(
-      "access-control-allow-origin",
-      "http://localhost:5000",
+    "access-control-allow-origin",
+    "http://localhost:5000",
   )
 }

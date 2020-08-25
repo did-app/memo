@@ -1,5 +1,5 @@
-import {fetchConversation, addParticipant} from "../client.js"
-import {setTopic, renderParticipant} from "./view.js"
+import {fetchConversation, addParticipant, writeMessage} from "../client.js"
+import {setTopic, renderParticipant, renderMessage} from "./view.js"
 import {formValues} from "../utils.js"
 
 (async function () {
@@ -12,17 +12,25 @@ import {formValues} from "../utils.js"
     const [name] = emailAddress.split("@")
     renderParticipant(name, emailAddress)
   });
+  conversation.messages.forEach(function (message) {
+    const {content} = message
+    renderMessage({content})
+  });
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
     const action = event.target.dataset.action
-    console.log(action);
+    const form = formValues(event.target)
+    console.log(form);
     if (action === "addParticipant") {
-      let form = formValues(event.target)
-      console.log(form);
       let {emailAddress} = form
 
       let response = await addParticipant(conversationId, emailAddress)
+      window.location.reload()
+    } else if (action == "writeMessage") {
+      let {content} = form
+
+      let response = await writeMessage(conversationId, content)
       window.location.reload()
     }
   })

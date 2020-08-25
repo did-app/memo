@@ -7,11 +7,16 @@ import gleam/pgo
 import plum_mail/run_sql
 
 pub type Conversation {
-  Conversation(id: Int, topic: String, participants: List(tuple(Int, String)))
+  Conversation(
+    id: Int,
+    topic: String,
+    participants: List(tuple(Int, String)),
+    messages: List(String),
+  )
 }
 
 pub fn to_json(conversation: Conversation) {
-  let Conversation(id, topic, participants) = conversation
+  let Conversation(id, topic, participants, messages) = conversation
   json.object([
     tuple(
       "conversation",
@@ -28,6 +33,15 @@ pub fn to_json(conversation: Conversation) {
                 tuple("id", json.int(id)),
                 tuple("email_address", json.string(email_address)),
               ])
+            },
+          )),
+        ),
+        tuple(
+          "messages",
+          json.list(list.map(
+            messages,
+            fn(message) {
+              json.object([tuple("content", json.string(message))])
             },
           )),
         ),
@@ -57,7 +71,7 @@ pub fn fetch_by_id(id) {
         assert Ok(topic) = dynamic.element(row, 1)
         assert Ok(topic) = dynamic.string(topic)
 
-        Conversation(id, topic, [])
+        Conversation(id, topic, [], [])
       },
     )
 
@@ -81,6 +95,23 @@ pub fn fetch_by_id(id) {
         tuple(id, email_address)
       },
     )
+  let sql =
+    "
+    SELECT m.content
+    FROM messages AS m
+    WHERE conversation_id = $1
+    "
+  let args = [pgo.int(c.id)]
+  try messages =
+    run_sql.execute(
+      sql,
+      args,
+      fn(row) {
+        assert Ok(content) = dynamic.element(row, 0)
+        assert Ok(content) = dynamic.string(content)
+        content
+      },
+    )
 
-  Ok(Conversation(..c, participants: participants))
+  Ok(Conversation(..c, participants: participants, messages: messages))
 }

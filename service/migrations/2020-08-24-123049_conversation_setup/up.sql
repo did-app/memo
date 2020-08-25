@@ -34,3 +34,14 @@ CREATE TABLE participants (
 );
 
 SELECT diesel_manage_updated_at('participants');
+
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  conversation_id INT REFERENCES conversations(id) NOT NULL,
+  content TEXT NOT NULL,
+  author_id INT REFERENCES identifiers(id) NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+SELECT diesel_manage_updated_at('messages');

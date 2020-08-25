@@ -12,3 +12,11 @@ export async function addParticipant(id, emailAddress) {
   console.log(response);
   return ({})
 }
+export async function writeMessage(id, content) {
+  const response = await fetch(API_ROOT + "/c/" + id + "/message", {
+    method: "POST",
+    body: JSON.stringify({content: content})
+  })
+  console.log(response);
+  return ({})
+}

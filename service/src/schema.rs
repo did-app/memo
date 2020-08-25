@@ -19,6 +19,17 @@ table! {
 }
 
 table! {
+    messages (id) {
+        id -> Int4,
+        conversation_id -> Int4,
+        content -> Text,
+        author_id -> Int4,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     participants (id) {
         id -> Int4,
         conversation_id -> Int4,
@@ -28,11 +39,14 @@ table! {
     }
 }
 
+joinable!(messages -> conversations (conversation_id));
+joinable!(messages -> identifiers (author_id));
 joinable!(participants -> conversations (conversation_id));
 joinable!(participants -> identifiers (identifier_id));
 
 allow_tables_to_appear_in_same_query!(
     conversations,
     identifiers,
+    messages,
     participants,
 );

@@ -30,7 +30,7 @@ pub fn execute(topic, owner_id) {
         assert Ok(topic) = dynamic.element(row, 1)
         assert Ok(topic) = dynamic.string(topic)
 
-        Conversation(id, topic, [])
+        Conversation(id, topic, [], [])
       },
     )
   Ok(c)

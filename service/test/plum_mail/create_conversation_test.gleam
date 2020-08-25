@@ -31,7 +31,7 @@ pub fn create_conversation_test() {
   assert Ok(tuple(_, id)) = string.split_once(location, "/c/")
   assert Ok(id) = int.parse(id)
 
-  let conversation: tuple(Int, String, List(tuple(Int, String))) =
+  let tuple(_id, t, _p, _m) =
     support.get_conversation(id, session.to_string(user_session))
-  should.equal(conversation.1, topic)
+  should.equal(t, topic)
 }
