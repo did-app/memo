@@ -54,4 +54,11 @@ pub fn show_conversation_test() {
 
   should.equal(response.status, 200)
   io.debug(response.body)
+  todo
+}
+
+
+pub fn add_participant_test() {
+    todo
+
 }
