@@ -70,7 +70,8 @@ pub fn route(request) {
       try email_address = map.get(form, "email_address")
       let Ok(identifier_id) =
         authentication.identifier_from_email(email_address)
-      redirect("/")
+        // TODO parameterise redirect
+      redirect("http://localhost:5000/search")
       |> http.set_resp_cookie(
         "session",
         int.to_string(identifier_id),
@@ -83,7 +84,7 @@ pub fn route(request) {
       try identifier_id =
         session.require_authentication(session.extract(request))
       try conversation = start_conversation.execute(topic, identifier_id)
-      redirect(string.append("/c/", int.to_string(conversation.id)))
+      redirect(string.append("http://localhost:5000/c/", int.to_string(conversation.id)))
       |> Ok
     }
     ["c", id] -> {
@@ -93,6 +94,7 @@ pub fn route(request) {
       let body = conversation.to_json(c)
       http.response(200)
       |> http.set_resp_body(body)
+      |> http.prepend_resp_header("access-control-allow-origin", "http://localhost:5000")
       |> Ok
     }
     // AND corresponding delete
