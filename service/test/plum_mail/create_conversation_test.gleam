@@ -28,7 +28,7 @@ pub fn create_conversation_test() {
 
   should.equal(response.status, 303)
   assert Ok(location) = http.get_resp_header(response, "location")
-  assert Ok(tuple("", id)) = string.split_once(location, "/c/")
+  assert Ok(tuple(_, id)) = string.split_once(location, "/c/")
   assert Ok(id) = int.parse(id)
 
   let conversation: tuple(Int, String, List(tuple(Int, String))) =

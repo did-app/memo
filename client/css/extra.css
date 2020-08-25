@@ -1,0 +1,92 @@
+/* https://tailwindcomponents.com/component/checkbox-1 */
+input:checked+svg {
+  display: block;
+}
+
+body {
+  background: #f6f6f6;
+}
+
+.my-shadow {
+  box-shadow: 0 0 50px -12px rgba(0, 0, 0, .25);
+}
+
+.rounded-2xl {
+  border-radius: 1.5rem;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border: none;
+}
+
+.markdown-body h1 {
+  font-size: 1.5em;
+  /* font-weight: normal; */
+}
+
+.markdown-body h3,
+.markdown-body h4 {
+  font-size: inherit;
+}
+
+.markdown-body h2 {
+  font-size: 1.3em;
+  /* font-weight: normal; */
+}
+
+.markdown-body ul {
+  list-style: initial;
+}
+
+.markdown-body ol {
+  list-style: decimal;
+}
+
+/*.markdown-body p {
+  margin-bottom:1em;
+}*/
+/*.markdown-body blockquote {
+  border-left:0.4em solid #e2e8f0;
+  padding: 0.5em 0 0.5em 1em;
+}*/
+/*.markdown-body a {
+  color:deepskyblue;
+}*/
+input.message-checkbox[type="checkbox"]:checked~.markdown-body {
+  display: none;
+}
+
+input.message-checkbox[type="checkbox"]~.content-intro {
+  display: none;
+}
+
+input.message-checkbox[type="checkbox"]:checked~.content-intro {
+  display: block;
+}
+
+input.message-checkbox[type="checkbox"]:checked~footer {
+  margin-bottom: -3rem;
+}
+
+input.message-checkbox[type="checkbox"]+label>div {
+  display: none;
+}
+
+input.message-checkbox[type="checkbox"]:checked+label>div {
+  display: block;
+  cursor: pointer;
+}
+
+.markdown-body {
+  /* Overwrite gh markdown back to tailwind */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+input#preview-tab[type="checkbox"]:checked~textarea {
+  display: none;
+}
+
+input#preview-tab[type="checkbox"]:not(:checked)~#preview {
+  display: none;
+}
