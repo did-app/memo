@@ -1,8 +1,10 @@
 import gleam/bit_builder.{BitBuilder}
 import gleam/bit_string
+import gleam/dynamic
 import gleam/int
 import gleam/map
 import gleam/string
+import gleam/result
 import gleam/uri
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
@@ -44,9 +46,16 @@ fn create_conversation_params(request) {
   map.get(form, "topic")
 }
 
-fn add_participant_params(request) {
-  try form = parse_form(request)
-  map.get(form, "email_address")
+fn add_participant_params(request: http.Request(BitString)) {
+    try body = bit_string.to_string(request.body)
+  try data = json.decode(body)
+  |> result.map_error(fn(_) { todo })
+  let data = dynamic.from(data)
+  try email_address = dynamic.field(data, "email_address")
+  |> result.map_error(fn(_) { todo })
+  try email_address = dynamic.string(email_address)
+  |> result.map_error(fn(_) { todo })
+  Ok(email_address)
 }
 
 fn can_view(conversation, session) {
@@ -97,10 +106,6 @@ pub fn route(request) {
       let body = conversation.to_json(c)
       http.response(200)
       |> http.set_resp_body(body)
-      |> http.prepend_resp_header(
-        "access-control-allow-origin",
-        "http://localhost:5000",
-      )
       |> Ok
     }
     // AND corresponding delete
@@ -127,4 +132,8 @@ pub fn handle(request: Request(BitString)) -> Response(BitBuilder) {
     Ok(response) -> response
     Error(reason) -> error_response(reason)
   }
+  |> http.prepend_resp_header(
+      "access-control-allow-origin",
+      "http://localhost:5000",
+  )
 }
