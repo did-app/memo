@@ -2,6 +2,7 @@ import gleam/bit_builder.{BitBuilder}
 import gleam/bit_string
 import gleam/dynamic
 import gleam/int
+import gleam/io
 import gleam/map
 import gleam/string
 import gleam/result
@@ -27,7 +28,9 @@ pub fn redirect(uri: String) -> Response(BitBuilder) {
 }
 
 fn error_response(_) {
-  todo("implement error response")
+  // todo("implement error response")
+  http.response(401)
+  |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
 }
 
 fn parse_form(request: Request(_)) {
@@ -93,6 +96,17 @@ pub fn route(request) {
       http.response(200)
       |> http.set_resp_body(body)
       |> Ok
+    }
+    ["inbox"] -> {
+        request
+        |> io.debug
+        try identifier_id =
+          session.require_authentication(session.extract(request))
+          |> io.debug
+        http.response(200)
+        |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+        |> Ok
+
     }
     ["sign_in"] -> {
       try form = parse_form(request)

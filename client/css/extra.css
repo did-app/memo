@@ -1,3 +1,7 @@
+::-webkit-scrollbar {
+  display: none;
+}
+
 /* https://tailwindcomponents.com/component/checkbox-1 */
 input:checked+svg {
   display: block;
