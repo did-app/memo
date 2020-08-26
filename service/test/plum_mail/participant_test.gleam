@@ -9,6 +9,7 @@ import gleam/http
 import gleam/json
 import plum_mail/authentication
 import plum_mail/discuss/start_conversation
+import plum_mail/web/helpers as web
 import plum_mail/web/session
 import plum_mail/web/router.{handle}
 import plum_mail/support
@@ -37,10 +38,9 @@ pub fn add_participant_test() {
       "cookie",
       string.append("session=", session.to_string(user_session)),
     )
-    |> http.set_req_body(bit_string.append(
-      <<"email_address=":utf8>>,
-      bit_string.from_string(invited),
-    ))
+    |> web.set_req_json(json.object([
+      tuple("email_address", json.string(email_address)),
+    ]))
 
   let response = handle(request)
   should.equal(response.status, 201)

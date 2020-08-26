@@ -1,9 +1,11 @@
+import gleam/io
 import gleam/int
 import gleam/string
 import gleam/http
 import gleam/json
 import plum_mail/authentication
 import plum_mail/discuss/start_conversation
+import plum_mail/discuss/add_participant
 import plum_mail/web/helpers
 import plum_mail/web/session
 import plum_mail/web/router.{handle}
@@ -13,10 +15,14 @@ import gleam/should
 pub fn write_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier_id) = authentication.identifier_from_email(email_address)
+  io.debug("------")
+  io.debug(identifier_id)
   let user_session = session.authenticated(identifier_id)
   let topic = "Test topic"
   // conversation, could be domain and entity is thread/topic
   assert Ok(conversation) = start_conversation.execute(topic, identifier_id)
+  let invited = support.generate_email_address("other.test")
+  assert Ok(_) = add_participant.execute(conversation, invited)
   let request =
     http.default_req()
     |> http.set_method(http.Post)

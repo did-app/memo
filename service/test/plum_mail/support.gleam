@@ -7,6 +7,7 @@ import gleam/string
 import gleam/crypto
 import gleam/http
 import gleam/json
+import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
 
 pub fn generate_email_address(domain) {

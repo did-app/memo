@@ -3,6 +3,7 @@ import gleam/bit_string
 import gleam/dynamic
 import gleam/int
 import gleam/io
+import gleam/list
 import gleam/map
 import gleam/option.{Some}
 import gleam/string
@@ -83,9 +84,18 @@ fn write_message_params(request: http.Request(BitString)) {
   Ok(content)
 }
 
-fn can_view(conversation, session) {
-  let identifier_id = 1
-  Ok(identifier_id)
+fn can_view(c, user_session) {
+  try identifier_id = session.require_authentication(user_session)
+  let conversation.Conversation(participants: participants, ..) = c
+  list.find_map(
+    participants,
+    fn(participant) {
+      let tuple(participant_id, _) = participant
+      case participant_id == identifier_id {
+        True -> Ok(identifier_id)
+      }
+    },
+  )
 }
 
 pub fn route(request) {
@@ -197,7 +207,17 @@ pub fn route(request) {
         pgo.text(content),
         pgo.int(author_id),
       ]
-      run_sql.execute(sql, args, fn(x) { x })
+      try _ = run_sql.execute(sql, args, fn(x) { x })
+      let recipients =
+        list.filter(
+          conversation.participants,
+          fn(p) {
+            let tuple(id, _) = p
+            id != author_id
+          },
+        )
+      // TODO read and send, almost certainly the right way as we don't want to be slow
+      todo("send email")
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok

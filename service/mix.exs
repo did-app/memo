@@ -26,6 +26,7 @@ defmodule PlumMail.MixProject do
       {:mix_gleam, "~> 0.1.0"},
       {:gleam_cowboy, "~> 0.1.2"},
       {:gleam_crypto, "~> 0.1.2"},
+      {:gleam_httpc, "~> 0.1.1"},
       {:gleam_json, "~> 0.1.0"},
       {:gleam_pgo, "~> 0.1.0"}
     ]
