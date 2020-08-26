@@ -1,9 +1,3 @@
-// TODO this is not safe
-export function domify(string) {
-  var htmlObject = document.createElement("div");
-  htmlObject.innerHTML = string;
-  return htmlObject.children[0];
-}
 
 export function formValues($form) {
   // https://codepen.io/ntpumartin/pen/MWYmypq

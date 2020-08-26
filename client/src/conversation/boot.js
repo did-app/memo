@@ -1,36 +1,48 @@
-import {fetchConversation, addParticipant, writeMessage} from "../client.js"
-import {setTopic, renderParticipant, renderMessage} from "./view.js"
-import {formValues} from "../utils.js"
+import Page from "./Page.svelte";
+import * as Client from "../client.js";
+import {formValues} from "../utils"
 
-export default async function () {
-  const conversationId = parseInt(window.location.pathname.substr(3))
-  const conversation = await fetchConversation(conversationId);
-  setTopic(conversation.topic);
+export default async function() {
+  const conversationId = parseInt(window.location.pathname.substr(3));
 
-  conversation.participants.forEach(function (participant) {
-    const {email_address: emailAddress} = participant
-    const [name] = emailAddress.split("@")
-    renderParticipant(name, emailAddress)
+  const page = new Page({ target: document.body });
+  let data = await Client.fetchConversation(conversationId);
+  let topic = data.topic;
+  let participants = data.participants.map(function({
+    email_address: emailAddress
+  }) {
+    const [name] = emailAddress.split("@");
+    return { name, emailAddress };
   });
-  conversation.messages.forEach(function (message) {
-    const {content} = message
-    renderMessage({content})
-  });
+  let messages = data.messages.map(function ({content}) {
+    const [intro] = content.trim().split(/\r?\n/)
+    const html = marked(content)
+    const checked = true
+    const date ="12 Aug"
+    const author = "vov"
+    return {checked, author, date, intro, html}
+  })
+  console.log(messages);
+  page.$set({topic, participants, messages})
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
+
     const action = event.target.dataset.action
+
     const form = formValues(event.target)
     console.log(form);
+
     if (action === "addParticipant") {
       let {emailAddress} = form
 
-      let response = await addParticipant(conversationId, emailAddress)
-      window.location.reload()
+      let response = await Client.addParticipant(conversationId, emailAddress)
+      console.log(response);
+      // window.location.reload()
     } else if (action == "writeMessage") {
       let {content} = form
 
-      let response = await writeMessage(conversationId, content)
+      let response = await Client.writeMessage(conversationId, content)
       window.location.reload()
     }
   })
