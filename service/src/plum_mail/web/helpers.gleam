@@ -13,6 +13,7 @@ pub fn set_req_json(request, data) {
   |> http.prepend_req_header("content-type", "application/json")
   |> http.set_req_body(body)
 }
+
 pub fn set_resp_json(respuest, data) {
   let body =
     data

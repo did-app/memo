@@ -1,7 +1,10 @@
+import gleam/bit_builder
 import gleam/bit_string
+import gleam/dynamic
 import gleam/int
 import gleam/string
 import gleam/http
+import gleam/json
 import plum_mail/authentication
 import plum_mail/web/router.{handle}
 import plum_mail/web/session
@@ -34,4 +37,27 @@ pub fn create_conversation_test() {
   let tuple(_id, t, _p, _m) =
     support.get_conversation(id, session.to_string(user_session))
   should.equal(t, topic)
+
+  let request =
+    http.default_req()
+    |> http.set_method(http.Get)
+    |> http.set_path("/inbox")
+    |> http.set_req_cookie("session", session.to_string(user_session))
+    |> http.set_req_body(<<>>)
+  let response = handle(request)
+
+  assert Ok(body) =
+    response.body
+    |> bit_builder.to_bit_string()
+    |> bit_string.to_string
+  assert Ok(data) = json.decode(body)
+  let data = dynamic.from(data)
+  assert Ok(conversations) = dynamic.field(data, "conversations")
+  assert Ok(conversations) = dynamic.list(conversations)
+  assert [conversation] = conversations
+  dynamic.field(conversation, "id")
+  |> should.equal(Ok(dynamic.from(id)))
+
+  dynamic.field(conversation, "topic")
+  |> should.equal(Ok(dynamic.from(topic)))
 }

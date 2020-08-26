@@ -100,19 +100,36 @@ pub fn route(request) {
       |> Ok
     }
     ["inbox"] -> {
-        try identifier_id =
-          session.require_authentication(session.extract(request))
-        http.response(200)
-        |> web.set_resp_json(json.object([
-            tuple("conversations", json.list([
-                json.object([
-                    tuple("id", json.int(1)),
-                    tuple("topic", json.string("Investor meeting")),
-                    tuple("updated_at", json.string("19 July"))
-                    ])
-                ]))]))
-        |> Ok
-
+      try identifier_id =
+        session.require_authentication(session.extract(request))
+      let sql =
+        "
+      SELECT c.id, c.topic
+      FROM conversations AS c
+      JOIN participants AS me ON me.conversation_id = c.id
+      WHERE me.identifier_id = $1
+      "
+      let args = [pgo.int(identifier_id)]
+      try jsons =
+        run_sql.execute(
+          sql,
+          args,
+          fn(row) {
+            assert Ok(id) = dynamic.element(row, 0)
+            assert Ok(id) = dynamic.int(id)
+            assert Ok(topic) = dynamic.element(row, 1)
+            assert Ok(topic) = dynamic.string(topic)
+            json.object([
+              tuple("id", json.int(id)),
+              tuple("topic", json.string(topic)),
+            ])
+          },
+        )
+      http.response(200)
+      |> web.set_resp_json(json.object([
+        tuple("conversations", json.list(jsons)),
+      ]))
+      |> Ok
     }
     ["sign_in"] -> {
       try form = parse_form(request)
@@ -126,12 +143,12 @@ pub fn route(request) {
         "session",
         int.to_string(identifier_id),
         // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
-        cookie_defaults
+        cookie_defaults,
       )
       |> Ok
     }
     ["c", "create"] -> {
-        io.debug(request)
+      io.debug(request)
       try topic = create_conversation_params(request)
       try identifier_id =
         session.require_authentication(session.extract(request))
