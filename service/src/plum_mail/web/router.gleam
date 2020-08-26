@@ -4,6 +4,7 @@ import gleam/dynamic
 import gleam/int
 import gleam/io
 import gleam/map
+import gleam/option.{Some}
 import gleam/string
 import gleam/result
 import gleam/uri
@@ -15,6 +16,7 @@ import gleam/pgo
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/web/session
+import plum_mail/web/helpers as web
 import plum_mail/discuss/conversation
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
@@ -98,13 +100,17 @@ pub fn route(request) {
       |> Ok
     }
     ["inbox"] -> {
-        request
-        |> io.debug
         try identifier_id =
           session.require_authentication(session.extract(request))
-          |> io.debug
         http.response(200)
-        |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+        |> web.set_resp_json(json.object([
+            tuple("conversations", json.list([
+                json.object([
+                    tuple("id", json.int(1)),
+                    tuple("topic", json.string("Investor meeting")),
+                    tuple("updated_at", json.string("19 July"))
+                    ])
+                ]))]))
         |> Ok
 
     }
@@ -114,15 +120,18 @@ pub fn route(request) {
       let Ok(identifier_id) =
         authentication.identifier_from_email(email_address)
       // TODO parameterise redirect
+      let cookie_defaults = http.cookie_defaults(request.scheme)
       redirect("http://localhost:5000/search")
       |> http.set_resp_cookie(
         "session",
         int.to_string(identifier_id),
-        http.cookie_defaults(request.scheme),
+        // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
+        cookie_defaults
       )
       |> Ok
     }
     ["c", "create"] -> {
+        io.debug(request)
       try topic = create_conversation_params(request)
       try identifier_id =
         session.require_authentication(session.extract(request))
@@ -190,4 +199,5 @@ pub fn handle(request: Request(BitString)) -> Response(BitBuilder) {
     "access-control-allow-origin",
     "http://localhost:5000",
   )
+  |> http.prepend_resp_header("access-control-allow-credentials", "true")
 }
