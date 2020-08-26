@@ -2,7 +2,7 @@ import {fetchConversation, addParticipant, writeMessage} from "../client.js"
 import {setTopic, renderParticipant, renderMessage} from "./view.js"
 import {formValues} from "../utils.js"
 
-(async function () {
+export default async function () {
   const conversationId = parseInt(window.location.pathname.substr(3))
   const conversation = await fetchConversation(conversationId);
   setTopic(conversation.topic);
@@ -34,4 +34,4 @@ import {formValues} from "../utils.js"
       window.location.reload()
     }
   })
-})()
+}

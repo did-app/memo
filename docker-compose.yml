@@ -16,7 +16,7 @@ services:
     volumes:
       - ./client:/opt/app
       - client_node_modules:/opt/app/node_modules
-    command: bash -c "npm i && npx sirv --dev --single conversation.html --host 0.0.0.0"
+    command: npm run start:dev
   service:
     build:
       context: ./service
