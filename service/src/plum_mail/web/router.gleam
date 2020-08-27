@@ -199,8 +199,8 @@ pub fn route(request) {
       // try conversation = .execute(conversation, email_address)
       let sql =
         "
-        INSERT INTO messages (conversation_id, content, author_id)
-        VALUES ($1, $2, $3)
+        INSERT INTO messages (conversation_id, content, author_id, counter)
+        VALUES ($1, $2, $3, (SELECT COUNT(id) FROM messages WHERE conversation_id = $1) + 1)
         "
       let args = [
         pgo.int(conversation.id),
@@ -216,8 +216,6 @@ pub fn route(request) {
             id != author_id
           },
         )
-      // TODO read and send, almost certainly the right way as we don't want to be slow
-      todo("send email")
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok

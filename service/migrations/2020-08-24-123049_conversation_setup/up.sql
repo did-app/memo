@@ -21,12 +21,25 @@ CREATE TABLE conversations (
 
 SELECT diesel_manage_updated_at('conversations');
 
-CREATE TABLE participants (
+CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
+  counter INT NOT NULL,
+  content TEXT NOT NULL,
+  author_id INT REFERENCES identifiers(id) NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+SELECT diesel_manage_updated_at('messages');
+-- TODO unique index
+
+CREATE TABLE participants (
+  id SERIAL PRIMARY KEY,
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  conversation_id INT REFERENCES conversations(id) NOT NULL,
+  cursor INT NOT NULL,
   -- TODO add these features
-  -- Position
   -- mark as unrea
   -- active
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -35,13 +48,9 @@ CREATE TABLE participants (
 
 SELECT diesel_manage_updated_at('participants');
 
-CREATE TABLE messages (
+CREATE TABLE message_notifications (
   id SERIAL PRIMARY KEY,
-  conversation_id INT REFERENCES conversations(id) NOT NULL,
-  content TEXT NOT NULL,
-  author_id INT REFERENCES identifiers(id) NOT NULL,
-  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-SELECT diesel_manage_updated_at('messages');
+  message_id INT REFERENCES messages(id) NOT NULL,
+  participant_id INT REFERENCES participants(id) NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+)
