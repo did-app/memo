@@ -38,7 +38,7 @@ pub fn write_test() {
       tuple("content", json.string("My first message")),
     ]))
 
-  let response = handle(request)
+  let response = handle(request, support.test_config())
   should.equal(response.status, 201)
 
   let tuple(_id, topic, participants, messages) =
@@ -48,8 +48,9 @@ pub fn write_test() {
   |> should.equal([tuple("My first message")])
 
   assert Ok(dispatches) = dispatch_email.load()
-  assert Ok(message) = list.reverse(dispatches)
-  |> list.head()
+  assert Ok(message) =
+    list.reverse(dispatches)
+    |> list.head()
 
   should.equal(message.to, tuple(invited_id, invited))
   // should.equal(message.from, string.append)
@@ -59,8 +60,9 @@ pub fn write_test() {
   assert Ok(_) = dispatch_email.record_sent(message)
 
   assert Ok(dispatches) = dispatch_email.load()
-  assert Ok(other) = list.reverse(dispatches)
-  |> list.head()
+  assert Ok(other) =
+    list.reverse(dispatches)
+    |> list.head()
   other.id
-|> should.not_equal(message.id)
+  |> should.not_equal(message.id)
 }

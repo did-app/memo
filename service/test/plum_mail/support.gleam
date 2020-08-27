@@ -7,8 +7,13 @@ import gleam/string
 import gleam/crypto
 import gleam/http
 import gleam/json
+import plum_mail/config
 import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
+
+pub fn test_config() {
+  config.Config(client_origin: "https://app.plummail.test")
+}
 
 pub fn generate_email_address(domain) {
   crypto.strong_random_bytes(8)
@@ -29,7 +34,7 @@ pub fn get_conversation(id, session) {
     |> http.set_path(string.append("/c/", int.to_string(id)))
     |> http.prepend_req_header("cookie", string.append("session=", session))
     |> http.set_req_body(<<>>)
-  let http.Response(body: body, ..) = handle(request)
+  let http.Response(body: body, ..) = handle(request, test_config())
   let body = bit_builder.to_bit_string(body)
   assert Ok(body) = bit_string.to_string(body)
   assert Ok(data) = json.decode(body)

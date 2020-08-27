@@ -27,7 +27,7 @@ pub fn create_conversation_test() {
     |> http.set_path("/c/create")
     |> http.set_req_cookie("session", session.to_string(user_session))
     |> http.set_req_body(body)
-  let response = handle(request)
+  let response = handle(request, support.test_config())
 
   should.equal(response.status, 303)
   assert Ok(location) = http.get_resp_header(response, "location")
@@ -44,7 +44,7 @@ pub fn create_conversation_test() {
     |> http.set_path("/inbox")
     |> http.set_req_cookie("session", session.to_string(user_session))
     |> http.set_req_body(<<>>)
-  let response = handle(request)
+  let response = handle(request, support.test_config())
 
   assert Ok(body) =
     response.body

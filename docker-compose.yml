@@ -31,6 +31,7 @@ services:
     network_mode: host
     environment:
       PORT: 8000
+      CLIENT_ORIGIN: "http://localhost:5000"
       DATABASE_URL: postgres://eEj8ar4O:OTnrE1n7D392DnbovK@localhost:6543/plum_mail
       DATABASE_SSL: "FALSE"
     depends_on:

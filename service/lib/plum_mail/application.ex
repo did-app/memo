@@ -9,9 +9,14 @@ defmodule PlumMail.Application do
     db_ssl = System.get_env("DATABASE_SSL") != "FALSE"
     db_config = [{:ssl, db_ssl} | db_config]
 
+    config = :plum_mail@config.from_env()
+
     children = [
       %{id: :pgo, start: {:gleam@pgo, :start_link, [:default, db_config]}, type: :supervisor},
-      %{id: :cowboy, start: {:gleam@http@cowboy, :start, [&:plum_mail@web@router.handle/1, port]}}
+      %{
+        id: :cowboy,
+        start: {:gleam@http@cowboy, :start, [&:plum_mail@web@router.handle(&1, config), port]}
+      }
     ]
 
     opts = [strategy: :one_for_one, name: PlumMail.Supervisor]

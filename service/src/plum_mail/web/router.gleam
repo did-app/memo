@@ -14,6 +14,7 @@ import gleam/http.{Request, Response}
 import gleam/json
 import gleam/pgo
 // Web/utils let session = utils.extractsession
+import plum_mail/config
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/web/session
@@ -98,7 +99,7 @@ fn can_view(c, user_session) {
   )
 }
 
-pub fn route(request) {
+pub fn route(request, config: config.Config) {
   case http.path_segments(request) {
     [] -> {
       let body =
@@ -146,9 +147,8 @@ pub fn route(request) {
       try email_address = map.get(form, "email_address")
       let Ok(identifier_id) =
         authentication.identifier_from_email(email_address)
-      // TODO parameterise redirect
       let cookie_defaults = http.cookie_defaults(request.scheme)
-      redirect("http://localhost:5000/search")
+      redirect(config.client_origin)
       |> http.set_resp_cookie(
         "session",
         int.to_string(identifier_id),
@@ -164,7 +164,7 @@ pub fn route(request) {
         session.require_authentication(session.extract(request))
       try conversation = start_conversation.execute(topic, identifier_id)
       redirect(string.append(
-        "http://localhost:5000/c/",
+        string.append(config.client_origin, "/c/"),
         int.to_string(conversation.id),
       ))
       |> Ok
@@ -224,15 +224,18 @@ pub fn route(request) {
   }
 }
 
-pub fn handle(request: Request(BitString)) -> Response(BitBuilder) {
+pub fn handle(
+  request: Request(BitString),
+  config: config.Config,
+) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
-  case route(request) {
+  case route(request, config) {
     Ok(response) -> response
     Error(reason) -> error_response(reason)
   }
   |> http.prepend_resp_header(
     "access-control-allow-origin",
-    "http://localhost:5000",
+    config.client_origin,
   )
   |> http.prepend_resp_header("access-control-allow-credentials", "true")
 }

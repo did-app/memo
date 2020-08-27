@@ -42,7 +42,7 @@ pub fn add_participant_test() {
       tuple("email_address", json.string(email_address)),
     ]))
 
-  let response = handle(request)
+  let response = handle(request, support.test_config())
   should.equal(response.status, 201)
   let tuple(_id, topic, participants, _messages) =
     support.get_conversation(conversation.id, session.to_string(user_session))
