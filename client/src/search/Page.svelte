@@ -33,7 +33,7 @@
     </a>
     {/each}
     {#if newTopic}
-    <form class="" action="http://localhost:8000/c/create" method="post">
+    <form class="" action="__API_ORIGIN__/c/create" method="post">
       <input type="hidden" name="topic" value="{newTopic}">
       <button class="block w-full text-left my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl" type="submit">
         <h2 class="my-1">Start new conversation with topic: <span class="font-bold">{newTopic}</span></h2>

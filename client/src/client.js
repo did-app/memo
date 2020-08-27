@@ -1,17 +1,15 @@
-const API_ROOT = "http://localhost:8000";
-
 export async function fetchInbox() {
-  const response = await fetch(API_ROOT + "/inbox", {
+  const response = await fetch("__API_ORIGIN__/inbox", {
     credentials: "include"
   });
   return response
 }
 export async function fetchConversation(id) {
-  const response = await fetch(API_ROOT + "/c/" + id, {});
+  const response = await fetch("__API_ORIGIN__/c/" + id, {});
   return (await response.json()).conversation;
 }
 export async function addParticipant(id, emailAddress) {
-  const response = await fetch(API_ROOT + "/c/" + id + "/participant", {
+  const response = await fetch("__API_ORIGIN__/c/" + id + "/participant", {
     method: "POST",
     body: JSON.stringify({ email_address: emailAddress })
   });
@@ -19,7 +17,7 @@ export async function addParticipant(id, emailAddress) {
   return {};
 }
 export async function writeMessage(id, content) {
-  const response = await fetch(API_ROOT + "/c/" + id + "/message", {
+  const response = await fetch("__API_ORIGIN__/c/" + id + "/message", {
     method: "POST",
     body: JSON.stringify({ content: content })
   });
