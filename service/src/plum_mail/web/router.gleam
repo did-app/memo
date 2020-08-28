@@ -158,11 +158,25 @@ pub fn route(request, config: config.Config) {
       |> http.set_resp_body(body)
       |> Ok
     }
+    ["i", conversation_id, identifier_id] -> {
+      let cookie_defaults = http.cookie_defaults(request.scheme)
+      // TODO this needs to be a proper token
+      let url = string.join([config.client_origin, "/c/", conversation_id], "")
+      redirect(url)
+      |> http.set_resp_cookie(
+        "session",
+        identifier_id,
+        // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
+        cookie_defaults,
+      )
+      |> Ok
+    }
     // AND corresponding delete
     ["c", id, "participant"] -> {
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
+      // TODO move to add_participant
       try email_address = add_participant_params(request)
       try conversation = add_participant.execute(conversation, email_address)
       // FIXME do we need to update http

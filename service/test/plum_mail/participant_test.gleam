@@ -18,12 +18,12 @@ import gleam/should
 
 pub fn add_participant_test() {
   let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier_id) = authentication.identifier_from_email(email_address)
-  let user_session = session.authenticated(identifier_id)
+  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  let user_session = session.authenticated(identifier.id)
   let topic = "Test topic"
 
   // conversation, could be domain and entity is thread/topic
-  assert Ok(conversation) = start_conversation.execute(topic, identifier_id)
+  assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
 
   assert Ok(conversation) = conversation_mod.fetch_by_id(conversation.id)
 

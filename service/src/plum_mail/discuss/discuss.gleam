@@ -1,11 +1,18 @@
+import gleam/int
+import gleam/string
+import plum_mail/authentication.{Identifier}
 import plum_mail/discuss/conversation.{Conversation}
 
-pub type Identifier {
-  Identifier(id: Int, email_address: String)
+pub opaque type Participation {
+  Participation(
+    conversation: Conversation,
+    active: Bool,
+    identifier: Identifier,
+  )
 }
 
-pub opaque type Participation {
-  Participation(conversation: Conversation, active: Bool)
+pub fn build_participation(conversation, identifier) {
+  Participation(conversation, True, identifier)
 }
 
 pub fn load_participation(conversation_id: Int, identifier_id: Int) {
@@ -21,7 +28,20 @@ pub fn can_edit(participation) -> tuple(Conversation, Int) {
   todo
 }
 
-// pub fn seed() {
-//     start_conversation()
+// pub fn seed(topic) {
+//   assert Ok(identifier_id) = authentication.identifier_from_email(email_address)
+//   // assert create the go link probably needs a conversation
+//   start_conversation.execute()
 // }
-// Should be sent out via cron
+// Share is a functionality
+pub fn invite_link(participation) {
+  let Participation(
+    conversation: Conversation(id: conversation_id, ..),
+    identifier: Identifier(id: identifier_id, ..),
+    ..,
+  ) = participation
+  string.join(
+    ["", "i", int.to_string(conversation_id), int.to_string(identifier_id)],
+    "/",
+  )
+}

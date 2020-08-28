@@ -1,15 +1,17 @@
 import gleam/dynamic
 import gleam/int
+import gleam/option.{None, Some}
 import gleam/string
 import gleam/http
 import gleam/json
 import gleam/pgo
 import plum_mail/run_sql
+import plum_mail/authentication.{Identifier}
 
 pub type Message {
   Message(id: Int, conversation: tuple(Int, String), // to can be participant
     // from can be author
-    from: String, to: tuple(Int, String), content: String)
+    from: String, to: Identifier, content: String)
 }
 
 pub fn load() {
@@ -66,7 +68,12 @@ pub fn load() {
       id: message_id,
       conversation: tuple(conversation_id, topic),
       from: string.append(int.to_string(conversation_id), "@plummail.co"),
-      to: tuple(recipient_id, recipient_email_address),
+      // TODO fix nickname
+      to: Identifier(
+        id: recipient_id,
+        email_address: recipient_email_address,
+        nickname: None,
+      ),
       content: content,
     )
   }
@@ -81,7 +88,7 @@ pub fn record_sent(message: Message) {
     INSERT INTO message_notifications (message_id, identifier_id)
     VALUES ($1, $2)
     "
-  let args = [pgo.int(message.id), pgo.int(message.to.0)]
+  let args = [pgo.int(message.id), pgo.int(message.to.id)]
   let mapper = fn(x) { x }
   run_sql.execute(sql, args, mapper)
 }
@@ -90,7 +97,7 @@ fn send(api_token, message: Message) {
   let data =
     json.object([
       tuple("From", json.string(message.from)),
-      tuple("To", json.string(message.to.1)),
+      tuple("To", json.string(message.to.email_address)),
       tuple("TextBody", json.string(message.content)),
     ])
   let request =

@@ -13,8 +13,8 @@ import gleam/should
 
 pub fn create_conversation_test() {
   let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier_id) = authentication.identifier_from_email(email_address)
-  let user_session = session.authenticated(identifier_id)
+  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  let user_session = session.authenticated(identifier.id)
   let topic = "Test topic"
 
   let body =
