@@ -20,7 +20,9 @@ pub fn follow_invitation_test() {
   let email_address = support.generate_email_address("other.test")
   // TODO this needs to run off a permission
   assert Ok(participation) =
-    add_participant.execute(conversation, email_address)
+    email_address
+    |> add_participant.Params
+    |> add_participant.execute(conversation, _)
 
   let path = discuss.invite_link(participation)
   let request =

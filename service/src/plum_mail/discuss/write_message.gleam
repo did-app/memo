@@ -1,32 +1,15 @@
 import gleam/dynamic.{Dynamic}
 import gleam/option.{None, Option, Some}
 import gleam/pgo
+import plum_mail/acl
 import plum_mail/run_sql
 
 pub type Params {
   Params(content: String, from: Option(String), resolve: Bool)
 }
 
-fn required(raw, key, cast) {
-  case dynamic.field(raw, key) {
-    Ok(value) ->
-      case cast(value) {
-        Ok(value) -> Ok(value)
-        Error(_) -> Error(todo)
-      }
-    Error(_) -> Error(todo)
-  }
-}
-
-fn as_string(raw) {
-  case dynamic.string(raw) {
-    Ok(value) -> Ok(value)
-    Error(_) -> Error(todo)
-  }
-}
-
 pub fn params(raw: Dynamic) {
-  try content = required(raw, "content", as_string)
+  try content = acl.required(raw, "content", acl.as_string)
   Params(content, None, False)
   |> Ok()
 }

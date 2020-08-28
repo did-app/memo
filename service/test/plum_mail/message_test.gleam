@@ -23,6 +23,7 @@ pub fn write_test() {
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
   assert Ok(invited) =
     support.generate_email_address("other.test")
+    |> add_participant.Params
     |> add_participant.execute(conversation, _)
   let request =
     http.default_req()

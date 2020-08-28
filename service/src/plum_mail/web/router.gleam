@@ -21,6 +21,7 @@ import plum_mail/web/session
 import plum_mail/web/helpers as web
 import plum_mail/discuss/conversation
 import plum_mail/discuss/start_conversation
+import plum_mail/discuss/show_inbox
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/write_message
 
@@ -56,21 +57,6 @@ fn create_conversation_params(request) {
   map.get(form, "topic")
 }
 
-fn add_participant_params(request: http.Request(BitString)) {
-  try body = bit_string.to_string(request.body)
-  try data =
-    json.decode(body)
-    |> result.map_error(fn(_) { todo })
-  let data = dynamic.from(data)
-  try email_address =
-    dynamic.field(data, "email_address")
-    |> result.map_error(fn(_) { todo })
-  try email_address =
-    dynamic.string(email_address)
-    |> result.map_error(fn(_) { todo })
-  Ok(email_address)
-}
-
 fn json_params(request: http.Request(BitString)) {
   try body = bit_string.to_string(request.body)
   try data =
@@ -95,49 +81,26 @@ fn can_view(c, user_session) {
   )
 }
 
-pub fn route(request, config: config.Config) {
+pub fn route(
+  request,
+  config: config.Config,
+) -> Result(Response(BitBuilder), Nil) {
   case http.path_segments(request) {
-    [] -> {
-      let body =
-        "Hello, world!"
-        |> bit_string.from_string
-        |> bit_builder.from_bit_string
-      http.response(200)
-      |> http.set_resp_body(body)
-      |> Ok
-    }
     ["inbox"] -> {
       try identifier_id =
         session.require_authentication(session.extract(request))
-      let sql =
-        "
-      SELECT c.id, c.topic
-      FROM conversations AS c
-      JOIN participants AS me ON me.conversation_id = c.id
-      WHERE me.identifier_id = $1
-      "
-      let args = [pgo.int(identifier_id)]
-      try jsons =
-        run_sql.execute(
-          sql,
-          args,
-          fn(row) {
-            assert Ok(id) = dynamic.element(row, 0)
-            assert Ok(id) = dynamic.int(id)
-            assert Ok(topic) = dynamic.element(row, 1)
-            assert Ok(topic) = dynamic.string(topic)
-            json.object([
-              tuple("id", json.int(id)),
-              tuple("topic", json.string(topic)),
-            ])
-          },
-        )
+      try conversations = show_inbox.execute(identifier_id)
+      // |> result.map_error(fn(x) { todo("mapping show inbox") })
       http.response(200)
-      |> web.set_resp_json(json.object([
-        tuple("conversations", json.list(jsons)),
-      ]))
-      |> Ok
+      |> web.set_resp_json(json.object([tuple("conversations", conversations)]))
+      |> Ok()
     }
+    [] -> // http.response(200)
+      // |> http.set_resp_body(<<>>)
+      // |> Ok()
+      // |> result.map_error(fn(x) { todo("mapping show inbox") })
+      // Ok(http.set_resp_body(http.response(200), <<>>))
+      todo("index")
     ["c", "create"] -> {
       try topic = create_conversation_params(request)
       try identifier_id =
@@ -171,14 +134,14 @@ pub fn route(request, config: config.Config) {
       )
       |> Ok
     }
-    // AND corresponding delete
+    // TODO AND corresponding delete
     ["c", id, "participant"] -> {
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
-      // TODO move to add_participant
-      try email_address = add_participant_params(request)
-      try conversation = add_participant.execute(conversation, email_address)
+      try params = json_params(request)
+      try params = add_participant.params(params)
+      try conversation = add_participant.execute(conversation, params)
       // FIXME do we need to update http
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
