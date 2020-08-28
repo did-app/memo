@@ -115,12 +115,15 @@ pub fn route(
     ["c", id] -> {
       assert Ok(id) = int.parse(id)
       try c = conversation.fetch_by_id(id)
+      io.debug(request)
+      io.debug(session.extract(request))
       try author_id = can_view(c, session.extract(request))
       let body = conversation.to_json(c)
       http.response(200)
       |> http.set_resp_body(body)
       |> Ok
     }
+    // This could be participant_id
     ["i", conversation_id, identifier_id] -> {
       let cookie_defaults = http.cookie_defaults(request.scheme)
       // TODO this needs to be a proper token
@@ -154,6 +157,7 @@ pub fn route(
       try author_id = can_view(conversation, session.extract(request))
       try params = json_params(request)
       try params = write_message.params(params)
+      io.debug(params)
       try _ = write_message.execute(tuple(conversation.id, author_id), params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -168,6 +172,7 @@ pub fn handle(
   config: config.Config,
 ) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
+  // io.debug(request)
   case route(request, config) {
     Ok(response) -> response
     Error(reason) -> error_response(reason)
@@ -177,4 +182,5 @@ pub fn handle(
     config.client_origin,
   )
   |> http.prepend_resp_header("access-control-allow-credentials", "true")
+  // |> io.debug()
 }

@@ -5,13 +5,16 @@ export async function fetchInbox() {
   return response
 }
 export async function fetchConversation(id) {
-  const response = await fetch("__API_ORIGIN__/c/" + id, {});
+  const response = await fetch("__API_ORIGIN__/c/" + id, {
+    credentials: "include"
+  });
   return (await response.json()).conversation;
 }
 export async function addParticipant(id, emailAddress) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/participant", {
     method: "POST",
-    body: JSON.stringify({ email_address: emailAddress })
+    credentials: "include",
+    body: JSON.stringify({ email_address: emailAddress }),
   });
   console.log(response);
   return {};
