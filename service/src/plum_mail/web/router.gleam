@@ -138,21 +138,6 @@ pub fn route(request, config: config.Config) {
       ]))
       |> Ok
     }
-    ["sign_in"] -> {
-      try form = parse_form(request)
-      try email_address = map.get(form, "email_address")
-      let Ok(identifier_id) =
-        authentication.identifier_from_email(email_address)
-      let cookie_defaults = http.cookie_defaults(request.scheme)
-      redirect(config.client_origin)
-      |> http.set_resp_cookie(
-        "session",
-        int.to_string(identifier_id),
-        // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
-        cookie_defaults,
-      )
-      |> Ok
-    }
     ["c", "create"] -> {
       try topic = create_conversation_params(request)
       try identifier_id =
