@@ -15,6 +15,8 @@ import gleam/json
 import gleam/pgo
 // Web/utils let session = utils.extractsession
 import plum_mail/config
+import plum_mail/error.{Reason}
+import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/web/session
@@ -33,39 +35,6 @@ pub fn redirect(uri: String) -> Response(BitBuilder) {
   http.Response(status: 303, headers: [tuple("location", uri)], body: body)
 }
 
-fn error_response(_) {
-  // todo("implement error response")
-  http.response(401)
-  |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-}
-
-fn parse_form(request: Request(_)) {
-  case request.method {
-    http.Post -> {
-      try body = bit_string.to_string(request.body)
-      case uri.parse_query(body) {
-        Ok(params) -> Ok(map.from_list(params))
-        _ -> todo("bad quert")
-      }
-    }
-    _ -> todo("incorrect method")
-  }
-}
-
-fn create_conversation_params(request) {
-  try form = parse_form(request)
-  map.get(form, "topic")
-}
-
-fn json_params(request: http.Request(BitString)) {
-  try body = bit_string.to_string(request.body)
-  try data =
-    json.decode(body)
-    |> result.map_error(fn(_) { todo })
-  dynamic.from(data)
-  |> Ok
-}
-
 fn can_view(c, user_session) {
   try identifier_id = session.require_authentication(user_session)
   let conversation.Conversation(participants: participants, ..) = c
@@ -79,12 +48,13 @@ fn can_view(c, user_session) {
       }
     },
   )
+  |> result.map_error(fn(_: Nil) { error.Forbidden })
 }
 
 pub fn route(
   request,
   config: config.Config,
-) -> Result(Response(BitBuilder), Nil) {
+) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
     ["inbox"] -> {
       try identifier_id =
@@ -95,14 +65,12 @@ pub fn route(
       |> web.set_resp_json(json.object([tuple("conversations", conversations)]))
       |> Ok()
     }
-    [] -> // http.response(200)
-      // |> http.set_resp_body(<<>>)
-      // |> Ok()
-      // |> result.map_error(fn(x) { todo("mapping show inbox") })
+    [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
     ["c", "create"] -> {
-      try topic = create_conversation_params(request)
+      try params = acl.parse_form(request)
+      try topic = start_conversation.params(params)
       try identifier_id =
         session.require_authentication(session.extract(request))
       try conversation = start_conversation.execute(topic, identifier_id)
@@ -142,7 +110,7 @@ pub fn route(
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
-      try params = json_params(request)
+      try params = acl.parse_json(request)
       try params = add_participant.params(params)
       try conversation = add_participant.execute(conversation, params)
       // FIXME do we need to update http
@@ -155,7 +123,7 @@ pub fn route(
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
-      try params = json_params(request)
+      try params = acl.parse_json(request)
       try params = write_message.params(params)
       io.debug(params)
       try _ = write_message.execute(tuple(conversation.id, author_id), params)
@@ -175,7 +143,7 @@ pub fn handle(
   // io.debug(request)
   case route(request, config) {
     Ok(response) -> response
-    Error(reason) -> error_response(reason)
+    Error(reason) -> acl.error_response(reason)
   }
   |> http.prepend_resp_header(
     "access-control-allow-origin",

@@ -2,6 +2,7 @@ import gleam/int
 import gleam/list
 import gleam/option.{Option, Some}
 import gleam/http
+import plum_mail/error
 
 pub opaque type Session {
   Session(identifier_id: Option(Int))
@@ -27,5 +28,5 @@ pub fn extract(request) -> Session {
 }
 
 pub fn require_authentication(session: Session) {
-  option.to_result(session.identifier_id, Nil)
+  option.to_result(session.identifier_id, error.Unauthenticated)
 }

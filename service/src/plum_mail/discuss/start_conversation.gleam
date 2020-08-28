@@ -1,9 +1,18 @@
 import gleam/dynamic
 import gleam/io
+import gleam/map
 import gleam/result
 import gleam/pgo
+import plum_mail/error
 import plum_mail/run_sql
 import plum_mail/discuss/conversation.{Conversation}
+
+pub fn params(form) {
+  case map.get(form, "topic") {
+    Ok(value) -> Ok(value)
+    Error(Nil) -> Error(error.Unprocessable("topic", error.Missing))
+  }
+}
 
 pub fn execute(topic, owner_id) {
   let sql =
