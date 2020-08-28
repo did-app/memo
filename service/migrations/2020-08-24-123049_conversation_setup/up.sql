@@ -12,9 +12,6 @@ CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   topic VARCHAR,
   resolved BOOLEAN NOT NULL DEFAULT False,
-  -- TODO add these features
-  -- slug VARCHAR UNIQUE,
-  -- root_conversation_id INT REFERENCES conversations(id),
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

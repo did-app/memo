@@ -27,12 +27,6 @@ pub fn can_view(participation) -> Conversation {
 pub fn can_edit(participation) -> tuple(Conversation, Int) {
   todo
 }
-
-// pub fn seed(topic) {
-//   assert Ok(identifier_id) = authentication.identifier_from_email(email_address)
-//   // assert create the go link probably needs a conversation
-//   start_conversation.execute()
-// }
 // Share is a functionality
 pub fn invite_link(participation) {
   let Participation(

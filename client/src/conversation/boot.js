@@ -8,6 +8,7 @@ export default async function() {
   const page = new Page({ target: document.body });
   let data = await Client.fetchConversation(conversationId);
   let topic = data.topic;
+  let resolved = data.resolved;
   let participants = data.participants.map(function({
     email_address: emailAddress
   }) {
@@ -22,8 +23,9 @@ export default async function() {
     const author = "vov"
     return {checked, author, date, intro, html}
   })
+  messages[messages.length - 1].checked = false
   console.log(messages);
-  page.$set({topic, participants, messages})
+  page.$set({topic, resolved, participants, messages})
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
@@ -40,9 +42,9 @@ export default async function() {
       console.log(response);
       // window.location.reload()
     } else if (action == "writeMessage") {
-      let {content} = form
+      let {content, resolve} = form
 
-      let response = await Client.writeMessage(conversationId, content)
+      let response = await Client.writeMessage(conversationId, content, resolve)
       window.location.reload()
     }
   })

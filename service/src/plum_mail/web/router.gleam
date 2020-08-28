@@ -18,7 +18,7 @@ import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/run_sql
-import plum_mail/authentication
+import plum_mail/authentication.{Identifier}
 import plum_mail/web/session
 import plum_mail/web/helpers as web
 import plum_mail/discuss/conversation
@@ -40,9 +40,8 @@ fn can_view(c, user_session) {
   let conversation.Conversation(participants: participants, ..) = c
   list.find_map(
     participants,
-    fn(participant) {
-      let tuple(participant_id, _) = participant
-      case participant_id == identifier_id {
+    fn(participant: Identifier) {
+      case participant.id == identifier_id {
         True -> Ok(identifier_id)
         False -> Error(Nil)
       }
@@ -83,8 +82,6 @@ pub fn route(
     ["c", id] -> {
       assert Ok(id) = int.parse(id)
       try c = conversation.fetch_by_id(id)
-      io.debug(request)
-      io.debug(session.extract(request))
       try author_id = can_view(c, session.extract(request))
       let body = conversation.to_json(c)
       http.response(200)
@@ -124,8 +121,8 @@ pub fn route(
       try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
       try params = acl.parse_json(request)
-      try params = write_message.params(params)
       io.debug(params)
+      try params = write_message.params(params)
       try _ = write_message.execute(tuple(conversation.id, author_id), params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))

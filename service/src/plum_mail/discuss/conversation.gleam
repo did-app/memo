@@ -2,33 +2,37 @@ import gleam/bit_builder
 import gleam/bit_string
 import gleam/dynamic
 import gleam/list
+import gleam/option.{None}
 import gleam/json
 import gleam/pgo
 import plum_mail/run_sql
+import plum_mail/authentication.{Identifier}
 
 pub type Conversation {
   Conversation(
     id: Int,
     topic: String,
-    participants: List(tuple(Int, String)),
+    resolved: Bool,
+    participants: List(Identifier),
     messages: List(String),
   )
 }
 
 pub fn to_json(conversation: Conversation) {
-  let Conversation(id, topic, participants, messages) = conversation
+  let Conversation(id, topic, resolved, participants, messages) = conversation
   json.object([
     tuple(
       "conversation",
       json.object([
         tuple("id", json.int(id)),
         tuple("topic", json.string(topic)),
+        tuple("resolved", json.bool(resolved)),
         tuple(
           "participants",
           json.list(list.map(
             participants,
             fn(participant) {
-              let tuple(id, email_address) = participant
+              let Identifier(id: id, email_address: email_address, ..) = participant
               json.object([
                 tuple("id", json.int(id)),
                 tuple("email_address", json.string(email_address)),
@@ -56,7 +60,7 @@ pub fn to_json(conversation: Conversation) {
 pub fn fetch_by_id(id) {
   let sql =
     "
-    SELECT id, topic
+    SELECT id, topic, resolved
     FROM conversations
     WHERE id = $1
     "
@@ -70,14 +74,16 @@ pub fn fetch_by_id(id) {
         assert Ok(id) = dynamic.int(id)
         assert Ok(topic) = dynamic.element(row, 1)
         assert Ok(topic) = dynamic.string(topic)
+        assert Ok(resolved) = dynamic.element(row, 2)
+        assert Ok(resolved) = dynamic.bool(resolved)
 
-        Conversation(id, topic, [], [])
+        Conversation(id, topic, resolved, [], [])
       },
     )
 
   let sql =
     "
-    SELECT p.id, i.email_address
+    SELECT i.id, i.email_address
     FROM participants AS p
     JOIN identifiers AS i ON i.id = p.identifier_id
     WHERE conversation_id = $1
@@ -92,7 +98,8 @@ pub fn fetch_by_id(id) {
         assert Ok(id) = dynamic.int(id)
         assert Ok(email_address) = dynamic.element(row, 1)
         assert Ok(email_address) = dynamic.string(email_address)
-        tuple(id, email_address)
+        // TODO nickname
+        Identifier(id: id, email_address: email_address, nickname: None)
       },
     )
   let sql =

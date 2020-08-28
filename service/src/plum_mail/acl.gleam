@@ -5,6 +5,7 @@ import gleam/dynamic
 import gleam/io
 import gleam/list
 import gleam/map
+import gleam/option.{Some, None}
 import gleam/uri
 import gleam/http.{Request}
 import gleam/json
@@ -54,8 +55,24 @@ pub fn required(raw, key, cast) {
   }
 }
 
+pub fn optional(raw, key, cast) {
+    case dynamic.field(raw, key) {
+        Ok(value) -> case cast(value) {
+            Ok(value) -> Ok(Some(value))
+            Error(reason) -> Error(todo)
+        }
+        Error(_) -> Ok(None)
+    }
+}
+
 pub fn as_string(raw) {
   case dynamic.string(raw) {
+    Ok(value) -> Ok(value)
+    Error(_) -> Error(todo)
+  }
+}
+pub fn as_bool(raw) {
+  case dynamic.bool(raw) {
     Ok(value) -> Ok(value)
     Error(_) -> Error(todo)
   }

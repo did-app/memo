@@ -1,6 +1,7 @@
 <script>
   import { Circle2 } from 'svelte-loading-spinners'
   export let topic;
+  export let resolved = false;
   export let participants = [];
   export let messages = [];
 </script>
@@ -40,11 +41,11 @@
       </article>
       {/each}
     </div>
-    <h2 id="concluded-banner" class="hidden text-lg text-center font-bold text-gray-700 mb-14">
+    <h2 class:hidden="{!resolved}" class="text-lg text-center font-bold text-gray-700 mb-14">
       This conversation has been resolved, <br> No further messages can be sent.
     </h2>
 
-    <form id="reply-form" class="relative w-full rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-20" data-action="writeMessage">
+    <form id="reply-form" class:hidden="{resolved}" class="relative w-full rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-20" data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:14em" placeholder="Write message ..."></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:14em;">

@@ -19,10 +19,11 @@ export async function addParticipant(id, emailAddress) {
   console.log(response);
   return {};
 }
-export async function writeMessage(id, content) {
+export async function writeMessage(id, content, resolve) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/message", {
     method: "POST",
-    body: JSON.stringify({ content: content })
+    credentials: "include",
+    body: JSON.stringify({ content, resolve })
   });
   console.log(response);
   return {};
