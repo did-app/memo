@@ -83,7 +83,23 @@ pub fn route(
       assert Ok(id) = int.parse(id)
       try c = conversation.fetch_by_id(id)
       try author_id = can_view(c, session.extract(request))
-      let body = conversation.to_json(c)
+      io.debug(c)
+      io.debug(author_id)
+      // Need to get me email address for placeholder and nickname for nickname
+      let body =
+        json.object([
+          tuple("conversation", conversation.to_json(c)),
+          tuple(
+            "me",
+            json.object([
+              tuple("email_address", json.string("todo@example.com")),
+              tuple("nickname", json.null()),
+            ]),
+          ),
+        ])
+        |> json.encode()
+        |> bit_string.from_string
+        |> bit_builder.from_bit_string
       http.response(200)
       |> http.set_resp_body(body)
       |> Ok

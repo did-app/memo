@@ -20,41 +20,32 @@ pub type Conversation {
 
 pub fn to_json(conversation: Conversation) {
   let Conversation(id, topic, resolved, participants, messages) = conversation
+
   json.object([
+    tuple("id", json.int(id)),
+    tuple("topic", json.string(topic)),
+    tuple("resolved", json.bool(resolved)),
     tuple(
-      "conversation",
-      json.object([
-        tuple("id", json.int(id)),
-        tuple("topic", json.string(topic)),
-        tuple("resolved", json.bool(resolved)),
-        tuple(
-          "participants",
-          json.list(list.map(
-            participants,
-            fn(participant) {
-              let Identifier(id: id, email_address: email_address, ..) = participant
-              json.object([
-                tuple("id", json.int(id)),
-                tuple("email_address", json.string(email_address)),
-              ])
-            },
-          )),
-        ),
-        tuple(
-          "messages",
-          json.list(list.map(
-            messages,
-            fn(message) {
-              json.object([tuple("content", json.string(message))])
-            },
-          )),
-        ),
-      ]),
+      "participants",
+      json.list(list.map(
+        participants,
+        fn(participant) {
+          let Identifier(id: id, email_address: email_address, ..) = participant
+          json.object([
+            tuple("id", json.int(id)),
+            tuple("email_address", json.string(email_address)),
+          ])
+        },
+      )),
+    ),
+    tuple(
+      "messages",
+      json.list(list.map(
+        messages,
+        fn(message) { json.object([tuple("content", json.string(message))]) },
+      )),
     ),
   ])
-  |> json.encode()
-  |> bit_string.from_string
-  |> bit_builder.from_bit_string
 }
 
 pub fn fetch_by_id(id) {

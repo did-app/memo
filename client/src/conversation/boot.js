@@ -6,16 +6,20 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
-  let data = await Client.fetchConversation(conversationId);
-  let topic = data.topic;
-  let resolved = data.resolved;
-  let participants = data.participants.map(function({
+  let {conversation, me} = await Client.fetchConversation(conversationId);
+  console.log(me);
+  let nickname = me["nickname"];
+  let emailAddress = me["email_address"];
+  let displayName = nickname || emailAddress.split("@")[0];
+  let topic = conversation.topic;
+  let resolved = conversation.resolved;
+  let participants = conversation.participants.map(function({
     email_address: emailAddress
   }) {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
-  let messages = data.messages.map(function ({content}) {
+  let messages = conversation.messages.map(function ({content}) {
     const [intro] = content.trim().split(/\r?\n/)
     const html = marked(content)
     const checked = true
@@ -23,9 +27,11 @@ export default async function() {
     const author = "vov"
     return {checked, author, date, intro, html}
   })
-  messages[messages.length - 1].checked = false
+  if (messages[messages.length - 1]) {
+    messages[messages.length - 1].checked = false
+  }
   console.log(messages);
-  page.$set({topic, resolved, participants, messages})
+  page.$set({nickname, displayName, topic, resolved, participants, messages})
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
@@ -42,9 +48,10 @@ export default async function() {
       console.log(response);
       // window.location.reload()
     } else if (action == "writeMessage") {
-      let {content, resolve} = form
+      let {content, from, resolve} = form
+      from = from === "" ? null : from
 
-      let response = await Client.writeMessage(conversationId, content, resolve)
+      let response = await Client.writeMessage(conversationId, content, from, resolve)
       window.location.reload()
     }
   })

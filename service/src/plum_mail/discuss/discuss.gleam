@@ -27,6 +27,7 @@ pub fn can_view(participation) -> Conversation {
 pub fn can_edit(participation) -> tuple(Conversation, Int) {
   todo
 }
+
 // Share is a functionality
 pub fn invite_link(participation) {
   let Participation(

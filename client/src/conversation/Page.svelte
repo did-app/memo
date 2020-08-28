@@ -1,5 +1,7 @@
 <script>
   import { Circle2 } from 'svelte-loading-spinners'
+  export let nickname;
+  export let displayName;
   export let topic;
   export let resolved = false;
   export let participants = [];
@@ -53,7 +55,7 @@
       </div>
       <section class="font-bold flex px-2 pb-1">
         <span class="text-gray-700 pr-2">From:</span>
-        <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="<%= Helpers.email_address(identifier) %>" value="Richard">
+        <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="{displayName}" value="">
       </section>
       <footer id="compose-menu" class="flex items-baseline border-t">
         <label class="font-bold flex px-2 py-1 justify-start items-start">

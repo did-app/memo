@@ -8,7 +8,7 @@ export async function fetchConversation(id) {
   const response = await fetch("__API_ORIGIN__/c/" + id, {
     credentials: "include"
   });
-  return (await response.json()).conversation;
+  return (await response.json());
 }
 export async function addParticipant(id, emailAddress) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/participant", {
@@ -19,11 +19,11 @@ export async function addParticipant(id, emailAddress) {
   console.log(response);
   return {};
 }
-export async function writeMessage(id, content, resolve) {
+export async function writeMessage(id, content, from, resolve) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/message", {
     method: "POST",
     credentials: "include",
-    body: JSON.stringify({ content, resolve })
+    body: JSON.stringify({ content, from, resolve })
   });
   console.log(response);
   return {};

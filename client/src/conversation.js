@@ -21,11 +21,6 @@ $textarea.addEventListener("change", event => {
 
 
 
-function resolveConversation() {
-  $concludedBanner.classList.remove('hidden')
-    $replyForm.classList.add('hidden')
-}
-
 function writeMessage(event) {
   event.preventDefault();
   const $form = event.target;
