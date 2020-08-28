@@ -20,3 +20,8 @@ pub fn can_view(participation) -> Conversation {
 pub fn can_edit(participation) -> tuple(Conversation, Int) {
   todo
 }
+
+// pub fn seed() {
+//     start_conversation()
+// }
+// Should be sent out via cron

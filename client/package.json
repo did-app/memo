@@ -9,7 +9,7 @@
     "svelte": "^3.0.0"
   },
   "scripts": {
-    "serve:dev": "sirv --dev --single conversation.html --host 0.0.0.0",
+    "serve:dev": "sirv public --dev --single conversation.html --host 0.0.0.0",
     "build": "rollup -c",
     "build:dev": "rollup -c -w",
     "start:dev": "run-p build:dev serve:dev"
