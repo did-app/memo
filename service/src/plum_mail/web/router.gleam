@@ -22,6 +22,7 @@ import plum_mail/web/helpers as web
 import plum_mail/discuss/conversation
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
+import plum_mail/discuss/write_message
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -70,19 +71,13 @@ fn add_participant_params(request: http.Request(BitString)) {
   Ok(email_address)
 }
 
-fn write_message_params(request: http.Request(BitString)) {
+fn json_params(request: http.Request(BitString)) {
   try body = bit_string.to_string(request.body)
   try data =
     json.decode(body)
     |> result.map_error(fn(_) { todo })
-  let data = dynamic.from(data)
-  try content =
-    dynamic.field(data, "content")
-    |> result.map_error(fn(_) { todo })
-  try content =
-    dynamic.string(content)
-    |> result.map_error(fn(_) { todo })
-  Ok(content)
+  dynamic.from(data)
+  |> Ok
 }
 
 fn can_view(c, user_session) {
@@ -195,27 +190,9 @@ pub fn route(request, config: config.Config) {
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)
       try author_id = can_view(conversation, session.extract(request))
-      try content = write_message_params(request)
-      // try conversation = .execute(conversation, email_address)
-      let sql =
-        "
-        INSERT INTO messages (conversation_id, content, author_id, counter)
-        VALUES ($1, $2, $3, (SELECT COUNT(id) FROM messages WHERE conversation_id = $1) + 1)
-        "
-      let args = [
-        pgo.int(conversation.id),
-        pgo.text(content),
-        pgo.int(author_id),
-      ]
-      try _ = run_sql.execute(sql, args, fn(x) { x })
-      let recipients =
-        list.filter(
-          conversation.participants,
-          fn(p) {
-            let tuple(id, _) = p
-            id != author_id
-          },
-        )
+      try params = json_params(request)
+      try params = write_message.params(params)
+      try _ = write_message.execute(tuple(conversation.id, author_id), params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
