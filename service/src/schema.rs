@@ -22,7 +22,7 @@ table! {
     message_notifications (id) {
         id -> Int4,
         message_id -> Int4,
-        participant_id -> Int4,
+        identifier_id -> Int4,
         inserted_at -> Timestamp,
     }
 }
@@ -50,8 +50,8 @@ table! {
     }
 }
 
+joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(message_notifications -> messages (message_id));
-joinable!(message_notifications -> participants (participant_id));
 joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (author_id));
 joinable!(participants -> conversations (conversation_id));

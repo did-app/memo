@@ -51,6 +51,6 @@ SELECT diesel_manage_updated_at('participants');
 CREATE TABLE message_notifications (
   id SERIAL PRIMARY KEY,
   message_id INT REFERENCES messages(id) NOT NULL,
-  participant_id INT REFERENCES participants(id) NOT NULL,
+  identifier_id INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
 )

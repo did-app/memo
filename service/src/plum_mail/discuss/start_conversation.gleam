@@ -24,7 +24,6 @@ pub fn execute(topic, owner_id) {
       sql,
       args,
       fn(row) {
-        io.debug(row)
         assert Ok(id) = dynamic.element(row, 0)
         assert Ok(id) = dynamic.int(id)
         assert Ok(topic) = dynamic.element(row, 1)

@@ -21,7 +21,7 @@ pub fn load() {
     FROM messages AS m
     JOIN conversations AS c ON c.id = m.conversation_id
     JOIN participants AS p ON p.conversation_id = c.id
-    LEFT JOIN message_notifications AS n ON n.message_id = m.id AND n.participant_id = p.id
+    LEFT JOIN message_notifications AS n ON n.message_id = m.id AND n.identifier_id = p.identifier_id
     JOIN identifiers AS recipient ON recipient.id = p.identifier_id
     JOIN identifiers AS author ON author.id = m.author_id
     WHERE p.identifier_id <> m.author_id
@@ -78,7 +78,7 @@ pub fn record_sent(message: Message) {
   // TODO rename to recipient id
   let sql =
     "
-    INSERT INTO message_notifications (message_id, participant_id)
+    INSERT INTO message_notifications (message_id, identifier_id)
     VALUES ($1, $2)
     "
   let args = [pgo.int(message.id), pgo.int(message.to.0)]

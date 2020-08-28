@@ -94,6 +94,7 @@ fn can_view(c, user_session) {
       let tuple(participant_id, _) = participant
       case participant_id == identifier_id {
         True -> Ok(identifier_id)
+        False -> Error(Nil)
       }
     },
   )
@@ -158,7 +159,6 @@ pub fn route(request, config: config.Config) {
       |> Ok
     }
     ["c", "create"] -> {
-      io.debug(request)
       try topic = create_conversation_params(request)
       try identifier_id =
         session.require_authentication(session.extract(request))

@@ -9,6 +9,7 @@ import gleam/http
 import gleam/json
 import plum_mail/authentication
 import plum_mail/discuss/start_conversation
+import plum_mail/discuss/conversation as conversation_mod
 import plum_mail/web/helpers as web
 import plum_mail/web/session
 import plum_mail/web/router.{handle}
@@ -20,11 +21,11 @@ pub fn add_participant_test() {
   assert Ok(identifier_id) = authentication.identifier_from_email(email_address)
   let user_session = session.authenticated(identifier_id)
   let topic = "Test topic"
+
   // conversation, could be domain and entity is thread/topic
   assert Ok(conversation) = start_conversation.execute(topic, identifier_id)
 
-  let tuple(_id, topic, _participants, _messages) =
-    support.get_conversation(conversation.id, session.to_string(user_session))
+  assert Ok(conversation) = conversation_mod.fetch_by_id(conversation.id)
 
   let invited = support.generate_email_address("example.test")
   let request =
@@ -44,9 +45,8 @@ pub fn add_participant_test() {
 
   let response = handle(request, support.test_config())
   should.equal(response.status, 201)
-  let tuple(_id, topic, participants, _messages) =
-    support.get_conversation(conversation.id, session.to_string(user_session))
+  assert Ok(conversation) = conversation_mod.fetch_by_id(conversation.id)
 
-  list.length(participants)
+  list.length(conversation.participants)
   |> should.equal(2)
 }
