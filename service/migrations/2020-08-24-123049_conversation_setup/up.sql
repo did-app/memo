@@ -32,10 +32,11 @@ SELECT diesel_manage_updated_at('messages');
 -- TODO unique index
 
 CREATE TABLE participants (
-  id SERIAL PRIMARY KEY,
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
+  PRIMARY KEY (identifier_id, conversation_id),
   cursor INT NOT NULL,
+  notify VARCHAR CHECK (notify IN ('none', 'all', 'concluded')) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

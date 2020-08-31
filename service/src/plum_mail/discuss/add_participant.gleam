@@ -22,14 +22,14 @@ pub fn execute(c: Conversation, params) {
   let sql =
     "
     WITH new_participant AS (
-        INSERT INTO participants (conversation_id, identifier_id, cursor)
-        VALUES ($1, $2, 0)
+        INSERT INTO participants (conversation_id, identifier_id, cursor, notify)
+        VALUES ($1, $2, 0, 'all')
         ON CONFLICT (identifier_id, conversation_id) DO NOTHING
         RETURNING *
     )
-    SELECT id FROM new_participant
+    SELECT identifier_id, conversation_id FROM new_participant
     UNION ALL
-    SELECT id FROM participants WHERE conversation_id = $1 AND identifier_id = $2
+    SELECT identifier_id, conversation_id FROM participants WHERE conversation_id = $1 AND identifier_id = $2
     "
   let args = [pgo.int(c.id), pgo.int(identifier.id)]
   try [_] = run_sql.execute(sql, args, fn(x) { x })

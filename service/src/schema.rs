@@ -40,11 +40,11 @@ table! {
 }
 
 table! {
-    participants (id) {
-        id -> Int4,
+    participants (identifier_id, conversation_id) {
         identifier_id -> Int4,
         conversation_id -> Int4,
         cursor -> Int4,
+        notify -> Varchar,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
