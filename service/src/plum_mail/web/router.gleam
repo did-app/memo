@@ -137,14 +137,11 @@ pub fn route(
       |> Ok
     }
     // TODO AND corresponding delete
-    // This will need participation for permissions
     ["c", id, "participant"] -> {
-      assert Ok(id) = int.parse(id)
-      try conversation = conversation.fetch_by_id(id)
-      try author_id = can_view(conversation, session.extract(request))
       try params = acl.parse_json(request)
       try params = add_participant.params(params)
-      try conversation = add_participant.execute(conversation, params)
+      try participation = load_participation(id, request)
+      try _ = add_participant.execute(participation, params)
       // FIXME do we need to update http
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))

@@ -16,9 +16,11 @@ pub fn params(raw: Dynamic) {
   |> Ok
 }
 
-pub fn execute(c: Conversation, params) {
+pub fn execute(participation, params) {
   let Params(email_address: email_address) = params
   try identifier = authentication.identifier_from_email(email_address)
+
+  try conversation = discuss.can_edit(participation)
   let sql =
     "
     WITH new_participant AS (
@@ -31,7 +33,7 @@ pub fn execute(c: Conversation, params) {
     UNION ALL
     SELECT identifier_id, conversation_id FROM participants WHERE conversation_id = $1 AND identifier_id = $2
     "
-  let args = [pgo.int(c.id), pgo.int(identifier.id)]
+  let args = [pgo.int(conversation.id), pgo.int(identifier.id)]
   try [_] = run_sql.execute(sql, args, fn(x) { x })
-  Ok(discuss.build_participation(c, identifier))
+  Ok(Nil)
 }

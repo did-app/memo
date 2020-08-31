@@ -21,12 +21,13 @@ pub fn write_test() {
   let topic = "Test topic"
 
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
+  let participant = todo
 
   let invited_email_address = support.generate_email_address("other.test")
   assert Ok(invited) =
     invited_email_address
     |> add_participant.Params
-    |> add_participant.execute(conversation, _)
+    |> add_participant.execute(participant, _)
   let request =
     http.default_req()
     |> http.set_method(http.Post)

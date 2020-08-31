@@ -107,8 +107,10 @@ pub fn can_view(participation) -> Conversation {
   todo
 }
 
-pub fn can_edit(participation) -> tuple(Conversation, Int) {
-  todo
+pub fn can_edit(participation) {
+  let Participation(conversation: conversation, ..) = participation
+
+  Ok(conversation)
 }
 
 // Share is a functionality

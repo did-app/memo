@@ -29,9 +29,7 @@ fn set_notification(user_session, conversation: Conversation, preference) {
       "cookie",
       string.append("session=", session.to_string(user_session)),
     )
-    |> web.set_req_json(json.object([
-      tuple("notify", json.string(preference)),
-    ]))
+    |> web.set_req_json(json.object([tuple("notify", json.string(preference))]))
 
   handle(request, support.test_config())
 }

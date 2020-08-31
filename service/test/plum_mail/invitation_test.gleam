@@ -17,12 +17,13 @@ pub fn follow_invitation_test() {
 
   assert Ok(conversation) =
     start_conversation.execute("A shiny topic", identifier.id)
+  let participation = todo
   let email_address = support.generate_email_address("other.test")
   // TODO this needs to run off a permission
   assert Ok(participation) =
     email_address
     |> add_participant.Params
-    |> add_participant.execute(conversation, _)
+    |> add_participant.execute(participation, _)
 
   let path = discuss.invite_link(participation)
   let request =
