@@ -21,9 +21,11 @@ import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 import plum_mail/web/session
 import plum_mail/web/helpers as web
+import plum_mail/discuss/discuss
 import plum_mail/discuss/conversation
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/show_inbox
+import plum_mail/discuss/set_notification
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/write_message
 
@@ -79,6 +81,7 @@ pub fn route(
       ))
       |> Ok
     }
+    // This will need participation for cursor
     ["c", id] -> {
       assert Ok(id) = int.parse(id)
       try c = conversation.fetch_by_id(id)
@@ -90,10 +93,11 @@ pub fn route(
         json.object([
           tuple("conversation", conversation.to_json(c)),
           tuple(
-            "me",
+            "participation",
             json.object([
               tuple("email_address", json.string("todo@example.com")),
               tuple("nickname", json.null()),
+              tuple("notify", json.string("concluded")),
             ]),
           ),
         ])
@@ -119,6 +123,7 @@ pub fn route(
       |> Ok
     }
     // TODO AND corresponding delete
+    // This will need participion for permissions
     ["c", id, "participant"] -> {
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)
@@ -131,7 +136,20 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
     }
+    ["c", id, "notify"] -> {
+      // TODO fix this id -> load_participation function
+      assert Ok(id) = int.parse(id)
+      try params = acl.parse_json(request)
+      try params = set_notification.params(params)
+      try participation =
+        discuss.load_participation(id, session.extract(request))
+      try _ = set_notification.execute(participation, params)
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
+    }
     // FIXME should add concurrency control
+    //
     ["c", id, "message"] -> {
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)

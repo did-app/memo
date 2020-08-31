@@ -48,6 +48,7 @@ pub fn to_json(conversation: Conversation) {
   ])
 }
 
+// TODO remove
 pub fn fetch_by_id(id) {
   let sql =
     "

@@ -6,13 +6,14 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
-  let {conversation, me} = await Client.fetchConversation(conversationId);
-  console.log(me);
-  let nickname = me["nickname"];
-  let emailAddress = me["email_address"];
+  let {conversation, participation} = await Client.fetchConversation(conversationId);
+  console.log(participation);
+  let nickname = participation["nickname"];
+  let emailAddress = participation["email_address"];
   let displayName = nickname || emailAddress.split("@")[0];
   let topic = conversation.topic;
   let resolved = conversation.resolved;
+  let notify = participation.notify;
   let participants = conversation.participants.map(function({
     email_address: emailAddress
   }) {
@@ -31,7 +32,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   console.log(messages);
-  page.$set({nickname, displayName, topic, resolved, participants, messages})
+  page.$set({nickname, displayName, topic, notify, resolved, participants, messages})
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
