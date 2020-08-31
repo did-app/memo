@@ -45,8 +45,7 @@ export default async function() {
       let {emailAddress} = form
 
       let response = await Client.addParticipant(conversationId, emailAddress)
-      console.log(response);
-      // window.location.reload()
+      window.location.reload()
     } else if (action == "writeMessage") {
       let {content, from, resolve} = form
       from = from === "" ? null : from
