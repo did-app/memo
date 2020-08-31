@@ -21,10 +21,17 @@ pub fn execute(c: Conversation, params) {
   try identifier = authentication.identifier_from_email(email_address)
   let sql =
     "
-    INSERT INTO participants (conversation_id, identifier_id, cursor)
-    VALUES ($1, $2, 0)
+    WITH new_participant AS (
+        INSERT INTO participants (conversation_id, identifier_id, cursor)
+        VALUES ($1, $2, 0)
+        ON CONFLICT (identifier_id, conversation_id) DO NOTHING
+        RETURNING *
+    )
+    SELECT id FROM new_participant
+    UNION ALL
+    SELECT id FROM participants WHERE conversation_id = $1 AND identifier_id = $2
     "
   let args = [pgo.int(c.id), pgo.int(identifier.id)]
-  try _ = run_sql.execute(sql, args, fn(x) { x })
+  try [_] = run_sql.execute(sql, args, fn(x) { x })
   Ok(discuss.build_participation(c, identifier))
 }

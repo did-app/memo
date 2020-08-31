@@ -41,6 +41,7 @@ CREATE TABLE participants (
 );
 
 SELECT diesel_manage_updated_at('participants');
+CREATE UNIQUE INDEX unique_participant_identifier_id_conversation_id ON participants(identifier_id, conversation_id);
 
 CREATE TABLE message_notifications (
   id SERIAL PRIMARY KEY,
