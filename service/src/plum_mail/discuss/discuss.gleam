@@ -46,6 +46,7 @@ pub type Participation {
   )
 }
 
+// TODO NOT good but part of tests
 pub fn build_participation(conversation, identifier) {
   Participation(conversation, True, 0, All, identifier)
 }
@@ -114,12 +115,7 @@ pub fn can_edit(participation) {
 }
 
 // Share is a functionality
-pub fn invite_link(participation) {
-  let Participation(
-    conversation: Conversation(id: conversation_id, ..),
-    identifier: Identifier(id: identifier_id, ..),
-    ..,
-  ) = participation
+pub fn invite_link(identifier_id, conversation_id) {
   string.join(
     ["", "i", int.to_string(conversation_id), int.to_string(identifier_id)],
     "/",

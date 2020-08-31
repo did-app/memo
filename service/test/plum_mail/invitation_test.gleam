@@ -8,6 +8,7 @@ import plum_mail/discuss/discuss
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
 import plum_mail/web/router.{handle}
+import plum_mail/web/session
 import plum_mail/support
 import gleam/should
 
@@ -17,15 +18,18 @@ pub fn follow_invitation_test() {
 
   assert Ok(conversation) =
     start_conversation.execute("A shiny topic", identifier.id)
-  let participation = todo
-  let email_address = support.generate_email_address("other.test")
-  // TODO this needs to run off a permission
+
+  let user_session = session.authenticated(identifier.id)
   assert Ok(participation) =
+    discuss.load_participation(conversation.id, user_session)
+  let email_address = support.generate_email_address("other.test")
+
+  assert Ok(tuple(identifier_id, conversation_id)) =
     email_address
     |> add_participant.Params
     |> add_participant.execute(participation, _)
 
-  let path = discuss.invite_link(participation)
+  let path = discuss.invite_link(identifier_id, conversation_id)
   let request =
     http.default_req()
     |> http.set_path(path)

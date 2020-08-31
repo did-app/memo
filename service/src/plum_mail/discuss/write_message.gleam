@@ -3,6 +3,7 @@ import gleam/option.{None, Option, Some}
 import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
+import plum_mail/discuss/discuss.{Participation}
 
 pub type Params {
   Params(content: String, from: Option(String), resolve: Bool)
@@ -17,14 +18,19 @@ pub fn params(raw: Dynamic) {
 }
 
 pub fn execute(participation, params) {
-  let tuple(conversation_id, author_id) = participation
+  let Participation(conversation: conversation, identifier: identifier, ..) =
+    participation
   let Params(content: content, from: from, resolve: resolve) = params
   let sql =
     "
       INSERT INTO messages (conversation_id, content, author_id, counter)
       VALUES ($1, $2, $3, (SELECT COUNT(id) FROM messages WHERE conversation_id = $1) + 1)
       "
-  let args = [pgo.int(conversation_id), pgo.text(content), pgo.int(author_id)]
+  let args = [
+    pgo.int(conversation.id),
+    pgo.text(content),
+    pgo.int(identifier.id),
+  ]
   try _ = run_sql.execute(sql, args, fn(x) { x })
   case resolve {
     True -> {
@@ -34,7 +40,7 @@ pub fn execute(participation, params) {
           SET resolved = True
           WHERE id = $1
           "
-      let args = [pgo.int(conversation_id)]
+      let args = [pgo.int(conversation.id)]
       try _ = run_sql.execute(sql, args, fn(x) { x })
       Ok(Nil)
     }

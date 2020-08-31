@@ -5,6 +5,7 @@ import gleam/string
 import gleam/http
 import gleam/json
 import plum_mail/authentication.{Identifier}
+import plum_mail/discuss/discuss
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/dispatch_email
@@ -21,13 +22,15 @@ pub fn write_test() {
   let topic = "Test topic"
 
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
-  let participant = todo
+  let user_session = session.authenticated(identifier.id)
+  assert Ok(participation) =
+    discuss.load_participation(conversation.id, user_session)
 
   let invited_email_address = support.generate_email_address("other.test")
   assert Ok(invited) =
     invited_email_address
     |> add_participant.Params
-    |> add_participant.execute(participant, _)
+    |> add_participant.execute(participation, _)
   let request =
     http.default_req()
     |> http.set_method(http.Post)

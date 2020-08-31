@@ -35,5 +35,5 @@ pub fn execute(participation, params) {
     "
   let args = [pgo.int(conversation.id), pgo.int(identifier.id)]
   try [_] = run_sql.execute(sql, args, fn(x) { x })
-  Ok(Nil)
+  Ok(tuple(identifier.id, conversation.id))
 }

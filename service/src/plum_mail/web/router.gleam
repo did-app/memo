@@ -44,21 +44,6 @@ fn load_participation(conversation_id, request) {
   discuss.load_participation(conversation_id, session.extract(request))
 }
 
-fn can_view(c, user_session) {
-  try identifier_id = session.require_authentication(user_session)
-  let conversation.Conversation(participants: participants, ..) = c
-  list.find_map(
-    participants,
-    fn(participant: Identifier) {
-      case participant.id == identifier_id {
-        True -> Ok(identifier_id)
-        False -> Error(Nil)
-      }
-    },
-  )
-  |> result.map_error(fn(_: Nil) { error.Forbidden })
-}
-
 pub fn route(
   request,
   config: config.Config,
@@ -91,12 +76,58 @@ pub fn route(
     // This will need participation for cursor
     ["c", id] -> {
       try participation = load_participation(id, request)
+      let sql =
+        "
+        SELECT i.id, i.email_address, i.nickname
+        FROM participants AS p
+        JOIN identifiers AS i ON i.id = p.identifier_id
+        WHERE conversation_id = $1
+        "
+      let args = [pgo.int(participation.conversation.id)]
+      try participants =
+        run_sql.execute(
+          sql,
+          args,
+          fn(row) {
+            assert Ok(id) = dynamic.element(row, 0)
+            assert Ok(id) = dynamic.int(id)
+            assert Ok(email_address) = dynamic.element(row, 1)
+            assert Ok(email_address) = dynamic.string(email_address)
+            assert Ok(nickname) = dynamic.element(row, 2)
+            assert Ok(nickname) =
+              run_sql.dynamic_option(nickname, dynamic.string)
+            Identifier(id: id, email_address: email_address, nickname: nickname)
+          },
+        )
+      let sql =
+        "
+          SELECT m.content
+          FROM messages AS m
+          WHERE conversation_id = $1
+          "
+      let args = [pgo.int(participation.conversation.id)]
+      try messages =
+        run_sql.execute(
+          sql,
+          args,
+          fn(row) {
+            assert Ok(content) = dynamic.element(row, 0)
+            assert Ok(content) = dynamic.string(content)
+            content
+          },
+        )
+      let c = participation.conversation
+      let c =
+        conversation.Conversation(
+          ..c,
+          participants: participants,
+          messages: messages,
+        )
+      // TODO fix the conversation updates.
       let body =
+        // TODO load up the messages properly
         json.object([
-          tuple(
-            "conversation",
-            conversation.to_json(participation.conversation),
-          ),
+          tuple("conversation", conversation.to_json(c)),
           tuple(
             "participation",
             json.object([
@@ -148,12 +179,9 @@ pub fn route(
       |> Ok
     }
     ["c", id, "notify"] -> {
-      // TODO fix this id -> load_participation function
-      assert Ok(id) = int.parse(id)
       try params = acl.parse_json(request)
       try params = set_notification.params(params)
-      try participation =
-        discuss.load_participation(id, session.extract(request))
+      try participation = load_participation(id, request)
       try _ = set_notification.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -162,13 +190,10 @@ pub fn route(
     // FIXME should add concurrency control
     //
     ["c", id, "message"] -> {
-      assert Ok(id) = int.parse(id)
-      try conversation = conversation.fetch_by_id(id)
-      try author_id = can_view(conversation, session.extract(request))
       try params = acl.parse_json(request)
-      io.debug(params)
       try params = write_message.params(params)
-      try _ = write_message.execute(tuple(conversation.id, author_id), params)
+      try participation = load_participation(id, request)
+      try _ = write_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
