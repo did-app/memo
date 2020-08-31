@@ -36,9 +36,6 @@ CREATE TABLE participants (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
   cursor INT NOT NULL,
-  -- TODO add these features
-  -- mark as unrea
-  -- active
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

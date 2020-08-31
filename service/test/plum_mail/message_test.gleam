@@ -19,10 +19,12 @@ pub fn write_test() {
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
   let user_session = session.authenticated(identifier.id)
   let topic = "Test topic"
-  // conversation, could be domain and entity is thread/topic
+
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
+
+  let invited_email_address = support.generate_email_address("other.test")
   assert Ok(invited) =
-    support.generate_email_address("other.test")
+    invited_email_address
     |> add_participant.Params
     |> add_participant.execute(conversation, _)
   let request =
@@ -38,6 +40,7 @@ pub fn write_test() {
     )
     |> helpers.set_req_json(json.object([
       tuple("content", json.string("My first message")),
+      tuple("resolve", json.bool(False)),
     ]))
 
   let response = handle(request, support.test_config())
@@ -54,9 +57,8 @@ pub fn write_test() {
     list.reverse(dispatches)
     |> list.head()
 
-  // TODO reinstate
-  // should.equal(message.to, invited)
-  // should.equal(message.from, string.append)
+  should.equal(message.to.email_address, invited_email_address)
+  // should.equal(message.from, "")
   should.equal(message.conversation, tuple(conversation.id, topic))
   should.equal(message.content, "My first message")
 

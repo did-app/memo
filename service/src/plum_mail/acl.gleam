@@ -50,9 +50,9 @@ pub fn required(raw, key, cast) {
     Ok(value) ->
       case cast(value) {
         Ok(value) -> Ok(value)
-        Error(_) -> Error(todo)
+        Error(_) -> Error(error.Unprocessable(field: key, failure: error.CastFailure("Could not cast parameter")))
       }
-    Error(_) -> Error(todo)
+    Error(_) -> Error(error.Unprocessable(field: key, failure: error.Missing))
   }
 }
 
