@@ -16,14 +16,6 @@ pub fn dynamic_option(raw, cast) {
   }
 }
 
-// FIXME move to pgo lib
-pub fn nullable(value: Option(a), mapper: fn(a) -> pgo.PgType) {
-  case value {
-    Some(term) -> mapper(term)
-    None -> pgo.null()
-  }
-}
-
 pub fn cast_datetime(raw: Dynamic) {
   try date = dynamic.element(raw, 0)
   try time = dynamic.element(raw, 1)

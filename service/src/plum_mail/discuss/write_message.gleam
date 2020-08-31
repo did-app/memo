@@ -16,7 +16,6 @@ pub fn params(raw: Dynamic) {
   |> Ok()
 }
 
-// TODO switch to participation type
 pub fn execute(participation, params) {
   let tuple(conversation_id, author_id) = participation
   let Params(content: content, from: from, resolve: resolve) = params

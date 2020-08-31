@@ -74,7 +74,7 @@ pub fn fetch_by_id(id) {
 
   let sql =
     "
-    SELECT i.id, i.email_address
+    SELECT i.id, i.email_address, i.nickname
     FROM participants AS p
     JOIN identifiers AS i ON i.id = p.identifier_id
     WHERE conversation_id = $1
@@ -89,8 +89,9 @@ pub fn fetch_by_id(id) {
         assert Ok(id) = dynamic.int(id)
         assert Ok(email_address) = dynamic.element(row, 1)
         assert Ok(email_address) = dynamic.string(email_address)
-        // TODO nickname
-        Identifier(id: id, email_address: email_address, nickname: None)
+        assert Ok(nickname) = dynamic.element(row, 2)
+        assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
+        Identifier(id: id, email_address: email_address, nickname: nickname)
       },
     )
   let sql =
