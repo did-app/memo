@@ -57,7 +57,7 @@ pub fn required(raw, key, cast) {
 }
 
 pub fn optional(raw, key, cast) {
-    let null = dynamic.from(atom.create_from_string("null"))
+  let null = dynamic.from(atom.create_from_string("null"))
   case dynamic.field(raw, key) {
     Ok(value) if value == null -> Ok(None)
     Ok(value) ->

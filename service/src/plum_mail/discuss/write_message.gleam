@@ -46,6 +46,5 @@ pub fn execute(participation, params) {
   //     Some(value)  ->
   //     None -> Ok(Nil)
   // }
-
   Ok(Nil)
 }

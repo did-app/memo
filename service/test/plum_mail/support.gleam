@@ -12,7 +12,10 @@ import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
 
 pub fn test_config() {
-  config.Config(client_origin: "https://app.plummail.test")
+  config.Config(
+    client_origin: "https://app.plummail.test",
+    postmark_api_token: "POSTMARK_TEST_TOKEN",
+  )
 }
 
 pub fn generate_email_address(domain) {
