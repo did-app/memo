@@ -37,6 +37,13 @@ pub fn redirect(uri: String) -> Response(BitBuilder) {
   http.Response(status: 303, headers: [tuple("location", uri)], body: body)
 }
 
+fn load_participation(conversation_id, request) {
+  try conversation_id =
+    int.parse(conversation_id)
+    |> result.map_error(fn(x) { todo("mapping conversation id") })
+  discuss.load_participation(conversation_id, session.extract(request))
+}
+
 fn can_view(c, user_session) {
   try identifier_id = session.require_authentication(user_session)
   let conversation.Conversation(participants: participants, ..) = c
@@ -83,21 +90,28 @@ pub fn route(
     }
     // This will need participation for cursor
     ["c", id] -> {
-      assert Ok(id) = int.parse(id)
-      try c = conversation.fetch_by_id(id)
-      try author_id = can_view(c, session.extract(request))
-      io.debug(c)
-      io.debug(author_id)
-      // Need to get me email address for placeholder and nickname for nickname
+      try participation = load_participation(id, request)
       let body =
         json.object([
-          tuple("conversation", conversation.to_json(c)),
+          tuple(
+            "conversation",
+            conversation.to_json(participation.conversation),
+          ),
           tuple(
             "participation",
             json.object([
-              tuple("email_address", json.string("todo@example.com")),
-              tuple("nickname", json.null()),
-              tuple("notify", json.string("concluded")),
+              tuple(
+                "email_address",
+                json.string(participation.identifier.email_address),
+              ),
+              tuple(
+                "nickname",
+                json.nullable(participation.identifier.nickname, json.string),
+              ),
+              tuple(
+                "notify",
+                json.string(discuss.notify_to_string(participation.notify)),
+              ),
             ]),
           ),
         ])
@@ -123,7 +137,7 @@ pub fn route(
       |> Ok
     }
     // TODO AND corresponding delete
-    // This will need participion for permissions
+    // This will need participation for permissions
     ["c", id, "participant"] -> {
       assert Ok(id) = int.parse(id)
       try conversation = conversation.fetch_by_id(id)

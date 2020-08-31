@@ -7,6 +7,7 @@
   export let notify;
   export let participants = [];
   export let messages = [];
+
 </script>
 
 {#if !topic}
@@ -102,7 +103,7 @@
     <p>Send me notifications for</p>
     <label class="flex px-2 py-1 justify-start items-start">
       <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-        <input type="radio" class="opacity-0 absolute" bind:group={notify} value={'all'}>
+        <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'all'}>
         <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
           <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
       </div>
@@ -110,7 +111,7 @@
     </label>
     <label class="flex px-2 py-1 justify-start items-start">
       <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-        <input type="radio" class="opacity-0 absolute" bind:group={notify} value={'concluded'}>
+        <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'concluded'}>
         <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
           <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
       </div>
@@ -118,7 +119,7 @@
     </label>
     <label class="flex px-2 py-1 justify-start items-start">
       <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-        <input type="radio" class="opacity-0 absolute" bind:group={notify} value={'none'}>
+        <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'none'}>
         <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
           <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
       </div>

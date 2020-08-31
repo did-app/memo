@@ -28,3 +28,12 @@ export async function writeMessage(id, content, from, resolve) {
   console.log(response);
   return {};
 }
+export async function setNotification(id, notify) {
+  const response = await fetch("__API_ORIGIN__/c/" + id + "/notify", {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ notify })
+  });
+  console.log(response);
+  return {};
+}

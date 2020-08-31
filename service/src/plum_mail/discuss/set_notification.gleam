@@ -9,7 +9,7 @@ pub type Params {
 }
 
 pub fn params(raw: Dynamic) {
-  try preference = acl.required(raw, "preference", discuss.as_preference)
+  try preference = acl.required(raw, "notify", discuss.as_preference)
   Params(preference)
   |> Ok
 }

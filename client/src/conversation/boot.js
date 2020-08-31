@@ -55,4 +55,12 @@ export default async function() {
       window.location.reload()
     }
   })
+
+  document.addEventListener('change', async function (event) {
+    if (event.target.name === 'notify') {
+      let notify = event.target.value;
+      await Client.setNotification(conversationId, notify)
+      window.location.reload()
+    }
+  })
 }
