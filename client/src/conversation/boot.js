@@ -63,4 +63,64 @@ export default async function() {
       window.location.reload()
     }
   })
+
+  document.addEventListener('selectionchange', function (event) {
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    if (!range || range.collapsed){
+      page.$set({left: null, bottom: null})
+      return true
+    }
+
+    const common = range.commonAncestorContainer;
+    const isText = common.nodeName === "#text";
+    const container = isText ? common.parentElement : common;
+    const message = container.closest(".markdown-body")
+    if (!message) {
+      page.$set({left: null, bottom: null})
+      return true
+    }
+    const { top: selTop, left: selLeft, width: selWidth } = range.getBoundingClientRect();
+    const tipEl = document.querySelector(".texttip")
+    const tipWidth = tipEl.offsetWidth;
+
+
+
+    // Middle of selection width
+    let newTipLeft = selLeft + (selWidth / 2) - window.scrollX;
+
+    // Right above selection
+    let newTipBottom = window.innerHeight - selTop - window.scrollY;
+
+    // Stop tooltip bleeding off of left or right edge of screen
+    // Use a buffer of 20px so we don't bump right against the edge
+    // The tooltip transforms itself left minus 50% of it's width in css
+    // so this will need to be taken into account
+
+    const buffer = 20;
+    const tipHalfWidth = this.tipWidth / 2;
+    // console.log(selection);
+    // "real" means after taking the css transform into account
+		const realTipLeft = newTipLeft - tipHalfWidth;
+		const realTipRight = realTipLeft + this.tipWidth;
+
+		if (realTipLeft < buffer) {
+			// Correct for left edge overlap
+			newTipLeft = buffer + tipHalfWidth;
+		} else if (realTipRight > window.innerWidth - buffer) {
+			// Correct for right edge overlap
+			newTipLeft = window.innerWidth - buffer - tipHalfWidth;
+		}
+
+    page.$set({left: newTipLeft, bottom: newTipBottom})
+  })
+
+  document.addEventListener('click', function (event) {
+    let button = event.target.closest("[role=button]")
+    console.log(event.target);
+    if (button) {
+      console.log(window.getSelection().toString());
+      // perhaops only select within one paragraph for pins replies.
+    }
+  })
 }
