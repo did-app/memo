@@ -6,8 +6,7 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
-  let {conversation, participation} = await Client.fetchConversation(conversationId);
-  console.log(participation);
+  let {conversation, participation, pins} = await Client.fetchConversation(conversationId);
   let nickname = participation["nickname"];
   let emailAddress = participation["email_address"];
   let displayName = nickname || emailAddress.split("@")[0];
@@ -32,7 +31,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   console.log(messages);
-  page.$set({nickname, displayName, topic, notify, resolved, participants, messages})
+  page.$set({nickname, displayName, topic, notify, resolved, participants, messages, pins})
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
@@ -130,7 +129,7 @@ export default async function() {
         const snippet = "\r\n> " + selectionContent.replace(/\r?\n/g, "\r\n> ");
         document.querySelector('textarea').value += snippet
       } else if (action === "pinSelection") {
-        page.$set({pins: [selectionContent]})
+        page.$set({pins: pins.concat(selectionContent)})
         let response = await Client.addPin(conversationId, selectionContent)
         window.location.reload()
       }

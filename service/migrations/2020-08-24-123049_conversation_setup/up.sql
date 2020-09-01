@@ -31,6 +31,16 @@ CREATE TABLE messages (
 SELECT diesel_manage_updated_at('messages');
 -- TODO unique index
 
+CREATE TABLE pins (
+  id SERIAL PRIMARY KEY,
+  conversation_id INT REFERENCES conversations(id) NOT NULL,
+  content TEXT NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+SELECT diesel_manage_updated_at('pins');
+
 CREATE TABLE participants (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,

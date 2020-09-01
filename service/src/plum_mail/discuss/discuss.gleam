@@ -93,6 +93,25 @@ pub fn load_messages(conversation_id) {
   )
 }
 
+pub fn load_pins(conversation_id) {
+  let sql =
+    "
+        SELECT p.content
+        FROM pins AS p
+        WHERE conversation_id = $1
+        "
+  let args = [pgo.int(conversation_id)]
+  run_sql.execute(
+    sql,
+    args,
+    fn(row) {
+      assert Ok(content) = dynamic.element(row, 0)
+      assert Ok(content) = dynamic.string(content)
+      content
+    },
+  )
+}
+
 //
 pub type Preference {
   None

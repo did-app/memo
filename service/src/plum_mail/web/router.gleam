@@ -24,6 +24,7 @@ import plum_mail/discuss/start_conversation
 import plum_mail/discuss/show_inbox
 import plum_mail/discuss/set_notification
 import plum_mail/discuss/add_participant
+import plum_mail/discuss/add_pin
 import plum_mail/discuss/write_message
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
@@ -78,6 +79,7 @@ pub fn route(
       try participants =
         discuss.load_participants(participation.conversation.id)
       try messages = discuss.load_messages(participation.conversation.id)
+      try pins = discuss.load_pins(participation.conversation.id)
       let c = participation.conversation
       let c =
         discuss.Conversation(
@@ -89,6 +91,7 @@ pub fn route(
       let body =
         json.object([
           tuple("conversation", discuss.conversation_to_json(c)),
+          tuple("pins", json.list(list.map(pins, fn(p) { json.string(p)}))),
           tuple(
             "participation",
             json.object([
@@ -159,7 +162,15 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
     }
-    ["c", id, "pin"] -> todo("Post pint")
+    ["c", id, "pin"] -> {
+      try params = acl.parse_json(request)
+      try params = add_pin.params(params)
+      try participation = load_participation(id, request)
+      try _ = add_pin.execute(participation, params)
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
+    }
   }
 }
 

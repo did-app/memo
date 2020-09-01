@@ -50,12 +50,23 @@ table! {
     }
 }
 
+table! {
+    pins (id) {
+        id -> Int4,
+        conversation_id -> Int4,
+        content -> Text,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
 joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(message_notifications -> messages (message_id));
 joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (author_id));
 joinable!(participants -> conversations (conversation_id));
 joinable!(participants -> identifiers (identifier_id));
+joinable!(pins -> conversations (conversation_id));
 
 allow_tables_to_appear_in_same_query!(
     conversations,
@@ -63,4 +74,5 @@ allow_tables_to_appear_in_same_query!(
     message_notifications,
     messages,
     participants,
+    pins,
 );
