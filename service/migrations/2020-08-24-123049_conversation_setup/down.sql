@@ -1,3 +1,4 @@
+DROP VIEW participant_lists;
 DROP TABLE message_notifications;
 DROP TABLE participants;
 DROP TABLE pins;

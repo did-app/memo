@@ -54,6 +54,17 @@ CREATE TABLE participants (
 SELECT diesel_manage_updated_at('participants');
 CREATE UNIQUE INDEX unique_participant_identifier_id_conversation_id ON participants(identifier_id, conversation_id);
 
+CREATE VIEW participant_lists AS (
+  SELECT p.conversation_id, json_agg(json_build_object(
+      'identifier_id', p.identifier_id,
+      'email_address', i.email_address,
+      'nickname', i.nickname
+  )) as participants
+  FROM participants AS p
+  JOIN identifiers AS i ON i.id = p.identifier_id
+  GROUP BY (p.conversation_id)
+);
+
 CREATE TABLE message_notifications (
   id SERIAL PRIMARY KEY,
   message_id INT REFERENCES messages(id) NOT NULL,

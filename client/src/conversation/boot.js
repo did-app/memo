@@ -23,8 +23,8 @@ export default async function() {
     const [intro] = content.trim().split(/\r?\n/)
     const html = marked(content)
     const checked = true
-    const date ="12 Aug"
-    const author = "vov"
+    const date ="12 Aug TODO"
+    const author = "vov TODO"
     return {checked, author, date, intro, html}
   })
   if (messages[messages.length - 1]) {

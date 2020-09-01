@@ -91,7 +91,7 @@ pub fn route(
       let body =
         json.object([
           tuple("conversation", discuss.conversation_to_json(c)),
-          tuple("pins", json.list(list.map(pins, fn(p) { json.string(p)}))),
+          tuple("pins", json.list(list.map(pins, fn(p) { json.string(p) }))),
           tuple(
             "participation",
             json.object([

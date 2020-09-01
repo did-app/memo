@@ -19,7 +19,7 @@ pub fn load() {
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
   let sql =
     "
-    SELECT m.id, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address
+    SELECT m.id, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, recipient.nickname
     FROM messages AS m
     JOIN conversations AS c ON c.id = m.conversation_id
     JOIN participants AS p ON p.conversation_id = c.id
@@ -52,6 +52,9 @@ pub fn load() {
     assert Ok(recipient_id) = dynamic.int(recipient_id)
     assert Ok(recipient_email_address) = dynamic.element(row, 8)
     assert Ok(recipient_email_address) = dynamic.string(recipient_email_address)
+    assert Ok(recipient_nickname) = dynamic.element(row, 9)
+    assert Ok(recipient_nickname) =
+      run_sql.dynamic_option(recipient_nickname, dynamic.string)
 
     let link =
       string.join(
@@ -68,11 +71,10 @@ pub fn load() {
       id: message_id,
       conversation: tuple(conversation_id, topic),
       from: string.append(int.to_string(conversation_id), "@plummail.co"),
-      // TODO fix nickname
       to: Identifier(
         id: recipient_id,
         email_address: recipient_email_address,
-        nickname: None,
+        nickname: recipient_nickname,
       ),
       content: content,
     )
