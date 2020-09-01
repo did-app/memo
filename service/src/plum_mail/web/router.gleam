@@ -13,6 +13,7 @@ import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/json
 // Web/utils let session = utils.extractsession
+import datetime
 import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
@@ -81,16 +82,26 @@ pub fn route(
       try messages = discuss.load_messages(participation.conversation.id)
       try pins = discuss.load_pins(participation.conversation.id)
       let c = participation.conversation
-      let c =
-        discuss.Conversation(
-          ..c,
-          participants: participants,
-          messages: messages,
-        )
+      let c = discuss.Conversation(..c, participants: participants)
       // TODO fix the conversation updates.
       let body =
         json.object([
           tuple("conversation", discuss.conversation_to_json(c)),
+          tuple(
+            "messages",
+            json.list(list.map(
+              messages,
+              fn(m) {
+                let tuple(content, counter, inserted_at, identifier) = m
+                let Identifier(email_address: email_address, ..) = identifier
+                json.object([
+                  tuple("content", json.string(content)),
+                  tuple("author", json.string(email_address)),
+                  tuple("inserted_at", json.string(datetime.to_human(inserted_at)))
+                ])
+              },
+            )),
+          ),
           tuple("pins", json.list(list.map(pins, fn(p) { json.string(p) }))),
           tuple(
             "participation",

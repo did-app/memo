@@ -6,7 +6,7 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
-  let {conversation, participation, pins} = await Client.fetchConversation(conversationId);
+  let {conversation, participation, messages, pins} = await Client.fetchConversation(conversationId);
   let nickname = participation["nickname"];
   let emailAddress = participation["email_address"];
   let displayName = nickname || emailAddress.split("@")[0];
@@ -19,13 +19,12 @@ export default async function() {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
-  let messages = conversation.messages.map(function ({content}) {
+  console.log(messages);
+  messages = messages.map(function ({content, author, inserted_at}) {
     const [intro] = content.trim().split(/\r?\n/)
     const html = marked(content)
     const checked = true
-    const date ="12 Aug TODO"
-    const author = "vov TODO"
-    return {checked, author, date, intro, html}
+    return {checked, author, date: inserted_at, intro, html}
   })
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false

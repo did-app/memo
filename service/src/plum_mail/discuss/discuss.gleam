@@ -77,8 +77,9 @@ pub fn load_participants(conversation_id) {
 pub fn load_messages(conversation_id) {
   let sql =
     "
-        SELECT m.content
+        SELECT m.content, m.counter, m.inserted_at, i.id, i.email_address, i.nickname
         FROM messages AS m
+        JOIN identifiers AS i ON i.id = m.author_id
         WHERE conversation_id = $1
         "
   let args = [pgo.int(conversation_id)]
@@ -88,7 +89,25 @@ pub fn load_messages(conversation_id) {
     fn(row) {
       assert Ok(content) = dynamic.element(row, 0)
       assert Ok(content) = dynamic.string(content)
-      content
+      assert Ok(counter) = dynamic.element(row, 1)
+      assert Ok(counter) = dynamic.int(counter)
+      assert Ok(inserted_at) = dynamic.element(row, 2)
+      assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
+      assert Ok(author_id) = dynamic.element(row, 3)
+      assert Ok(author_id) = dynamic.int(author_id)
+      assert Ok(author_email_address) = dynamic.element(row, 4)
+      assert Ok(author_email_address) = dynamic.string(author_email_address)
+      assert Ok(author_nickname) = dynamic.element(row, 5)
+      assert Ok(author_nickname) =
+        run_sql.dynamic_option(author_nickname, dynamic.string)
+
+      let author =
+        Identifier(
+          id: author_id,
+          email_address: author_email_address,
+          nickname: author_nickname,
+        )
+      tuple(content, counter, inserted_at, author)
     },
   )
 }
