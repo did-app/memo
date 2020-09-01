@@ -64,11 +64,15 @@ export default async function() {
     }
   })
 
+  // Could also be fixed with a div overlay
+  let delayClick;
+  let selectionContent;
   document.addEventListener('selectionchange', function (event) {
     const selection = window.getSelection();
     const range = selection.getRangeAt(0);
     if (!range || range.collapsed){
-      page.$set({left: null, bottom: null})
+      // Don't hide because gets messed with clicks
+      // page.$set({left: null, bottom: null})
       return true
     }
 
@@ -80,6 +84,7 @@ export default async function() {
       page.$set({left: null, bottom: null})
       return true
     }
+    selectionContent = range.toString()
     const { top: selTop, left: selLeft, width: selWidth } = range.getBoundingClientRect();
     const tipEl = document.querySelector(".texttip")
     const tipWidth = tipEl.offsetWidth;
@@ -112,15 +117,28 @@ export default async function() {
 			newTipLeft = window.innerWidth - buffer - tipHalfWidth;
 		}
 
+    delayClick = true;
     page.$set({left: newTipLeft, bottom: newTipBottom})
   })
 
-  document.addEventListener('click', function (event) {
+  document.addEventListener('click', async function (event) {
     let button = event.target.closest("[role=button]")
-    console.log(event.target);
-    if (button) {
-      console.log(window.getSelection().toString());
+    if (button && selectionContent) {
       // perhaops only select within one paragraph for pins replies.
+      const action = button.dataset.action
+      if (action === "quoteInReply") {
+        const snippet = "\r\n> " + selectionContent.replace(/\r?\n/g, "\r\n> ");
+        document.querySelector('textarea').value += snippet
+      } else if (action === "pinSelection") {
+        page.$set({pins: [selectionContent]})
+        let response = await Client.addPin(conversationId, selectionContent)
+        window.location.reload()
+      }
+    }
+    if (delayClick) {
+      delayClick = false;
+    } else {
+      page.$set({left: null, bottom: null})
     }
   })
 }

@@ -28,6 +28,15 @@ export async function writeMessage(id, content, from, resolve) {
   console.log(response);
   return {};
 }
+export async function addPin(id, content) {
+  const response = await fetch("__API_ORIGIN__/c/" + id + "/pin", {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ content })
+  });
+  console.log(response);
+  return {};
+}
 export async function setNotification(id, notify) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/notify", {
     method: "POST",

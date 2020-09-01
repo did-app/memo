@@ -9,6 +9,7 @@
   export let notify;
   export let participants = [];
   export let messages = [];
+  export let pins = [];
   export let left;
   export let bottom;
 </script>
@@ -94,6 +95,9 @@
     </style>
     <ul id="pins">
       <li class="last-only">Select message text to add first pin.</li>
+      {#each pins as pin}
+      <li class="bg-white border-indigo-700 border-l-4 m-1 p-2 shadow-lg text-xl">{pin}</li>
+      {/each}
     </ul>
     <h3 class="font-bold mt-8">Participants</h3>
     <ul id="participants">
@@ -136,11 +140,11 @@
 {/if }
 <div class="texttip texttip--theme-default" class:texttip--show="{!!left}" data-textip-iconformat="font" data-texttip-id="1" role="tooltip" aria-hidden="true" style="left:{left}px;bottom:{bottom}px">
   <div class="texttip__inner">
-    <div class="texttip__btn" role="button" data-texttip-btn-index="0" style="transition-delay: 40ms;">
+    <div class="texttip__btn" role="button" data-action="quoteInReply" data-texttip-btn-index="0" style="transition-delay: 40ms;">
       <i class="fa fa-quote-right" title="Quote" aria-hidden="true"></i>
       <span class="sr-only">Quote</span>
     </div>
-    <div class="texttip__btn" role="button" data-texttip-btn-index="1" style="transition-delay: 80ms;" on:click="{console.log('00000')}">
+    <div class="texttip__btn" role="button" data-action="pinSelection" data-texttip-btn-index="1" style="transition-delay: 80ms;" on:click="{console.log('00000')}">
       <i class="fa fa-map-pin" title="Pin" aria-hidden="true"></i>
       <span class="sr-only">Pin</span>
     </div>
