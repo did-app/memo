@@ -38,7 +38,7 @@ pub fn cast_datetime(raw: Dynamic) {
       tuple(year, month, day),
       tuple(hour, minute, second),
     ))
-    |> result.map_error(fn(_) { todo("datetime erro") })
+    |> result.map_error(fn(_) { "Datetime could not be cast from values" })
   Ok(dt)
 }
 

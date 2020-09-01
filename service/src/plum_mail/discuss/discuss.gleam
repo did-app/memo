@@ -107,7 +107,7 @@ pub fn as_preference(raw) {
     "all" -> Ok(All)
     "none" -> Ok(None)
     "concluded" -> Ok(Concluded)
-    _ -> Error(Nil)
+    _ -> Error("Not an acceptable notify preference")
   }
 }
 

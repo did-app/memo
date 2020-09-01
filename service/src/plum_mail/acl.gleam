@@ -67,7 +67,11 @@ pub fn optional(raw, key, cast) {
     Ok(value) ->
       case cast(value) {
         Ok(value) -> Ok(Some(value))
-        Error(reason) -> Error(todo)
+        Error(_) ->
+          Error(error.Unprocessable(
+            field: key,
+            failure: error.CastFailure("Could not cast parameter"),
+          ))
       }
     Error(_) -> Ok(None)
   }
@@ -76,14 +80,14 @@ pub fn optional(raw, key, cast) {
 pub fn as_string(raw) {
   case dynamic.string(raw) {
     Ok(value) -> Ok(value)
-    Error(_) -> Error(todo)
+    Error(reason) -> Error(reason)
   }
 }
 
 pub fn as_bool(raw) {
   case dynamic.bool(raw) {
     Ok(value) -> Ok(value)
-    Error(_) -> Error(todo)
+    Error(reason) -> Error(reason)
   }
 }
 
