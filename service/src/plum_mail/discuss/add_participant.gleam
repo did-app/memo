@@ -4,7 +4,6 @@ import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/discuss/discuss
-import plum_mail/discuss/conversation.{Conversation}
 
 pub type Params {
   Params(email_address: String)

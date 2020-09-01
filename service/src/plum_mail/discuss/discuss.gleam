@@ -1,13 +1,97 @@
 import gleam/dynamic
 import gleam/int
+import gleam/list
 import gleam/string
+import gleam/json
 import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
-import plum_mail/discuss/conversation.{Conversation}
 // Session is more than a web thing, anywhere you can be a session.
 import plum_mail/web/session
+
+pub type Conversation {
+  Conversation(
+    id: Int,
+    topic: String,
+    resolved: Bool,
+    participants: List(Identifier),
+    messages: List(String),
+  )
+}
+
+pub fn conversation_to_json(conversation: Conversation) {
+  let Conversation(id, topic, resolved, participants, messages) = conversation
+
+  json.object([
+    tuple("id", json.int(id)),
+    tuple("topic", json.string(topic)),
+    tuple("resolved", json.bool(resolved)),
+    tuple(
+      "participants",
+      json.list(list.map(
+        participants,
+        fn(participant) {
+          let Identifier(id: id, email_address: email_address, ..) = participant
+          json.object([
+            tuple("id", json.int(id)),
+            tuple("email_address", json.string(email_address)),
+          ])
+        },
+      )),
+    ),
+    tuple(
+      "messages",
+      json.list(list.map(
+        messages,
+        fn(message) { json.object([tuple("content", json.string(message))]) },
+      )),
+    ),
+  ])
+}
+
+pub fn load_participants(conversation_id) {
+  let sql =
+    "
+      SELECT i.id, i.email_address, i.nickname
+      FROM participants AS p
+      JOIN identifiers AS i ON i.id = p.identifier_id
+      WHERE conversation_id = $1
+      "
+  let args = [pgo.int(conversation_id)]
+  run_sql.execute(
+    sql,
+    args,
+    fn(row) {
+      assert Ok(id) = dynamic.element(row, 0)
+      assert Ok(id) = dynamic.int(id)
+      assert Ok(email_address) = dynamic.element(row, 1)
+      assert Ok(email_address) = dynamic.string(email_address)
+      assert Ok(nickname) = dynamic.element(row, 2)
+      assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
+      Identifier(id: id, email_address: email_address, nickname: nickname)
+    },
+  )
+}
+
+pub fn load_messages(conversation_id) {
+  let sql =
+    "
+        SELECT m.content
+        FROM messages AS m
+        WHERE conversation_id = $1
+        "
+  let args = [pgo.int(conversation_id)]
+  run_sql.execute(
+    sql,
+    args,
+    fn(row) {
+      assert Ok(content) = dynamic.element(row, 0)
+      assert Ok(content) = dynamic.string(content)
+      content
+    },
+  )
+}
 
 //
 pub type Preference {
@@ -44,11 +128,6 @@ pub type Participation {
     notify: Preference,
     identifier: Identifier,
   )
-}
-
-// TODO NOT good but part of tests
-pub fn build_participation(conversation, identifier) {
-  Participation(conversation, True, 0, All, identifier)
 }
 
 // Can call user session authentication?

@@ -12,17 +12,14 @@ import gleam/uri
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/json
-import gleam/pgo
 // Web/utils let session = utils.extractsession
 import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
-import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 import plum_mail/web/session
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss
-import plum_mail/discuss/conversation
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/show_inbox
 import plum_mail/discuss/set_notification
@@ -54,6 +51,8 @@ pub fn route(
         session.require_authentication(session.extract(request))
       try conversations = show_inbox.execute(identifier_id)
       // |> result.map_error(fn(x) { todo("mapping show inbox") })
+      // If this conversations is the same as the top level conversation object for a page,
+      // it can be the start value when switching pages
       http.response(200)
       |> web.set_resp_json(json.object([tuple("conversations", conversations)]))
       |> Ok()
@@ -76,58 +75,20 @@ pub fn route(
     // This will need participation for cursor
     ["c", id] -> {
       try participation = load_participation(id, request)
-      let sql =
-        "
-        SELECT i.id, i.email_address, i.nickname
-        FROM participants AS p
-        JOIN identifiers AS i ON i.id = p.identifier_id
-        WHERE conversation_id = $1
-        "
-      let args = [pgo.int(participation.conversation.id)]
       try participants =
-        run_sql.execute(
-          sql,
-          args,
-          fn(row) {
-            assert Ok(id) = dynamic.element(row, 0)
-            assert Ok(id) = dynamic.int(id)
-            assert Ok(email_address) = dynamic.element(row, 1)
-            assert Ok(email_address) = dynamic.string(email_address)
-            assert Ok(nickname) = dynamic.element(row, 2)
-            assert Ok(nickname) =
-              run_sql.dynamic_option(nickname, dynamic.string)
-            Identifier(id: id, email_address: email_address, nickname: nickname)
-          },
-        )
-      let sql =
-        "
-          SELECT m.content
-          FROM messages AS m
-          WHERE conversation_id = $1
-          "
-      let args = [pgo.int(participation.conversation.id)]
-      try messages =
-        run_sql.execute(
-          sql,
-          args,
-          fn(row) {
-            assert Ok(content) = dynamic.element(row, 0)
-            assert Ok(content) = dynamic.string(content)
-            content
-          },
-        )
+        discuss.load_participants(participation.conversation.id)
+      try messages = discuss.load_messages(participation.conversation.id)
       let c = participation.conversation
       let c =
-        conversation.Conversation(
+        discuss.Conversation(
           ..c,
           participants: participants,
           messages: messages,
         )
       // TODO fix the conversation updates.
       let body =
-        // TODO load up the messages properly
         json.object([
-          tuple("conversation", conversation.to_json(c)),
+          tuple("conversation", discuss.conversation_to_json(c)),
           tuple(
             "participation",
             json.object([

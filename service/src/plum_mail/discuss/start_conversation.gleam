@@ -5,7 +5,7 @@ import gleam/result
 import gleam/pgo
 import plum_mail/error
 import plum_mail/run_sql
-import plum_mail/discuss/conversation.{Conversation}
+import plum_mail/discuss/discuss.{Conversation}
 
 pub fn params(form) {
   case map.get(form, "topic") {

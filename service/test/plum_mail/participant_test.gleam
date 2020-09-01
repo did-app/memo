@@ -8,8 +8,8 @@ import gleam/string
 import gleam/http
 import gleam/json
 import plum_mail/authentication
+import plum_mail/discuss/discuss.{Conversation}
 import plum_mail/discuss/start_conversation
-import plum_mail/discuss/conversation.{Conversation} as conversation_mod
 import plum_mail/web/helpers as web
 import plum_mail/web/session
 import plum_mail/web/router.{handle}
@@ -42,16 +42,15 @@ pub fn successfully_add_new_participant_test() {
   let topic = "Test topic"
 
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
-  assert Ok(conversation) = conversation_mod.fetch_by_id(conversation.id)
 
   let invited_email_address = support.generate_email_address("other.test")
   let response =
     add_participant(user_session, conversation, invited_email_address)
 
   should.equal(response.status, 201)
-  assert Ok(conversation) = conversation_mod.fetch_by_id(conversation.id)
+  assert Ok(participants) = discuss.load_participants(conversation.id)
 
-  conversation.participants
+  participants
   |> list.map(fn(x: authentication.Identifier) { x.email_address })
   |> should.equal([email_address, invited_email_address])
 
@@ -60,8 +59,8 @@ pub fn successfully_add_new_participant_test() {
     add_participant(user_session, conversation, invited_email_address)
 
   should.equal(response.status, 201)
-  assert Ok(conversation) = conversation_mod.fetch_by_id(conversation.id)
-  conversation.participants
+  assert Ok(participants) = discuss.load_participants(conversation.id)
+  participants
   |> list.map(fn(x: authentication.Identifier) { x.email_address })
   |> should.equal([email_address, invited_email_address])
 }
