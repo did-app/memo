@@ -120,7 +120,6 @@ pub fn route(
     // This could be participant_id
     ["i", conversation_id, identifier_id] -> {
       let cookie_defaults = http.cookie_defaults(request.scheme)
-      // TODO this needs to be a proper token
       let url = string.join([config.client_origin, "/c/", conversation_id], "")
       redirect(url)
       |> http.set_resp_cookie(
@@ -131,7 +130,6 @@ pub fn route(
       )
       |> Ok
     }
-    // TODO AND corresponding delete
     ["c", id, "participant"] -> {
       try params = acl.parse_json(request)
       try params = add_participant.params(params)
