@@ -83,9 +83,41 @@ pub fn write_test() {
   assert Ok(_) = dispatch_email.record_sent(message)
 
   assert Ok(dispatches) = dispatch_email.load()
-  assert Ok(other) =
-    list.reverse(dispatches)
-    |> list.head()
-  other.id
-  |> should.not_equal(message.id)
+  case list.reverse(dispatches)
+  |> list.head() {
+    Ok(other) -> {
+      other.id
+      |> should.not_equal(message.id)
+      Nil
+    }
+    _ -> Nil
+  }
+
+  let other_session = session.authenticated(invited.0)
+  assert Ok(participation) =
+    discuss.load_participation(conversation.id, other_session)
+
+  participation.cursor
+  |> should.equal(0)
+
+  let request =
+    http.default_req()
+    |> http.set_method(http.Post)
+    |> http.set_path(string.join(
+      ["/c/", int.to_string(conversation.id), "/read"],
+      "",
+    ))
+    |> http.prepend_req_header(
+      "cookie",
+      string.append("session=", session.to_string(other_session)),
+    )
+    |> helpers.set_req_json(json.object([tuple("counter", json.int(1))]))
+
+  let response = handle(request, support.test_config())
+  should.equal(response.status, 201)
+  assert Ok(participation) =
+    discuss.load_participation(conversation.id, other_session)
+
+  participation.cursor
+  |> should.equal(1)
 }

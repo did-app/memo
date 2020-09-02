@@ -27,6 +27,7 @@ import plum_mail/discuss/set_notification
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/add_pin
 import plum_mail/discuss/write_message
+import plum_mail/discuss/read_message
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -164,12 +165,21 @@ pub fn route(
       |> Ok
     }
     // FIXME should add concurrency control
-    //
+    // Could be named write
     ["c", id, "message"] -> {
       try params = acl.parse_json(request)
       try params = write_message.params(params)
       try participation = load_participation(id, request)
       try _ = write_message.execute(participation, params)
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
+    }
+    ["c", id, "read"] -> {
+      try params = acl.parse_json(request)
+      try params = read_message.params(params)
+      try participation = load_participation(id, request)
+      try _ = read_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
