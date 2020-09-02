@@ -97,7 +97,10 @@ pub fn route(
                 json.object([
                   tuple("content", json.string(content)),
                   tuple("author", json.string(email_address)),
-                  tuple("inserted_at", json.string(datetime.to_human(inserted_at)))
+                  tuple(
+                    "inserted_at",
+                    json.string(datetime.to_human(inserted_at)),
+                  ),
                 ])
               },
             )),

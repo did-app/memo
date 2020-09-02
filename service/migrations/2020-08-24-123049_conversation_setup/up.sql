@@ -29,7 +29,7 @@ CREATE TABLE messages (
 );
 
 SELECT diesel_manage_updated_at('messages');
--- TODO unique index
+CREATE UNIQUE INDEX unique_messages_conversation_id_counter ON messages(conversation_id, counter);
 
 CREATE TABLE pins (
   id SERIAL PRIMARY KEY,
