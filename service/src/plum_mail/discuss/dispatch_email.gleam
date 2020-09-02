@@ -1,10 +1,15 @@
-import gleam/dynamic
+import gleam/atom
+import gleam/dynamic.{Dynamic}
 import gleam/int
+import gleam/io
+import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
 import gleam/http
+import gleam/httpc
 import gleam/json
 import gleam/pgo
+import plum_mail/config.{Config}
 import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 
@@ -18,6 +23,18 @@ pub type Message {
     to: Identifier,
     content: String,
   )
+}
+
+external fn earmark_as_html(String) -> tuple(Dynamic, Dynamic, Dynamic) = "Elixir.Earmark" "as_html"
+
+fn as_html(markdown)  {
+    let ok = dynamic.from(atom.create_from_string("ok"))
+    case earmark_as_html(markdown) {
+        tuple(tag, html, _) if tag == ok -> {
+            assert Ok(html) = dynamic.string(html)
+            html
+        }
+    }
 }
 
 pub fn load() {
@@ -65,17 +82,6 @@ pub fn load() {
     assert Ok(recipient_nickname) =
       run_sql.dynamic_option(recipient_nickname, dynamic.string)
 
-    let link =
-      string.join(
-        [
-          "\r\n\r\nhttps://calm.did.app/c/",
-          int.to_string(conversation_id),
-          "?t=",
-          int.to_string(recipient_id),
-        ],
-        "",
-      )
-
     Message(
       id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
@@ -108,12 +114,38 @@ pub fn record_sent(message: Message) {
   run_sql.execute(sql, args, mapper)
 }
 
-fn send(api_token, message: Message) {
+
+
+fn send(postmark_api_token, message: Message) {
+
+    let body = ["
+    <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+    <html xmlns=\"http://www.w3.org/1999/xhtml\">
+      <head>
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+        <meta name=\"x-apple-disable-message-reformatting\" />
+        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
+        <title></title>
+      </head>
+      <body>
+        <main>
+    ",
+           as_html(message.content),
+     "
+    <hr>
+    <p>This message was sent from Plum Mail.</p>
+    <a href=\"https://api.plummail.co/i/",int.to_string(message.id.0),"/",int.to_string(message.to.id),"\">Click here to reply</a>
+    </main>
+    "]
+    |> string.join("")
+
   let data =
     json.object([
-      tuple("From", json.string(message.from)),
+      tuple("From", json.string("updates@plummail.co")),
       tuple("To", json.string(message.to.email_address)),
-      tuple("TextBody", json.string(message.content)),
+      tuple("Subject", json.string(message.conversation.1)),
+      // tuple("TextBody", json.string(message.content)),
+      tuple("HtmlBody", json.string(body)),
     ])
   let request =
     http.default_req()
@@ -122,7 +154,18 @@ fn send(api_token, message: Message) {
     |> http.set_path("/email")
     |> http.prepend_req_header("content-type", "application/json")
     |> http.prepend_req_header("accept", "application/json")
-    |> http.prepend_req_header("x-postmark-server-token", api_token)
+    |> http.prepend_req_header("x-postmark-server-token", "3723ec42-b271-4c19-866d-3e58c31059ef")
     |> http.set_req_body(json.encode(data))
-  todo("postmark")
+    io.debug(request)
+    httpc.send(request)
+}
+
+pub fn execute() {
+    let Config(postmark_api_token: postmark_api_token, ..) = config.from_env()
+    assert Ok(messages) = load()
+    list.map(messages, fn(message) {
+        case send(postmark_api_token, message) {
+            Ok(http.Response(status: 200, ..)) -> record_sent(message)
+        }
+    })
 }

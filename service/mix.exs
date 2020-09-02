@@ -24,6 +24,7 @@ defmodule PlumMail.MixProject do
   defp deps do
     [
       {:mix_gleam, "~> 0.1.0"},
+      {:earmark, "~> 1.4"},
       {:gleam_cowboy, "~> 0.1.2"},
       {:gleam_crypto, "~> 0.1.2"},
       {:gleam_httpc, "~> 0.1.1"},
