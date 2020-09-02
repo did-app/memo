@@ -154,7 +154,7 @@ fn send(postmark_api_token, message: Message) {
     |> http.set_path("/email")
     |> http.prepend_req_header("content-type", "application/json")
     |> http.prepend_req_header("accept", "application/json")
-    |> http.prepend_req_header("x-postmark-server-token", "3723ec42-b271-4c19-866d-3e58c31059ef")
+    |> http.prepend_req_header("x-postmark-server-token", postmark_api_token)
     |> http.set_req_body(json.encode(data))
     io.debug(request)
     httpc.send(request)
