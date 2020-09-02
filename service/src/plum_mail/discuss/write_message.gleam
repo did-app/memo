@@ -23,8 +23,17 @@ pub fn execute(participation, params) {
   let Params(content: content, from: from, resolve: resolve) = params
   let sql =
     "
-      INSERT INTO messages (conversation_id, content, author_id, counter)
-      VALUES ($1, $2, $3, (SELECT COUNT(id) FROM messages WHERE conversation_id = $1) + 1)
+      WITH new_message AS (
+          INSERT INTO messages (conversation_id, content, author_id, counter)
+          VALUES ($1, $2, $3, (SELECT COUNT(counter) FROM messages WHERE conversation_id = $1) + 1)
+          RETURNING counter
+      ), participation AS (
+          UPDATE participants
+          SET cursor = (SELECT counter FROM new_message)
+          WHERE identifier_id = $3
+          AND conversation_id = $1
+      )
+      SELECT 42
       "
   let args = [
     pgo.int(conversation.id),

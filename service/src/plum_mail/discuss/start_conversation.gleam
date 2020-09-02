@@ -40,7 +40,7 @@ pub fn execute(topic, owner_id) {
         assert Ok(resolved) = dynamic.element(row, 2)
         assert Ok(resolved) = dynamic.bool(resolved)
 
-        Conversation(id, topic, resolved, [], [])
+        Conversation(id, topic, resolved, [])
       },
     )
   Ok(c)

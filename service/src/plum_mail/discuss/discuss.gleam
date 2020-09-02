@@ -8,6 +8,8 @@ import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 // Session is more than a web thing, anywhere you can be a session.
+// FIXME date_time or Datetime
+import datetime.{DateTime}
 import plum_mail/web/session
 
 pub type Conversation {
@@ -16,12 +18,11 @@ pub type Conversation {
     topic: String,
     resolved: Bool,
     participants: List(Identifier),
-    messages: List(String),
   )
 }
 
 pub fn conversation_to_json(conversation: Conversation) {
-  let Conversation(id, topic, resolved, participants, messages) = conversation
+  let Conversation(id, topic, resolved, participants) = conversation
 
   json.object([
     tuple("id", json.int(id)),
@@ -38,13 +39,6 @@ pub fn conversation_to_json(conversation: Conversation) {
             tuple("email_address", json.string(email_address)),
           ])
         },
-      )),
-    ),
-    tuple(
-      "messages",
-      json.list(list.map(
-        messages,
-        fn(message) { json.object([tuple("content", json.string(message))]) },
       )),
     ),
   ])
@@ -71,6 +65,15 @@ pub fn load_participants(conversation_id) {
       assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
       Identifier(id: id, email_address: email_address, nickname: nickname)
     },
+  )
+}
+
+pub type Message {
+  Message(
+    counter: Int,
+    content: String,
+    inserted_at: DateTime,
+    author: Identifier,
   )
 }
 
@@ -107,7 +110,7 @@ pub fn load_messages(conversation_id) {
           email_address: author_email_address,
           nickname: author_nickname,
         )
-      tuple(content, counter, inserted_at, author)
+      Message(counter, content, inserted_at, author)
     },
   )
 }
@@ -190,7 +193,7 @@ pub fn load_participation(conversation_id: Int, user_session: session.Session) {
     assert Ok(resolved) = dynamic.element(row, 2)
     assert Ok(resolved) = dynamic.bool(resolved)
 
-    let conversation = Conversation(id, topic, resolved, [], [])
+    let conversation = Conversation(id, topic, resolved, [])
 
     assert Ok(cursor) = dynamic.element(row, 3)
     assert Ok(cursor) = dynamic.int(cursor)

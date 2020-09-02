@@ -9,9 +9,15 @@ import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 
 pub type Message {
-  Message(id: Int, conversation: tuple(Int, String), // to can be participant
+  Message(
+    id: tuple(Int, Int),
+    conversation: tuple(Int, String),
+    // to can be participant
     // from can be author
-    from: String, to: Identifier, content: String)
+    from: String,
+    to: Identifier,
+    content: String,
+  )
 }
 
 pub fn load() {
@@ -19,11 +25,14 @@ pub fn load() {
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
   let sql =
     "
-    SELECT m.id, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, recipient.nickname
+    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, recipient.nickname
     FROM messages AS m
     JOIN conversations AS c ON c.id = m.conversation_id
     JOIN participants AS p ON p.conversation_id = c.id
-    LEFT JOIN message_notifications AS n ON n.message_id = m.id AND n.identifier_id = p.identifier_id
+    LEFT JOIN message_notifications AS n
+        ON n.conversation_id = m.conversation_id
+        AND n.counter = m.counter
+        AND n.identifier_id = p.identifier_id
     JOIN identifiers AS recipient ON recipient.id = p.identifier_id
     JOIN identifiers AS author ON author.id = m.author_id
     WHERE p.identifier_id <> m.author_id
@@ -34,8 +43,8 @@ pub fn load() {
     "
   let args = []
   let mapper = fn(row) {
-    assert Ok(message_id) = dynamic.element(row, 0)
-    assert Ok(message_id) = dynamic.int(message_id)
+    assert Ok(counter) = dynamic.element(row, 0)
+    assert Ok(counter) = dynamic.int(counter)
     assert Ok(content) = dynamic.element(row, 1)
     assert Ok(content) = dynamic.string(content)
     assert Ok(inserted_at) = dynamic.element(row, 2)
@@ -68,7 +77,7 @@ pub fn load() {
       )
 
     Message(
-      id: message_id,
+      id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
       from: string.append(int.to_string(conversation_id), "@plummail.co"),
       to: Identifier(
@@ -87,10 +96,14 @@ pub fn record_sent(message: Message) {
   // TODO rename to recipient id
   let sql =
     "
-    INSERT INTO message_notifications (message_id, identifier_id)
-    VALUES ($1, $2)
+    INSERT INTO message_notifications (conversation_id, counter, identifier_id)
+    VALUES ($1, $2, $3)
     "
-  let args = [pgo.int(message.id), pgo.int(message.to.id)]
+  let args = [
+    pgo.int(message.id.0),
+    pgo.int(message.id.1),
+    pgo.int(message.to.id),
+  ]
   let mapper = fn(x) { x }
   run_sql.execute(sql, args, mapper)
 }

@@ -15,6 +15,26 @@ import plum_mail/web/router.{handle}
 import plum_mail/support
 import gleam/should
 
+fn write_message(user_session, conversation_id, content, resolve) {
+  let request =
+    http.default_req()
+    |> http.set_method(http.Post)
+    |> http.set_path(string.join(
+      ["/c/", int.to_string(conversation_id), "/message"],
+      "",
+    ))
+    |> http.prepend_req_header(
+      "cookie",
+      string.append("session=", session.to_string(user_session)),
+    )
+    |> helpers.set_req_json(json.object([
+      tuple("content", json.string(content)),
+      tuple("resolve", json.bool(resolve)),
+    ]))
+
+  handle(request, support.test_config())
+}
+
 pub fn write_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
@@ -31,30 +51,24 @@ pub fn write_test() {
     invited_email_address
     |> add_participant.Params
     |> add_participant.execute(participation, _)
-  let request =
-    http.default_req()
-    |> http.set_method(http.Post)
-    |> http.set_path(string.join(
-      ["/c/", int.to_string(conversation.id), "/message"],
-      "",
-    ))
-    |> http.prepend_req_header(
-      "cookie",
-      string.append("session=", session.to_string(user_session)),
-    )
-    |> helpers.set_req_json(json.object([
-      tuple("content", json.string("My first message")),
-      tuple("resolve", json.bool(False)),
-    ]))
 
-  let response = handle(request, support.test_config())
+  let response =
+    write_message(user_session, conversation.id, "My first message", False)
   should.equal(response.status, 201)
 
-  let tuple(_id, topic, participants, messages) =
-    support.get_conversation(conversation.id, session.to_string(user_session))
+  assert Ok([message]) = discuss.load_messages(conversation.id)
+  message.counter
+  |> should.equal(1)
+  message.content
+  |> should.equal("My first message")
+  message.author
+  |> should.equal(participation.identifier)
 
-  messages
-  |> should.equal([tuple("My first message")])
+  assert Ok(participation) =
+    discuss.load_participation(conversation.id, user_session)
+
+  participation.cursor
+  |> should.equal(1)
 
   assert Ok(dispatches) = dispatch_email.load()
   assert Ok(message) =

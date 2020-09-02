@@ -19,9 +19,9 @@ CREATE TABLE conversations (
 SELECT diesel_manage_updated_at('conversations');
 
 CREATE TABLE messages (
-  id SERIAL PRIMARY KEY,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
   counter INT NOT NULL,
+  PRIMARY KEY (conversation_id, counter),
   content TEXT NOT NULL,
   author_id INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -29,7 +29,6 @@ CREATE TABLE messages (
 );
 
 SELECT diesel_manage_updated_at('messages');
-CREATE UNIQUE INDEX unique_messages_conversation_id_counter ON messages(conversation_id, counter);
 
 CREATE TABLE pins (
   id SERIAL PRIMARY KEY,
@@ -41,11 +40,15 @@ CREATE TABLE pins (
 
 SELECT diesel_manage_updated_at('pins');
 
+-- Single incrementing message would allow the cursor to be unique
+-- UUID for message would make it hard to fake the cursor position, but only messing up your own cursor
 CREATE TABLE participants (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
   PRIMARY KEY (identifier_id, conversation_id),
   cursor INT NOT NULL,
+  -- requires cursor being nullable for conversation with no messages or making a create conversation "Event"
+  -- FOREIGN KEY (conversation_id, cursor) REFERENCES messages(conversation_id, counter),
   notify VARCHAR CHECK (notify IN ('none', 'all', 'concluded')) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -67,7 +70,9 @@ CREATE VIEW participant_lists AS (
 
 CREATE TABLE message_notifications (
   id SERIAL PRIMARY KEY,
-  message_id INT REFERENCES messages(id) NOT NULL,
+  conversation_id INT NOT NULL,
+  counter INT NOT NULL,
+  FOREIGN KEY (conversation_id, counter) REFERENCES messages(conversation_id, counter),
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
 )

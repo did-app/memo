@@ -20,7 +20,7 @@ import plum_mail/acl
 import plum_mail/authentication.{Identifier}
 import plum_mail/web/session
 import plum_mail/web/helpers as web
-import plum_mail/discuss/discuss
+import plum_mail/discuss/discuss.{Message}
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/show_inbox
 import plum_mail/discuss/set_notification
@@ -91,8 +91,8 @@ pub fn route(
             "messages",
             json.list(list.map(
               messages,
-              fn(m) {
-                let tuple(content, counter, inserted_at, identifier) = m
+              fn(message) {
+                let Message(counter, content, inserted_at, identifier) = message
                 let Identifier(email_address: email_address, ..) = identifier
                 json.object([
                   tuple("content", json.string(content)),
