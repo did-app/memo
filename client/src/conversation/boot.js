@@ -6,7 +6,11 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
-  let {conversation, participation, messages, pins} = await Client.fetchConversation(conversationId);
+  let response = await Client.fetchConversation(conversationId);
+  if (response.status != 200) {
+    window.location.pathname = "/sign_in"
+  }
+  let {conversation, participation, messages, pins} = await response.json();
   let nickname = participation["nickname"];
   let emailAddress = participation["email_address"];
   let displayName = nickname || emailAddress.split("@")[0];

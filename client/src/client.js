@@ -8,7 +8,7 @@ export async function fetchConversation(id) {
   const response = await fetch("__API_ORIGIN__/c/" + id, {
     credentials: "include"
   });
-  return (await response.json());
+  return response;
 }
 export async function addParticipant(id, emailAddress) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/participant", {

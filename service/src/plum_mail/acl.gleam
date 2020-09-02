@@ -94,6 +94,7 @@ pub fn as_bool(raw) {
 pub fn error_response(reason) {
   let tuple(status, body) = case reason {
     error.BadRequest(detail) -> tuple(400, detail)
+    error.Unauthenticated -> tuple(401, "")
     error.Forbidden -> tuple(403, "")
   }
   http.response(status)
