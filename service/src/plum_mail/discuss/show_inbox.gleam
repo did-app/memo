@@ -17,7 +17,7 @@ pub fn execute(identifier_id) {
         JOIN participant_lists AS pl ON pl.conversation_id = c.id
         LEFT JOIN messages AS m ON m.conversation_id = c.id
         WHERE me.identifier_id = $1
-        ORDER BY c.id DESC
+        ORDER BY c.id DESC, m.inserted_at DESC
     )
     SELECT * FROM search
     ORDER BY inserted_at DESC
