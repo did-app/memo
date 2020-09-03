@@ -12,6 +12,9 @@
   export let pins = [];
   export let left;
   export let bottom;
+
+  let draft;
+  $: preview = draft ? marked(draft) : "No preview yet."
 </script>
 
 <style media="screen">
@@ -21,7 +24,6 @@
 <div class="flex min-h-screen flex-col">
   <div class="m-auto">
     <Circle2 size="25" colorOuter="#3c366b" colorCenter="#3c366b" colorInner="#3c366b" unit="vw"></Circle2>
-
   </div>
 </div>
 {:else}
@@ -29,7 +31,6 @@
   <h1 id="topic" class="text-2xl">{topic}</h1>
 </header>
 <div class="flex">
-
   <main class="flex-grow max-w-3xl ml-auto px-2 mb-16">
     <div id="messages" class="">
       {#each messages as {checked, author, date, intro, html}, count}
@@ -58,9 +59,9 @@
 
     <form id="reply-form" class:hidden="{resolved}" class="relative w-full rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-20" data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
-      <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:14em" placeholder="Write message ..."></textarea>
+      <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:14em" placeholder="Write message ..." bind:value={draft}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:14em;">
-        No preview yet.
+        {@html preview}
       </div>
       <section class="font-bold flex px-2 pb-1">
         <span class="text-gray-700 pr-2">From:</span>
