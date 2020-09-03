@@ -141,7 +141,7 @@ pub fn route(
         "session",
         identifier_id,
         // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
-        cookie_defaults,
+        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
       )
       |> Ok
     }

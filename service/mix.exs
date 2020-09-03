@@ -27,6 +27,8 @@ defmodule PlumMail.MixProject do
       {:earmark, "~> 1.4"},
       {:gleam_cowboy, "~> 0.1.2"},
       {:gleam_crypto, "~> 0.1.2"},
+      {:gleam_http,
+       github: "midas-framework/http", branch: "max-age-bug", manager: :rebar3, override: true},
       {:gleam_httpc, "~> 0.1.1"},
       {:gleam_json, "~> 0.1.0"},
       {:gleam_pgo, "~> 0.1.0"}
