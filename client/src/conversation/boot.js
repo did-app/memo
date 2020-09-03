@@ -23,7 +23,6 @@ export default async function() {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
-  console.log(messages);
   messages = messages.map(function ({content, author, inserted_at}) {
     const [intro] = content.trim().split(/\r?\n/)
     const html = marked(content)
@@ -33,7 +32,7 @@ export default async function() {
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false
   }
-  console.log(messages);
+  document.title = topic
   page.$set({nickname, displayName, topic, notify, resolved, participants, messages, pins})
 
   document.addEventListener('submit', async function (event) {
