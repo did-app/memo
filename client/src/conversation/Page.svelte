@@ -50,8 +50,8 @@
 <header class="max-w-3xl mx-auto text-center py-2 md:pt-6 md:pb-4">
   <h1 id="topic" class="text-xl md:text-2xl">{topic}</h1>
 </header>
-<div class="md:flex">
-  <main class="flex-grow max-w-3xl md:ml-auto px-1 md:px-2 md:mb-16">
+<div class="sm:flex">
+  <main class="sm:w-2/3 max-w-md mx-auto md:mr-0 md:max-w-3xl px-1 md:px-2 md:mb-16">
     <div id="messages" class="">
       {#each messages as {checked, author, date, intro, html}, count}
       <article class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
@@ -106,7 +106,7 @@
       </footer>
     </form>
   </main>
-  <aside class="flex flex-col p-2 text-gray-700 mr-auto">
+  <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
     <h3 class="font-bold">Pins</h3>
     <style media="screen">
       .last-only {
@@ -129,7 +129,7 @@
       <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
       {/each}
     </ul>
-    <form class="whitespace-no-wrap" data-action="addParticipant" method="post">
+    <form class="" data-action="addParticipant" method="post">
       <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="text" name="emailAddress" value="" placeholder="email address">
       <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
     </form>
