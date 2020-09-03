@@ -15,6 +15,25 @@
 
   let draft;
   $: preview = draft ? marked(draft) : "No preview yet."
+
+  // https://svelte.dev/repl/ead0f1fcd2d4402bbbd64eca1d665341?version=3.14.1
+  function resize(event) {
+    // // Reset field height
+    // field.style.height = 'inherit';
+    // // Get the computed styles for the element
+    // var computed = window.getComputedStyle(field);
+    // // Calculate the height
+    // var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
+    //              + parseInt(computed.getPropertyValue('padding-top'), 10)
+    //              + field.scrollHeight
+    //              + parseInt(computed.getPropertyValue('padding-bottom'), 10)
+    //              + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+
+    event.target.style.height = "1px";
+    event.target.style.height = (+event.target.scrollHeight)+"px";
+    const $composeMenu = document.getElementById('compose-menu');
+    $composeMenu.scrollIntoView();
+  }
 </script>
 
 <style media="screen">
@@ -59,8 +78,8 @@
 
     <form id="reply-form" class:hidden="{resolved}" class="relative w-full rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-20" data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
-      <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:14em" placeholder="Write message ..." bind:value={draft}></textarea>
-      <div id="preview" class="markdown-body p-2" style="min-height:14em;">
+      <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
+      <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}
       </div>
       <section class="font-bold flex px-2 pb-1">
