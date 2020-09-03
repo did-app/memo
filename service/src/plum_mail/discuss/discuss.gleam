@@ -84,6 +84,7 @@ pub fn load_messages(conversation_id) {
         FROM messages AS m
         JOIN identifiers AS i ON i.id = m.author_id
         WHERE conversation_id = $1
+        ORDER BY m.inserted_at ASC
         "
   let args = [pgo.int(conversation_id)]
   run_sql.execute(

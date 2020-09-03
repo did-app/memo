@@ -72,7 +72,6 @@ pub fn unread_messages_in_conversation_test() {
   dynamic.field(r2, "unread")
   |> should.equal(Ok(dynamic.from(False)))
 }
-
 // pub fn unread_messages_in_concluded_conversation_test() {
 //   todo
 // }
