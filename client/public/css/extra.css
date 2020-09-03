@@ -18,6 +18,12 @@ body {
 .rounded-2xl {
   border-radius: 1.5rem;
 }
+@media (min-width: 768px) {
+  .md\:rounded-2xl {
+    border-radius: 1.5rem;
+  }
+}
+
 
 .markdown-body h1,
 .markdown-body h2 {

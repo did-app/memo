@@ -47,27 +47,27 @@
   </div>
 </div>
 {:else}
-<header class="max-w-3xl mx-auto text-center pt-6 pb-4">
-  <h1 id="topic" class="text-2xl">{topic}</h1>
+<header class="max-w-3xl mx-auto text-center py-2 md:pt-6 md:pb-4">
+  <h1 id="topic" class="text-xl md:text-2xl">{topic}</h1>
 </header>
-<div class="flex">
-  <main class="flex-grow max-w-3xl ml-auto px-2 mb-16">
+<div class="md:flex">
+  <main class="flex-grow max-w-3xl ml-auto px-1 md:px-2 md:mb-16">
     <div id="messages" class="">
       {#each messages as {checked, author, date, intro, html}, count}
-      <article class="relative rounded-2xl my-shadow bg-white">
+      <article class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
         <input id="message-{count}" class="message-checkbox hidden" type="checkbox" {checked}>
         <label for="message-{count}">
-          <header class="pt-4 pb-4 flex">
-            <span class="font-bold ml-20">{author}</span>
-            <span class="ml-auto mr-8">{date}</span>
+          <header class="py-1 md:py-4 flex text-gray-600">
+            <span class="font-bold ml-2 md:ml-20 truncate">{author}</span>
+            <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">{date}</span>
           </header>
           <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 ">
           </div>
         </label>
-        <div class="content-intro px-20 truncate">{intro}</div>
+        <div class="content-intro px-2 md:px-20 truncate">{intro}</div>
         <!-- TODO sanitize -->
-        <div class="markdown-body px-20">{@html html}</div>
-        <footer class="h-12 mb-2 mt-4">
+        <div class="markdown-body py-2 px-2 md:px-20">{@html html}</div>
+        <footer class="h-2 md:h-12 mb-2 mt-4">
 
         </footer>
       </article>
@@ -77,7 +77,7 @@
       This conversation has been resolved, <br> No further messages can be sent.
     </h2>
 
-    <form id="reply-form" class:hidden="{resolved}" class="relative w-full rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-20" data-action="writeMessage">
+    <form id="reply-form" class:hidden="{resolved}" class="relative w-full rounded-lg md:rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-2 md:px-20" data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
