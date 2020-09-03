@@ -51,12 +51,12 @@
   <h1 id="topic" class="text-xl md:text-2xl">{topic}</h1>
 </header>
 <div class="md:flex">
-  <main class="flex-grow max-w-3xl ml-auto px-1 md:px-2 md:mb-16">
+  <main class="flex-grow max-w-3xl md:ml-auto px-1 md:px-2 md:mb-16">
     <div id="messages" class="">
       {#each messages as {checked, author, date, intro, html}, count}
       <article class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
         <input id="message-{count}" class="message-checkbox hidden" type="checkbox" {checked}>
-        <label for="message-{count}">
+        <label class="cursor-pointer" for="message-{count}">
           <header class="py-1 md:py-4 flex text-gray-600">
             <span class="font-bold ml-2 md:ml-20 truncate">{author}</span>
             <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">{date}</span>
@@ -77,34 +77,36 @@
       This conversation has been resolved, <br> No further messages can be sent.
     </h2>
 
-    <form id="reply-form" class:hidden="{resolved}" class="relative w-full rounded-lg md:rounded-2xl my-shadow bg-white mt-2 mb-8 py-6 px-2 md:px-20" data-action="writeMessage">
+    <form id="reply-form" class:hidden="{resolved}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
-      <textarea class="w-full px-2 bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
+      <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}
       </div>
-      <section class="px-2 pb-1">
+      <section class="pb-1 whitespace-no-wrap overflow-hidden">
         <span class="font-bold text-gray-700">From:</span>
         <!-- <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="{displayName}" value=""> -->
-        <span class="">{emailAddress}</span>
+        <span class="truncate">{emailAddress}</span>
       </section>
-      <footer id="compose-menu" class="flex items-baseline border-t">
-        <label class="font-bold flex px-2 py-1 justify-start items-start">
-          <span class="text-gray-700 pr-2">Close conversation</span>
+      <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
+        <label class="font-bold flex py-1 justify-start items-start">
+          <span class="text-gray-700 pr-2">Resolve</span>
           <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
             <input type="checkbox" class="opacity-0 absolute" name="resolve">
             <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
               <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
           </div>
         </label>
-        <label for="preview-tab" class="ml-auto">
-          <span class="m-1 ml-auto px-2 py-1 rounded border cursor-pointer border-indigo-900 focus:border-indigo-700 hover:border-indigo-700 text-indigo-800 font-bold mt-4">Preview</span>
-        </label>
-        <button class="m-1 px-2 py-1 rounded bg-indigo-900 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold mt-4" type="submit">Send</button>
+        <div class="ml-auto">
+          <label for="preview-tab" class="">
+            <span class="my-1 py-1 px-2 rounded border cursor-pointer border-indigo-900 focus:border-indigo-700 hover:border-indigo-700 text-indigo-800 font-bold">Preview</span>
+          </label>
+          <button class="my-1 py-1 px-2 rounded bg-indigo-900 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">Send</button>
+        </div>
       </footer>
     </form>
   </main>
-  <aside class="w-full max-w-md flex flex-col py-2 px-6 text-gray-700 mr-auto">
+  <aside class="flex flex-col p-2 text-gray-700 mr-auto">
     <h3 class="font-bold">Pins</h3>
     <style media="screen">
       .last-only {
@@ -127,7 +129,7 @@
       <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
       {/each}
     </ul>
-    <form class="" data-action="addParticipant" method="post">
+    <form class="whitespace-no-wrap" data-action="addParticipant" method="post">
       <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="text" name="emailAddress" value="" placeholder="email address">
       <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
     </form>

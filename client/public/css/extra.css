@@ -83,10 +83,6 @@ input.message-checkbox[type="checkbox"]+label>div {
   display: none;
 }
 
-input.message-checkbox[type="checkbox"]:checked+label>div {
-  display: block;
-  cursor: pointer;
-}
 
 .markdown-body {
   /* Overwrite gh markdown back to tailwind */
