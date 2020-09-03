@@ -33,7 +33,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   document.title = topic
-  page.$set({nickname, displayName, topic, notify, resolved, participants, messages, pins})
+  page.$set({emailAddress, nickname, displayName, topic, notify, resolved, participants, messages, pins})
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
