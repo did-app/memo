@@ -8,7 +8,6 @@ import gleam/http
 import gleam/json
 import plum_mail/authentication
 import plum_mail/web/router.{handle}
-import plum_mail/web/session
 import plum_mail/support
 import gleam/should
 

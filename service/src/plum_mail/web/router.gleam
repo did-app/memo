@@ -18,7 +18,6 @@ import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/authentication.{Identifier}
-import plum_mail/web/session
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss.{Message}
 import plum_mail/discuss/start_conversation
@@ -37,11 +36,25 @@ pub fn redirect(uri: String) -> Response(BitBuilder) {
   http.Response(status: 303, headers: [tuple("location", uri)], body: body)
 }
 
+fn load_session(request) {
+  let cookies = http.get_req_cookies(request)
+  try session =
+    list.key_find(cookies, "session")
+    |> result.map_error(fn(e) {
+      todo("Neeed to do proper error for unauthenticated")
+    })
+  authentication.load_session(session)
+  |> result.map_error(fn(e) {
+    todo("Neeed to do proper error for unauthenticated")
+  })
+}
+
 fn load_participation(conversation_id, request) {
   try conversation_id =
     int.parse(conversation_id)
     |> result.map_error(fn(x) { todo("mapping conversation id") })
-  discuss.load_participation(conversation_id, session.extract(request))
+  try identifier_id = load_session(request)
+  discuss.load_participation(conversation_id, identifier_id)
 }
 
 fn as_token(token_string) {
@@ -60,8 +73,7 @@ pub fn route(
       todo("authenticate")
     }
     ["inbox"] -> {
-      try identifier_id =
-        session.require_authentication(session.extract(request))
+      try identifier_id = load_session(request)
       try conversations = show_inbox.execute(identifier_id)
       // |> result.map_error(fn(x) { todo("mapping show inbox") })
       // If this conversations is the same as the top level conversation object for a page,
@@ -76,8 +88,7 @@ pub fn route(
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
-      try identifier_id =
-        session.require_authentication(session.extract(request))
+      try identifier_id = load_session(request)
       try conversation = start_conversation.execute(topic, identifier_id)
       redirect(string.append(
         string.append(config.client_origin, "/c/"),

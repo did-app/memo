@@ -7,7 +7,6 @@ import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/write_message
 import plum_mail/discuss/show_inbox
-import plum_mail/web/session
 import plum_mail/support
 import gleam/should
 
@@ -20,9 +19,12 @@ pub fn unread_messages_in_conversation_test() {
   let email_address = support.generate_email_address("alice.test")
   assert Ok(alice) = authentication.identifier_from_email(email_address)
 
-  let me_session = session.authenticated(me.id)
+  let email_address = support.generate_email_address("example.test")
+  assert Ok(me) = authentication.identifier_from_email(email_address)
+  assert Ok(tuple(_, me_session)) =
+    authentication.generate_client_tokens(me.id, "ua", None)
   assert Ok(c1) = start_conversation.execute("First", me.id)
-  assert Ok(participation) = discuss.load_participation(c1.id, me_session)
+  assert Ok(participation) = discuss.load_participation(c1.id, me.id)
   assert Ok(_) =
     add_participant.execute(
       participation,
@@ -35,15 +37,14 @@ pub fn unread_messages_in_conversation_test() {
     )
 
   assert Ok(c2) = start_conversation.execute("Second", me.id)
-  assert Ok(participation) = discuss.load_participation(c2.id, me_session)
+  assert Ok(participation) = discuss.load_participation(c2.id, me.id)
   assert Ok(_) =
     add_participant.execute(
       participation,
       add_participant.Params(email_address),
     )
 
-  let alice_session = session.authenticated(alice.id)
-  assert Ok(participation) = discuss.load_participation(c2.id, alice_session)
+  assert Ok(participation) = discuss.load_participation(c2.id, alice.id)
   assert Ok(_) =
     write_message.execute(
       participation,

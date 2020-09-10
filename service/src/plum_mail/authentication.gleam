@@ -102,7 +102,7 @@ fn from_refresh_token(refresh_token, user_agent) {
   }
 }
 
-pub fn from_link_token(token) {
+fn from_link_token(token) {
   let Token(selector, secret) = token
   let sql =
     "

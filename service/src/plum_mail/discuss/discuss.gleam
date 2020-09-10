@@ -10,7 +10,6 @@ import plum_mail/authentication.{Identifier}
 // Session is more than a web thing, anywhere you can be a session.
 // FIXME date_time or Datetime
 import datetime.{DateTime}
-import plum_mail/web/session
 
 pub type Conversation {
   Conversation(
@@ -173,9 +172,8 @@ pub type Participation {
 }
 
 // Can call user session authentication?
-pub fn load_participation(conversation_id: Int, user_session: session.Session) {
+pub fn load_participation(conversation_id: Int, identifier_id: Int) {
   // BECOMES a LEFT JOIN for open conversation
-  try identifier_id = session.require_authentication(user_session)
   let sql =
     "
     SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, i.id, i.email_address, i.nickname
