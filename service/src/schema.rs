@@ -74,6 +74,7 @@ table! {
         selector -> Varchar,
         validator -> Varchar,
         identifier_id -> Int4,
+        user_agent -> Varchar,
         inserted_at -> Timestamp,
     }
 }

@@ -76,16 +76,16 @@ pub fn save_link_token(token, identifier_id) {
   |> Ok()
 }
 
-fn from_refresh_token(refresh_token) {
+fn from_refresh_token(refresh_token, user_agent) {
   let Token(selector, secret) = refresh_token
-  // TODO return user_agent
   let sql =
     "
-              SELECT validator, identifier_id
-              FROM refresh_tokens
-              WHERE selector = $1
-              "
-  let args = [pgo.text(selector)]
+  SELECT validator, identifier_id
+  FROM refresh_tokens
+  WHERE selector = $1
+  AND user_agent = $2
+  "
+  let args = [pgo.text(selector), pgo.text(user_agent)]
   let mapper = fn(row) {
     assert Ok(validator) = dynamic.element(row, 0)
     assert Ok(validator) = dynamic.string(validator)
@@ -163,18 +163,18 @@ fn maybe_from_link_token(link_token) {
   }
 }
 
-fn maybe_from_refresh_token(link_token) {
+fn maybe_from_refresh_token(link_token, user_agent) {
   case link_token {
-    Some(link_token) -> from_refresh_token(link_token)
+    Some(link_token) -> from_refresh_token(link_token, user_agent)
     None -> Error(Nil)
   }
 }
 
 // So it's all very circular and needs a flow diagram
-pub fn authenticate(link_token, refresh_token) {
+pub fn authenticate(link_token, refresh_token, user_agent) {
   try identifier_id = case maybe_from_link_token(link_token) {
     Ok(identifier_id) -> Ok(identifier_id)
-    Error(_) -> maybe_from_refresh_token(refresh_token)
+    Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
   }
 
   let old_refresh_selector =
@@ -186,18 +186,19 @@ pub fn authenticate(link_token, refresh_token) {
   let sql =
     "
   WITH new_refresh AS (
-      INSERT INTO refresh_tokens (selector, validator, identifier_id)
-      VALUES ($1, $2, $3)
+      INSERT INTO refresh_tokens (selector, validator, user_agent, identifier_id)
+      VALUES ($1, $2, $3, $4)
   ), new_session AS (
       INSERT INTO session_tokens (selector, validator, refresh_selector)
-      VALUES ($4, $5, $1)
+      VALUES ($5, $6, $1)
   )
   DELETE FROM refresh_tokens
-  WHERE selector = $6
+  WHERE selector = $7
   "
   let args = [
     pgo.text(refresh_token.selector),
     pgo.text(hash_string(refresh_token.secret)),
+    pgo.text(user_agent),
     pgo.int(identifier_id),
     pgo.text(session_token.selector),
     pgo.text(hash_string(session_token.secret)),
