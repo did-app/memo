@@ -38,23 +38,39 @@ pub fn fails_to_authenticate_without_any_tokens_test() {
   |> should.equal(Error(Nil))
 }
 
-// TODO fails to authenticate with expired link token
-// fn generate_token(identifier_id) {
-// }
-//
-// // Fails to authenticate with invalid selector format or validator
+pub fn fails_to_authenticate_with_expired_link_token_test() {
+  // NOTE link can be valid forever, currently set to 7 days
+  Nil
+}
+
+// Fails to authenticate with invalid selector format or validator
 pub fn authenticate_with_link_token_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
+
   assert Ok(link_token) =
     authentication.generate_token()
     |> authentication.save_link_token(identifier.id)
 
   assert Ok(tuple(r1, s1)) = authentication.authenticate(Some(link_token), None)
+  authentication.load_session(authentication.serialize_token(s1))
+  |> should.equal(Ok(identifier.id))
 
+  // Use the refresh token
   assert Ok(tuple(r2, s2)) = authentication.authenticate(None, Some(r1))
-  todo("deleted")
-  // |> should.equal(Ok(refresh_token2))
+  authentication.load_session(authentication.serialize_token(s2))
+  |> should.equal(Ok(identifier.id))
+
+  // Original refresh and sessions are invalidated
+  assert Error(Nil) = authentication.authenticate(None, Some(r1))
+  authentication.load_session(authentication.serialize_token(s1))
+  |> should.equal(Error(Nil))
+  io.debug("ballon2")
+
+  // link token remains valid
+  assert Ok(tuple(r3, s3)) = authentication.authenticate(Some(link_token), None)
+  authentication.load_session(authentication.serialize_token(s3))
+  |> should.equal(Ok(identifier.id))
 }
 // If we bounce need to query referrer for refresh or session good,
 // also to show sign in or link expired

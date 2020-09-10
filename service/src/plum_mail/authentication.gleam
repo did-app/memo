@@ -22,6 +22,19 @@ pub fn hash_string(secret) {
   |> base.url_encode64(False)
 }
 
+pub fn validate(secret, validator) {
+  let match =
+    bit_string.from_string(secret)
+    |> crypto.hash(crypto.Sha256, _)
+    |> base.url_encode64(False)
+    |> bit_string.from_string()
+    |> crypto.secure_compare(bit_string.from_string(validator))
+  case match {
+    True -> Ok(Nil)
+    False -> Error(Nil)
+  }
+}
+
 pub type Token {
   Token(selector: String, secret: String)
 }
@@ -83,16 +96,10 @@ fn from_refresh_token(refresh_token) {
   try refresh_tokens = run_sql.execute(sql, args, mapper)
   case refresh_tokens {
     [] -> Error(Nil)
-    [tuple(validator, identifier_id)] ->
-      case crypto.secure_compare(
-        bit_string.from_string(validator),
-        bit_string.from_string(base.url_encode64(
-          crypto.hash(crypto.Sha256, bit_string.from_string(secret)),
-          False,
-        )),
-      ) {
-        True -> Ok(identifier_id)
-      }
+    [tuple(validator, identifier_id)] -> {
+      try _ = validate(secret, validator)
+      Ok(identifier_id)
+    }
   }
 }
 
@@ -103,6 +110,7 @@ pub fn from_link_token(token) {
       SELECT validator, identifier_id
       FROM link_tokens
       WHERE selector = $1
+      AND inserted_at > NOW() - INTERVAL '7 DAYS'
       "
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
@@ -115,16 +123,36 @@ pub fn from_link_token(token) {
   try challenge_tokens = run_sql.execute(sql, args, mapper)
   case challenge_tokens {
     [] -> todo
-    [tuple(validator, identifier_id)] ->
-      case crypto.secure_compare(
-        bit_string.from_string(validator),
-        bit_string.from_string(base.url_encode64(
-          crypto.hash(crypto.Sha256, bit_string.from_string(secret)),
-          False,
-        )),
-      ) {
-        True -> Ok(identifier_id)
-      }
+    [tuple(validator, identifier_id)] -> {
+      try _ = validate(secret, validator)
+      Ok(identifier_id)
+    }
+  }
+}
+
+pub fn load_session(token_string) {
+  try Token(selector, secret) = parse_token(token_string)
+  let sql =
+    "SELECT session_tokens.validator, refresh_tokens.identifier_id
+    FROM session_tokens
+    JOIN refresh_tokens ON refresh_tokens.selector = session_tokens.refresh_selector
+    WHERE session_tokens.selector = $1
+    AND session_tokens.inserted_at > NOW() - INTERVAL '1 DAYS'"
+  let args = [pgo.text(selector)]
+  let mapper = fn(row) {
+    assert Ok(validator) = dynamic.element(row, 0)
+    assert Ok(validator) = dynamic.string(validator)
+    assert Ok(identifier_id) = dynamic.element(row, 1)
+    assert Ok(identifier_id) = dynamic.int(identifier_id)
+    tuple(validator, identifier_id)
+  }
+  try session_tokens = run_sql.execute(sql, args, mapper)
+  case session_tokens {
+    [] -> Error(Nil)
+    [tuple(validator, identifier_id)] -> {
+      try _ = validate(secret, validator)
+      Ok(identifier_id)
+    }
   }
 }
 
