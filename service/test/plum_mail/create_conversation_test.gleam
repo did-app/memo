@@ -2,6 +2,7 @@ import gleam/bit_builder
 import gleam/bit_string
 import gleam/dynamic
 import gleam/int
+import gleam/option.{None}
 import gleam/string
 import gleam/http
 import gleam/json
@@ -14,7 +15,8 @@ import gleam/should
 pub fn create_conversation_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
-  let user_session = session.authenticated(identifier.id)
+  assert Ok(tuple(_, session_token)) =
+    authentication.generate_client_tokens(identifier.id, "ua", None)
   let topic = "Test topic"
 
   let body =
@@ -25,7 +27,10 @@ pub fn create_conversation_test() {
     http.default_req()
     |> http.set_method(http.Post)
     |> http.set_path("/c/create")
-    |> http.set_req_cookie("session", session.to_string(user_session))
+    |> http.set_req_cookie(
+      "session",
+      authentication.serialize_token(session_token),
+    )
     |> http.set_req_body(body)
   let response = handle(request, support.test_config())
 
@@ -35,14 +40,17 @@ pub fn create_conversation_test() {
   assert Ok(id) = int.parse(id)
 
   let tuple(_id, t, _p, _m) =
-    support.get_conversation(id, session.to_string(user_session))
+    support.get_conversation(id, authentication.serialize_token(session_token))
   should.equal(t, topic)
 
   let request =
     http.default_req()
     |> http.set_method(http.Get)
     |> http.set_path("/inbox")
-    |> http.set_req_cookie("session", session.to_string(user_session))
+    |> http.set_req_cookie(
+      "session",
+      authentication.serialize_token(session_token),
+    )
     |> http.set_req_body(<<>>)
   let response = handle(request, support.test_config())
 

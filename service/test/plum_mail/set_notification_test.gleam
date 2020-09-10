@@ -4,6 +4,7 @@ import gleam/dynamic
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/option.{None}
 import gleam/string
 import gleam/http
 import gleam/json
@@ -36,7 +37,8 @@ fn set_notification(user_session, conversation: Conversation, preference) {
 pub fn successfully_set_notification_preference_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
-  let user_session = session.authenticated(identifier.id)
+  assert Ok(tuple(_, session_token)) =
+    authentication.generate_client_tokens(identifier.id, "ua", None)
   let topic = "Test topic"
 
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)

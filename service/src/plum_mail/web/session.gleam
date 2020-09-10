@@ -3,6 +3,7 @@ import gleam/list
 import gleam/option.{Option, Some}
 import gleam/http
 import plum_mail/error
+import plum_mail/authentication
 
 pub opaque type Session {
   Session(identifier_id: Option(Int))
@@ -15,12 +16,13 @@ pub fn authenticated(identifier_id) {
 pub fn to_string(session) {
   let Session(Some(identifier_id)) = session
   int.to_string(identifier_id)
+  todo("proper session serialization")
 }
 
 fn extract_user_id(request) {
   let cookies = http.get_req_cookies(request)
   try session_string = list.key_find(cookies, "session")
-  int.parse(session_string)
+  authentication.load_session(session_string)
 }
 
 pub fn extract(request) -> Session {

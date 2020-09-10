@@ -143,18 +143,19 @@ pub fn route(
       |> Ok
     }
     // This could be participant_id
-    ["i", conversation_id, identifier_id] -> {
-      let cookie_defaults = http.cookie_defaults(request.scheme)
-      let url = string.join([config.client_origin, "/c/", conversation_id], "")
-      redirect(url)
-      |> http.set_resp_cookie(
-        "session",
-        identifier_id,
-        // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
-        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-      )
-      |> Ok
-    }
+    // TODO remove
+    // ["i", conversation_id, identifier_id] -> {
+    //   let cookie_defaults = http.cookie_defaults(request.scheme)
+    //   let url = string.join([config.client_origin, "/c/", conversation_id], "")
+    //   redirect(url)
+    //   |> http.set_resp_cookie(
+    //     "session",
+    //     identifier_id,
+    //     // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
+    //     http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
+    //   )
+    //   |> Ok
+    // }
     ["c", id, "participant"] -> {
       try params = acl.parse_json(request)
       try params = add_participant.params(params)

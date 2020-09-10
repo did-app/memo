@@ -14,8 +14,7 @@ fn random_string(entropy) {
   |> base.url_encode64(False)
 }
 
-// TODO probably not public
-pub fn hash_string(secret) {
+fn hash_string(secret) {
   secret
   |> bit_string.from_string()
   |> crypto.hash(crypto.Sha256, _)
@@ -170,31 +169,22 @@ fn maybe_from_refresh_token(link_token, user_agent) {
   }
 }
 
-// So it's all very circular and needs a flow diagram
-pub fn authenticate(link_token, refresh_token, user_agent) {
-  try identifier_id = case maybe_from_link_token(link_token) {
-    Ok(identifier_id) -> Ok(identifier_id)
-    Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
-  }
-
-  let old_refresh_selector =
-    option.map(refresh_token, fn(t: Token) { t.selector })
-
+pub fn generate_client_tokens(identifier_id, user_agent, old_refresh_selector) {
   let refresh_token = generate_token()
   let session_token = generate_token()
 
   let sql =
     "
-  WITH new_refresh AS (
-      INSERT INTO refresh_tokens (selector, validator, user_agent, identifier_id)
-      VALUES ($1, $2, $3, $4)
-  ), new_session AS (
-      INSERT INTO session_tokens (selector, validator, refresh_selector)
-      VALUES ($5, $6, $1)
-  )
-  DELETE FROM refresh_tokens
-  WHERE selector = $7
-  "
+      WITH new_refresh AS (
+          INSERT INTO refresh_tokens (selector, validator, user_agent, identifier_id)
+          VALUES ($1, $2, $3, $4)
+      ), new_session AS (
+          INSERT INTO session_tokens (selector, validator, refresh_selector)
+          VALUES ($5, $6, $1)
+      )
+      DELETE FROM refresh_tokens
+      WHERE selector = $7
+      "
   let args = [
     pgo.text(refresh_token.selector),
     pgo.text(hash_string(refresh_token.secret)),
@@ -205,13 +195,22 @@ pub fn authenticate(link_token, refresh_token, user_agent) {
     pgo.nullable(old_refresh_selector, pgo.text),
   ]
   let mapper = fn(row) { row }
-  try _ =
-    run_sql.execute(sql, args, mapper)
-    |> io.debug()
+  try _ = run_sql.execute(sql, args, mapper)
 
-  //
-  // // delete old selectors
   Ok(tuple(refresh_token, session_token))
+}
+
+// So it's all very circular and needs a flow diagram
+pub fn authenticate(link_token, refresh_token, user_agent) {
+  try identifier_id = case maybe_from_link_token(link_token) {
+    Ok(identifier_id) -> Ok(identifier_id)
+    Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
+  }
+
+  let old_refresh_selector =
+    option.map(refresh_token, fn(t: Token) { t.selector })
+
+  generate_client_tokens(identifier_id, user_agent, old_refresh_selector)
 }
 
 pub type EmailAddress {
