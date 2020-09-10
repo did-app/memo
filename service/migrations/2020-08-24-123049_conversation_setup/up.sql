@@ -16,6 +16,26 @@ CREATE TABLE link_tokens (
   -- updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE refresh_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  -- TODO original time
+  -- TODO replace id
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+  -- updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE session_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  refresh_selector VARCHAR REFERENCES refresh_tokens(selector) ON DELETE CASCADE NOT NULL,
+  -- TODO original time
+  -- TODO replace id
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+  -- updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   topic VARCHAR,

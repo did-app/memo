@@ -4,5 +4,7 @@ DROP TABLE participants;
 DROP TABLE pins;
 DROP TABLE messages;
 DROP TABLE conversations;
+DROP TABLE session_tokens;
+DROP TABLE refresh_tokens;
 DROP TABLE link_tokens;
 DROP TABLE identifiers;

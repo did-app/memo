@@ -1,9 +1,189 @@
+import gleam/bit_string
+import gleam/base
 import gleam/dynamic
-import gleam/option.{Option}
+import gleam/io
+import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
+import gleam/crypto
 import gleam/pgo
 import plum_mail/run_sql
+
+fn random_string(entropy) {
+  crypto.strong_random_bytes(4)
+  |> base.url_encode64(False)
+}
+
+// TODO probably not public
+pub fn hash_string(secret) {
+  secret
+  |> bit_string.from_string()
+  |> crypto.hash(crypto.Sha256, _)
+  |> base.url_encode64(False)
+}
+
+pub type Token {
+  Token(selector: String, secret: String)
+}
+
+// TODO probably not public
+pub fn generate_token() {
+  let selector = random_string(4)
+  let secret = random_string(8)
+  Token(selector, secret)
+}
+
+pub fn serialize_token(token) {
+  let Token(selector, secret) = token
+  string.join([selector, secret], ":")
+}
+
+pub fn parse_token(token_string) {
+  try tuple(selector, secret) = string.split_once(token_string, ":")
+  Ok(Token(selector, secret))
+}
+
+pub fn save_link_token(token, identifier_id) {
+  let Token(selector, secret) = token
+
+  let sql =
+    "
+  INSERT INTO link_tokens (selector, validator, identifier_id)
+  VALUES ($1, $2, $3)
+  RETURNING *
+  "
+  let args = [
+    pgo.text(selector),
+    pgo.text(hash_string(secret)),
+    pgo.int(identifier_id),
+  ]
+  let mapper = fn(row) { Nil }
+  try [Nil] = run_sql.execute(sql, args, mapper)
+  Token(selector, secret)
+  |> Ok()
+}
+
+fn from_refresh_token(refresh_token) {
+  let Token(selector, secret) = refresh_token
+  // TODO return user_agent
+  let sql =
+    "
+              SELECT validator, identifier_id
+              FROM refresh_tokens
+              WHERE selector = $1
+              "
+  let args = [pgo.text(selector)]
+  let mapper = fn(row) {
+    assert Ok(validator) = dynamic.element(row, 0)
+    assert Ok(validator) = dynamic.string(validator)
+    assert Ok(identifier_id) = dynamic.element(row, 1)
+    assert Ok(identifier_id) = dynamic.int(identifier_id)
+    tuple(validator, identifier_id)
+  }
+  try refresh_tokens = run_sql.execute(sql, args, mapper)
+  case refresh_tokens {
+    [] -> Error(Nil)
+    [tuple(validator, identifier_id)] ->
+      case crypto.secure_compare(
+        bit_string.from_string(validator),
+        bit_string.from_string(base.url_encode64(
+          crypto.hash(crypto.Sha256, bit_string.from_string(secret)),
+          False,
+        )),
+      ) {
+        True -> Ok(identifier_id)
+      }
+  }
+}
+
+pub fn from_link_token(token) {
+  let Token(selector, secret) = token
+  let sql =
+    "
+      SELECT validator, identifier_id
+      FROM link_tokens
+      WHERE selector = $1
+      "
+  let args = [pgo.text(selector)]
+  let mapper = fn(row) {
+    assert Ok(validator) = dynamic.element(row, 0)
+    assert Ok(validator) = dynamic.string(validator)
+    assert Ok(identifier_id) = dynamic.element(row, 1)
+    assert Ok(identifier_id) = dynamic.int(identifier_id)
+    tuple(validator, identifier_id)
+  }
+  try challenge_tokens = run_sql.execute(sql, args, mapper)
+  case challenge_tokens {
+    [] -> todo
+    [tuple(validator, identifier_id)] ->
+      case crypto.secure_compare(
+        bit_string.from_string(validator),
+        bit_string.from_string(base.url_encode64(
+          crypto.hash(crypto.Sha256, bit_string.from_string(secret)),
+          False,
+        )),
+      ) {
+        True -> Ok(identifier_id)
+      }
+  }
+}
+
+fn maybe_from_link_token(link_token) {
+  case link_token {
+    Some(link_token) -> from_link_token(link_token)
+    None -> Error(Nil)
+  }
+}
+
+fn maybe_from_refresh_token(link_token) {
+  case link_token {
+    Some(link_token) -> from_refresh_token(link_token)
+    None -> Error(Nil)
+  }
+}
+
+// So it's all very circular and needs a flow diagram
+pub fn authenticate(link_token, refresh_token) {
+  try identifier_id = case maybe_from_link_token(link_token) {
+    Ok(identifier_id) -> Ok(identifier_id)
+    Error(_) -> maybe_from_refresh_token(refresh_token)
+  }
+
+  let old_refresh_selector =
+    option.map(refresh_token, fn(t: Token) { t.selector })
+
+  let refresh_token = generate_token()
+  let session_token = generate_token()
+
+  let sql =
+    "
+  WITH new_refresh AS (
+      INSERT INTO refresh_tokens (selector, validator, identifier_id)
+      VALUES ($1, $2, $3)
+  ), new_session AS (
+      INSERT INTO session_tokens (selector, validator, refresh_selector)
+      VALUES ($4, $5, $1)
+  )
+  DELETE FROM refresh_tokens
+  WHERE selector = $6
+  "
+  let args = [
+    pgo.text(refresh_token.selector),
+    pgo.text(hash_string(refresh_token.secret)),
+    pgo.int(identifier_id),
+    pgo.text(session_token.selector),
+    pgo.text(hash_string(session_token.secret)),
+    pgo.nullable(old_refresh_selector, pgo.text),
+  ]
+  let mapper = fn(row) { row }
+  try _ =
+    run_sql.execute(sql, args, mapper)
+    |> io.debug()
+
+  //
+  // // delete old selectors
+  Ok(tuple(refresh_token, session_token))
+}
 
 pub type EmailAddress {
   EmailAddress(String)
