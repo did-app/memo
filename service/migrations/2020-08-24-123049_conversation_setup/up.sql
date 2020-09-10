@@ -8,6 +8,14 @@ CREATE TABLE identifiers (
 
 SELECT diesel_manage_updated_at('identifiers');
 
+CREATE TABLE link_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+  -- updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   topic VARCHAR,

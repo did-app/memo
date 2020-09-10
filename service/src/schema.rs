@@ -19,6 +19,15 @@ table! {
 }
 
 table! {
+    link_tokens (selector) {
+        selector -> Varchar,
+        validator -> Varchar,
+        identifier_id -> Int4,
+        inserted_at -> Timestamp,
+    }
+}
+
+table! {
     message_notifications (id) {
         id -> Int4,
         conversation_id -> Int4,
@@ -60,6 +69,7 @@ table! {
     }
 }
 
+joinable!(link_tokens -> identifiers (identifier_id));
 joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (author_id));
@@ -70,6 +80,7 @@ joinable!(pins -> conversations (conversation_id));
 allow_tables_to_appear_in_same_query!(
     conversations,
     identifiers,
+    link_tokens,
     message_notifications,
     messages,
     participants,

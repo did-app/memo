@@ -1,8 +1,23 @@
 import gleam/dynamic
 import gleam/option.{Option}
 import gleam/result
+import gleam/string
 import gleam/pgo
 import plum_mail/run_sql
+
+pub type EmailAddress {
+  EmailAddress(String)
+}
+
+pub fn validate_email(email_address) {
+  let email_address = string.trim(email_address)
+  try parts = string.split_once(string.reverse(email_address), "@")
+  case parts {
+    tuple("", _) -> Error(Nil)
+    tuple(_, "") -> Error(Nil)
+    _ -> Ok(email_address)
+  }
+}
 
 pub type Identifier {
   Identifier(id: Int, email_address: String, nickname: Option(String))
