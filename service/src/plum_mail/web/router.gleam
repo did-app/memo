@@ -93,7 +93,7 @@ pub fn route(
       )
       try tuple(refresh_token, session_token) =
         authentication.authenticate(link_token, refresh_token, user_agent)
-        |> result.map_error(fn(e) { todo("map auth error") })
+        |> result.map_error(fn(e) { error.Unauthenticated })
       let cookie_defaults = http.cookie_defaults(request.scheme)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
