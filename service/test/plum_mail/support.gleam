@@ -8,6 +8,7 @@ import gleam/crypto
 import gleam/http
 import gleam/json
 import plum_mail/config
+import plum_mail/authentication.{EmailAddress}
 import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
 
@@ -21,7 +22,9 @@ pub fn test_config() {
 pub fn generate_email_address(domain) {
   crypto.strong_random_bytes(8)
   |> base.url_encode64(False)
+  |> string.append("@")
   |> string.append(domain)
+  |> EmailAddress()
 }
 
 pub fn get_resp_cookie(response) {

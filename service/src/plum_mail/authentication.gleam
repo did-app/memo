@@ -84,10 +84,7 @@ fn from_refresh_token(refresh_token, user_agent) {
   WHERE selector = $1
   AND user_agent = $2
   "
-  let args = [
-  pgo.text(selector),
-  pgo.text(user_agent)
-  ]
+  let args = [pgo.text(selector), pgo.text(user_agent)]
   let mapper = fn(row) {
     assert Ok(validator) = dynamic.element(row, 0)
     assert Ok(validator) = dynamic.string(validator)
@@ -231,7 +228,7 @@ pub fn authenticate(link_token, refresh_token, user_agent) {
 }
 
 pub type EmailAddress {
-  EmailAddress(String)
+  EmailAddress(value: String)
 }
 
 pub fn validate_email(email_address) {
@@ -240,12 +237,12 @@ pub fn validate_email(email_address) {
   case parts {
     tuple("", _) -> Error(Nil)
     tuple(_, "") -> Error(Nil)
-    _ -> Ok(email_address)
+    _ -> Ok(EmailAddress(email_address))
   }
 }
 
 pub type Identifier {
-  Identifier(id: Int, email_address: String, nickname: Option(String))
+  Identifier(id: Int, email_address: EmailAddress, nickname: Option(String))
 }
 
 fn row_to_identifier(row) {
@@ -253,6 +250,7 @@ fn row_to_identifier(row) {
   assert Ok(id) = dynamic.int(id)
   assert Ok(email_address) = dynamic.element(row, 1)
   assert Ok(email_address) = dynamic.string(email_address)
+  assert Ok(email_address) = validate_email(email_address)
   assert Ok(nickname) = dynamic.element(row, 2)
   assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
   Identifier(id, email_address, nickname)
@@ -271,7 +269,7 @@ pub fn fetch_identifier(id) {
 }
 
 // https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com
-pub fn identifier_from_email(email_address) {
+pub fn identifier_from_email(email_address: EmailAddress) {
   let sql =
     "
     WITH new_identifier AS (
@@ -286,7 +284,7 @@ pub fn identifier_from_email(email_address) {
     "
   // Could return True of False field for new user
   // Would enable Log or send email when new user is added
-  let args = [pgo.text(email_address)]
+  let args = [pgo.text(email_address.value)]
   try [row] = run_sql.execute(sql, args, row_to_identifier)
   Ok(row)
 }

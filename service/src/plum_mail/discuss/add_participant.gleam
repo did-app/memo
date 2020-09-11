@@ -2,15 +2,15 @@ import gleam/dynamic.{Dynamic}
 import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
-import plum_mail/authentication
+import plum_mail/authentication.{EmailAddress}
 import plum_mail/discuss/discuss
 
 pub type Params {
-  Params(email_address: String)
+  Params(email_address: EmailAddress)
 }
 
 pub fn params(raw: Dynamic) {
-  try email_address = acl.required(raw, "email_address", acl.as_string)
+  try email_address = acl.required(raw, "email_address", acl.as_email)
   Params(email_address)
   |> Ok
 }

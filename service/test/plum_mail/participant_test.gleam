@@ -8,7 +8,7 @@ import gleam/option.{None}
 import gleam/string
 import gleam/http
 import gleam/json
-import plum_mail/authentication
+import plum_mail/authentication.{EmailAddress}
 import plum_mail/discuss/discuss.{Conversation}
 import plum_mail/discuss/start_conversation
 import plum_mail/web/helpers as web
@@ -16,7 +16,11 @@ import plum_mail/web/router.{handle}
 import plum_mail/support
 import gleam/should
 
-fn add_participant(user_session, conversation: Conversation, email_address) {
+fn add_participant(
+  user_session,
+  conversation: Conversation,
+  email_address: EmailAddress,
+) {
   let request =
     http.default_req()
     |> http.set_method(http.Post)
@@ -30,7 +34,7 @@ fn add_participant(user_session, conversation: Conversation, email_address) {
     )
     |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> web.set_req_json(json.object([
-      tuple("email_address", json.string(email_address)),
+      tuple("email_address", json.string(email_address.value)),
     ]))
 
   handle(request, support.test_config())

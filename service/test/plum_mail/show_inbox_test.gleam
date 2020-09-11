@@ -1,7 +1,7 @@
 import gleam/dynamic
 import gleam/option.{None}
 import gleam/io
-import plum_mail/authentication
+import plum_mail/authentication.{EmailAddress}
 import plum_mail/discuss/discuss
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant

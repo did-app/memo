@@ -151,7 +151,7 @@ pub fn route(
                 let Identifier(email_address: email_address, ..) = identifier
                 json.object([
                   tuple("content", json.string(content)),
-                  tuple("author", json.string(email_address)),
+                  tuple("author", json.string(email_address.value)),
                   tuple(
                     "inserted_at",
                     json.string(datetime.to_human(inserted_at)),
@@ -166,7 +166,7 @@ pub fn route(
             json.object([
               tuple(
                 "email_address",
-                json.string(participation.identifier.email_address),
+                json.string(participation.identifier.email_address.value),
               ),
               tuple(
                 "nickname",

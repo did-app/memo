@@ -6,7 +6,7 @@ import gleam/option.{None, Some}
 import gleam/string
 import gleam/crypto
 import gleam/pgo
-import plum_mail/authentication
+import plum_mail/authentication.{EmailAddress}
 import plum_mail/run_sql
 import plum_mail/support
 import gleam/should
@@ -28,9 +28,9 @@ pub fn validate_email_test() {
   |> should.equal(Error(Nil))
 
   authentication.validate_email("me@example.com")
-  |> should.equal(Ok("me@example.com"))
+  |> should.equal(Ok(EmailAddress("me@example.com")))
   authentication.validate_email("   me@example.com ")
-  |> should.equal(Ok("me@example.com"))
+  |> should.equal(Ok(EmailAddress("me@example.com")))
 }
 
 pub fn fails_to_authenticate_without_any_tokens_test() {

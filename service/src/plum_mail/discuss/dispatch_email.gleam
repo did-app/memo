@@ -79,6 +79,8 @@ pub fn load() {
     assert Ok(recipient_id) = dynamic.int(recipient_id)
     assert Ok(recipient_email_address) = dynamic.element(row, 8)
     assert Ok(recipient_email_address) = dynamic.string(recipient_email_address)
+    assert Ok(recipient_email_address) =
+      authentication.validate_email(recipient_email_address)
     assert Ok(recipient_nickname) = dynamic.element(row, 9)
     assert Ok(recipient_nickname) =
       run_sql.dynamic_option(recipient_nickname, dynamic.string)
@@ -155,7 +157,7 @@ fn send(config, message: Message) {
   let data =
     json.object([
       tuple("From", json.string("updates@plummail.co")),
-      tuple("To", json.string(message.to.email_address)),
+      tuple("To", json.string(message.to.email_address.value)),
       tuple("Subject", json.string(message.conversation.1)),
       // tuple("TextBody", json.string(message.content)),
       tuple("HtmlBody", json.string(body)),
