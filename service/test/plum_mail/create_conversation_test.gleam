@@ -2,7 +2,7 @@ import gleam/bit_builder
 import gleam/bit_string
 import gleam/dynamic
 import gleam/int
-import gleam/option.{None}
+import gleam/option.{None, Some}
 import gleam/string
 import gleam/http
 import gleam/json
@@ -14,8 +14,10 @@ import gleam/should
 pub fn create_conversation_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(_, session_token)) =
-    authentication.generate_client_tokens(identifier.id, "ua", None)
+    authentication.authenticate(Some(link_token), None, "ua")
+
   let topic = "Test topic"
 
   let body =

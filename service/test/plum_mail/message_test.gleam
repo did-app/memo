@@ -1,7 +1,7 @@
 import gleam/io
 import gleam/int
 import gleam/list
-import gleam/option.{None}
+import gleam/option.{None, Some}
 import gleam/string
 import gleam/http
 import gleam/json
@@ -39,8 +39,10 @@ fn write_message(user_session, conversation_id, content, resolve) {
 pub fn write_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(_, session_token)) =
-    authentication.generate_client_tokens(identifier.id, "ua", None)
+    authentication.authenticate(Some(link_token), None, "ua")
+
   let topic = "Test topic"
 
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
@@ -52,8 +54,11 @@ pub fn write_test() {
     invited_email_address
     |> add_participant.Params
     |> add_participant.execute(participation, _)
+  // assert Ok(tuple(_, other_session)) =
+  //   authentication.generate_client_tokens(invited.0, "ua", None)
+  assert Ok(link_token) = authentication.generate_link_token(invited.0)
   assert Ok(tuple(_, other_session)) =
-    authentication.generate_client_tokens(invited.0, "ua", None)
+    authentication.authenticate(Some(link_token), None, "ua")
 
   let response =
     write_message(session_token, conversation.id, "My first message", False)

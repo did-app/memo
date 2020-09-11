@@ -79,25 +79,28 @@ fn from_refresh_token(refresh_token, user_agent) {
   let Token(selector, secret) = refresh_token
   let sql =
     "
-  SELECT validator, identifier_id
+  SELECT refresh_tokens.validator, refresh_tokens.link_token_selector
   FROM refresh_tokens
-  WHERE selector = $1
-  AND user_agent = $2
+  JOIN link_tokens ON link_tokens.selector = refresh_tokens.link_token_selector
+  WHERE refresh_tokens.selector = $1
+  AND refresh_tokens.user_agent = $2
+  AND refresh_tokens.inserted_at > NOW() - INTERVAL '2 DAYS'
+  AND link_tokens.inserted_at > NOW() - INTERVAL '30 DAYS'
   "
   let args = [pgo.text(selector), pgo.text(user_agent)]
   let mapper = fn(row) {
     assert Ok(validator) = dynamic.element(row, 0)
     assert Ok(validator) = dynamic.string(validator)
-    assert Ok(identifier_id) = dynamic.element(row, 1)
-    assert Ok(identifier_id) = dynamic.int(identifier_id)
-    tuple(validator, identifier_id)
+    assert Ok(link_token_selector) = dynamic.element(row, 1)
+    assert Ok(link_token_selector) = dynamic.string(link_token_selector)
+    tuple(validator, link_token_selector)
   }
   try refresh_tokens = run_sql.execute(sql, args, mapper)
   case refresh_tokens {
     [] -> Error(Nil)
-    [tuple(validator, identifier_id)] -> {
+    [tuple(validator, link_token_selector)] -> {
       try _ = validate(secret, validator)
-      Ok(identifier_id)
+      Ok(link_token_selector)
     }
   }
 }
@@ -106,25 +109,29 @@ fn from_link_token(token) {
   let Token(selector, secret) = token
   let sql =
     "
-      SELECT validator, identifier_id
+      SELECT validator, selector, inserted_at > NOW() - INTERVAL '7 DAYS'
       FROM link_tokens
       WHERE selector = $1
-      AND inserted_at > NOW() - INTERVAL '7 DAYS'
       "
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
     assert Ok(validator) = dynamic.element(row, 0)
     assert Ok(validator) = dynamic.string(validator)
-    assert Ok(identifier_id) = dynamic.element(row, 1)
-    assert Ok(identifier_id) = dynamic.int(identifier_id)
-    tuple(validator, identifier_id)
+    assert Ok(link_token_selector) = dynamic.element(row, 1)
+    assert Ok(link_token_selector) = dynamic.string(link_token_selector)
+    assert Ok(current) = dynamic.element(row, 2)
+    assert Ok(current) = dynamic.bool(current)
+    tuple(validator, link_token_selector, current)
   }
   try challenge_tokens = run_sql.execute(sql, args, mapper)
   case challenge_tokens {
     [] -> todo
-    [tuple(validator, identifier_id)] -> {
+    [tuple(validator, link_token_selector, current)] -> {
       try _ = validate(secret, validator)
-      Ok(identifier_id)
+      case current {
+        True -> Ok(link_token_selector)
+        False -> Error(Nil)
+      }
     }
   }
 }
@@ -132,9 +139,10 @@ fn from_link_token(token) {
 pub fn load_session(token_string) {
   try Token(selector, secret) = parse_token(token_string)
   let sql =
-    "SELECT session_tokens.validator, refresh_tokens.identifier_id
+    "SELECT session_tokens.validator, link_tokens.identifier_id
     FROM session_tokens
-    JOIN refresh_tokens ON refresh_tokens.selector = session_tokens.refresh_selector
+    JOIN refresh_tokens ON refresh_tokens.selector = session_tokens.refresh_token_selector
+    JOIN link_tokens ON link_tokens.selector = refresh_tokens.link_token_selector
     WHERE session_tokens.selector = $1
     AND session_tokens.inserted_at > NOW() - INTERVAL '1 DAYS'"
   let args = [pgo.text(selector)]
@@ -169,17 +177,21 @@ fn maybe_from_refresh_token(link_token, user_agent) {
   }
 }
 
-pub fn generate_client_tokens(identifier_id, user_agent, old_refresh_selector) {
+pub fn generate_client_tokens(
+  link_token_selector,
+  user_agent,
+  old_refresh_token_selector,
+) {
   let refresh_token = generate_token()
   let session_token = generate_token()
 
   let sql =
     "
       WITH new_refresh AS (
-          INSERT INTO refresh_tokens (selector, validator, user_agent, identifier_id)
+          INSERT INTO refresh_tokens (selector, validator, user_agent, link_token_selector)
           VALUES ($1, $2, $3, $4)
       ), new_session AS (
-          INSERT INTO session_tokens (selector, validator, refresh_selector)
+          INSERT INTO session_tokens (selector, validator, refresh_token_selector)
           VALUES ($5, $6, $1)
       )
       DELETE FROM refresh_tokens
@@ -189,10 +201,10 @@ pub fn generate_client_tokens(identifier_id, user_agent, old_refresh_selector) {
     pgo.text(refresh_token.selector),
     pgo.text(hash_string(refresh_token.secret)),
     pgo.text(user_agent),
-    pgo.int(identifier_id),
+    pgo.text(link_token_selector),
     pgo.text(session_token.selector),
     pgo.text(hash_string(session_token.secret)),
-    pgo.nullable(old_refresh_selector, pgo.text),
+    pgo.nullable(old_refresh_token_selector, pgo.text),
   ]
   let mapper = fn(row) { row }
   try _ = run_sql.execute(sql, args, mapper)
@@ -216,15 +228,19 @@ pub fn authenticate(link_token, refresh_token, user_agent) {
       }
     None -> Ok(None)
   }
-  try identifier_id = case maybe_from_link_token(link_token) {
-    Ok(identifier_id) -> Ok(identifier_id)
+  try link_token_selector = case maybe_from_link_token(link_token) {
+    Ok(link_token_selector) -> Ok(link_token_selector)
     Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
   }
 
-  let old_refresh_selector =
+  let old_refresh_token_selector =
     option.map(refresh_token, fn(t: Token) { t.selector })
 
-  generate_client_tokens(identifier_id, user_agent, old_refresh_selector)
+  generate_client_tokens(
+    link_token_selector,
+    user_agent,
+    old_refresh_token_selector,
+  )
 }
 
 pub type EmailAddress {
