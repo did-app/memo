@@ -84,7 +84,10 @@ fn from_refresh_token(refresh_token, user_agent) {
   WHERE selector = $1
   AND user_agent = $2
   "
-  let args = [pgo.text(selector), pgo.text(user_agent)]
+  let args = [
+  pgo.text(selector),
+  pgo.text(user_agent)
+  ]
   let mapper = fn(row) {
     assert Ok(validator) = dynamic.element(row, 0)
     assert Ok(validator) = dynamic.string(validator)

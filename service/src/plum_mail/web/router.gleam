@@ -86,10 +86,7 @@ pub fn route(
     ["authenticate"] -> {
       try params = acl.parse_json(request)
       try link_token = acl.optional(params, "link_token", acl.as_string)
-      let cookies = http.get_req_cookies(request)
-      let refresh_token =
-        list.key_find(cookies, "refresh")
-        |> option.from_result()
+      let tuple(refresh_token, _) = load_cookies(request, config.client_origin)
       assert tuple("user_agent", Ok(user_agent)) = tuple(
         "user_agent",
         http.get_req_header(request, "user-agent"),
