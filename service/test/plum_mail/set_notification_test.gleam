@@ -44,8 +44,7 @@ pub fn successfully_set_notification_preference_test() {
   let response = set_notification(session_token, conversation, "concluded")
 
   should.equal(response.status, 201)
-  // TODO reinstate
-  // let Ok(participant) =
-  //   discuss.load_participation(conversation.id, "user_session")
-  // should.equal(participant.notify, discuss.Concluded)
+  let Ok(participant) =
+    discuss.load_participation(conversation.id, identifier.id)
+  should.equal(participant.notify, discuss.Concluded)
 }
