@@ -51,6 +51,8 @@ pub fn write_test() {
     invited_email_address
     |> add_participant.Params
     |> add_participant.execute(participation, _)
+  assert Ok(tuple(_, other_session)) =
+    authentication.generate_client_tokens(invited.0, "ua", None)
 
   let response =
     write_message(
@@ -100,9 +102,8 @@ pub fn write_test() {
     _ -> Nil
   }
 
-  let other_session = session.authenticated(invited.0)
   assert Ok(participation) =
-    discuss.load_participation(conversation.id, other_session)
+    discuss.load_participation(conversation.id, invited.0)
 
   participation.cursor
   |> should.equal(0)
@@ -116,14 +117,14 @@ pub fn write_test() {
     ))
     |> http.prepend_req_header(
       "cookie",
-      string.append("session=", session.to_string(other_session)),
+      string.append("session=", authentication.serialize_token(other_session)),
     )
     |> helpers.set_req_json(json.object([tuple("counter", json.int(1))]))
 
   let response = handle(request, support.test_config())
   should.equal(response.status, 201)
   assert Ok(participation) =
-    discuss.load_participation(conversation.id, other_session)
+    discuss.load_participation(conversation.id, invited.0)
 
   participation.cursor
   |> should.equal(1)

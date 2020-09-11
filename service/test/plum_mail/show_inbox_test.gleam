@@ -19,8 +19,6 @@ pub fn unread_messages_in_conversation_test() {
   let email_address = support.generate_email_address("alice.test")
   assert Ok(alice) = authentication.identifier_from_email(email_address)
 
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(me) = authentication.identifier_from_email(email_address)
   assert Ok(tuple(_, me_session)) =
     authentication.generate_client_tokens(me.id, "ua", None)
   assert Ok(c1) = start_conversation.execute("First", me.id)
