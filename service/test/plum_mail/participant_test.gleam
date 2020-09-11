@@ -46,11 +46,7 @@ pub fn successfully_add_new_participant_test() {
 
   let invited_email_address = support.generate_email_address("other.test")
   let response =
-    add_participant(
-      authentication.serialize_token(session_token),
-      conversation,
-      invited_email_address,
-    )
+    add_participant(session_token, conversation, invited_email_address)
 
   should.equal(response.status, 201)
   assert Ok(participants) = discuss.load_participants(conversation.id)
@@ -61,11 +57,7 @@ pub fn successfully_add_new_participant_test() {
 
   // It is idempotent
   let response =
-    add_participant(
-      authentication.serialize_token(session_token),
-      conversation,
-      invited_email_address,
-    )
+    add_participant(session_token, conversation, invited_email_address)
 
   should.equal(response.status, 201)
   assert Ok(participants) = discuss.load_participants(conversation.id)

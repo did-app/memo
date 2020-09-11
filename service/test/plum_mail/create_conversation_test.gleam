@@ -26,10 +26,7 @@ pub fn create_conversation_test() {
     http.default_req()
     |> http.set_method(http.Post)
     |> http.set_path("/c/create")
-    |> http.set_req_cookie(
-      "session",
-      authentication.serialize_token(session_token),
-    )
+    |> http.set_req_cookie("session", session_token)
     |> http.set_req_body(body)
   let response = handle(request, support.test_config())
 
@@ -38,18 +35,14 @@ pub fn create_conversation_test() {
   assert Ok(tuple(_, id)) = string.split_once(location, "/c/")
   assert Ok(id) = int.parse(id)
 
-  let tuple(_id, t, _p, _m) =
-    support.get_conversation(id, authentication.serialize_token(session_token))
+  let tuple(_id, t, _p, _m) = support.get_conversation(id, session_token)
   should.equal(t, topic)
 
   let request =
     http.default_req()
     |> http.set_method(http.Get)
     |> http.set_path("/inbox")
-    |> http.set_req_cookie(
-      "session",
-      authentication.serialize_token(session_token),
-    )
+    |> http.set_req_cookie("session", session_token)
     |> http.set_req_body(<<>>)
   let response = handle(request, support.test_config())
 

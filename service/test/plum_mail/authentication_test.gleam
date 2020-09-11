@@ -6,7 +6,7 @@ import gleam/option.{None, Some}
 import gleam/string
 import gleam/crypto
 import gleam/pgo
-import plum_mail/authentication.{Token}
+import plum_mail/authentication
 import plum_mail/run_sql
 import plum_mail/support
 import gleam/should
@@ -48,32 +48,30 @@ pub fn authenticate_with_link_token_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
 
-  assert Ok(link_token) =
-    authentication.generate_token()
-    |> authentication.save_link_token(identifier.id)
+  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
 
   let user_agent = "Agent-123"
   assert Ok(tuple(r1, s1)) =
     authentication.authenticate(Some(link_token), None, user_agent)
-  authentication.load_session(authentication.serialize_token(s1))
+  authentication.load_session(s1)
   |> should.equal(Ok(identifier.id))
 
   // Use the refresh token
   assert Ok(tuple(r2, s2)) =
     authentication.authenticate(None, Some(r1), user_agent)
-  authentication.load_session(authentication.serialize_token(s2))
+  authentication.load_session(s2)
   |> should.equal(Ok(identifier.id))
 
   // Original refresh and sessions are invalidated
   assert Error(Nil) = authentication.authenticate(None, Some(r1), user_agent)
-  authentication.load_session(authentication.serialize_token(s1))
+  authentication.load_session(s1)
   |> should.equal(Error(Nil))
   io.debug("ballon2")
 
   // link token remains valid
   assert Ok(tuple(r3, s3)) =
     authentication.authenticate(Some(link_token), None, user_agent)
-  authentication.load_session(authentication.serialize_token(s3))
+  authentication.load_session(s3)
   |> should.equal(Ok(identifier.id))
 }
 
@@ -81,9 +79,7 @@ pub fn refresh_token_tied_to_user_agent_test() {
   let email_address = support.generate_email_address("example.test")
   assert Ok(identifier) = authentication.identifier_from_email(email_address)
 
-  assert Ok(link_token) =
-    authentication.generate_token()
-    |> authentication.save_link_token(identifier.id)
+  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
 
   let user_agent = "Agent-123"
   assert Ok(tuple(r1, s1)) =

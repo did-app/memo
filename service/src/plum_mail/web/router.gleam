@@ -57,11 +57,6 @@ fn load_participation(conversation_id, request) {
   discuss.load_participation(conversation_id, identifier_id)
 }
 
-fn as_token(token_string) {
-  assert Ok(token_string) = dynamic.string(token_string)
-  authentication.parse_token(token_string)
-}
-
 pub fn route(
   request,
   config: config.Config,
@@ -69,7 +64,7 @@ pub fn route(
   case http.path_segments(request) {
     ["authenticate"] -> {
       try params = acl.parse_json(request)
-      try link_token = acl.optional(params, "link_token", as_token)
+      try link_token = acl.optional(params, "link_token", acl.as_string)
       todo("authenticate")
     }
     ["inbox"] -> {

@@ -55,12 +55,7 @@ pub fn write_test() {
     authentication.generate_client_tokens(invited.0, "ua", None)
 
   let response =
-    write_message(
-      authentication.serialize_token(session_token),
-      conversation.id,
-      "My first message",
-      False,
-    )
+    write_message(session_token, conversation.id, "My first message", False)
   should.equal(response.status, 201)
 
   assert Ok([message]) = discuss.load_messages(conversation.id)
@@ -117,7 +112,7 @@ pub fn write_test() {
     ))
     |> http.prepend_req_header(
       "cookie",
-      string.append("session=", authentication.serialize_token(other_session)),
+      string.append("session=", other_session),
     )
     |> helpers.set_req_json(json.object([tuple("counter", json.int(1))]))
 

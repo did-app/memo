@@ -38,12 +38,7 @@ pub fn successfully_set_notification_preference_test() {
   let topic = "Test topic"
 
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
-  let response =
-    set_notification(
-      authentication.serialize_token(session_token),
-      conversation,
-      "concluded",
-    )
+  let response = set_notification(session_token, conversation, "concluded")
 
   should.equal(response.status, 201)
   // TODO reinstate

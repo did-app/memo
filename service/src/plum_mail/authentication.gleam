@@ -34,29 +34,28 @@ pub fn validate(secret, validator) {
   }
 }
 
-pub type Token {
+type Token {
   Token(selector: String, secret: String)
 }
 
-// TODO probably not public
-pub fn generate_token() {
+fn generate_token() {
   let selector = random_string(4)
   let secret = random_string(8)
   Token(selector, secret)
 }
 
-pub fn serialize_token(token) {
+fn serialize_token(token) {
   let Token(selector, secret) = token
   string.join([selector, secret], ":")
 }
 
-pub fn parse_token(token_string) {
+fn parse_token(token_string) {
   try tuple(selector, secret) = string.split_once(token_string, ":")
   Ok(Token(selector, secret))
 }
 
-pub fn save_link_token(token, identifier_id) {
-  let Token(selector, secret) = token
+pub fn generate_link_token(identifier_id) {
+  let Token(selector, secret) = generate_token()
 
   let sql =
     "
@@ -72,6 +71,7 @@ pub fn save_link_token(token, identifier_id) {
   let mapper = fn(row) { Nil }
   try [Nil] = run_sql.execute(sql, args, mapper)
   Token(selector, secret)
+  |> serialize_token()
   |> Ok()
 }
 
@@ -197,11 +197,25 @@ pub fn generate_client_tokens(identifier_id, user_agent, old_refresh_selector) {
   let mapper = fn(row) { row }
   try _ = run_sql.execute(sql, args, mapper)
 
-  Ok(tuple(refresh_token, session_token))
+  Ok(tuple(serialize_token(refresh_token), serialize_token(session_token)))
 }
 
 // So it's all very circular and needs a flow diagram
 pub fn authenticate(link_token, refresh_token, user_agent) {
+  try link_token = case link_token {
+    Some(link_token) ->
+      case parse_token(link_token) {
+        Ok(link_token) -> Ok(Some(link_token))
+      }
+    None -> Ok(None)
+  }
+  try refresh_token = case refresh_token {
+    Some(refresh_token) ->
+      case parse_token(refresh_token) {
+        Ok(refresh_token) -> Ok(Some(refresh_token))
+      }
+    None -> Ok(None)
+  }
   try identifier_id = case maybe_from_link_token(link_token) {
     Ok(identifier_id) -> Ok(identifier_id)
     Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
