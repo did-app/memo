@@ -64,7 +64,7 @@ pub fn authenticate_with_link_token_test() {
   |> should.equal(Error(Nil))
 
   // link token remains valid
-  assert Ok(tuple(_r, s3)) =
+  assert Ok(tuple(_r_other, s3)) =
     authentication.authenticate(Some(link_token), None, user_agent)
   authentication.load_session(s3)
   |> should.equal(Ok(identifier.id))
