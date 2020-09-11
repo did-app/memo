@@ -53,7 +53,7 @@ pub fn authenticate_with_link_token_test() {
   |> should.equal(Ok(identifier.id))
 
   // Use the refresh token
-  assert Ok(tuple(r2, s2)) =
+  assert Ok(tuple(_r, s2)) =
     authentication.authenticate(None, Some(r1), user_agent)
   authentication.load_session(s2)
   |> should.equal(Ok(identifier.id))
@@ -63,8 +63,12 @@ pub fn authenticate_with_link_token_test() {
   authentication.load_session(s1)
   |> should.equal(Error(Nil))
 
+  let a1 = 1
+  let _a = 1
+  let _a1 = 1
+
   // link token remains valid
-  assert Ok(tuple(r3, s3)) =
+  assert Ok(tuple(_r, s3)) =
     authentication.authenticate(Some(link_token), None, user_agent)
   authentication.load_session(s3)
   |> should.equal(Ok(identifier.id))
@@ -77,7 +81,7 @@ pub fn refresh_token_tied_to_user_agent_test() {
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
 
   let user_agent = "Agent-123"
-  assert Ok(tuple(r1, s1)) =
+  assert Ok(tuple(r1, _)) =
     authentication.authenticate(Some(link_token), None, user_agent)
   authentication.authenticate(None, Some(r1), "Other-fire")
   |> should.equal(Error(Nil))

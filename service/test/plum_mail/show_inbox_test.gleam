@@ -1,7 +1,7 @@
 import gleam/dynamic
 import gleam/option.{None, Some}
 import gleam/io
-import plum_mail/authentication.{EmailAddress}
+import plum_mail/authentication
 import plum_mail/discuss/discuss
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
@@ -18,10 +18,6 @@ pub fn unread_messages_in_conversation_test() {
 
   let email_address = support.generate_email_address("alice.test")
   assert Ok(alice) = authentication.identifier_from_email(email_address)
-
-  assert Ok(link_token) = authentication.generate_link_token(me.id)
-  assert Ok(tuple(_, me_session)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(c1) = start_conversation.execute("First", me.id)
   assert Ok(participation) = discuss.load_participation(c1.id, me.id)

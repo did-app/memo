@@ -1,5 +1,4 @@
 import gleam/dynamic.{Dynamic}
-import gleam/option.{None, Option, Some}
 import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql

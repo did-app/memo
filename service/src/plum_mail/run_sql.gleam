@@ -3,7 +3,7 @@ import gleam/dynamic.{Dynamic}
 import gleam/float
 import gleam/io
 import gleam/list
-import gleam/option.{None, Option, Some}
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/pgo
 import datetime

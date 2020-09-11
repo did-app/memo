@@ -39,7 +39,7 @@ pub fn execute(participation, params) {
         pgo.int(identifier.id),
         pgo.int(conversation.id),
       ]
-      let mapper = fn(row) { Nil }
+      let mapper = fn(_) { Nil }
       assert Ok([_]) = run_sql.execute(sql, args, mapper)
       Ok(Nil)
     }

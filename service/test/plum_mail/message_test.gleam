@@ -5,7 +5,7 @@ import gleam/option.{None, Some}
 import gleam/string
 import gleam/http
 import gleam/json
-import plum_mail/authentication.{Identifier}
+import plum_mail/authentication
 import plum_mail/discuss/discuss
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant

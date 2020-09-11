@@ -20,7 +20,7 @@ pub fn params(raw: Dynamic) {
 pub fn execute(participation, params) {
   let Participation(conversation: conversation, identifier: identifier, ..) =
     participation
-  let Params(content: content, from: from, resolve: resolve) = params
+  let Params(content: content, from: _from, resolve: resolve) = params
   let sql =
     "
       WITH new_message AS (
@@ -55,10 +55,4 @@ pub fn execute(participation, params) {
     }
     False -> Ok(Nil)
   }
-
-  // case from {
-  //     Some(value)  ->
-  //     None -> Ok(Nil)
-  // }
-  Ok(Nil)
 }
