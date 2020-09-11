@@ -36,7 +36,9 @@ pub fn get_conversation(id, session) {
     http.default_req()
     |> http.set_path(string.append("/c/", int.to_string(id)))
     |> http.prepend_req_header("cookie", string.append("session=", session))
+    |> http.prepend_req_header("origin", test_config().client_origin)
     |> http.set_req_body(<<>>)
+
   let http.Response(body: body, ..) = handle(request, test_config())
   let body = bit_builder.to_bit_string(body)
   assert Ok(body) = bit_string.to_string(body)

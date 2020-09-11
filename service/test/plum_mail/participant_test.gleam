@@ -28,6 +28,7 @@ fn add_participant(user_session, conversation: Conversation, email_address) {
       "cookie",
       string.append("session=", user_session),
     )
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> web.set_req_json(json.object([
       tuple("email_address", json.string(email_address)),
     ]))

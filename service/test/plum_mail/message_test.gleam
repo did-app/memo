@@ -27,6 +27,7 @@ fn write_message(user_session, conversation_id, content, resolve) {
       "cookie",
       string.append("session=", user_session),
     )
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> helpers.set_req_json(json.object([
       tuple("content", json.string(content)),
       tuple("resolve", json.bool(resolve)),
@@ -112,6 +113,7 @@ pub fn write_test() {
       "cookie",
       string.append("session=", other_session),
     )
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> helpers.set_req_json(json.object([tuple("counter", json.int(1))]))
 
   let response = handle(request, support.test_config())

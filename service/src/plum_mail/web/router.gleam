@@ -36,22 +36,45 @@ pub fn redirect(uri: String) -> Response(BitBuilder) {
   http.Response(status: 303, headers: [tuple("location", uri)], body: body)
 }
 
-fn load_session(request) {
+fn load_cookies(request, client_origin) {
+  let origin =
+    http.get_req_header(request, "origin")
+    |> option.from_result()
+  let referrer =
+    http.get_req_header(request, "referer`")
+    |> option.from_result()
+    |> option.map(fn(referrer) {
+      assert Ok(referrer) = uri.parse(referrer)
+      assert Ok(origin) = uri.origin(referrer)
+      origin
+    })
+
+  assert Some(client_origin) = option.or(origin, referrer)
+
   let cookies = http.get_req_cookies(request)
-  try session =
+  let refresh_token =
+    list.key_find(cookies, "refresh")
+    |> option.from_result()
+  let session_token =
     list.key_find(cookies, "session")
-    |> result.map_error(fn(_: Nil) { error.Unauthenticated })
+    |> option.from_result()
+  tuple(refresh_token, session_token)
+}
+
+fn load_session(request, client_origin) {
+  let tuple(_, session_token) = load_cookies(request, client_origin)
+  try session = option.to_result(session_token, error.Unauthenticated)
   authentication.load_session(session)
   |> result.map_error(fn(_: Nil) { error.Unauthenticated })
 }
 
-fn load_participation(conversation_id, request) {
+fn load_participation(conversation_id, request, client_origin) {
   try conversation_id =
     int.parse(conversation_id)
     |> result.map_error(fn(_: Nil) {
       error.BadRequest("Invalid conversation id")
     })
-  try identifier_id = load_session(request)
+  try identifier_id = load_session(request, client_origin)
   discuss.load_participation(conversation_id, identifier_id)
 }
 
@@ -61,7 +84,6 @@ pub fn route(
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
     ["authenticate"] -> {
-      io.debug(request)
       try params = acl.parse_json(request)
       try link_token = acl.optional(params, "link_token", acl.as_string)
       let cookies = http.get_req_cookies(request)
@@ -72,7 +94,6 @@ pub fn route(
         "user_agent",
         http.get_req_header(request, "user-agent"),
       )
-      io.debug(refresh_token)
       try tuple(refresh_token, session_token) =
         authentication.authenticate(link_token, refresh_token, user_agent)
         |> result.map_error(fn(e) { todo("map auth error") })
@@ -88,7 +109,7 @@ pub fn route(
       |> Ok
     }
     ["inbox"] -> {
-      try identifier_id = load_session(request)
+      try identifier_id = load_session(request, config.client_origin)
       try conversations = show_inbox.execute(identifier_id)
       // |> result.map_error(fn(x) { todo("mapping show inbox") })
       // If this conversations is the same as the top level conversation object for a page,
@@ -103,7 +124,7 @@ pub fn route(
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
-      try identifier_id = load_session(request)
+      try identifier_id = load_session(request, config.client_origin)
       try conversation = start_conversation.execute(topic, identifier_id)
       redirect(string.append(
         string.append(config.client_origin, "/c/"),
@@ -113,7 +134,7 @@ pub fn route(
     }
     // This will need participation for cursor
     ["c", id] -> {
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try participants =
         discuss.load_participants(participation.conversation.id)
       try messages = discuss.load_messages(participation.conversation.id)
@@ -172,7 +193,7 @@ pub fn route(
     ["c", id, "participant"] -> {
       try params = acl.parse_json(request)
       try params = add_participant.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = add_participant.execute(participation, params)
       // FIXME do we need to update http
       http.response(201)
@@ -182,7 +203,7 @@ pub fn route(
     ["c", id, "notify"] -> {
       try params = acl.parse_json(request)
       try params = set_notification.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = set_notification.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -193,7 +214,7 @@ pub fn route(
     ["c", id, "message"] -> {
       try params = acl.parse_json(request)
       try params = write_message.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = write_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -202,7 +223,7 @@ pub fn route(
     ["c", id, "read"] -> {
       try params = acl.parse_json(request)
       try params = read_message.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = read_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -211,7 +232,7 @@ pub fn route(
     ["c", id, "pin"] -> {
       try params = acl.parse_json(request)
       try params = add_pin.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = add_pin.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))

@@ -27,7 +27,9 @@ pub fn create_conversation_test() {
     |> http.set_method(http.Post)
     |> http.set_path("/c/create")
     |> http.set_req_cookie("session", session_token)
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> http.set_req_body(body)
+
   let response = handle(request, support.test_config())
 
   should.equal(response.status, 303)
@@ -43,6 +45,7 @@ pub fn create_conversation_test() {
     |> http.set_method(http.Get)
     |> http.set_path("/inbox")
     |> http.set_req_cookie("session", session_token)
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> http.set_req_body(<<>>)
   let response = handle(request, support.test_config())
 

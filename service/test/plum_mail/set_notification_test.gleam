@@ -25,6 +25,7 @@ fn set_notification(session, conversation: Conversation, preference) {
       "",
     ))
     |> http.prepend_req_header("cookie", string.append("session=", session))
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> web.set_req_json(json.object([tuple("notify", json.string(preference))]))
 
   handle(request, support.test_config())
