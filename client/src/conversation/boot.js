@@ -6,6 +6,11 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
+
+  console.log("boooooooooooooooooooo");
+  let resp = Client.authenticate(undefined)
+  console.log(resp);
+  foo()
   let response = await Client.fetchConversation(conversationId);
   if (response.status != 200) {
     window.location.pathname = "/sign_in"

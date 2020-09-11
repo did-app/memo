@@ -115,7 +115,17 @@ pub fn record_sent(message: Message) {
   run_sql.execute(sql, args, mapper)
 }
 
-fn send(postmark_api_token, message: Message) {
+fn authenticated_link(origin, conversation_id, identifier_id) {
+  assert Ok(token) = authentication.generate_link_token(identifier_id)
+  [origin, "/c/", int.to_string(conversation_id), "#code", "=", token]
+  |> string.join("")
+}
+
+fn send(config, message: Message) {
+  let Config(
+    postmark_api_token: postmark_api_token,
+    client_origin: client_origin,
+  ) = config
   let body =
     [
       "
@@ -134,10 +144,8 @@ fn send(postmark_api_token, message: Message) {
       "
     <hr>
     <p>This message was sent from Plum Mail.</p>
-    <a href=\"https://api.plummail.co/i/",
-      int.to_string(message.id.0),
-      "/",
-      int.to_string(message.to.id),
+    <a href=\"",
+      authenticated_link(client_origin, message.id.0, message.to.id),
       "\">Click here to reply</a>
     </main>
     ",
@@ -166,12 +174,11 @@ fn send(postmark_api_token, message: Message) {
 }
 
 pub fn execute() {
-  let Config(postmark_api_token: postmark_api_token, ..) = config.from_env()
   assert Ok(messages) = load()
   list.map(
     messages,
     fn(message) {
-      case send(postmark_api_token, message) {
+      case send(config.from_env(), message) {
         Ok(http.Response(status: 200, ..)) -> record_sent(message)
       }
     },

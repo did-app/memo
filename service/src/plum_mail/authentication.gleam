@@ -10,7 +10,7 @@ import gleam/pgo
 import plum_mail/run_sql
 
 fn random_string(entropy) {
-  crypto.strong_random_bytes(4)
+  crypto.strong_random_bytes(entropy)
   |> base.url_encode64(False)
 }
 

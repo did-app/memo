@@ -40,19 +40,17 @@ fn load_session(request) {
   let cookies = http.get_req_cookies(request)
   try session =
     list.key_find(cookies, "session")
-    |> result.map_error(fn(e) {
-      todo("Neeed to do proper error for unauthenticated")
-    })
+    |> result.map_error(fn(_: Nil) { error.Unauthenticated })
   authentication.load_session(session)
-  |> result.map_error(fn(e) {
-    todo("Neeed to do proper error for unauthenticated")
-  })
+  |> result.map_error(fn(_: Nil) { error.Unauthenticated })
 }
 
 fn load_participation(conversation_id, request) {
   try conversation_id =
     int.parse(conversation_id)
-    |> result.map_error(fn(x) { todo("mapping conversation id") })
+    |> result.map_error(fn(_: Nil) {
+      error.BadRequest("Invalid conversation id")
+    })
   try identifier_id = load_session(request)
   discuss.load_participation(conversation_id, identifier_id)
 }
@@ -63,9 +61,31 @@ pub fn route(
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
     ["authenticate"] -> {
+      io.debug(request)
       try params = acl.parse_json(request)
       try link_token = acl.optional(params, "link_token", acl.as_string)
-      todo("authenticate")
+      let cookies = http.get_req_cookies(request)
+      let refresh_token =
+        list.key_find(cookies, "refresh")
+        |> option.from_result()
+      assert tuple("user_agent", Ok(user_agent)) = tuple(
+        "user_agent",
+        http.get_req_header(request, "user-agent"),
+      )
+      io.debug(refresh_token)
+      try tuple(refresh_token, session_token) =
+        authentication.authenticate(link_token, refresh_token, user_agent)
+        |> result.map_error(fn(e) { todo("map auth error") })
+      let cookie_defaults = http.cookie_defaults(request.scheme)
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> http.set_resp_cookie("session", session_token, cookie_defaults)
+      |> http.set_resp_cookie(
+        "refresh",
+        refresh_token,
+        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
+      )
+      |> Ok
     }
     ["inbox"] -> {
       try identifier_id = load_session(request)
@@ -148,20 +168,7 @@ pub fn route(
       |> http.set_resp_body(body)
       |> Ok
     }
-    // This could be participant_id
-    // TODO remove
-    // ["i", conversation_id, identifier_id] -> {
-    //   let cookie_defaults = http.cookie_defaults(request.scheme)
-    //   let url = string.join([config.client_origin, "/c/", conversation_id], "")
-    //   redirect(url)
-    //   |> http.set_resp_cookie(
-    //     "session",
-    //     identifier_id,
-    //     // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
-    //     http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-    //   )
-    //   |> Ok
-    // }
+
     ["c", id, "participant"] -> {
       try params = acl.parse_json(request)
       try params = add_participant.params(params)

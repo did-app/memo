@@ -69,8 +69,6 @@ pub fn write_test() {
   assert Ok(participation) =
     discuss.load_participation(conversation.id, identifier.id)
 
-  // TODO -> change authentication to return a string
-  // save_link_token should generate internally
   participation.cursor
   |> should.equal(1)
 

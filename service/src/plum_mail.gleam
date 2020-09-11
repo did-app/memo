@@ -12,3 +12,8 @@ pub fn start_conversation(topic, owner_id) {
   assert Ok(owner_id) = dynamic.int(owner_id)
   inner_sc.execute(topic, owner_id)
 }
+
+pub fn generate_link_token(identifier_id) {
+  assert Ok(identifier_id) = dynamic.int(identifier_id)
+  authentication.generate_link_token(identifier_id)
+}

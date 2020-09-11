@@ -1,3 +1,13 @@
+export async function authenticate(linkToken) {
+  const response = await fetch("__API_ORIGIN__/authenticate", {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ link_token: linkToken }),
+  });
+  return response
+
+}
+
 export async function fetchInbox() {
   const response = await fetch("__API_ORIGIN__/inbox", {
     credentials: "include"
