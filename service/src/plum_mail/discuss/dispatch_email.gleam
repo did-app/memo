@@ -19,7 +19,7 @@ pub type Message {
     conversation: tuple(Int, String),
     // to can be participant
     // from can be author
-    from: String,
+    author: Identifier,
     to: Identifier,
     content: String,
   )
@@ -43,7 +43,7 @@ pub fn load() {
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
   let sql =
     "
-    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, recipient.nickname
+    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, recipient.nickname, author.email_address, author.nickname
     FROM messages AS m
     JOIN conversations AS c ON c.id = m.conversation_id
     JOIN participants AS p ON p.conversation_id = c.id
@@ -67,8 +67,8 @@ pub fn load() {
     assert Ok(content) = dynamic.string(content)
     // assert Ok(inserted_at) = dynamic.element(row, 2)
     // assert Ok(inserted_at) = dynamic.string(inserted_at)
-    // assert Ok(author_id) = dynamic.element(row, 3)
-    // assert Ok(author_id) = dynamic.int(author_id)
+    assert Ok(author_id) = dynamic.element(row, 3)
+    assert Ok(author_id) = dynamic.int(author_id)
     assert Ok(conversation_id) = dynamic.element(row, 4)
     assert Ok(conversation_id) = dynamic.int(conversation_id)
     assert Ok(topic) = dynamic.element(row, 5)
@@ -84,11 +84,18 @@ pub fn load() {
     assert Ok(recipient_nickname) = dynamic.element(row, 9)
     assert Ok(recipient_nickname) =
       run_sql.dynamic_option(recipient_nickname, dynamic.string)
+    assert Ok(author_email_address) = dynamic.element(row, 10)
+    assert Ok(author_email_address) = dynamic.string(author_email_address)
+    assert Ok(author_email_address) =
+      authentication.validate_email(author_email_address)
+    assert Ok(author_nickname) = dynamic.element(row, 11)
+    assert Ok(author_nickname) =
+      run_sql.dynamic_option(author_nickname, dynamic.string)
 
     Message(
       id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
-      from: string.append(int.to_string(conversation_id), "@plummail.co"),
+      author: Identifier(id: author_id, email_address: author_email_address, nickname: author_nickname),
       to: Identifier(
         id: recipient_id,
         email_address: recipient_email_address,
@@ -144,8 +151,11 @@ fn send(config, message: Message) {
     ",
       as_html(message.content),
       "
-    <hr>
-    <p>This message was sent from Plum Mail.</p>
+    <br>
+    <br>
+    <p><em style=\"font-style:italic;\">",
+    message.author.email_address.value,
+    " sent you this message using Plum Mail.</em></p>
     <a href=\"",
       authenticated_link(client_origin, message.id.0, message.to.id),
       "\">Click here to reply</a>
