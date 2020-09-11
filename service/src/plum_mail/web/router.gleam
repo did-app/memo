@@ -18,7 +18,6 @@ import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/authentication.{Identifier}
-import plum_mail/web/session
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss.{Message}
 import plum_mail/discuss/start_conversation
@@ -37,11 +36,46 @@ pub fn redirect(uri: String) -> Response(BitBuilder) {
   http.Response(status: 303, headers: [tuple("location", uri)], body: body)
 }
 
-fn load_participation(conversation_id, request) {
+fn load_cookies(request, client_origin) {
+  let origin =
+    http.get_req_header(request, "origin")
+    |> option.from_result()
+  let referrer =
+    http.get_req_header(request, "referer`")
+    |> option.from_result()
+    |> option.map(fn(referrer) {
+      assert Ok(referrer) = uri.parse(referrer)
+      assert Ok(origin) = uri.origin(referrer)
+      origin
+    })
+
+  assert Some(client_origin) = option.or(origin, referrer)
+
+  let cookies = http.get_req_cookies(request)
+  let refresh_token =
+    list.key_find(cookies, "refresh")
+    |> option.from_result()
+  let session_token =
+    list.key_find(cookies, "session")
+    |> option.from_result()
+  tuple(refresh_token, session_token)
+}
+
+fn load_session(request, client_origin) {
+  let tuple(_, session_token) = load_cookies(request, client_origin)
+  try session = option.to_result(session_token, error.Unauthenticated)
+  authentication.load_session(session)
+  |> result.map_error(fn(_: Nil) { error.Unauthenticated })
+}
+
+fn load_participation(conversation_id, request, client_origin) {
   try conversation_id =
     int.parse(conversation_id)
-    |> result.map_error(fn(x) { todo("mapping conversation id") })
-  discuss.load_participation(conversation_id, session.extract(request))
+    |> result.map_error(fn(_: Nil) {
+      error.BadRequest("Invalid conversation id")
+    })
+  try identifier_id = load_session(request, client_origin)
+  discuss.load_participation(conversation_id, identifier_id)
 }
 
 pub fn route(
@@ -49,9 +83,30 @@ pub fn route(
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
+    ["authenticate"] -> {
+      try params = acl.parse_json(request)
+      try link_token = acl.optional(params, "link_token", acl.as_string)
+      let tuple(refresh_token, _) = load_cookies(request, config.client_origin)
+      assert tuple("user_agent", Ok(user_agent)) = tuple(
+        "user_agent",
+        http.get_req_header(request, "user-agent"),
+      )
+      try tuple(refresh_token, session_token) =
+        authentication.authenticate(link_token, refresh_token, user_agent)
+        |> result.map_error(fn(e) { todo("map auth error") })
+      let cookie_defaults = http.cookie_defaults(request.scheme)
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> http.set_resp_cookie("session", session_token, cookie_defaults)
+      |> http.set_resp_cookie(
+        "refresh",
+        refresh_token,
+        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
+      )
+      |> Ok
+    }
     ["inbox"] -> {
-      try identifier_id =
-        session.require_authentication(session.extract(request))
+      try identifier_id = load_session(request, config.client_origin)
       try conversations = show_inbox.execute(identifier_id)
       // |> result.map_error(fn(x) { todo("mapping show inbox") })
       // If this conversations is the same as the top level conversation object for a page,
@@ -66,8 +121,7 @@ pub fn route(
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
-      try identifier_id =
-        session.require_authentication(session.extract(request))
+      try identifier_id = load_session(request, config.client_origin)
       try conversation = start_conversation.execute(topic, identifier_id)
       redirect(string.append(
         string.append(config.client_origin, "/c/"),
@@ -77,7 +131,7 @@ pub fn route(
     }
     // This will need participation for cursor
     ["c", id] -> {
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try participants =
         discuss.load_participants(participation.conversation.id)
       try messages = discuss.load_messages(participation.conversation.id)
@@ -97,7 +151,7 @@ pub fn route(
                 let Identifier(email_address: email_address, ..) = identifier
                 json.object([
                   tuple("content", json.string(content)),
-                  tuple("author", json.string(email_address)),
+                  tuple("author", json.string(email_address.value)),
                   tuple(
                     "inserted_at",
                     json.string(datetime.to_human(inserted_at)),
@@ -112,7 +166,7 @@ pub fn route(
             json.object([
               tuple(
                 "email_address",
-                json.string(participation.identifier.email_address),
+                json.string(participation.identifier.email_address.value),
               ),
               tuple(
                 "nickname",
@@ -132,23 +186,11 @@ pub fn route(
       |> http.set_resp_body(body)
       |> Ok
     }
-    // This could be participant_id
-    ["i", conversation_id, identifier_id] -> {
-      let cookie_defaults = http.cookie_defaults(request.scheme)
-      let url = string.join([config.client_origin, "/c/", conversation_id], "")
-      redirect(url)
-      |> http.set_resp_cookie(
-        "session",
-        identifier_id,
-        // http.CookieAttributes(..cookie_defaults, same_site: Some(http.None)),
-        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-      )
-      |> Ok
-    }
+
     ["c", id, "participant"] -> {
       try params = acl.parse_json(request)
       try params = add_participant.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = add_participant.execute(participation, params)
       // FIXME do we need to update http
       http.response(201)
@@ -158,7 +200,7 @@ pub fn route(
     ["c", id, "notify"] -> {
       try params = acl.parse_json(request)
       try params = set_notification.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = set_notification.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -169,7 +211,7 @@ pub fn route(
     ["c", id, "message"] -> {
       try params = acl.parse_json(request)
       try params = write_message.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = write_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -178,7 +220,7 @@ pub fn route(
     ["c", id, "read"] -> {
       try params = acl.parse_json(request)
       try params = read_message.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = read_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -187,7 +229,7 @@ pub fn route(
     ["c", id, "pin"] -> {
       try params = acl.parse_json(request)
       try params = add_pin.params(params)
-      try participation = load_participation(id, request)
+      try participation = load_participation(id, request, config.client_origin)
       try _ = add_pin.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))

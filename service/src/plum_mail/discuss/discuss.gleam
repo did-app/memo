@@ -10,7 +10,6 @@ import plum_mail/authentication.{Identifier}
 // Session is more than a web thing, anywhere you can be a session.
 // FIXME date_time or Datetime
 import datetime.{DateTime}
-import plum_mail/web/session
 
 pub type Conversation {
   Conversation(
@@ -36,7 +35,7 @@ pub fn conversation_to_json(conversation: Conversation) {
           let Identifier(id: id, email_address: email_address, ..) = participant
           json.object([
             tuple("id", json.int(id)),
-            tuple("email_address", json.string(email_address)),
+            tuple("email_address", json.string(email_address.value)),
           ])
         },
       )),
@@ -51,6 +50,7 @@ pub fn load_participants(conversation_id) {
       FROM participants AS p
       JOIN identifiers AS i ON i.id = p.identifier_id
       WHERE conversation_id = $1
+      ORDER BY p.inserted_at ASC
       "
   let args = [pgo.int(conversation_id)]
   run_sql.execute(
@@ -61,6 +61,8 @@ pub fn load_participants(conversation_id) {
       assert Ok(id) = dynamic.int(id)
       assert Ok(email_address) = dynamic.element(row, 1)
       assert Ok(email_address) = dynamic.string(email_address)
+      assert Ok(email_address) = authentication.validate_email(email_address)
+
       assert Ok(nickname) = dynamic.element(row, 2)
       assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
       Identifier(id: id, email_address: email_address, nickname: nickname)
@@ -101,6 +103,9 @@ pub fn load_messages(conversation_id) {
       assert Ok(author_id) = dynamic.int(author_id)
       assert Ok(author_email_address) = dynamic.element(row, 4)
       assert Ok(author_email_address) = dynamic.string(author_email_address)
+      assert Ok(author_email_address) =
+        authentication.validate_email(author_email_address)
+
       assert Ok(author_nickname) = dynamic.element(row, 5)
       assert Ok(author_nickname) =
         run_sql.dynamic_option(author_nickname, dynamic.string)
@@ -173,9 +178,8 @@ pub type Participation {
 }
 
 // Can call user session authentication?
-pub fn load_participation(conversation_id: Int, user_session: session.Session) {
+pub fn load_participation(conversation_id: Int, identifier_id: Int) {
   // BECOMES a LEFT JOIN for open conversation
-  try identifier_id = session.require_authentication(user_session)
   let sql =
     "
     SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, i.id, i.email_address, i.nickname
@@ -206,6 +210,7 @@ pub fn load_participation(conversation_id: Int, user_session: session.Session) {
     assert Ok(id) = dynamic.int(id)
     assert Ok(email_address) = dynamic.element(row, 6)
     assert Ok(email_address) = dynamic.string(email_address)
+    assert Ok(email_address) = authentication.validate_email(email_address)
     assert Ok(nickname) = dynamic.element(row, 7)
     assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
 

@@ -3,9 +3,20 @@ import * as Client from "../client.js";
 
 export default async function() {
   const page = new Page({ target: document.body });
+
+  let fragment = window.location.hash.substring(1);
+  let params = new URLSearchParams(fragment);
+  let code = params.get("code");
+  let resp = await Client.authenticate(code)
+  if (resp.status != 200) {
+    window.location.pathname = "/sign_in"
+  }
+
   let response = await Client.fetchInbox();
   if (response.status != 200) {
-    window.location.pathname = "/sign_in"
+    // window.location.pathname = "/sign_in"
+    throw "Could not find conversation"
+
   }
   let {conversations} = await response.json()
   console.log(conversations);

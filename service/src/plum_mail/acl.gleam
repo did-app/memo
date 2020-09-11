@@ -11,6 +11,7 @@ import gleam/uri
 import gleam/http.{Request}
 import gleam/json
 import plum_mail/error
+import plum_mail/authentication
 
 fn check_method(request, methods) {
   let Request(method: method, ..) = request
@@ -81,6 +82,14 @@ pub fn as_string(raw) {
   case dynamic.string(raw) {
     Ok(value) -> Ok(value)
     Error(reason) -> Error(reason)
+  }
+}
+
+pub fn as_email(raw) {
+  try raw = as_string(raw)
+  case authentication.validate_email(raw) {
+    Ok(value) -> Ok(value)
+    Error(Nil) -> Error("not a valid email")
   }
 }
 

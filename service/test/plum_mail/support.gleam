@@ -8,6 +8,7 @@ import gleam/crypto
 import gleam/http
 import gleam/json
 import plum_mail/config
+import plum_mail/authentication.{EmailAddress}
 import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
 
@@ -21,7 +22,9 @@ pub fn test_config() {
 pub fn generate_email_address(domain) {
   crypto.strong_random_bytes(8)
   |> base.url_encode64(False)
+  |> string.append("@")
   |> string.append(domain)
+  |> EmailAddress()
 }
 
 pub fn get_resp_cookie(response) {
@@ -36,7 +39,9 @@ pub fn get_conversation(id, session) {
     http.default_req()
     |> http.set_path(string.append("/c/", int.to_string(id)))
     |> http.prepend_req_header("cookie", string.append("session=", session))
+    |> http.prepend_req_header("origin", test_config().client_origin)
     |> http.set_req_body(<<>>)
+
   let http.Response(body: body, ..) = handle(request, test_config())
   let body = bit_builder.to_bit_string(body)
   assert Ok(body) = bit_string.to_string(body)

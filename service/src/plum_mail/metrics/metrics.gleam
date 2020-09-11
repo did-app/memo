@@ -6,7 +6,6 @@ import gleam/option.{None}
 import gleam/string
 import gleam/pgo
 import plum_mail/run_sql
-import plum_mail/web/session
 import plum_mail/discuss/discuss
 import plum_mail/discuss/write_message
 
@@ -56,10 +55,7 @@ pub fn execute(conversation_id, identifier_id) {
   assert Ok(identifier_id) = dynamic.string(identifier_id)
   assert Ok(identifier_id) = int.parse(identifier_id)
   assert Ok(participation) =
-    discuss.load_participation(
-      conversation_id,
-      session.authenticated(identifier_id),
-    )
+    discuss.load_participation(conversation_id, identifier_id)
   assert Ok(rows) = load(conversation_id)
   case rows {
     [] -> Nil

@@ -6,9 +6,20 @@ export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
+
+  let fragment = window.location.hash.substring(1);
+  let params = new URLSearchParams(fragment);
+  let code = params.get("code");
+  let resp = await Client.authenticate(code)
+  window.location.hash = "#"
+  if (resp.status != 200) {
+    window.location.pathname = "/sign_in"
+  }
+
   let response = await Client.fetchConversation(conversationId);
   if (response.status != 200) {
-    window.location.pathname = "/sign_in"
+    // window.location.pathname = "/sign_in"
+    throw "Could not find conversation"
   }
   let {conversation, participation, messages, pins} = await response.json();
   let nickname = participation["nickname"];
