@@ -4,6 +4,7 @@ import gleam/io
 import gleam/list
 import gleam/option.{None}
 import gleam/string
+import gleam/json
 import gleam/pgo
 import plum_mail/run_sql
 import plum_mail/discuss/discuss
@@ -12,9 +13,10 @@ import plum_mail/discuss/write_message
 pub fn load(metric_id) {
   let sql =
     "
-    SELECT c.topic, COUNT(m.counter)
+    SELECT c.topic, COUNT(m.counter), pl.participants
     FROM conversations AS c
     LEFT JOIN messages AS m ON m.conversation_id = c.id
+    JOIN participant_lists AS pl ON pl.conversation_id = c.id
     WHERE c.inserted_at > NOW() - INTERVAL '1 HOURS'
     OR m.inserted_at > NOW() - INTERVAL '1 HOURS'
     AND c.id <> $1
@@ -26,14 +28,28 @@ pub fn load(metric_id) {
     assert Ok(topic) = dynamic.string(topic)
     assert Ok(count) = dynamic.element(row, 1)
     assert Ok(count) = dynamic.int(count)
-    tuple(topic, count)
+    assert Ok(participants) = dynamic.element(row, 2)
+    assert Ok(participants) = dynamic.string(participants)
+    assert Ok(participants) = json.decode(participants)
+    let participants = dynamic.from(participants)
+    assert Ok(participants) =
+      dynamic.typed_list(
+        participants,
+        fn(item) {
+          assert Ok(email_address) = dynamic.field(item, "email_address")
+          assert Ok(email_address) = dynamic.string(email_address)
+          Ok(email_address)
+        },
+      )
+    tuple(topic, count, participants)
   }
   run_sql.execute(sql, args, mapper)
 }
 
 fn list_item(row) {
-  let tuple(topic, count) = row
-  ["- `", topic, "` sent **", int.to_string(count), "** messages"]
+  let tuple(topic, count, participants) = row
+  let participants = string.join(participants, ", ")
+  ["- `", topic, "` sent **", int.to_string(count), "** messages to ", participants]
   |> string.join("")
 }
 
