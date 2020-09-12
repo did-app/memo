@@ -33,7 +33,8 @@
     event.target.style.height = "1px";
     event.target.style.height = (+event.target.scrollHeight)+"px";
     const $composeMenu = document.getElementById('compose-menu');
-    $composeMenu.scrollIntoView();
+    // TODO reinstate but Breaks on iOS
+    // $composeMenu.scrollIntoView();
   }
 </script>
 
