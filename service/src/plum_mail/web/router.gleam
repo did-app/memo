@@ -49,6 +49,7 @@ fn load_cookies(request, client_origin) {
       origin
     })
 
+  // Test in router test
   assert Some(client_origin) = option.or(origin, referrer)
 
   let cookies = http.get_req_cookies(request)
