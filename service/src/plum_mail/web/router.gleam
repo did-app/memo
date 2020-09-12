@@ -49,7 +49,8 @@ fn load_cookies(request, client_origin) {
       origin
     })
 
-  // Test in router test
+  // Test in router test, return 403 if cookies are set.
+  // Would it be easier to return a single result/option
   assert Some(client_origin) = option.or(origin, referrer)
 
   let cookies = http.get_req_cookies(request)
