@@ -13,14 +13,18 @@ import plum_mail/discuss/write_message
 pub fn load(metric_id) {
   let sql =
     "
-    SELECT c.topic, COUNT(m.counter), pl.participants
-    FROM conversations AS c
-    LEFT JOIN messages AS m ON m.conversation_id = c.id
-    JOIN participant_lists AS pl ON pl.conversation_id = c.id
-    WHERE c.inserted_at > NOW() - INTERVAL '1 HOURS'
-    OR m.inserted_at > NOW() - INTERVAL '1 HOURS'
-    AND c.id <> $1
-    GROUP BY c.id
+    WITH active_conversations AS (
+        SELECT c.id, c.topic, COUNT(m.counter) as count
+        FROM conversations AS c
+        LEFT JOIN messages AS m ON m.conversation_id = c.id
+        WHERE c.inserted_at > NOW() - INTERVAL '1 HOURS'
+        OR m.inserted_at > NOW() - INTERVAL '1 HOURS'
+        AND c.id <> $1
+        GROUP BY c.id
+    )
+    SELECT topic, count, pl.participants
+    FROM active_conversations
+    JOIN participant_lists AS pl ON pl.conversation_id = active_conversations.id
     "
   let args = [pgo.int(metric_id)]
   let mapper = fn(row) {
