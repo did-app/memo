@@ -108,58 +108,60 @@
     </form>
   </main>
   <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
-    <h3 class="font-bold">Pins</h3>
-    <style media="screen">
-      .last-only {
-        display: none;
-      }
+    <div class="sticky top-0">
+      <h3 class="font-bold">Pins</h3>
+      <style media="screen">
+        .last-only {
+          display: none;
+        }
 
-      .last-only:last-child {
-        display: block;
-      }
-    </style>
-    <ul id="pins">
-      <li class="last-only">Select message text to add first pin.</li>
-      {#each pins as {counter, content}}
-      <li class="bg-white border-indigo-700 border-l-4 m-1 p-2 shadow-lg text-xl"><a href="#{counter}">{content}</a></li>
-      {/each}
-    </ul>
-    <h3 class="font-bold mt-8">Participants</h3>
-    <ul id="participants">
-      {#each participants as {name, emailAddress}}
-      <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
-      {/each}
-    </ul>
-    <form class="" data-action="addParticipant" method="post">
-      <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="text" name="emailAddress" value="" placeholder="email address">
-      <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
-    </form>
-    <h3 class="font-bold mt-4">Notifications</h3>
-    <p>Send me notifications for</p>
-    <label class="flex px-2 py-1 justify-start items-start">
-      <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-        <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'all'}>
-        <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-      </div>
-      <span class="text-gray-700 pr-2">All messages</span>
-    </label>
-    <label class="flex px-2 py-1 justify-start items-start">
-      <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-        <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'concluded'}>
-        <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-      </div>
-      <span class="text-gray-700 pr-2">Conversation concluded</span>
-    </label>
-    <label class="flex px-2 py-1 justify-start items-start">
-      <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-        <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'none'}>
-        <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-      </div>
-      <span class="text-gray-700 pr-2">Never</span>
-    </label>
+        .last-only:last-child {
+          display: block;
+        }
+      </style>
+      <ul id="pins">
+        <li class="last-only">Select message text to add first pin.</li>
+        {#each pins as {counter, content}}
+        <li class="bg-white border-indigo-700 border-l-4 m-1 p-2 shadow-lg text-xl"><a href="#{counter}">{content}</a></li>
+        {/each}
+      </ul>
+      <h3 class="font-bold mt-8">Participants</h3>
+      <ul id="participants">
+        {#each participants as {name, emailAddress}}
+        <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
+        {/each}
+      </ul>
+      <form class="" data-action="addParticipant" method="post">
+        <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="text" name="emailAddress" value="" placeholder="email address">
+        <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
+      </form>
+      <h3 class="font-bold mt-4">Notifications</h3>
+      <p>Send me notifications for</p>
+      <label class="flex px-2 py-1 justify-start items-start">
+        <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+          <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'all'}>
+          <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
+            <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
+          </div>
+          <span class="text-gray-700 pr-2">All messages</span>
+        </label>
+        <label class="flex px-2 py-1 justify-start items-start">
+          <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+            <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'concluded'}>
+            <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
+              <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
+            </div>
+            <span class="text-gray-700 pr-2">Conversation concluded</span>
+          </label>
+          <label class="flex px-2 py-1 justify-start items-start">
+            <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+              <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'none'}>
+              <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
+                <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
+              </div>
+              <span class="text-gray-700 pr-2">Never</span>
+            </label>
+    </div>
   </aside>
 </div>
 {/if }
