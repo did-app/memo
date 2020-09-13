@@ -72,6 +72,7 @@ CREATE TABLE message_notifications (
   id SERIAL PRIMARY KEY,
   conversation_id INT NOT NULL,
   counter INT NOT NULL,
+  -- TODO check does foreign key mean the combination is valid?
   FOREIGN KEY (conversation_id, counter) REFERENCES messages(conversation_id, counter),
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()

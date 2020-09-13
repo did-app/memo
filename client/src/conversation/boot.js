@@ -25,6 +25,7 @@ export default async function() {
   let nickname = participation["nickname"];
   let emailAddress = participation["email_address"];
   let displayName = nickname || emailAddress.split("@")[0];
+  let cursor = participation["cursor"];
   let topic = conversation.topic;
   let resolved = conversation.resolved;
   let notify = participation.notify;
@@ -34,12 +35,17 @@ export default async function() {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
+  var highest;
   messages = messages.map(function ({counter, content, author, inserted_at}) {
     const [intro] = content.trim().split(/\r?\n/)
     const html = marked(content)
-    const checked = true
+    // checked = closed
+    const checked = !(cursor < counter)
+    highest = counter
     return {counter, checked, author, date: inserted_at, intro, html}
   })
+  Client.readMessage(conversationId, highest)
+  // Always leave the last open
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false
   }

@@ -38,6 +38,14 @@ export async function writeMessage(id, content, from, resolve) {
   console.log(response);
   return {};
 }
+export async function readMessage(id, counter) {
+  const response = await fetch("__API_ORIGIN__/c/" + id + "/read", {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ counter})
+  });
+  return response;
+}
 export async function addPin(id, counter, content) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/pin", {
     method: "POST",

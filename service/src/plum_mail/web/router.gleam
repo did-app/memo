@@ -141,7 +141,7 @@ pub fn route(
       let c = participation.conversation
       let c = discuss.Conversation(..c, participants: participants)
       // TODO fix the conversation updates.
-      let body =
+      let data =
         json.object([
           tuple("conversation", discuss.conversation_to_json(c)),
           tuple(
@@ -192,14 +192,15 @@ pub fn route(
                 "notify",
                 json.string(discuss.notify_to_string(participation.notify)),
               ),
+              tuple(
+                "cursor",
+                json.int(participation.cursor),
+              ),
             ]),
           ),
         ])
-        |> json.encode()
-        |> bit_string.from_string
-        |> bit_builder.from_bit_string
       http.response(200)
-      |> http.set_resp_body(body)
+      |> web.set_resp_json(data)
       |> Ok
     }
 
