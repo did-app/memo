@@ -152,6 +152,7 @@ pub fn route(
                 let Message(counter, content, inserted_at, identifier) = message
                 let Identifier(email_address: email_address, ..) = identifier
                 json.object([
+                  tuple("counter", json.int(counter)),
                   tuple("content", json.string(content)),
                   tuple("author", json.string(email_address.value)),
                   tuple(

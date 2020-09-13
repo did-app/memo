@@ -7,6 +7,7 @@ import gleam/io
 import gleam/list
 import gleam/map
 import gleam/option.{None, Some}
+import gleam/string
 import gleam/uri
 import gleam/http.{Request}
 import gleam/json
@@ -112,6 +113,7 @@ pub fn error_response(reason) {
     error.BadRequest(detail) -> tuple(400, detail)
     error.Unauthenticated -> tuple(401, "")
     error.Forbidden -> tuple(403, "")
+    error.Unprocessable(field: field, ..) -> tuple(422, string.append("Could not process with invalid field ", field))
   }
   http.response(status)
   |> http.set_resp_body(bit_builder.from_bit_string(bit_string.from_string(body)))

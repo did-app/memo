@@ -38,14 +38,13 @@ export async function writeMessage(id, content, from, resolve) {
   console.log(response);
   return {};
 }
-export async function addPin(id, content) {
+export async function addPin(id, counter, content) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/pin", {
     method: "POST",
     credentials: "include",
-    body: JSON.stringify({ content })
+    body: JSON.stringify({ counter, content })
   });
-  console.log(response);
-  return {};
+  return response;
 }
 export async function setNotification(id, notify) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/notify", {
