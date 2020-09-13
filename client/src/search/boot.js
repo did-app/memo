@@ -22,7 +22,7 @@ export default async function() {
   console.log(conversations);
   let conversationSearch = new MiniSearch({
      fields: ['topic', 'participants', 'slug'], // fields to index for full-text search
-     storeFields: ['topic', 'participants', 'slug'], // fields to return with search results
+     storeFields: ['topic', 'next', 'participants', 'slug'], // fields to return with search results
      tokenize: (string, fieldName) => {
        return string.split(/[\s,@]+/)
      },

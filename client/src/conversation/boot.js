@@ -11,7 +11,7 @@ export default async function() {
   let params = new URLSearchParams(fragment);
   let code = params.get("code");
   let resp = await Client.authenticate(code)
-  window.location.hash = "#"
+
   if (resp.status != 200) {
     window.location.pathname = "/sign_in"
   }
@@ -44,13 +44,27 @@ export default async function() {
     highest = counter
     return {counter, checked, author, date: inserted_at, intro, html}
   })
-  Client.readMessage(conversationId, highest)
   // Always leave the last open
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false
   }
   document.title = topic
   page.$set({emailAddress, nickname, displayName, topic, notify, resolved, participants, messages, pins})
+  if (code) {
+    window.location.hash = "#"
+  } else {
+    requestAnimationFrame(function () {
+      let id = window.location.hash.substr(1)
+      console.log(id);
+      let el = document.getElementById(id)
+      console.log(el);
+      if (el) {
+        el.scrollIntoView()
+      }
+
+    })
+  }
+  Client.readMessage(conversationId, highest)
 
   document.addEventListener('submit', async function (event) {
     event.preventDefault()
@@ -153,7 +167,7 @@ export default async function() {
         let response = await Client.addPin(conversationId, parseInt(selectionMessageCounter), selectionContent)
         console.log(response);
         if (response.status === 201) {
-          page.$set({pins: pins.concat(selectionContent)})
+          // page.$set({pins: pins.concat(selectionContent)})
           window.location.reload()
 
         } else {
