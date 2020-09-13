@@ -19,7 +19,7 @@ import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/authentication.{Identifier}
 import plum_mail/web/helpers as web
-import plum_mail/discuss/discuss.{Message}
+import plum_mail/discuss/discuss.{Message, Pin}
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/show_inbox
 import plum_mail/discuss/set_notification
@@ -162,7 +162,20 @@ pub fn route(
               },
             )),
           ),
-          tuple("pins", json.list(list.map(pins, fn(p) { json.string(p) }))),
+          tuple(
+            "pins",
+            json.list(list.map(
+              pins,
+              fn(pin) {
+                let Pin(counter, identifier_id, content) = pin
+                json.object([
+                  tuple("counter", json.int(counter)),
+                  tuple("identifier_id", json.int(identifier_id)),
+                  tuple("content", json.string(content)),
+                ])
+              },
+            )),
+          ),
           tuple(
             "participation",
             json.object([

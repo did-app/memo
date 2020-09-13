@@ -49,7 +49,14 @@ pub fn load(metric_id) {
 fn list_item(row) {
   let tuple(topic, count, participants) = row
   let participants = string.join(participants, ", ")
-  ["- `", topic, "` sent **", int.to_string(count), "** messages to ", participants]
+  [
+    "- `",
+    topic,
+    "` sent **",
+    int.to_string(count),
+    "** messages to ",
+    participants,
+  ]
   |> string.join("")
 }
 

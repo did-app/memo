@@ -121,10 +121,14 @@ pub fn load_messages(conversation_id) {
   )
 }
 
+pub type Pin {
+  Pin(counter: Int, identifier_id: Int, content: String)
+}
+
 pub fn load_pins(conversation_id) {
   let sql =
     "
-        SELECT p.content
+        SELECT p.counter, p.identifier_id, p.content
         FROM pins AS p
         WHERE conversation_id = $1
         "
@@ -133,9 +137,13 @@ pub fn load_pins(conversation_id) {
     sql,
     args,
     fn(row) {
-      assert Ok(content) = dynamic.element(row, 0)
+      assert Ok(counter) = dynamic.element(row, 0)
+      assert Ok(counter) = dynamic.int(counter)
+      assert Ok(identifier_id) = dynamic.element(row, 1)
+      assert Ok(identifier_id) = dynamic.int(identifier_id)
+      assert Ok(content) = dynamic.element(row, 2)
       assert Ok(content) = dynamic.string(content)
-      content
+      Pin(counter, identifier_id, content)
     },
   )
 }

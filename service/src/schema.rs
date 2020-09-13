@@ -63,6 +63,8 @@ table! {
     pins (id) {
         id -> Int4,
         conversation_id -> Int4,
+        counter -> Int4,
+        identifier_id -> Int4,
         content -> Text,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
@@ -94,7 +96,7 @@ joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (author_id));
 joinable!(participants -> conversations (conversation_id));
 joinable!(participants -> identifiers (identifier_id));
-joinable!(pins -> conversations (conversation_id));
+joinable!(pins -> identifiers (identifier_id));
 joinable!(refresh_tokens -> link_tokens (link_token_selector));
 joinable!(session_tokens -> refresh_tokens (refresh_token_selector));
 

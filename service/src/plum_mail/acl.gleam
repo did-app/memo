@@ -85,6 +85,13 @@ pub fn as_string(raw) {
   }
 }
 
+pub fn as_int(raw) {
+  case dynamic.int(raw) {
+    Ok(value) -> Ok(value)
+    Error(reason) -> Error(reason)
+  }
+}
+
 pub fn as_email(raw) {
   try raw = as_string(raw)
   case authentication.validate_email(raw) {
