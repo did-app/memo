@@ -54,10 +54,10 @@
 <div class="sm:flex">
   <main class="sm:w-2/3 max-w-md mx-auto md:mr-0 md:max-w-3xl px-1 md:px-2 md:mb-16">
     <div id="messages" class="">
-      {#each messages as {checked, author, date, intro, html}, count}
-      <article class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
-        <input id="message-{count}" class="message-checkbox hidden" type="checkbox" {checked}>
-        <label class="cursor-pointer" for="message-{count}">
+      {#each messages as {counter, checked, author, date, intro, html}}
+      <article id="{counter}" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
+        <input id="message-{counter}" class="message-checkbox hidden" type="checkbox" {checked}>
+        <label class="cursor-pointer" for="message-{counter}">
           <header class="py-1 md:py-4 flex text-gray-600">
             <span class="font-bold ml-2 md:ml-20 truncate">{author}</span>
             <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">{date}</span>
@@ -120,8 +120,8 @@
     </style>
     <ul id="pins">
       <li class="last-only">Select message text to add first pin.</li>
-      {#each pins as pin}
-      <li class="bg-white border-indigo-700 border-l-4 m-1 p-2 shadow-lg text-xl">{pin}</li>
+      {#each pins as {counter, content}}
+      <li class="bg-white border-indigo-700 border-l-4 m-1 p-2 shadow-lg text-xl"><a href="#{counter}">{content}</a></li>
       {/each}
     </ul>
     <h3 class="font-bold mt-8">Participants</h3>

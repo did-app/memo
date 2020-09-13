@@ -34,11 +34,11 @@ export default async function() {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
-  messages = messages.map(function ({content, author, inserted_at}) {
+  messages = messages.map(function ({counter, content, author, inserted_at}) {
     const [intro] = content.trim().split(/\r?\n/)
     const html = marked(content)
     const checked = true
-    return {checked, author, date: inserted_at, intro, html}
+    return {counter, checked, author, date: inserted_at, intro, html}
   })
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false
@@ -79,6 +79,7 @@ export default async function() {
   // Could also be fixed with a div overlay
   let delayClick;
   let selectionContent;
+  let selectionMessageCounter;
   document.addEventListener('selectionchange', function (event) {
     const selection = window.getSelection();
     const range = selection.getRangeAt(0);
@@ -97,6 +98,7 @@ export default async function() {
       return true
     }
     selectionContent = range.toString()
+    selectionMessageCounter = message.closest("article").id
     const { top: selTop, left: selLeft, width: selWidth } = range.getBoundingClientRect();
     const tipEl = document.querySelector(".texttip")
     const tipWidth = tipEl.offsetWidth;
@@ -142,9 +144,15 @@ export default async function() {
         const snippet = "\r\n> " + selectionContent.replace(/\r?\n/g, "\r\n> ");
         document.querySelector('textarea').value += snippet
       } else if (action === "pinSelection") {
-        page.$set({pins: pins.concat(selectionContent)})
-        let response = await Client.addPin(conversationId, selectionContent)
-        window.location.reload()
+        let response = await Client.addPin(conversationId, parseInt(selectionMessageCounter), selectionContent)
+        console.log(response);
+        if (response.status === 201) {
+          page.$set({pins: pins.concat(selectionContent)})
+          window.location.reload()
+
+        } else {
+          alert("Failed to add pin")
+        }
       }
     }
     if (delayClick) {

@@ -95,7 +95,11 @@ pub fn load() {
     Message(
       id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
-      author: Identifier(id: author_id, email_address: author_email_address, nickname: author_nickname),
+      author: Identifier(
+        id: author_id,
+        email_address: author_email_address,
+        nickname: author_nickname,
+      ),
       to: Identifier(
         id: recipient_id,
         email_address: recipient_email_address,
@@ -154,8 +158,8 @@ fn send(config, message: Message) {
     <br>
     <br>
     <p><em style=\"font-style:italic;\">",
-    message.author.email_address.value,
-    " sent you this message using Plum Mail.</em></p>
+      message.author.email_address.value,
+      " sent you this message using Plum Mail.</em></p>
     <a href=\"",
       authenticated_link(client_origin, message.id.0, message.to.id),
       "\">Click here to reply</a>
