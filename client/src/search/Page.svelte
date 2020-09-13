@@ -30,7 +30,7 @@
     <a class="block my-2 py-1 px-2 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl" href="/c/{id}#{next}">
       <h2 class="font-bold my-1">{topic}</h2>
       <div class="truncate">
-        {participants.map(p => p.email_address).join(", ")}
+        {participants}
       </div>
     </a>
     {/each}

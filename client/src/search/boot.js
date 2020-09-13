@@ -30,7 +30,13 @@ export default async function() {
        tokenize: (string) => string.split(/[\s,@]+/) // search query tokenizer
      }
    })
-   conversationSearch.addAll(conversations)
+   conversationSearch.addAll(conversations.map(function (c) {
+     let participants = c.participants.map(function (p) {
+       return p.email_address
+     }).join(", ")
+     return Object.assign({}, c, {participants})
+   }))
+
 
    function searchAll(term) {
      if (term.length == 0) {
