@@ -1,6 +1,6 @@
 import Page from "./Page.svelte";
 import * as Client from "../client.js";
-import {formValues} from "../utils"
+import {formValues} from "../dom"
 
 export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
