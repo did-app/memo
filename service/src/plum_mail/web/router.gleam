@@ -11,6 +11,7 @@ import gleam/result
 import gleam/uri
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
+import gleam/httpc
 import gleam/json
 // Web/utils let session = utils.extractsession
 import datetime
@@ -107,6 +108,66 @@ pub fn route(
       )
       |> Ok
     }
+    ["authenticate", "email"] -> {
+      try params = acl.parse_json(request)
+      try email_address = acl.required(params, "email_address", acl.as_email)
+      try identifier = authentication.lookup_identifier(email_address)
+      assert Ok(token) = authentication.generate_link_token(identifier.id)
+      let config.Config(
+        postmark_api_token: postmark_api_token,
+        client_origin: client_origin,
+      ) = config
+      let body =
+        [
+          "
+          <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+          <html xmlns=\"http://www.w3.org/1999/xhtml\">
+            <head>
+              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+              <meta name=\"x-apple-disable-message-reformatting\" />
+              <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
+              <title></title>
+            </head>
+            <body>
+              <main>
+              Sign in to your plum mail account with the authentication link below
+              <br>
+              <br>
+          ",
+          "<a href=\"",
+          client_origin,
+          "/#code=",
+          token,
+          "\">Click here to sign in</a>
+          </main>
+          ",
+        ]
+        |> string.join("")
+      let data =
+        json.object([
+          tuple("From", json.string("updates@plummail.co")),
+          tuple("To", json.string(email_address.value)),
+          tuple("Subject", json.string("Welcome back to plum mail")),
+          // tuple("TextBody", json.string(message.content)),
+          tuple("HtmlBody", json.string(body)),
+        ])
+      let request =
+        http.default_req()
+        |> http.set_method(http.Post)
+        |> http.set_host("api.postmarkapp.com")
+        |> http.set_path("/email")
+        |> http.prepend_req_header("content-type", "application/json")
+        |> http.prepend_req_header("accept", "application/json")
+        |> http.prepend_req_header(
+          "x-postmark-server-token",
+          postmark_api_token,
+        )
+        |> http.set_req_body(json.encode(data))
+      assert Ok(http.Response(status: 200, ..)) = httpc.send(request)
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+      |> Ok
+    }
     ["inbox"] -> {
       try identifier_id = load_session(request, config.client_origin)
       try conversations = show_inbox.execute(identifier_id)
@@ -192,10 +253,7 @@ pub fn route(
                 "notify",
                 json.string(discuss.notify_to_string(participation.notify)),
               ),
-              tuple(
-                "cursor",
-                json.int(participation.cursor),
-              ),
+              tuple("cursor", json.int(participation.cursor)),
             ]),
           ),
         ])
@@ -252,6 +310,10 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
     }
+    _ ->
+      http.response(404)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
   }
 }
 
@@ -261,14 +323,21 @@ pub fn handle(
 ) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
   // io.debug(request)
-  case route(request, config) {
-    Ok(response) -> response
-    Error(reason) -> acl.error_response(reason)
+  case request.method {
+    http.Options ->
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+    _ ->
+      case route(request, config) {
+        Ok(response) -> response
+        Error(reason) -> acl.error_response(reason)
+      }
   }
   |> http.prepend_resp_header(
     "access-control-allow-origin",
     config.client_origin,
   )
   |> http.prepend_resp_header("access-control-allow-credentials", "true")
+  |> http.prepend_resp_header("access-control-allow-headers", "content-type")
   // |> io.debug()
 }

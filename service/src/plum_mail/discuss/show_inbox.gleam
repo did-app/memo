@@ -65,7 +65,7 @@ pub fn execute(identifier_id) {
           tuple("resolved", json.bool(resolved)),
           tuple("participants", json.list(participants)),
           tuple("unread", json.bool(option.unwrap(latest, 0) > cursor)),
-          tuple("next", json.int(int.min(cursor + 1, option.unwrap(latest, 0))))
+          tuple("next", json.int(int.min(cursor + 1, option.unwrap(latest, 0)))),
         ])
       },
     )

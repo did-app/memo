@@ -1,6 +1,7 @@
 pub type InvalidField {
   Missing
   CastFailure(help: String)
+  NotRecognised
 }
 
 pub type Reason {

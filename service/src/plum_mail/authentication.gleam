@@ -8,6 +8,7 @@ import gleam/string
 import gleam/crypto
 import gleam/pgo
 import plum_mail/run_sql
+import plum_mail/error
 
 fn random_string(entropy) {
   crypto.strong_random_bytes(entropy)
@@ -303,6 +304,25 @@ pub fn identifier_from_email(email_address: EmailAddress) {
   let args = [pgo.text(email_address.value)]
   try [row] = run_sql.execute(sql, args, row_to_identifier)
   Ok(row)
+}
+
+pub fn lookup_identifier(email_address: EmailAddress) {
+  let sql =
+    "
+    SELECT id, email_address, nickname FROM identifiers WHERE email_address = $1
+    "
+  // Could return True of False field for new user
+  // Would enable Log or send email when new user is added
+  let args = [pgo.text(email_address.value)]
+  try rows = run_sql.execute(sql, args, row_to_identifier)
+  case rows {
+    [row] -> Ok(row)
+    [] ->
+      Error(error.Unprocessable(
+        field: "email_address",
+        failure: error.NotRecognised,
+      ))
+  }
 }
 
 pub fn update_nickname(identifier_id, nickname) {
