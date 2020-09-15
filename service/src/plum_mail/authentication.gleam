@@ -305,6 +305,7 @@ pub fn identifier_from_email(email_address: EmailAddress) {
   try [row] = run_sql.execute(sql, args, row_to_identifier)
   Ok(row)
 }
+
 pub fn lookup_identifier(email_address: EmailAddress) {
   let sql =
     "
@@ -315,9 +316,12 @@ pub fn lookup_identifier(email_address: EmailAddress) {
   let args = [pgo.text(email_address.value)]
   try rows = run_sql.execute(sql, args, row_to_identifier)
   case rows {
-      [row] ->
-      Ok(row)
-      [] -> Error(error.Unprocessable(field: "email_address", failure: error.NotRecognised))
+    [row] -> Ok(row)
+    [] ->
+      Error(error.Unprocessable(
+        field: "email_address",
+        failure: error.NotRecognised,
+      ))
   }
 }
 
