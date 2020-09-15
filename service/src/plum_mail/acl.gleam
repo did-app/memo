@@ -13,6 +13,7 @@ import gleam/http.{Request}
 import gleam/json
 import plum_mail/error
 import plum_mail/authentication
+import plum_mail/web/helpers as web
 
 fn check_method(request, methods) {
   let Request(method: method, ..) = request
@@ -109,7 +110,7 @@ pub fn as_bool(raw) {
 }
 
 pub fn error_response(reason) {
-  let tuple(status, body) = case reason {
+  let tuple(status, detail) = case reason {
     error.BadRequest(detail) -> tuple(400, detail)
     error.Unauthenticated -> tuple(401, "")
     error.Forbidden -> tuple(403, "")
@@ -119,5 +120,6 @@ pub fn error_response(reason) {
     )
   }
   http.response(status)
-  |> http.set_resp_body(bit_builder.from_bit_string(bit_string.from_string(body)))
+  |> web.set_resp_json(json.object([tuple("detail", json.string(detail))]))
+  // |> http.set_resp_body(bit_builder.from_bit_string(bit_string.from_string(body)))
 }

@@ -65,8 +65,8 @@ export async function setNotification(id, notify) {
   return {};
 }
 
-export async function requestEmailAuthentication() {
-  return await post("/authenticate/email", {});
+export async function requestEmailAuthentication(emailAddress) {
+  return await post("/authenticate/email", {email_address: emailAddress});
 }
 
 async function post(path, params) {
@@ -85,12 +85,11 @@ async function post(path, params) {
   return r.asyncFlatMap(async function(response) {
     let status = response.status;
     if (status === 200) {
-      console.log("jsoning");
       return await parseJSON(response)
       // 400 is an error client shouldn't see
     } else if (status === 422) {
-      // Assume decode is good, raise error if not
-      todo();
+      let error =  (await parseJSON(response)).unwrapOr({detail: "Bad response from server"})
+      return Fail(error)
     } else {
       // TODO this should alert
       return Fail({ detail: "Bad response from server", meta: { url, status } });
