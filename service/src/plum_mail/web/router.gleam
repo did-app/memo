@@ -107,6 +107,13 @@ pub fn route(
       )
       |> Ok
     }
+    ["authenticate", "email"] -> {
+        5
+        io.debug(request)
+        http.response(200)
+        |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+        |> Ok
+    }
     ["inbox"] -> {
       try identifier_id = load_session(request, config.client_origin)
       try conversations = show_inbox.execute(identifier_id)
@@ -252,6 +259,11 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
     }
+    _ -> {
+        http.response(404)
+        |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+        |> Ok
+    }
   }
 }
 
@@ -261,14 +273,19 @@ pub fn handle(
 ) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
   // io.debug(request)
-  case route(request, config) {
-    Ok(response) -> response
-    Error(reason) -> acl.error_response(reason)
+  case request.method {
+      http.Options -> http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      _ -> case route(request, config) {
+          Ok(response) -> response
+          Error(reason) -> acl.error_response(reason)
+      }
   }
   |> http.prepend_resp_header(
     "access-control-allow-origin",
     config.client_origin,
   )
   |> http.prepend_resp_header("access-control-allow-credentials", "true")
+  |> http.prepend_resp_header("access-control-allow-headers", "content-type")
   // |> io.debug()
 }
