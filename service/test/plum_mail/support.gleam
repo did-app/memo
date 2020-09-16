@@ -42,8 +42,8 @@ pub fn generate_identifier(domain) {
     let email_address = generate_email_address(domain)
     let sql =
       "
-      INSERT INTO identifiers (email_address)
-      VALUES ($1)
+      INSERT INTO identifiers (email_address, referred_by)
+      VALUES ($1, currval('identifiers_id_seq'))
       RETURNING id, email_address
       "
     // Could return True of False field for new user

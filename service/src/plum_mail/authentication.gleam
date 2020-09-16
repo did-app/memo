@@ -284,26 +284,8 @@ pub fn fetch_identifier(id) {
 }
 
 // https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com
-pub fn identifier_from_email(email_address: EmailAddress) {
-  let sql =
-    "
-    WITH new_identifier AS (
-        INSERT INTO identifiers (email_address)
-        VALUES ($1)
-        ON CONFLICT DO NOTHING
-        RETURNING *
-    )
-    SELECT id, email_address FROM new_identifier
-    UNION ALL
-    SELECT id, email_address FROM identifiers WHERE email_address = $1
-    "
-  // Could return True of False field for new user
-  // Would enable Log or send email when new user is added
-  let args = [pgo.text(email_address.value)]
-  try [identifier] = run_sql.execute(sql, args, row_to_identifier)
-  Ok(identifier)
-}
 
+// TODO remove, or send in the correct write message for attemted login, might result in special sign in action not general auth one
 pub fn lookup_identifier(email_address: EmailAddress) {
   let sql =
     "
