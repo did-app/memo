@@ -52,7 +52,8 @@ table! {
     participants (identifier_id, conversation_id) {
         identifier_id -> Int4,
         conversation_id -> Int4,
-        owner -> Bool,
+        original -> Bool,
+        invited_by -> Nullable<Int4>,
         cursor -> Int4,
         notify -> Varchar,
         inserted_at -> Timestamp,
@@ -96,7 +97,6 @@ joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (author_id));
 joinable!(participants -> conversations (conversation_id));
-joinable!(participants -> identifiers (identifier_id));
 joinable!(pins -> identifiers (identifier_id));
 joinable!(refresh_tokens -> link_tokens (link_token_selector));
 joinable!(session_tokens -> refresh_tokens (refresh_token_selector));

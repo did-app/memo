@@ -21,7 +21,7 @@ pub fn load() {
         FROM participants AS p
         JOIN conversations AS c ON c.id = p.conversation_id
         JOIN identifiers AS i on i.id = p.identifier_id
-        WHERE p.owner = TRUE
+        WHERE p.original = TRUE
     )
     SELECT email_address, COUNT(id)
     FROM owners

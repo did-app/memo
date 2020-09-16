@@ -17,16 +17,16 @@ pub fn params(raw: Dynamic) {
 
 pub fn execute(participation, params) {
   let Params(email_address: email_address) = params
-  try identifier = authentication.identifier_from_email(email_address)
-  let Participation(conversation: conversation, ..) = participation
+  try invited = authentication.identifier_from_email(email_address)
+  let Participation(conversation: conversation, identifier: author, ..) = participation
 
   // TODO have a creator or an "author"
   // have a notificatons table
   let sql =
     "
     WITH new_participant AS (
-        INSERT INTO participants (conversation_id, identifier_id, owner, cursor, notify)
-        VALUES ($1, $2, FALSE, 0, 'all')
+        INSERT INTO participants (conversation_id, identifier_id, original, invited_by, cursor, notify)
+        VALUES ($1, $2, FALSE, $3, 0, 'all')
         ON CONFLICT (identifier_id, conversation_id) DO NOTHING
         RETURNING *
     )
@@ -34,7 +34,7 @@ pub fn execute(participation, params) {
     UNION ALL
     SELECT identifier_id, conversation_id FROM participants WHERE conversation_id = $1 AND identifier_id = $2
     "
-  let args = [pgo.int(conversation.id), pgo.int(identifier.id)]
+  let args = [pgo.int(conversation.id), pgo.int(invited.id), pgo.int(author.id)]
   try [_] = run_sql.execute(sql, args, fn(x) { x })
-  Ok(tuple(identifier.id, conversation.id))
+  Ok(tuple(invited.id, conversation.id))
 }
