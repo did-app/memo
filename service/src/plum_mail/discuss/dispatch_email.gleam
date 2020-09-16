@@ -4,6 +4,7 @@ import gleam/int
 import gleam/io
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
 import gleam/string
 import gleam/http
 import gleam/httpc
@@ -75,6 +76,11 @@ pub fn load() {
     assert Ok(topic) = dynamic.element(row, 5)
     assert Ok(topic) = dynamic.string(topic)
     assert Ok(topic) = discuss.validate_topic(topic)
+    // TODO remove
+    |> result.map_error(fn(e) {
+        io.debug(topic)
+        Error(e)
+    })
     // assert Ok(resolved) = dynamic.element(row, 6)
     // assert Ok(resolved) = dynamic.bool(resolved)
     assert Ok(recipient_id) = dynamic.element(row, 7)
