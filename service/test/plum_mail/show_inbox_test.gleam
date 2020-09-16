@@ -13,11 +13,9 @@ import gleam/should
 pub fn unread_messages_in_conversation_test() {
   // Can left join on messages that were created before X pm
   // Ordered by most recent
-  let email_address = support.generate_email_address("me.test")
-  assert Ok(me) = authentication.identifier_from_email(email_address)
+  assert Ok(me) = support.generate_identifier("me.test")
 
-  let email_address = support.generate_email_address("alice.test")
-  assert Ok(alice) = authentication.identifier_from_email(email_address)
+  assert Ok(alice) = support.generate_identifier("alice.test")
 
   assert Ok(first) = discuss.validate_topic("First")
   assert Ok(c1) = start_conversation.execute(first, me.id)
@@ -29,7 +27,7 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(_) =
     add_participant.execute(
       participation,
-      add_participant.Params(email_address),
+      add_participant.Params(alice.email_address),
     )
   assert Ok(_) =
     write_message.execute(
@@ -47,7 +45,7 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(_) =
     add_participant.execute(
       participation,
-      add_participant.Params(email_address),
+      add_participant.Params(alice.email_address),
     )
 
   assert Ok(participation) = discuss.load_participation(c2.id, alice.id)

@@ -300,8 +300,8 @@ pub fn identifier_from_email(email_address: EmailAddress) {
   // Could return True of False field for new user
   // Would enable Log or send email when new user is added
   let args = [pgo.text(email_address.value)]
-  try [row] = run_sql.execute(sql, args, row_to_identifier)
-  Ok(row)
+  try [identifier] = run_sql.execute(sql, args, row_to_identifier)
+  Ok(identifier)
 }
 
 pub fn lookup_identifier(email_address: EmailAddress) {

@@ -41,8 +41,7 @@ fn add_participant(
 }
 
 pub fn successfully_add_new_participant_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
@@ -59,7 +58,7 @@ pub fn successfully_add_new_participant_test() {
 
   participants
   |> list.map(fn(x: authentication.Identifier) { x.email_address })
-  |> should.equal([email_address, invited_email_address])
+  |> should.equal([identifier.email_address, invited_email_address])
 
   // It is idempotent
   let response =
@@ -69,5 +68,5 @@ pub fn successfully_add_new_participant_test() {
   assert Ok(participants) = discuss.load_participants(conversation.id)
   participants
   |> list.map(fn(x: authentication.Identifier) { x.email_address })
-  |> should.equal([email_address, invited_email_address])
+  |> should.equal([identifier.email_address, invited_email_address])
 }

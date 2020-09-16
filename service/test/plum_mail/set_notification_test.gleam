@@ -32,8 +32,7 @@ fn set_notification(session, conversation: Conversation, preference) {
 }
 
 pub fn successfully_set_notification_preference_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
