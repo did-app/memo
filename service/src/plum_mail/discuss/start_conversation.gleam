@@ -27,12 +27,12 @@ pub fn execute(topic, owner_id) {
   let sql =
     "
     WITH new_conversation AS (
-        INSERT INTO conversations (topic)
-        VALUES ($1)
+        INSERT INTO conversations (topic, started_by)
+        VALUES ($1, $2)
         RETURNING *
     ), new_participant AS (
-        INSERT INTO participants (identifier_id, conversation_id, original, cursor, notify)
-        VALUES ($2, (SELECT id FROM new_conversation), TRUE, 0, 'all')
+        INSERT INTO participants (identifier_id, conversation_id, cursor, notify)
+        VALUES ($2, (SELECT id FROM new_conversation), 0, 'all')
     )
     SELECT id, topic, resolved FROM new_conversation
     "

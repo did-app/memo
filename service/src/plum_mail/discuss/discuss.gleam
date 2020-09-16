@@ -196,7 +196,6 @@ pub type Participation {
     active: Bool,
     cursor: Int,
     notify: Preference,
-    original: Bool,
     invited_by: Option(Int),
     identifier: Identifier,
   )
@@ -207,7 +206,7 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
   // BECOMES a LEFT JOIN for open conversation
   let sql =
     "
-    SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, p.original, p.invited_by, i.id, i.email_address
+    SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, p.invited_by, i.id, i.email_address
     FROM conversations AS c
     JOIN participants AS p ON p.conversation_id = c.id
     JOIN identifiers AS i ON i.id = p.identifier_id
@@ -231,14 +230,12 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(notify) = dynamic.element(row, 4)
     // assert Ok(notify) = dynamic.string(notify)
     assert Ok(notify) = as_preference(notify)
-    assert Ok(original) = dynamic.element(row, 5)
-    assert Ok(original) = dynamic.bool(original)
-    assert Ok(invited_by) = dynamic.element(row, 6)
+    assert Ok(invited_by) = dynamic.element(row, 5)
     assert Ok(invited_by) = run_sql.dynamic_option(invited_by, dynamic.int)
 
-    assert Ok(id) = dynamic.element(row, 7)
+    assert Ok(id) = dynamic.element(row, 6)
     assert Ok(id) = dynamic.int(id)
-    assert Ok(email_address) = dynamic.element(row, 8)
+    assert Ok(email_address) = dynamic.element(row, 7)
     assert Ok(email_address) = dynamic.string(email_address)
     assert Ok(email_address) = authentication.validate_email(email_address)
 
@@ -249,7 +246,6 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
       active: True,
       cursor: cursor,
       notify: notify,
-      original: original,
       invited_by: invited_by,
       identifier: identifier,
     )

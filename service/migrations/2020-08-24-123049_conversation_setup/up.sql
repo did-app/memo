@@ -11,6 +11,7 @@ SELECT diesel_manage_updated_at('identifiers');
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   topic VARCHAR,
+  started_by INT REFERENCES identifiers(id) NOT NULL,
   -- resolve
   -- concluded
   -- closed
@@ -54,9 +55,7 @@ CREATE TABLE participants (
   -- constraint that must be owner or invited doesnt work on public conversations
   -- creator might not be participant if automated or manager?
   -- TODO started_conversation
-  original BOOLEAN NOT NULL,
-  invited_by INT REFERENCES identifiers(id)
-  CONSTRAINT invited_or_original CHECK ((original = TRUE) or invited_by IS NOT NULL),
+  invited_by INT REFERENCES identifiers(id),
   cursor INT NOT NULL,
   -- requires cursor being nullable for conversation with no messages or making a create conversation "Event"
   -- FOREIGN KEY (conversation_id, cursor) REFERENCES messages(conversation_id, counter),
@@ -67,7 +66,6 @@ CREATE TABLE participants (
 
 SELECT diesel_manage_updated_at('participants');
 CREATE UNIQUE INDEX unique_participant_identifier_id_conversation_id ON participants(identifier_id, conversation_id);
-CREATE UNIQUE INDEX unique_owner_conversation_id ON participants(conversation_id) WHERE (original = TRUE);
 
 CREATE VIEW participant_lists AS (
   SELECT p.conversation_id, json_agg(json_build_object(

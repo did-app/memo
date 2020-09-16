@@ -2,6 +2,7 @@ table! {
     conversations (id) {
         id -> Int4,
         topic -> Nullable<Varchar>,
+        started_by -> Int4,
         resolved -> Bool,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
@@ -52,7 +53,6 @@ table! {
     participants (identifier_id, conversation_id) {
         identifier_id -> Int4,
         conversation_id -> Int4,
-        original -> Bool,
         invited_by -> Nullable<Int4>,
         cursor -> Int4,
         notify -> Varchar,
@@ -92,6 +92,7 @@ table! {
     }
 }
 
+joinable!(conversations -> identifiers (started_by));
 joinable!(link_tokens -> identifiers (identifier_id));
 joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(messages -> conversations (conversation_id));

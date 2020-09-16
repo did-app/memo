@@ -40,6 +40,7 @@ fn add_participant(
   handle(request, support.test_config())
 }
 
+// TODO test referred_by
 pub fn successfully_add_new_participant_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
