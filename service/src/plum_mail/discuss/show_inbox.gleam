@@ -4,6 +4,7 @@ import gleam/io
 import gleam/option
 import gleam/json
 import gleam/pgo
+import datetime
 import plum_mail/run_sql
 
 pub fn execute(identifier_id) {
@@ -12,7 +13,7 @@ pub fn execute(identifier_id) {
   let sql =
     "
     WITH search AS (
-        SELECT DISTINCT ON (c.id) c.id, c.topic, c.resolved, pl.participants, me.cursor, me.notify, m.inserted_at, m.counter
+        SELECT DISTINCT ON (c.id) c.id, c.topic, c.resolved, pl.participants, me.cursor, me.notify, COALESCE(m.inserted_at, c.inserted_at) as inserted_at, m.counter
         FROM conversations AS c
         JOIN participants AS me ON me.conversation_id = c.id
         JOIN participant_lists AS pl ON pl.conversation_id = c.id
@@ -54,9 +55,8 @@ pub fn execute(identifier_id) {
         assert Ok(cursor) = dynamic.int(cursor)
         // assert Ok(notify) = dynamic.element(row, 5)
         // assert Ok(notify) = dynamic.int(notify)
-        // assert Ok(inserted_at) = dynamic.element(row, 6)
-        // NOTE this is an optional value maybe there is no message, unwrap with created at
-        // assert Ok(inserted_at) = dynamic.int(inserted_at)
+        assert Ok(inserted_at) = dynamic.element(row, 6)
+        assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
         assert Ok(latest) = dynamic.element(row, 7)
         assert Ok(latest) = run_sql.dynamic_option(latest, dynamic.int)
         json.object([
@@ -64,6 +64,7 @@ pub fn execute(identifier_id) {
           tuple("topic", json.string(topic)),
           tuple("resolved", json.bool(resolved)),
           tuple("participants", json.list(participants)),
+          tuple("updated_at", json.string(datetime.to_human(inserted_at))),
           tuple("unread", json.bool(option.unwrap(latest, 0) > cursor)),
           tuple("next", json.int(int.min(cursor + 1, option.unwrap(latest, 0)))),
         ])

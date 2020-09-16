@@ -30,12 +30,17 @@ export default async function() {
        tokenize: (string) => string.split(/[\s,@]+/) // search query tokenizer
      }
    })
-   conversationSearch.addAll(conversations.map(function (c) {
+   conversations = conversations.map(function (c) {
      let participants = c.participants.map(function (p) {
        return p.email_address
      }).join(", ")
      return Object.assign({}, c, {participants})
-   }))
+   })
+   let unread = conversations.filter(function (c) {
+     return c.unread
+   })
+   page.$set({unread})
+   conversationSearch.addAll(conversations)
 
 
    function searchAll(term) {
