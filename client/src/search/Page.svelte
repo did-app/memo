@@ -1,26 +1,23 @@
 <script>
   export let results = [];
   export let newTopic;
+
+  let nextDate = new Date()
+  nextDate.setHours(nextDate.getHours() + 1, 0, 0, 0)
+  let nextHour = nextDate.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true })
+  let unread = [];
 </script>
 
 <header class="w-full max-w-2xl mx-auto text-right">
-  <style media="screen">
-    #notifications:checked ~ .inline-block  {
-      display: none;
-    }
-    #notifications:checked ~ .hidden  {
-      display: inline-block;
-    }
-  </style>
-  <label>
-    <input id="notifications" class="hidden" type="checkbox" name="" value="">
-    <span class="inline-block ml-auto text-lg p-4">
-      <span href="/c#1">Next update 8am <img class="inline-block w-8" src="002-clock.svg" alt=""> </span>
-    </span>
-    <span class="hidden ml-auto text-lg p-4">
-      <a href="/c#3">New messages <img class="inline-block w-8" src="003-chat.svg" alt=""> </a>
-    </span>
-  </label>
+  {#if unread.length === 0}
+  <div class="ml-auto text-lg p-4">
+    <span href="/c#1">Next update {nextHour} <img class="inline-block w-8" src="002-clock.svg" alt=""> </span>
+  </div>
+  {:else}
+  <div class="ml-auto text-lg p-4">
+    <a href="/c#3">New messages <img class="inline-block w-8" src="003-chat.svg" alt=""> </a>
+  </div>
+  {/if}
 </header>
 <main class="w-full max-w-2xl m-auto p-6">
   <h1 class="flex-grow font-serif text-indigo-800 text-6xl text-center">plum mail</h1>
