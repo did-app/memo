@@ -22,6 +22,10 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(first) = discuss.validate_topic("First")
   assert Ok(c1) = start_conversation.execute(first, me.id)
   assert Ok(participation) = discuss.load_participation(c1.id, me.id)
+  participation.original
+  |> should.equal(True)
+  participation.invited_by
+  |> should.equal(None)
   assert Ok(_) =
     add_participant.execute(
       participation,
@@ -36,6 +40,10 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(second) = discuss.validate_topic("Second")
   assert Ok(c2) = start_conversation.execute(second, me.id)
   assert Ok(participation) = discuss.load_participation(c2.id, me.id)
+  participation.original
+  |> should.equal(True)
+  participation.invited_by
+  |> should.equal(None)
   assert Ok(_) =
     add_participant.execute(
       participation,
@@ -43,6 +51,10 @@ pub fn unread_messages_in_conversation_test() {
     )
 
   assert Ok(participation) = discuss.load_participation(c2.id, alice.id)
+  participation.original
+  |> should.equal(False)
+  participation.invited_by
+  |> should.equal(Some(me.id))
   assert Ok(_) =
     write_message.execute(
       participation,
