@@ -39,7 +39,7 @@ export default async function() {
   var highest;
   messages = messages.map(function ({counter, content, author, inserted_at}) {
     const [intro] = content.trim().split(/\r?\n/)
-    const html = DOMPurify.sanitize(marked(draft))
+    const html = DOMPurify.sanitize(marked(content))
     // checked = closed
     const checked = !(cursor < counter)
     highest = counter
