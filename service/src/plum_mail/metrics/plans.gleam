@@ -17,11 +17,11 @@ pub fn load() {
   let sql =
     "
     WITH owners AS (
-        SELECT DISTINCT ON (c.id) c.id, i.email_address
+        SELECT c.id, i.email_address
         FROM participants AS p
         JOIN conversations AS c ON c.id = p.conversation_id
         JOIN identifiers AS i on i.id = p.identifier_id
-        ORDER BY c.id, p.inserted_at ASC
+        WHERE p.owner = TRUE
     )
     SELECT email_address, COUNT(id)
     FROM owners

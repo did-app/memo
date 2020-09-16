@@ -25,8 +25,8 @@ pub fn execute(participation, params) {
   let sql =
     "
     WITH new_participant AS (
-        INSERT INTO participants (conversation_id, identifier_id, cursor, notify)
-        VALUES ($1, $2, 0, 'all')
+        INSERT INTO participants (conversation_id, identifier_id, owner, cursor, notify)
+        VALUES ($1, $2, FALSE, 0, 'all')
         ON CONFLICT (identifier_id, conversation_id) DO NOTHING
         RETURNING *
     )

@@ -52,6 +52,7 @@ table! {
     participants (identifier_id, conversation_id) {
         identifier_id -> Int4,
         conversation_id -> Int4,
+        owner -> Bool,
         cursor -> Int4,
         notify -> Varchar,
         inserted_at -> Timestamp,

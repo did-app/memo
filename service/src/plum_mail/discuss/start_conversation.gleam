@@ -31,8 +31,8 @@ pub fn execute(topic, owner_id) {
         VALUES ($1)
         RETURNING *
     ), new_participant AS (
-        INSERT INTO participants (identifier_id, conversation_id, cursor, notify)
-        VALUES ($2, (SELECT id FROM new_conversation), 0, 'all')
+        INSERT INTO participants (identifier_id, conversation_id, owner, cursor, notify)
+        VALUES ($2, (SELECT id FROM new_conversation), TRUE, 0, 'all')
     )
     SELECT id, topic, resolved FROM new_conversation
     "

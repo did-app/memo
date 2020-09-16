@@ -46,6 +46,7 @@ CREATE TABLE participants (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
   PRIMARY KEY (identifier_id, conversation_id),
+  owner BOOLEAN NOT NULL,
   cursor INT NOT NULL,
   -- requires cursor being nullable for conversation with no messages or making a create conversation "Event"
   -- FOREIGN KEY (conversation_id, cursor) REFERENCES messages(conversation_id, counter),
@@ -56,6 +57,7 @@ CREATE TABLE participants (
 
 SELECT diesel_manage_updated_at('participants');
 CREATE UNIQUE INDEX unique_participant_identifier_id_conversation_id ON participants(identifier_id, conversation_id);
+CREATE UNIQUE INDEX unique_owner_conversation_id ON participants(conversation_id) WHERE (owner = TRUE);
 
 CREATE VIEW participant_lists AS (
   SELECT p.conversation_id, json_agg(json_build_object(
