@@ -48,10 +48,11 @@
   </div>
 </div>
 {:else}
-<header class="max-w-3xl mx-auto text-center py-2 md:pt-6 md:pb-4">
-  <h1 id="topic" class="text-xl md:text-2xl">{topic}</h1>
+<header class="max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
+  <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
+  <h1 id="topic" class="flex-grow text-xl md:text-2xl">{topic}</h1>
 </header>
-<div class="sm:flex">
+<div class="sm:flex max-w-5xl mx-auto">
   <main class="sm:w-2/3 max-w-md mx-auto md:mr-0 md:max-w-3xl px-1 md:px-2 md:mb-16">
     <div id="messages" class="">
       {#each messages as {counter, checked, author, date, intro, html}}
