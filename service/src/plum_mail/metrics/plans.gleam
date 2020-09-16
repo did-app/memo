@@ -27,6 +27,15 @@ pub fn load() {
     FROM owners
     GROUP BY email_address
     ORDER BY COUNT(id) DESC
+
+    --
+
+    SELECT i.email_address, COUNT(c.id)
+    FROM conversations AS c
+    JOIN identifiers AS i ON i.id = c.started_by
+    GROUP BY i.email_address
+    ORDER BY COUNT(c.id) DESC
+
     "
   let mapper = fn(row) {
     assert Ok(email_address) = dynamic.element(row, 0)
