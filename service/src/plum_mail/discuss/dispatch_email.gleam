@@ -75,12 +75,12 @@ pub fn load() {
     assert Ok(conversation_id) = dynamic.int(conversation_id)
     assert Ok(topic) = dynamic.element(row, 5)
     assert Ok(topic) = dynamic.string(topic)
-    assert Ok(topic) = discuss.validate_topic(topic)
     // TODO remove
-    |> result.map_error(fn(e) {
-        io.debug(topic)
-        Error(e)
-    })
+    assert Ok(fallback_topic) = discuss.validate_topic("A fallback topic")
+    let topic = result.unwrap(
+        discuss.validate_topic(topic),
+        fallback_topic
+    )
     // assert Ok(resolved) = dynamic.element(row, 6)
     // assert Ok(resolved) = dynamic.bool(resolved)
     assert Ok(recipient_id) = dynamic.element(row, 7)
