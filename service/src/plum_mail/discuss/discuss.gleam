@@ -1,6 +1,7 @@
 import gleam/dynamic
 import gleam/int
 import gleam/list
+import gleam/regex
 import gleam/string
 import gleam/json
 import gleam/pgo
@@ -17,7 +18,12 @@ pub opaque type Topic {
 }
 
 pub fn validate_topic(topic) {
-  Ok(Topic(topic))
+  assert Ok(re) = regex.from_string("^[\\w][\\w\\-,\\. ]{3,48}[\\w\\.]$")
+  let topic = string.trim(topic)
+  case regex.check(re, topic) {
+    True -> Ok(Topic(topic))
+    False -> Error(Nil)
+  }
 }
 
 pub fn topic_to_string(topic) {
