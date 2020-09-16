@@ -1,7 +1,7 @@
 CREATE TABLE identifiers (
   id SERIAL PRIMARY KEY,
   email_address VARCHAR NOT NULL UNIQUE,
-  nickname VARCHAR,
+  referred_by INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -11,6 +11,10 @@ SELECT diesel_manage_updated_at('identifiers');
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   topic VARCHAR,
+  -- resolve
+  -- concluded
+  -- closed
+  -- messages should be conclusion so if reopened can see history
   resolved BOOLEAN NOT NULL DEFAULT False,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -46,6 +50,10 @@ CREATE TABLE participants (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
   PRIMARY KEY (identifier_id, conversation_id),
+  -- Can have a conversation with no original participant
+  -- constraint that must be owner or invited doesnt work on public conversations
+  -- creator might not be participant if automated or manager?
+  -- TODO started_conversation
   original BOOLEAN NOT NULL,
   invited_by INT REFERENCES identifiers(id)
   CONSTRAINT invited_or_original CHECK ((original = TRUE) or invited_by IS NOT NULL),
@@ -64,8 +72,7 @@ CREATE UNIQUE INDEX unique_owner_conversation_id ON participants(conversation_id
 CREATE VIEW participant_lists AS (
   SELECT p.conversation_id, json_agg(json_build_object(
       'identifier_id', p.identifier_id,
-      'email_address', i.email_address,
-      'nickname', i.nickname
+      'email_address', i.email_address
   )) as participants
   FROM participants AS p
   JOIN identifiers AS i ON i.id = p.identifier_id

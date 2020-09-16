@@ -5,7 +5,6 @@
 
   import DOMPurify from 'dompurify';
 
-  export let nickname;
   export let displayName;
   export let emailAddress;
   export let topic;

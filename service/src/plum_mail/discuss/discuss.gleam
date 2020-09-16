@@ -53,7 +53,7 @@ pub fn conversation_to_json(conversation: Conversation) {
       json.list(list.map(
         participants,
         fn(participant) {
-          let Identifier(id: id, email_address: email_address, ..) = participant
+          let Identifier(id: id, email_address: email_address) = participant
           json.object([
             tuple("id", json.int(id)),
             tuple("email_address", json.string(email_address.value)),
@@ -67,7 +67,7 @@ pub fn conversation_to_json(conversation: Conversation) {
 pub fn load_participants(conversation_id) {
   let sql =
     "
-      SELECT i.id, i.email_address, i.nickname
+      SELECT i.id, i.email_address
       FROM participants AS p
       JOIN identifiers AS i ON i.id = p.identifier_id
       WHERE conversation_id = $1
@@ -84,9 +84,7 @@ pub fn load_participants(conversation_id) {
       assert Ok(email_address) = dynamic.string(email_address)
       assert Ok(email_address) = authentication.validate_email(email_address)
 
-      assert Ok(nickname) = dynamic.element(row, 2)
-      assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
-      Identifier(id: id, email_address: email_address, nickname: nickname)
+      Identifier(id: id, email_address: email_address)
     },
   )
 }
@@ -103,7 +101,7 @@ pub type Message {
 pub fn load_messages(conversation_id) {
   let sql =
     "
-        SELECT m.content, m.counter, m.inserted_at, i.id, i.email_address, i.nickname
+        SELECT m.content, m.counter, m.inserted_at, i.id, i.email_address
         FROM messages AS m
         JOIN identifiers AS i ON i.id = m.author_id
         WHERE conversation_id = $1
@@ -127,15 +125,11 @@ pub fn load_messages(conversation_id) {
       assert Ok(author_email_address) =
         authentication.validate_email(author_email_address)
 
-      assert Ok(author_nickname) = dynamic.element(row, 5)
-      assert Ok(author_nickname) =
-        run_sql.dynamic_option(author_nickname, dynamic.string)
 
       let author =
         Identifier(
           id: author_id,
           email_address: author_email_address,
-          nickname: author_nickname,
         )
       Message(counter, content, inserted_at, author)
     },
@@ -213,7 +207,7 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
   // BECOMES a LEFT JOIN for open conversation
   let sql =
     "
-    SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, p.original, p.invited_by, i.id, i.email_address, i.nickname
+    SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, p.original, p.invited_by, i.id, i.email_address
     FROM conversations AS c
     JOIN participants AS p ON p.conversation_id = c.id
     JOIN identifiers AS i ON i.id = p.identifier_id
@@ -247,10 +241,8 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(email_address) = dynamic.element(row, 8)
     assert Ok(email_address) = dynamic.string(email_address)
     assert Ok(email_address) = authentication.validate_email(email_address)
-    assert Ok(nickname) = dynamic.element(row, 9)
-    assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
 
-    let identifier = Identifier(id, email_address, nickname)
+    let identifier = Identifier(id, email_address)
 
     Participation(
       conversation: conversation,

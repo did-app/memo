@@ -45,7 +45,7 @@ pub fn load() {
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
   let sql =
     "
-    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, recipient.nickname, author.email_address, author.nickname
+    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, author.email_address
     FROM messages AS m
     JOIN conversations AS c ON c.id = m.conversation_id
     JOIN participants AS p ON p.conversation_id = c.id
@@ -89,16 +89,10 @@ pub fn load() {
     assert Ok(recipient_email_address) = dynamic.string(recipient_email_address)
     assert Ok(recipient_email_address) =
       authentication.validate_email(recipient_email_address)
-    assert Ok(recipient_nickname) = dynamic.element(row, 9)
-    assert Ok(recipient_nickname) =
-      run_sql.dynamic_option(recipient_nickname, dynamic.string)
-    assert Ok(author_email_address) = dynamic.element(row, 10)
+    assert Ok(author_email_address) = dynamic.element(row, 9)
     assert Ok(author_email_address) = dynamic.string(author_email_address)
     assert Ok(author_email_address) =
       authentication.validate_email(author_email_address)
-    assert Ok(author_nickname) = dynamic.element(row, 11)
-    assert Ok(author_nickname) =
-      run_sql.dynamic_option(author_nickname, dynamic.string)
 
     Message(
       id: tuple(conversation_id, counter),
@@ -106,12 +100,10 @@ pub fn load() {
       author: Identifier(
         id: author_id,
         email_address: author_email_address,
-        nickname: author_nickname,
       ),
       to: Identifier(
         id: recipient_id,
         email_address: recipient_email_address,
-        nickname: recipient_nickname,
       ),
       content: content,
     )

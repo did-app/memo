@@ -246,10 +246,6 @@ pub fn route(
                 json.string(participation.identifier.email_address.value),
               ),
               tuple(
-                "nickname",
-                json.nullable(participation.identifier.nickname, json.string),
-              ),
-              tuple(
                 "notify",
                 json.string(discuss.notify_to_string(participation.notify)),
               ),

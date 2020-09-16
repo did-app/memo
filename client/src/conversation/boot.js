@@ -23,9 +23,8 @@ export default async function() {
     throw "Could not find conversation"
   }
   let {conversation, participation, messages, pins} = await response.json();
-  let nickname = participation["nickname"];
   let emailAddress = participation["email_address"];
-  let displayName = nickname || emailAddress.split("@")[0];
+  let displayName = emailAddress.split("@")[0];
   let cursor = participation["cursor"];
   let topic = conversation.topic;
   let resolved = conversation.resolved;
@@ -50,7 +49,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   document.title = topic
-  page.$set({emailAddress, nickname, displayName, topic, notify, resolved, participants, messages, pins})
+  page.$set({emailAddress, displayName, topic, notify, resolved, participants, messages, pins})
   if (code) {
     window.location.hash = "#"
   } else {
