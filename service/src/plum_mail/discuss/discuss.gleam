@@ -11,10 +11,24 @@ import plum_mail/authentication.{Identifier}
 // FIXME date_time or Datetime
 import datetime.{DateTime}
 
+// TODO test validate
+pub opaque type Topic {
+  Topic(value: String)
+}
+
+pub fn validate_topic(topic) {
+  Ok(Topic(topic))
+}
+
+pub fn topic_to_string(topic) {
+  let Topic(topic) = topic
+  topic
+}
+
 pub type Conversation {
   Conversation(
     id: Int,
-    topic: String,
+    topic: Topic,
     resolved: Bool,
     participants: List(Identifier),
   )
@@ -25,7 +39,7 @@ pub fn conversation_to_json(conversation: Conversation) {
 
   json.object([
     tuple("id", json.int(id)),
-    tuple("topic", json.string(topic)),
+    tuple("topic", json.string(topic.value)),
     tuple("resolved", json.bool(resolved)),
     tuple(
       "participants",
@@ -203,6 +217,7 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(id) = dynamic.int(id)
     assert Ok(topic) = dynamic.element(row, 1)
     assert Ok(topic) = dynamic.string(topic)
+    assert Ok(topic) = validate_topic(topic)
     assert Ok(resolved) = dynamic.element(row, 2)
     assert Ok(resolved) = dynamic.bool(resolved)
 

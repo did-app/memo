@@ -38,8 +38,7 @@ pub fn successfully_set_notification_preference_test() {
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
-  let topic = "Test topic"
-
+  assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
   let response = set_notification(session_token, conversation, "concluded")
 

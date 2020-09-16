@@ -42,7 +42,7 @@ pub fn pin_content_test() {
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
-  let topic = "Test topic"
+  assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
   assert Ok(participation) =
     discuss.load_participation(conversation.id, identifier.id)

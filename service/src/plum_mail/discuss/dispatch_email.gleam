@@ -12,11 +12,12 @@ import gleam/pgo
 import plum_mail/config.{Config}
 import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
+import plum_mail/discuss/discuss.{Topic}
 
 pub type Message {
   Message(
     id: tuple(Int, Int),
-    conversation: tuple(Int, String),
+    conversation: tuple(Int, Topic),
     // to can be participant
     // from can be author
     author: Identifier,
@@ -73,6 +74,7 @@ pub fn load() {
     assert Ok(conversation_id) = dynamic.int(conversation_id)
     assert Ok(topic) = dynamic.element(row, 5)
     assert Ok(topic) = dynamic.string(topic)
+    assert Ok(topic) = discuss.validate_topic(topic)
     // assert Ok(resolved) = dynamic.element(row, 6)
     // assert Ok(resolved) = dynamic.bool(resolved)
     assert Ok(recipient_id) = dynamic.element(row, 7)
@@ -172,7 +174,10 @@ fn send(config, message: Message) {
     json.object([
       tuple("From", json.string("updates@plummail.co")),
       tuple("To", json.string(message.to.email_address.value)),
-      tuple("Subject", json.string(message.conversation.1)),
+      tuple(
+        "Subject",
+        json.string(discuss.topic_to_string(message.conversation.1)),
+      ),
       // tuple("TextBody", json.string(message.content)),
       tuple("HtmlBody", json.string(body)),
     ])

@@ -8,8 +8,17 @@ import plum_mail/run_sql
 import plum_mail/discuss/discuss.{Conversation}
 
 pub fn params(form) {
+  // Note doesn't use ACL because not JSON
   case map.get(form, "topic") {
-    Ok(value) -> Ok(value)
+    Ok(value) ->
+      case discuss.validate_topic(value) {
+        Ok(topic) -> Ok(topic)
+        Error(Nil) ->
+          Error(error.Unprocessable(
+            "topic",
+            error.CastFailure("contains invalid charachters"),
+          ))
+      }
     Error(Nil) -> Error(error.Unprocessable("topic", error.Missing))
   }
 }
@@ -27,7 +36,7 @@ pub fn execute(topic, owner_id) {
     )
     SELECT id, topic, resolved FROM new_conversation
     "
-  let args = [pgo.text(topic), pgo.int(owner_id)]
+  let args = [pgo.text(discuss.topic_to_string(topic)), pgo.int(owner_id)]
   try [c] =
     run_sql.execute(
       sql,
@@ -37,6 +46,7 @@ pub fn execute(topic, owner_id) {
         assert Ok(id) = dynamic.int(id)
         assert Ok(topic) = dynamic.element(row, 1)
         assert Ok(topic) = dynamic.string(topic)
+        assert Ok(topic) = discuss.validate_topic(topic)
         assert Ok(resolved) = dynamic.element(row, 2)
         assert Ok(resolved) = dynamic.bool(resolved)
 

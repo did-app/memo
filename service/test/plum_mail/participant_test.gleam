@@ -47,8 +47,7 @@ pub fn successfully_add_new_participant_test() {
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
-  let topic = "Test topic"
-
+  assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
 
   let invited_email_address = support.generate_email_address("other.test")

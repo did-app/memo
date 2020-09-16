@@ -19,7 +19,8 @@ pub fn unread_messages_in_conversation_test() {
   let email_address = support.generate_email_address("alice.test")
   assert Ok(alice) = authentication.identifier_from_email(email_address)
 
-  assert Ok(c1) = start_conversation.execute("First", me.id)
+  assert Ok(first) = discuss.validate_topic("First")
+  assert Ok(c1) = start_conversation.execute(first, me.id)
   assert Ok(participation) = discuss.load_participation(c1.id, me.id)
   assert Ok(_) =
     add_participant.execute(
@@ -32,7 +33,8 @@ pub fn unread_messages_in_conversation_test() {
       write_message.Params("My Message", None, False),
     )
 
-  assert Ok(c2) = start_conversation.execute("Second", me.id)
+  assert Ok(second) = discuss.validate_topic("Second")
+  assert Ok(c2) = start_conversation.execute(second, me.id)
   assert Ok(participation) = discuss.load_participation(c2.id, me.id)
   assert Ok(_) =
     add_participant.execute(
