@@ -207,6 +207,8 @@ pub fn execute() {
     fn(message) {
       case send(config.from_env(), message) {
         Ok(http.Response(status: 200, ..)) -> record_sent(message)
+        // TODO why was that, handle case of bad email addresses
+        Ok(http.Response(status: 422, ..)) -> Ok([])
       }
     },
   )
