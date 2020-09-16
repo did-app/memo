@@ -2,6 +2,9 @@
   import {
     Circle2
   } from 'svelte-loading-spinners'
+
+  import DOMPurify from 'dompurify';
+
   export let nickname;
   export let displayName;
   export let emailAddress;
@@ -15,7 +18,7 @@
   export let bottom;
 
   let draft;
-  $: preview = draft ? marked(draft) : "No preview yet."
+  $: preview = draft ? DOMPurify.sanitize(marked(draft)) : "No preview yet."
 
   // https://svelte.dev/repl/ead0f1fcd2d4402bbbd64eca1d665341?version=3.14.1
   function resize(event) {

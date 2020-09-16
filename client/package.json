@@ -15,6 +15,8 @@
     "start:dev": "run-p build:dev serve:dev"
   },
   "dependencies": {
+    "dompurify": "^2.0.15",
+    "marked": "^1.1.1",
     "svelte-loading-spinners": "^0.1.1"
   }
 }
