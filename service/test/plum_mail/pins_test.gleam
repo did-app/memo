@@ -63,4 +63,14 @@ pub fn pin_content_test() {
   |> should.equal(identifier.id)
   pin.content
   |> should.equal("Some sub content")
+
+  // Other user can't write pin
+  let email_address = support.generate_email_address("other.test")
+  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
+  assert Ok(tuple(_, session_token)) =
+    authentication.authenticate(Some(link_token), None, "ua")
+  let response = add_pin(session_token, conversation.id, 1, "Some sub content")
+  response.status
+  |> should.equal(403)
 }

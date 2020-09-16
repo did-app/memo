@@ -6,6 +6,7 @@ import gleam/string
 import gleam/json
 import gleam/pgo
 import plum_mail/acl
+import plum_mail/error
 import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 // Session is more than a web thing, anywhere you can be a session.
@@ -254,19 +255,11 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     )
   }
 
-  try [participation] = run_sql.execute(sql, args, mapper)
-  Ok(participation)
-}
-
-// Note doesn't need to always load identifier if we are making json returns because identifier information already fetched.
-pub fn can_view(participation) -> Conversation {
-  todo
-}
-
-pub fn can_edit(participation) {
-  let Participation(conversation: conversation, ..) = participation
-
-  Ok(conversation)
+  try loaded = run_sql.execute(sql, args, mapper)
+  case loaded {
+    [participation] -> Ok(participation)
+    [] -> Error(error.Forbidden)
+  }
 }
 
 // Share is a functionality

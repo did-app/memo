@@ -17,6 +17,7 @@ pub fn params(raw: Dynamic) {
   |> Ok()
 }
 
+// TODO test can't write unless a participant
 pub fn execute(participation, params) {
   let Participation(conversation: conversation, identifier: identifier, ..) =
     participation

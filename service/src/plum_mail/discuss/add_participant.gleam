@@ -3,7 +3,7 @@ import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication.{EmailAddress}
-import plum_mail/discuss/discuss
+import plum_mail/discuss/discuss.{Participation}
 
 pub type Params {
   Params(email_address: EmailAddress)
@@ -18,8 +18,8 @@ pub fn params(raw: Dynamic) {
 pub fn execute(participation, params) {
   let Params(email_address: email_address) = params
   try identifier = authentication.identifier_from_email(email_address)
+  let Participation(conversation: conversation, ..) = participation
 
-  try conversation = discuss.can_edit(participation)
   let sql =
     "
     WITH new_participant AS (
