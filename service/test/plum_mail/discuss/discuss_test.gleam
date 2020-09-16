@@ -8,6 +8,14 @@ pub fn topic_validation_test() {
   |> result.map(topic_to_string)
   |> should.equal(Ok("My new topic"))
 
+  validate_topic("My new topic?")
+  |> result.map(topic_to_string)
+  |> should.equal(Ok("My new topic?"))
+
+  validate_topic("My new topic!")
+  |> result.map(topic_to_string)
+  |> should.equal(Ok("My new topic!"))
+
   validate_topic("My-new,topic.")
   |> result.map(topic_to_string)
   |> should.equal(Ok("My-new,topic."))
