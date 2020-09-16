@@ -20,6 +20,8 @@ pub fn execute(participation, params) {
   try identifier = authentication.identifier_from_email(email_address)
   let Participation(conversation: conversation, ..) = participation
 
+  // TODO have a creator or an "author"
+  // have a notificatons table
   let sql =
     "
     WITH new_participant AS (

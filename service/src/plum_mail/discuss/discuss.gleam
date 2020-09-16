@@ -13,7 +13,6 @@ import plum_mail/authentication.{Identifier}
 // FIXME date_time or Datetime
 import datetime.{DateTime}
 
-// TODO test validate
 pub opaque type Topic {
   Topic(value: String)
 }
