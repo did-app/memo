@@ -80,10 +80,9 @@ export default async function() {
       let response = await Client.addParticipant(conversationId, emailAddress)
       window.location.reload()
     } else if (action == "writeMessage") {
-      let {content, from, resolve} = form
-      from = from === "" ? null : from
+      let {content, resolve} = form
 
-      let response = await Client.writeMessage(conversationId, content, from, resolve)
+      let response = await Client.writeMessage(conversationId, content, resolve)
       window.location.reload()
     }
   })

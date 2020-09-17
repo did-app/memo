@@ -30,11 +30,11 @@ export async function addParticipant(id, emailAddress) {
   console.log(response);
   return {};
 }
-export async function writeMessage(id, content, from, conclusion) {
+export async function writeMessage(id, content, conclusion) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/message", {
     method: "POST",
     credentials: "include",
-    body: JSON.stringify({ content, from, conclusion })
+    body: JSON.stringify({ content, conclusion })
   });
   console.log(response);
   return {};
