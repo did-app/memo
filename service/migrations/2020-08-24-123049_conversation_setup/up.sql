@@ -66,15 +66,10 @@ CREATE TABLE pins (
 
 SELECT diesel_manage_updated_at('pins');
 
--- Single incrementing message would allow the cursor to be unique
--- UUID for message would make it hard to fake the cursor position, but only messing up your own cursor
 CREATE TABLE participants (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   conversation_id INT REFERENCES conversations(id) NOT NULL,
   PRIMARY KEY (identifier_id, conversation_id),
-  -- Can have a conversation with no original participant
-  -- constraint that must be owner or invited doesnt work on public conversations
-  -- creator might not be participant if automated or manager?
   invited_by INT REFERENCES identifiers(id),
   cursor INT NOT NULL,
   -- requires cursor being nullable for conversation with no messages or making a create conversation "Event"
