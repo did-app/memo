@@ -61,6 +61,8 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(inbox) = show_inbox.execute(me.id)
   assert Ok([r1, r2]) = dynamic.list(dynamic.from(inbox))
 
+  dynamic.field(r1, "id")
+  |> should.equal(Ok(dynamic.from(c2.id)))
   dynamic.field(r1, "topic")
   |> should.equal(Ok(dynamic.from("Second")))
   dynamic.field(r1, "closed")
@@ -68,6 +70,8 @@ pub fn unread_messages_in_conversation_test() {
   dynamic.field(r1, "unread")
   |> should.equal(Ok(dynamic.from(True)))
 
+  dynamic.field(r2, "id")
+  |> should.equal(Ok(dynamic.from(c1.id)))
   dynamic.field(r2, "topic")
   |> should.equal(Ok(dynamic.from("First")))
   dynamic.field(r2, "closed")

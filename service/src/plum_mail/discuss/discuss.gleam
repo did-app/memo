@@ -187,6 +187,7 @@ pub type Participation {
     active: Bool,
     cursor: Int,
     notify: Preference,
+    owner: Bool,
     invited_by: Option(Int),
     identifier: Identifier,
   )
@@ -195,13 +196,15 @@ pub type Participation {
 // Can call user session authentication?
 pub fn load_participation(conversation_id: Int, identifier_id: Int) {
   // BECOMES a LEFT JOIN for open conversation
+  // TODO this should become left join messages ordered by, or a with with a distinct message
+  // perhaps a view called latest
   let sql =
     "
     WITH conclusions AS (
         SELECT * FROM messages
         WHERE conclusion = TRUE
     )
-    SELECT c.id, c.topic, COALESCE(m.conclusion, FALSE) as closed, p.cursor, p.notify, p.invited_by, i.id, i.email_address
+    SELECT c.id, c.topic, COALESCE(m.conclusion, FALSE) as closed, p.cursor, p.notify, p.invited_by, i.id, i.email_address, c.started_by = i.id
     FROM conversations AS c
     JOIN participants AS p ON p.conversation_id = c.id
     JOIN identifiers AS i ON i.id = p.identifier_id
@@ -234,6 +237,8 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(email_address) = dynamic.element(row, 7)
     assert Ok(email_address) = dynamic.string(email_address)
     assert Ok(email_address) = authentication.validate_email(email_address)
+    assert Ok(owner) = dynamic.element(row, 8)
+    assert Ok(owner) = dynamic.bool(owner)
 
     let identifier = Identifier(id, email_address)
 
@@ -242,6 +247,7 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
       active: True,
       cursor: cursor,
       notify: notify,
+      owner: owner,
       invited_by: invited_by,
       identifier: identifier,
     )
