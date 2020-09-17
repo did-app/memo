@@ -8,15 +8,32 @@ CREATE TABLE identifiers (
 
 SELECT diesel_manage_updated_at('identifiers');
 
+CREATE TABLE link_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE refresh_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  link_token_selector VARCHAR REFERENCES link_tokens(selector) ON DELETE CASCADE NOT NULL,
+  user_agent VARCHAR NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE session_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  refresh_token_selector VARCHAR REFERENCES refresh_tokens(selector) ON DELETE CASCADE NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   topic VARCHAR,
   started_by INT REFERENCES identifiers(id) NOT NULL,
-  -- resolve
-  -- concluded
-  -- closed
-  -- messages should be conclusion so if reopened can see history
-  resolved BOOLEAN NOT NULL DEFAULT False,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -28,7 +45,8 @@ CREATE TABLE messages (
   counter INT NOT NULL,
   PRIMARY KEY (conversation_id, counter),
   content TEXT NOT NULL,
-  author_id INT REFERENCES identifiers(id) NOT NULL,
+  conclusion BOOLEAN NOT NULL,
+  authored_by INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -37,7 +55,10 @@ SELECT diesel_manage_updated_at('messages');
 
 CREATE TABLE pins (
   id SERIAL PRIMARY KEY,
-  conversation_id INT REFERENCES conversations(id) NOT NULL,
+  conversation_id INT NOT NULL,
+  counter INT NOT NULL,
+  FOREIGN KEY (conversation_id, counter) REFERENCES messages(conversation_id, counter),
+  authored_by INT REFERENCES identifiers(id) NOT NULL,
   content TEXT NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -54,7 +75,6 @@ CREATE TABLE participants (
   -- Can have a conversation with no original participant
   -- constraint that must be owner or invited doesnt work on public conversations
   -- creator might not be participant if automated or manager?
-  -- TODO started_conversation
   invited_by INT REFERENCES identifiers(id),
   cursor INT NOT NULL,
   -- requires cursor being nullable for conversation with no messages or making a create conversation "Event"

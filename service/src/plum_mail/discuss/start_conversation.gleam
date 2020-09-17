@@ -34,7 +34,7 @@ pub fn execute(topic, owner_id) {
         INSERT INTO participants (identifier_id, conversation_id, cursor, notify)
         VALUES ($2, (SELECT id FROM new_conversation), 0, 'all')
     )
-    SELECT id, topic, resolved FROM new_conversation
+    SELECT id, topic FROM new_conversation
     "
   let args = [pgo.text(discuss.topic_to_string(topic)), pgo.int(owner_id)]
   try [c] =
@@ -47,10 +47,8 @@ pub fn execute(topic, owner_id) {
         assert Ok(topic) = dynamic.element(row, 1)
         assert Ok(topic) = dynamic.string(topic)
         assert Ok(topic) = discuss.validate_topic(topic)
-        assert Ok(resolved) = dynamic.element(row, 2)
-        assert Ok(resolved) = dynamic.bool(resolved)
 
-        Conversation(id, topic, resolved, [])
+        Conversation(id: id, topic: topic, closed: False)
       },
     )
   Ok(c)

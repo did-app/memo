@@ -8,7 +8,7 @@
   export let displayName;
   export let emailAddress;
   export let topic;
-  export let resolved = false;
+  export let closed = false;
   export let notify;
   export let participants = [];
   export let messages = [];
@@ -77,11 +77,11 @@
       </article>
       {/each}
     </div>
-    <h2 class:hidden="{!resolved}" class="text-lg text-center font-bold text-gray-700 mb-14">
-      This conversation has been resolved, <br> No further messages can be sent.
+    <h2 class:hidden="{!closed}" class="text-lg text-center font-bold text-gray-700 mb-14">
+      This conversation has been closed, <br> No further messages can be sent.
     </h2>
 
-    <form id="reply-form" class:hidden="{resolved}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
+    <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">

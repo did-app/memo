@@ -15,7 +15,7 @@ import plum_mail/web/router.{handle}
 import plum_mail/support
 import gleam/should
 
-fn write_message(user_session, conversation_id, content, resolve) {
+fn write_message(user_session, conversation_id, content, conclusion) {
   let request =
     http.default_req()
     |> http.set_method(http.Post)
@@ -30,7 +30,7 @@ fn write_message(user_session, conversation_id, content, resolve) {
     |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> helpers.set_req_json(json.object([
       tuple("content", json.string(content)),
-      tuple("resolve", json.bool(resolve)),
+      tuple("conclusion", json.bool(conclusion)),
     ]))
 
   handle(request, support.test_config())

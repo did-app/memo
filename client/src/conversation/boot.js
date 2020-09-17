@@ -27,7 +27,7 @@ export default async function() {
   let displayName = emailAddress.split("@")[0];
   let cursor = participation["cursor"];
   let topic = conversation.topic;
-  let resolved = conversation.resolved;
+  let closed = conversation.closed;
   let notify = participation.notify;
   let participants = conversation.participants.map(function({
     email_address: emailAddress
@@ -49,7 +49,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   document.title = topic
-  page.$set({emailAddress, displayName, topic, notify, resolved, participants, messages, pins})
+  page.$set({emailAddress, displayName, topic, notify, closed, participants, messages, pins})
   if (code) {
     window.location.hash = "#"
   } else {

@@ -76,18 +76,6 @@ pub fn get_conversation(id, session) {
   assert Ok(data) = dynamic.field(data, "conversation")
   assert Ok(topic) = dynamic.field(data, "topic")
   assert Ok(topic) = dynamic.string(topic)
-  assert Ok(participants) = dynamic.field(data, "participants")
-  assert Ok(participants) =
-    dynamic.typed_list(
-      participants,
-      fn(participant) {
-        try id_inner = dynamic.field(participant, "id")
-        try id_inner = dynamic.int(id_inner)
-        try email_address = dynamic.field(participant, "email_address")
-        try email_address = dynamic.string(email_address)
-        Ok(tuple(id_inner, email_address))
-      },
-    )
   // assert Ok(messages) = dynamic.field(data, "messages")
   // assert Ok(messages) =
   //   dynamic.typed_list(
@@ -98,5 +86,5 @@ pub fn get_conversation(id, session) {
   //       try content = dynamic.string(content)
   //       Ok(tuple(content)) },
   //   )
-  tuple(id, topic, participants, [])
+  tuple(id, topic, [])
 }

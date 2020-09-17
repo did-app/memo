@@ -38,7 +38,7 @@ pub fn create_conversation_test() {
   assert Ok(tuple(_, id)) = string.split_once(location, "/c/")
   assert Ok(id) = int.parse(id)
 
-  let tuple(_id, t, _p, _m) = support.get_conversation(id, session_token)
+  let tuple(_id, t, _m) = support.get_conversation(id, session_token)
   should.equal(t, topic)
 
   let request =
@@ -65,6 +65,6 @@ pub fn create_conversation_test() {
   dynamic.field(conversation, "topic")
   |> should.equal(Ok(dynamic.from(topic)))
 
-  dynamic.field(conversation, "resolved")
+  dynamic.field(conversation, "closed")
   |> should.equal(Ok(dynamic.from(False)))
 }

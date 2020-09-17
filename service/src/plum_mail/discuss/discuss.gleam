@@ -36,31 +36,30 @@ pub type Conversation {
   Conversation(
     id: Int,
     topic: Topic,
-    resolved: Bool,
-    participants: List(Identifier),
+    closed: Bool,
   )
 }
 
 pub fn conversation_to_json(conversation: Conversation) {
-  let Conversation(id, topic, resolved, participants) = conversation
+  let Conversation(id, topic, closed) = conversation
 
   json.object([
     tuple("id", json.int(id)),
     tuple("topic", json.string(topic.value)),
-    tuple("resolved", json.bool(resolved)),
-    tuple(
-      "participants",
-      json.list(list.map(
-        participants,
-        fn(participant) {
-          let Identifier(id: id, email_address: email_address) = participant
-          json.object([
-            tuple("id", json.int(id)),
-            tuple("email_address", json.string(email_address.value)),
-          ])
-        },
-      )),
-    ),
+    tuple("closed", json.bool(closed)),
+    // tuple(
+    //   "participants",
+    //   json.list(list.map(
+    //     participants,
+    //     fn(participant) {
+    //       let Identifier(id: id, email_address: email_address) = participant
+    //       json.object([
+    //         tuple("id", json.int(id)),
+    //         tuple("email_address", json.string(email_address.value)),
+    //       ])
+    //     },
+    //   )),
+    // ),
   ])
 }
 
@@ -103,7 +102,7 @@ pub fn load_messages(conversation_id) {
     "
         SELECT m.content, m.counter, m.inserted_at, i.id, i.email_address
         FROM messages AS m
-        JOIN identifiers AS i ON i.id = m.author_id
+        JOIN identifiers AS i ON i.id = m.authored_by
         WHERE conversation_id = $1
         ORDER BY m.inserted_at ASC
         "
@@ -118,8 +117,8 @@ pub fn load_messages(conversation_id) {
       assert Ok(counter) = dynamic.int(counter)
       assert Ok(inserted_at) = dynamic.element(row, 2)
       assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
-      assert Ok(author_id) = dynamic.element(row, 3)
-      assert Ok(author_id) = dynamic.int(author_id)
+      assert Ok(authored_by) = dynamic.element(row, 3)
+      assert Ok(authored_by) = dynamic.int(authored_by)
       assert Ok(author_email_address) = dynamic.element(row, 4)
       assert Ok(author_email_address) = dynamic.string(author_email_address)
       assert Ok(author_email_address) =
@@ -128,7 +127,7 @@ pub fn load_messages(conversation_id) {
 
       let author =
         Identifier(
-          id: author_id,
+          id: authored_by,
           email_address: author_email_address,
         )
       Message(counter, content, inserted_at, author)
@@ -143,7 +142,7 @@ pub type Pin {
 pub fn load_pins(conversation_id) {
   let sql =
     "
-        SELECT p.counter, p.identifier_id, p.content
+        SELECT p.counter, p.authored_by, p.content
         FROM pins AS p
         WHERE conversation_id = $1
         "
@@ -154,11 +153,11 @@ pub fn load_pins(conversation_id) {
     fn(row) {
       assert Ok(counter) = dynamic.element(row, 0)
       assert Ok(counter) = dynamic.int(counter)
-      assert Ok(identifier_id) = dynamic.element(row, 1)
-      assert Ok(identifier_id) = dynamic.int(identifier_id)
+      assert Ok(authored_by) = dynamic.element(row, 1)
+      assert Ok(authored_by) = dynamic.int(authored_by)
       assert Ok(content) = dynamic.element(row, 2)
       assert Ok(content) = dynamic.string(content)
-      Pin(counter, identifier_id, content)
+      Pin(counter, authored_by, content)
     },
   )
 }
@@ -206,10 +205,15 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
   // BECOMES a LEFT JOIN for open conversation
   let sql =
     "
-    SELECT c.id, c.topic, c.resolved, p.cursor, p.notify, p.invited_by, i.id, i.email_address
+    WITH conclusions AS (
+        SELECT * FROM messages
+        WHERE conclusion = TRUE
+    )
+    SELECT c.id, c.topic, COALESCE(m.conclusion, FALSE) as closed, p.cursor, p.notify, p.invited_by, i.id, i.email_address
     FROM conversations AS c
     JOIN participants AS p ON p.conversation_id = c.id
     JOIN identifiers AS i ON i.id = p.identifier_id
+    LEFT JOIN conclusions AS m ON m.conversation_id = c.id
     WHERE c.id = $1
     AND i.id = $2
     "
@@ -220,10 +224,10 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(topic) = dynamic.element(row, 1)
     assert Ok(topic) = dynamic.string(topic)
     assert Ok(topic) = validate_topic(topic)
-    assert Ok(resolved) = dynamic.element(row, 2)
-    assert Ok(resolved) = dynamic.bool(resolved)
+    assert Ok(closed) = dynamic.element(row, 2)
+    assert Ok(closed) = dynamic.bool(closed)
 
-    let conversation = Conversation(id, topic, resolved, [])
+    let conversation = Conversation(id, topic, closed)
 
     assert Ok(cursor) = dynamic.element(row, 3)
     assert Ok(cursor) = dynamic.int(cursor)

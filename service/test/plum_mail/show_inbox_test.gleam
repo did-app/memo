@@ -30,7 +30,7 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(_) =
     write_message.execute(
       participation,
-      write_message.Params("My Message", None, False),
+      write_message.Params("My Message", False),
     )
 
   assert Ok(second) = discuss.validate_topic("Second")
@@ -50,12 +50,12 @@ pub fn unread_messages_in_conversation_test() {
   assert Ok(_) =
     write_message.execute(
       participation,
-      write_message.Params("New message", None, False),
+      write_message.Params("New message", False),
     )
   assert Ok(_) =
     write_message.execute(
       participation,
-      write_message.Params("Next message", None, False),
+      write_message.Params("Next message", False),
     )
 
   assert Ok(inbox) = show_inbox.execute(me.id)
@@ -63,14 +63,14 @@ pub fn unread_messages_in_conversation_test() {
 
   dynamic.field(r1, "topic")
   |> should.equal(Ok(dynamic.from("Second")))
-  dynamic.field(r1, "resolved")
+  dynamic.field(r1, "closed")
   |> should.equal(Ok(dynamic.from(False)))
   dynamic.field(r1, "unread")
   |> should.equal(Ok(dynamic.from(True)))
 
   dynamic.field(r2, "topic")
   |> should.equal(Ok(dynamic.from("First")))
-  dynamic.field(r2, "resolved")
+  dynamic.field(r2, "closed")
   |> should.equal(Ok(dynamic.from(False)))
   dynamic.field(r2, "unread")
   |> should.equal(Ok(dynamic.from(False)))

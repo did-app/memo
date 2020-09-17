@@ -45,7 +45,7 @@ pub fn load() {
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
   let sql =
     "
-    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, c.resolved, recipient.id, recipient.email_address, author.email_address
+    SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, m.conclusion, recipient.id, recipient.email_address, author.email_address
     FROM messages AS m
     JOIN conversations AS c ON c.id = m.conversation_id
     JOIN participants AS p ON p.conversation_id = c.id
@@ -54,8 +54,8 @@ pub fn load() {
         AND n.counter = m.counter
         AND n.identifier_id = p.identifier_id
     JOIN identifiers AS recipient ON recipient.id = p.identifier_id
-    JOIN identifiers AS author ON author.id = m.author_id
-    WHERE p.identifier_id <> m.author_id
+    JOIN identifiers AS author ON author.id = m.authored_by
+    WHERE p.identifier_id <> m.authored_by
     AND p.cursor < m.counter
     AND n.id IS NULL
     -- AND m.inserted_at < (now() at time zone 'utc') - '1 minute'::interval
@@ -69,8 +69,8 @@ pub fn load() {
     assert Ok(content) = dynamic.string(content)
     // assert Ok(inserted_at) = dynamic.element(row, 2)
     // assert Ok(inserted_at) = dynamic.string(inserted_at)
-    assert Ok(author_id) = dynamic.element(row, 3)
-    assert Ok(author_id) = dynamic.int(author_id)
+    assert Ok(authored_by) = dynamic.element(row, 3)
+    assert Ok(authored_by) = dynamic.int(authored_by)
     assert Ok(conversation_id) = dynamic.element(row, 4)
     assert Ok(conversation_id) = dynamic.int(conversation_id)
     assert Ok(topic) = dynamic.element(row, 5)
@@ -81,8 +81,8 @@ pub fn load() {
         discuss.validate_topic(topic),
         fallback_topic
     )
-    // assert Ok(resolved) = dynamic.element(row, 6)
-    // assert Ok(resolved) = dynamic.bool(resolved)
+    // assert Ok(closed) = dynamic.element(row, 6)
+    // assert Ok(closed) = dynamic.bool(closed)
     assert Ok(recipient_id) = dynamic.element(row, 7)
     assert Ok(recipient_id) = dynamic.int(recipient_id)
     assert Ok(recipient_email_address) = dynamic.element(row, 8)
@@ -98,7 +98,7 @@ pub fn load() {
       id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
       author: Identifier(
-        id: author_id,
+        id: authored_by,
         email_address: author_email_address,
       ),
       to: Identifier(

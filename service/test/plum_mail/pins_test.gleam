@@ -49,7 +49,7 @@ pub fn pin_content_test() {
   let Ok(_) =
     write_message.execute(
       participation,
-      write_message.Params("My Message", None, False),
+      write_message.Params("My Message", False),
     )
   let response = add_pin(session_token, conversation.id, 1, "Some sub content")
   response.status
