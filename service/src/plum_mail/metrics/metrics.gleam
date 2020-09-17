@@ -11,11 +11,6 @@ import plum_mail/discuss/discuss
 import plum_mail/discuss/write_message
 
 pub fn load(metric_id) {
-  "
-    WITH AS (
-
-    )
-    "
   let sql =
     "
     WITH active_conversations AS (
