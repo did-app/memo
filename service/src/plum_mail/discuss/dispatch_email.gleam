@@ -162,7 +162,7 @@ fn send(config, message: Message) {
 
   let data =
     json.object([
-      tuple("From", json.string("updates@plummail.co")),
+      tuple("From", json.string(string.append(message.author.email_address.value, " <updates@plummail.co>"))),
       tuple("To", json.string(message.to.email_address.value)),
       tuple(
         "Subject",
