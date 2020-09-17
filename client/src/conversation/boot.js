@@ -22,15 +22,14 @@ export default async function() {
     // window.location.pathname = "/sign_in"
     throw "Could not find conversation"
   }
-  let {conversation, participation, messages, pins} = await response.json();
-  let nickname = participation["nickname"];
+  let {conversation, participation, messages, pins, participants} = await response.json();
   let emailAddress = participation["email_address"];
-  let displayName = nickname || emailAddress.split("@")[0];
+  let displayName = emailAddress.split("@")[0];
   let cursor = participation["cursor"];
   let topic = conversation.topic;
-  let resolved = conversation.resolved;
+  let closed = conversation.closed;
   let notify = participation.notify;
-  let participants = conversation.participants.map(function({
+  participants = participants.map(function({
     email_address: emailAddress
   }) {
     const [name] = emailAddress.split("@");
@@ -50,7 +49,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   document.title = topic
-  page.$set({emailAddress, nickname, displayName, topic, notify, resolved, participants, messages, pins})
+  page.$set({emailAddress, displayName, topic, notify, closed, participants, messages, pins})
   if (code) {
     window.location.hash = "#"
   } else {
@@ -81,10 +80,9 @@ export default async function() {
       let response = await Client.addParticipant(conversationId, emailAddress)
       window.location.reload()
     } else if (action == "writeMessage") {
-      let {content, from, resolve} = form
-      from = from === "" ? null : from
+      let {content, resolve} = form
 
-      let response = await Client.writeMessage(conversationId, content, from, resolve)
+      let response = await Client.writeMessage(conversationId, content, resolve)
       window.location.reload()
     }
   })

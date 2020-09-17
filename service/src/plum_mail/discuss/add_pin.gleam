@@ -21,7 +21,7 @@ pub fn execute(participation, params) {
   let Params(counter: counter, content: content) = params
   let sql =
     "
-        INSERT INTO pins (conversation_id, counter, identifier_id, content)
+        INSERT INTO pins (conversation_id, counter, authored_by, content)
         VALUES ($1, $2, $3, $4)
         "
   let args = [

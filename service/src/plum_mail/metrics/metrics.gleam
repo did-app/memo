@@ -88,7 +88,7 @@ pub fn execute(conversation_id, identifier_id) {
     [] -> Nil
     _ -> {
       let content = message(rows)
-      let params = write_message.Params(content, None, False)
+      let params = write_message.Params(content, False)
       assert Ok(_) = write_message.execute(participation, params)
       Nil
     }

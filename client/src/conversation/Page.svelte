@@ -5,11 +5,10 @@
 
   import DOMPurify from 'dompurify';
 
-  export let nickname;
   export let displayName;
   export let emailAddress;
   export let topic;
-  export let resolved = false;
+  export let closed = false;
   export let notify;
   export let participants = [];
   export let messages = [];
@@ -78,11 +77,11 @@
       </article>
       {/each}
     </div>
-    <h2 class:hidden="{!resolved}" class="text-lg text-center font-bold text-gray-700 mb-14">
-      This conversation has been resolved, <br> No further messages can be sent.
+    <h2 class:hidden="{!closed}" class="text-lg text-center font-bold text-gray-700 mb-14">
+      This conversation has been closed, <br> No further messages can be sent.
     </h2>
 
-    <form id="reply-form" class:hidden="{resolved}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
+    <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
@@ -95,7 +94,7 @@
       </section>
       <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
         <label class="font-bold flex py-1 justify-start items-start">
-          <span class="text-gray-700 pr-2">Resolve</span>
+          <span class="text-gray-700 pr-2">Conclude</span>
           <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
             <input type="checkbox" class="opacity-0 absolute" name="resolve">
             <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
@@ -175,7 +174,7 @@
       <i class="fa fa-quote-right" title="Quote" aria-hidden="true"></i>
       <span class="sr-only">Quote</span>
     </div>
-    <div class="texttip__btn" role="button" data-action="pinSelection" data-texttip-btn-index="1" style="transition-delay: 80ms;" on:click="{console.log('00000')}">
+    <div class="texttip__btn" role="button" data-action="pinSelection" data-texttip-btn-index="1" style="transition-delay: 80ms;">
       <i class="fa fa-map-pin" title="Pin" aria-hidden="true"></i>
       <span class="sr-only">Pin</span>
     </div>

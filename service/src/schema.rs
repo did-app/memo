@@ -2,7 +2,7 @@ table! {
     conversations (id) {
         id -> Int4,
         topic -> Nullable<Varchar>,
-        resolved -> Bool,
+        started_by -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -12,7 +12,7 @@ table! {
     identifiers (id) {
         id -> Int4,
         email_address -> Varchar,
-        nickname -> Nullable<Varchar>,
+        referred_by -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -42,7 +42,8 @@ table! {
         conversation_id -> Int4,
         counter -> Int4,
         content -> Text,
-        author_id -> Int4,
+        conclusion -> Bool,
+        authored_by -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -52,6 +53,7 @@ table! {
     participants (identifier_id, conversation_id) {
         identifier_id -> Int4,
         conversation_id -> Int4,
+        invited_by -> Nullable<Int4>,
         cursor -> Int4,
         notify -> Varchar,
         inserted_at -> Timestamp,
@@ -64,7 +66,7 @@ table! {
         id -> Int4,
         conversation_id -> Int4,
         counter -> Int4,
-        identifier_id -> Int4,
+        authored_by -> Int4,
         content -> Text,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
@@ -90,13 +92,13 @@ table! {
     }
 }
 
+joinable!(conversations -> identifiers (started_by));
 joinable!(link_tokens -> identifiers (identifier_id));
 joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(messages -> conversations (conversation_id));
-joinable!(messages -> identifiers (author_id));
+joinable!(messages -> identifiers (authored_by));
 joinable!(participants -> conversations (conversation_id));
-joinable!(participants -> identifiers (identifier_id));
-joinable!(pins -> identifiers (identifier_id));
+joinable!(pins -> identifiers (authored_by));
 joinable!(refresh_tokens -> link_tokens (link_token_selector));
 joinable!(session_tokens -> refresh_tokens (refresh_token_selector));
 

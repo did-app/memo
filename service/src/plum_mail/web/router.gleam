@@ -199,12 +199,26 @@ pub fn route(
         discuss.load_participants(participation.conversation.id)
       try messages = discuss.load_messages(participation.conversation.id)
       try pins = discuss.load_pins(participation.conversation.id)
-      let c = participation.conversation
-      let c = discuss.Conversation(..c, participants: participants)
-      // TODO fix the conversation updates.
       let data =
         json.object([
-          tuple("conversation", discuss.conversation_to_json(c)),
+          tuple(
+            "conversation",
+            discuss.conversation_to_json(participation.conversation),
+          ),
+          tuple(
+            "participants",
+            json.list(list.map(
+              participants,
+              fn(participant) {
+                let Identifier(id: id, email_address: email_address) =
+                  participant
+                json.object([
+                  tuple("id", json.int(id)),
+                  tuple("email_address", json.string(email_address.value)),
+                ])
+              },
+            )),
+          ),
           tuple(
             "messages",
             json.list(list.map(
@@ -244,10 +258,6 @@ pub fn route(
               tuple(
                 "email_address",
                 json.string(participation.identifier.email_address.value),
-              ),
-              tuple(
-                "nickname",
-                json.nullable(participation.identifier.nickname, json.string),
               ),
               tuple(
                 "notify",

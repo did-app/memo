@@ -40,8 +40,7 @@ pub fn fails_to_authenticate_without_any_tokens_test() {
 
 // Fails to authenticate with invalid selector format or validator
 pub fn authenticate_with_link_token_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
 
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
 
@@ -71,8 +70,7 @@ pub fn authenticate_with_link_token_test() {
 }
 
 pub fn refresh_token_tied_to_user_agent_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
 
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
 
@@ -84,8 +82,7 @@ pub fn refresh_token_tied_to_user_agent_test() {
 }
 
 pub fn link_token_should_not_be_valid_after_seven_days_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(selector, _)) = string.split_once(link_token, ":")
   let sql =
@@ -102,8 +99,7 @@ pub fn link_token_should_not_be_valid_after_seven_days_test() {
 }
 
 pub fn refresh_token_should_not_be_valid_after_two_days_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(refresh_token, _)) =
     authentication.authenticate(Some(link_token), None, "ua")
@@ -123,8 +119,7 @@ pub fn refresh_token_should_not_be_valid_after_two_days_test() {
 }
 
 pub fn refresh_token_not_valid_after_30_days_from_link_token_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(refresh_token, _)) =
     authentication.authenticate(Some(link_token), None, "ua")
@@ -144,8 +139,7 @@ pub fn refresh_token_not_valid_after_30_days_from_link_token_test() {
 }
 
 pub fn session_token_expires_after_one_day_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")

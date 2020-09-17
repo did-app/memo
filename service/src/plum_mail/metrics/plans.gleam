@@ -17,16 +17,25 @@ pub fn load() {
   let sql =
     "
     WITH owners AS (
-        SELECT DISTINCT ON (c.id) c.id, i.email_address
+        SELECT c.id, i.email_address
         FROM participants AS p
         JOIN conversations AS c ON c.id = p.conversation_id
         JOIN identifiers AS i on i.id = p.identifier_id
-        ORDER BY c.id, p.inserted_at ASC
+        WHERE p.original = TRUE
     )
     SELECT email_address, COUNT(id)
     FROM owners
     GROUP BY email_address
     ORDER BY COUNT(id) DESC
+
+    --
+
+    SELECT i.email_address, COUNT(c.id)
+    FROM conversations AS c
+    JOIN identifiers AS i ON i.id = c.started_by
+    GROUP BY i.email_address
+    ORDER BY COUNT(c.id) DESC
+
     "
   let mapper = fn(row) {
     assert Ok(email_address) = dynamic.element(row, 0)
@@ -70,7 +79,7 @@ pub fn execute(conversation_id, identifier_id) {
     [] -> Nil
     _ -> {
       let content = message(rows)
-      let params = write_message.Params(content, None, False)
+      let params = write_message.Params(content, False)
       assert Ok(_) = write_message.execute(participation, params)
       Nil
     }

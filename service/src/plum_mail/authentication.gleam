@@ -259,7 +259,7 @@ pub fn validate_email(email_address) {
 }
 
 pub type Identifier {
-  Identifier(id: Int, email_address: EmailAddress, nickname: Option(String))
+  Identifier(id: Int, email_address: EmailAddress)
 }
 
 fn row_to_identifier(row) {
@@ -268,15 +268,13 @@ fn row_to_identifier(row) {
   assert Ok(email_address) = dynamic.element(row, 1)
   assert Ok(email_address) = dynamic.string(email_address)
   assert Ok(email_address) = validate_email(email_address)
-  assert Ok(nickname) = dynamic.element(row, 2)
-  assert Ok(nickname) = run_sql.dynamic_option(nickname, dynamic.string)
-  Identifier(id, email_address, nickname)
+  Identifier(id, email_address)
 }
 
 pub fn fetch_identifier(id) {
   let sql =
     "
-    SELECT id, email_address, nickname
+    SELECT id, email_address
     FROM identifiers
     WHERE id = $1"
   let args = [pgo.int(id)]
@@ -286,30 +284,11 @@ pub fn fetch_identifier(id) {
 }
 
 // https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com
-pub fn identifier_from_email(email_address: EmailAddress) {
-  let sql =
-    "
-    WITH new_identifier AS (
-        INSERT INTO identifiers (email_address)
-        VALUES ($1)
-        ON CONFLICT DO NOTHING
-        RETURNING *
-    )
-    SELECT id, email_address, nickname FROM new_identifier
-    UNION ALL
-    SELECT id, email_address, nickname FROM identifiers WHERE email_address = $1
-    "
-  // Could return True of False field for new user
-  // Would enable Log or send email when new user is added
-  let args = [pgo.text(email_address.value)]
-  try [row] = run_sql.execute(sql, args, row_to_identifier)
-  Ok(row)
-}
-
+// TODO remove, or send in the correct write message for attemted login, might result in special sign in action not general auth one
 pub fn lookup_identifier(email_address: EmailAddress) {
   let sql =
     "
-    SELECT id, email_address, nickname FROM identifiers WHERE email_address = $1
+    SELECT id, email_address FROM identifiers WHERE email_address = $1
     "
   // Could return True of False field for new user
   // Would enable Log or send email when new user is added
@@ -323,16 +302,4 @@ pub fn lookup_identifier(email_address: EmailAddress) {
         failure: error.NotRecognised,
       ))
   }
-}
-
-pub fn update_nickname(identifier_id, nickname) {
-  let sql =
-    "
-    UPDATE identifiers
-    SET nickname = $2
-    WHERE id = $1
-    RETURNING id, email_address, nickname
-    "
-  let args = [pgo.int(identifier_id), pgo.text(nickname)]
-  run_sql.execute(sql, args, row_to_identifier)
 }

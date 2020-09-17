@@ -17,24 +17,47 @@ pub fn params(raw: Dynamic) {
 
 pub fn execute(participation, params) {
   let Params(email_address: email_address) = params
-  try identifier = authentication.identifier_from_email(email_address)
-  let Participation(conversation: conversation, ..) = participation
+  let Participation(conversation: conversation, identifier: author, ..) =
+    participation
 
-  // TODO have a creator or an "author"
-  // have a notificatons table
   let sql =
     "
-    WITH new_participant AS (
-        INSERT INTO participants (conversation_id, identifier_id, cursor, notify)
-        VALUES ($1, $2, 0, 'all')
+    WITH new_identifier AS (
+        INSERT INTO identifiers (email_address, referred_by)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *
+    ), invited AS (
+        SELECT id FROM new_identifier
+        UNION ALL
+        SELECT id FROM identifiers WHERE email_address = $1
+    ), new_participant AS (
+        INSERT INTO participants (conversation_id, identifier_id, invited_by, cursor, notify)
+        VALUES ($3, (SELECT id FROM invited), $2, 0, 'all')
         ON CONFLICT (identifier_id, conversation_id) DO NOTHING
         RETURNING *
     )
     SELECT identifier_id, conversation_id FROM new_participant
     UNION ALL
-    SELECT identifier_id, conversation_id FROM participants WHERE conversation_id = $1 AND identifier_id = $2
+    SELECT identifier_id, conversation_id FROM participants WHERE conversation_id = $3 AND identifier_id = (SELECT id FROM invited)
     "
-  let args = [pgo.int(conversation.id), pgo.int(identifier.id)]
-  try [_] = run_sql.execute(sql, args, fn(x) { x })
-  Ok(tuple(identifier.id, conversation.id))
+  let args = [
+    pgo.text(email_address.value),
+    pgo.int(author.id),
+    pgo.int(conversation.id),
+  ]
+  try [loaded] =
+    run_sql.execute(
+      sql,
+      args,
+      fn(row) {
+        assert Ok(invited_id) = dynamic.element(row, 0)
+        assert Ok(invited_id) = dynamic.int(invited_id)
+        assert Ok(conversation_id) = dynamic.element(row, 1)
+        assert Ok(conversation_id) = dynamic.int(conversation_id)
+        tuple(invited_id, conversation_id)
+      },
+    )
+
+  Ok(loaded)
 }

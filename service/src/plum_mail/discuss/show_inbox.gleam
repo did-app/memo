@@ -6,14 +6,22 @@ import gleam/json
 import gleam/pgo
 import datetime
 import plum_mail/run_sql
+import plum_mail/discuss/discuss
 
 pub fn execute(identifier_id) {
-  // TO can in memory see if cursor > latest
-  // Can in memory see if resolved
   let sql =
     "
     WITH search AS (
-        SELECT DISTINCT ON (c.id) c.id, c.topic, c.resolved, pl.participants, me.cursor, me.notify, COALESCE(m.inserted_at, c.inserted_at) as inserted_at, m.counter
+        SELECT DISTINCT ON (c.id)
+            c.id,
+            c.topic,
+            COALESCE(m.conclusion, FALSE) as closed,
+            pl.participants,
+            me.cursor,
+            me.notify,
+            COALESCE(m.inserted_at, c.inserted_at) as inserted_at,
+            m.counter,
+            COALESCE(m.conclusion, FALSE)
         FROM conversations AS c
         JOIN participants AS me ON me.conversation_id = c.id
         JOIN participant_lists AS pl ON pl.conversation_id = c.id
@@ -34,8 +42,8 @@ pub fn execute(identifier_id) {
         assert Ok(id) = dynamic.int(id)
         assert Ok(topic) = dynamic.element(row, 1)
         assert Ok(topic) = dynamic.string(topic)
-        assert Ok(resolved) = dynamic.element(row, 2)
-        assert Ok(resolved) = dynamic.bool(resolved)
+        assert Ok(closed) = dynamic.element(row, 2)
+        assert Ok(closed) = dynamic.bool(closed)
         assert Ok(participants) = dynamic.element(row, 3)
         assert Ok(participants) = dynamic.string(participants)
         assert Ok(participants) = json.decode(participants)
@@ -53,19 +61,28 @@ pub fn execute(identifier_id) {
 
         assert Ok(cursor) = dynamic.element(row, 4)
         assert Ok(cursor) = dynamic.int(cursor)
-        // assert Ok(notify) = dynamic.element(row, 5)
-        // assert Ok(notify) = dynamic.int(notify)
+        assert Ok(notify) = dynamic.element(row, 5)
+        assert Ok(notify) = discuss.as_preference(notify)
         assert Ok(inserted_at) = dynamic.element(row, 6)
         assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
         assert Ok(latest) = dynamic.element(row, 7)
         assert Ok(latest) = run_sql.dynamic_option(latest, dynamic.int)
+        assert Ok(conclusion) = dynamic.element(row, 8)
+        assert Ok(conclusion) = dynamic.bool(conclusion)
         json.object([
           tuple("id", json.int(id)),
           tuple("topic", json.string(topic)),
-          tuple("resolved", json.bool(resolved)),
+          tuple("closed", json.bool(closed)),
           tuple("participants", json.list(participants)),
           tuple("updated_at", json.string(datetime.to_human(inserted_at))),
-          tuple("unread", json.bool(option.unwrap(latest, 0) > cursor)),
+          tuple(
+            "unread",
+            json.bool(
+              option.unwrap(latest, 0) > cursor && {
+                notify == discuss.All || notify == discuss.Concluded && conclusion
+              },
+            ),
+          ),
           tuple("next", json.int(int.min(cursor + 1, option.unwrap(latest, 0)))),
         ])
       },

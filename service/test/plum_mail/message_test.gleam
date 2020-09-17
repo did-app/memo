@@ -15,7 +15,7 @@ import plum_mail/web/router.{handle}
 import plum_mail/support
 import gleam/should
 
-fn write_message(user_session, conversation_id, content, resolve) {
+fn write_message(user_session, conversation_id, content, conclusion) {
   let request =
     http.default_req()
     |> http.set_method(http.Post)
@@ -30,15 +30,14 @@ fn write_message(user_session, conversation_id, content, resolve) {
     |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> helpers.set_req_json(json.object([
       tuple("content", json.string(content)),
-      tuple("resolve", json.bool(resolve)),
+      tuple("conclusion", json.bool(conclusion)),
     ]))
 
   handle(request, support.test_config())
 }
 
 pub fn write_test() {
-  let email_address = support.generate_email_address("example.test")
-  assert Ok(identifier) = authentication.identifier_from_email(email_address)
+  assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
   assert Ok(tuple(_, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
