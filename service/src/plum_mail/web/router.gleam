@@ -206,6 +206,20 @@ pub fn route(
             discuss.conversation_to_json(participation.conversation),
           ),
           tuple(
+            "participants",
+            json.list(list.map(
+              participants,
+              fn(participant) {
+                let Identifier(id: id, email_address: email_address) =
+                  participant
+                json.object([
+                  tuple("id", json.int(id)),
+                  tuple("email_address", json.string(email_address.value)),
+                ])
+              },
+            )),
+          ),
+          tuple(
             "messages",
             json.list(list.map(
               messages,

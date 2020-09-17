@@ -94,7 +94,7 @@
       </section>
       <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
         <label class="font-bold flex py-1 justify-start items-start">
-          <span class="text-gray-700 pr-2">Resolve</span>
+          <span class="text-gray-700 pr-2">Conclude</span>
           <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
             <input type="checkbox" class="opacity-0 absolute" name="resolve">
             <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
@@ -174,7 +174,7 @@
       <i class="fa fa-quote-right" title="Quote" aria-hidden="true"></i>
       <span class="sr-only">Quote</span>
     </div>
-    <div class="texttip__btn" role="button" data-action="pinSelection" data-texttip-btn-index="1" style="transition-delay: 80ms;" on:click="{console.log('00000')}">
+    <div class="texttip__btn" role="button" data-action="pinSelection" data-texttip-btn-index="1" style="transition-delay: 80ms;">
       <i class="fa fa-map-pin" title="Pin" aria-hidden="true"></i>
       <span class="sr-only">Pin</span>
     </div>

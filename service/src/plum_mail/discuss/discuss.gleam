@@ -44,19 +44,6 @@ pub fn conversation_to_json(conversation: Conversation) {
     tuple("topic", json.string(topic.value)),
     tuple("closed", json.bool(closed)),
   ])
-  // tuple(
-  //   "participants",
-  //   json.list(list.map(
-  //     participants,
-  //     fn(participant) {
-  //       let Identifier(id: id, email_address: email_address) = participant
-  //       json.object([
-  //         tuple("id", json.int(id)),
-  //         tuple("email_address", json.string(email_address.value)),
-  //       ])
-  //     },
-  //   )),
-  // ),
 }
 
 pub fn load_participants(conversation_id) {

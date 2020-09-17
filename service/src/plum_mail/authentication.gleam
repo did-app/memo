@@ -288,7 +288,7 @@ pub fn fetch_identifier(id) {
 pub fn lookup_identifier(email_address: EmailAddress) {
   let sql =
     "
-    SELECT id, email_address, FROM identifiers WHERE email_address = $1
+    SELECT id, email_address FROM identifiers WHERE email_address = $1
     "
   // Could return True of False field for new user
   // Would enable Log or send email when new user is added

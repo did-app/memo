@@ -22,14 +22,14 @@ export default async function() {
     // window.location.pathname = "/sign_in"
     throw "Could not find conversation"
   }
-  let {conversation, participation, messages, pins} = await response.json();
+  let {conversation, participation, messages, pins, participants} = await response.json();
   let emailAddress = participation["email_address"];
   let displayName = emailAddress.split("@")[0];
   let cursor = participation["cursor"];
   let topic = conversation.topic;
   let closed = conversation.closed;
   let notify = participation.notify;
-  let participants = conversation.participants.map(function({
+  participants = participants.map(function({
     email_address: emailAddress
   }) {
     const [name] = emailAddress.split("@");

@@ -58,6 +58,7 @@ pub fn load() {
     WHERE p.identifier_id <> m.authored_by
     AND p.cursor < m.counter
     AND n.id IS NULL
+    AND (p.notify = 'all' OR (p.notify = 'concluded' AND m.conclusion))
     -- AND m.inserted_at < (now() at time zone 'utc') - '1 minute'::interval
     ORDER BY m.inserted_at ASC
     "

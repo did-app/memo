@@ -6,10 +6,9 @@ import gleam/json
 import gleam/pgo
 import datetime
 import plum_mail/run_sql
+import plum_mail/discuss/discuss
 
 pub fn execute(identifier_id) {
-  // TO can in memory see if cursor > latest
-  // Can in memory see if closed
   let sql =
     "
     WITH search AS (
@@ -21,7 +20,8 @@ pub fn execute(identifier_id) {
             me.cursor,
             me.notify,
             COALESCE(m.inserted_at, c.inserted_at) as inserted_at,
-            m.counter
+            m.counter,
+            COALESCE(m.conclusion, FALSE)
         FROM conversations AS c
         JOIN participants AS me ON me.conversation_id = c.id
         JOIN participant_lists AS pl ON pl.conversation_id = c.id
@@ -61,19 +61,28 @@ pub fn execute(identifier_id) {
 
         assert Ok(cursor) = dynamic.element(row, 4)
         assert Ok(cursor) = dynamic.int(cursor)
-        // assert Ok(notify) = dynamic.element(row, 5)
-        // assert Ok(notify) = dynamic.int(notify)
+        assert Ok(notify) = dynamic.element(row, 5)
+        assert Ok(notify) = discuss.as_preference(notify)
         assert Ok(inserted_at) = dynamic.element(row, 6)
         assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
         assert Ok(latest) = dynamic.element(row, 7)
         assert Ok(latest) = run_sql.dynamic_option(latest, dynamic.int)
+        assert Ok(conclusion) = dynamic.element(row, 8)
+        assert Ok(conclusion) = dynamic.bool(conclusion)
         json.object([
           tuple("id", json.int(id)),
           tuple("topic", json.string(topic)),
           tuple("closed", json.bool(closed)),
           tuple("participants", json.list(participants)),
           tuple("updated_at", json.string(datetime.to_human(inserted_at))),
-          tuple("unread", json.bool(option.unwrap(latest, 0) > cursor)),
+          tuple(
+            "unread",
+            json.bool(
+              option.unwrap(latest, 0) > cursor && {
+                notify == discuss.All || notify == discuss.Concluded && conclusion
+              },
+            ),
+          ),
           tuple("next", json.int(int.min(cursor + 1, option.unwrap(latest, 0)))),
         ])
       },
