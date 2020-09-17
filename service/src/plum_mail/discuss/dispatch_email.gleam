@@ -77,10 +77,7 @@ pub fn load() {
     assert Ok(topic) = dynamic.string(topic)
     // TODO remove
     assert Ok(fallback_topic) = discuss.validate_topic("A fallback topic")
-    let topic = result.unwrap(
-        discuss.validate_topic(topic),
-        fallback_topic
-    )
+    let topic = result.unwrap(discuss.validate_topic(topic), fallback_topic)
     // assert Ok(closed) = dynamic.element(row, 6)
     // assert Ok(closed) = dynamic.bool(closed)
     assert Ok(recipient_id) = dynamic.element(row, 7)
@@ -97,14 +94,8 @@ pub fn load() {
     Message(
       id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
-      author: Identifier(
-        id: authored_by,
-        email_address: author_email_address,
-      ),
-      to: Identifier(
-        id: recipient_id,
-        email_address: recipient_email_address,
-      ),
+      author: Identifier(id: authored_by, email_address: author_email_address),
+      to: Identifier(id: recipient_id, email_address: recipient_email_address),
       content: content,
     )
   }

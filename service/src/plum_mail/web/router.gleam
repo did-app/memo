@@ -201,7 +201,10 @@ pub fn route(
       try pins = discuss.load_pins(participation.conversation.id)
       let data =
         json.object([
-          tuple("conversation", discuss.conversation_to_json(participation.conversation)),
+          tuple(
+            "conversation",
+            discuss.conversation_to_json(participation.conversation),
+          ),
           tuple(
             "messages",
             json.list(list.map(

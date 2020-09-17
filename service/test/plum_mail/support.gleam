@@ -38,19 +38,23 @@ fn row_to_identifier(row) {
   authentication.Identifier(id, email_address)
 }
 
+pub fn identifier_from_email(email_address: EmailAddress) {
+  let sql =
+    "
+    INSERT INTO identifiers (email_address, referred_by)
+    VALUES ($1, currval('identifiers_id_seq'))
+    RETURNING id, email_address
+    "
+  // Could return True of False field for new user
+  // Would enable Log or send email when new user is added
+  let args = [pgo.text(email_address.value)]
+  try [identifier] = run_sql.execute(sql, args, row_to_identifier)
+  Ok(identifier)
+}
+
 pub fn generate_identifier(domain) {
-    let email_address = generate_email_address(domain)
-    let sql =
-      "
-      INSERT INTO identifiers (email_address, referred_by)
-      VALUES ($1, currval('identifiers_id_seq'))
-      RETURNING id, email_address
-      "
-    // Could return True of False field for new user
-    // Would enable Log or send email when new user is added
-    let args = [pgo.text(email_address.value)]
-    try [identifier] = run_sql.execute(sql, args, row_to_identifier)
-    Ok(identifier)
+  generate_email_address(domain)
+  |> identifier_from_email()
 }
 
 pub fn get_resp_cookie(response) {

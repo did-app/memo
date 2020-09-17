@@ -41,5 +41,5 @@ pub fn execute(participation, params) {
     pgo.bool(conclusion),
   ]
   try [_] = run_sql.execute(sql, args, fn(x) { x })
-Ok(Nil)
+  Ok(Nil)
 }

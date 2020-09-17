@@ -33,11 +33,7 @@ pub fn topic_to_string(topic) {
 }
 
 pub type Conversation {
-  Conversation(
-    id: Int,
-    topic: Topic,
-    closed: Bool,
-  )
+  Conversation(id: Int, topic: Topic, closed: Bool)
 }
 
 pub fn conversation_to_json(conversation: Conversation) {
@@ -47,20 +43,20 @@ pub fn conversation_to_json(conversation: Conversation) {
     tuple("id", json.int(id)),
     tuple("topic", json.string(topic.value)),
     tuple("closed", json.bool(closed)),
-    // tuple(
-    //   "participants",
-    //   json.list(list.map(
-    //     participants,
-    //     fn(participant) {
-    //       let Identifier(id: id, email_address: email_address) = participant
-    //       json.object([
-    //         tuple("id", json.int(id)),
-    //         tuple("email_address", json.string(email_address.value)),
-    //       ])
-    //     },
-    //   )),
-    // ),
   ])
+  // tuple(
+  //   "participants",
+  //   json.list(list.map(
+  //     participants,
+  //     fn(participant) {
+  //       let Identifier(id: id, email_address: email_address) = participant
+  //       json.object([
+  //         tuple("id", json.int(id)),
+  //         tuple("email_address", json.string(email_address.value)),
+  //       ])
+  //     },
+  //   )),
+  // ),
 }
 
 pub fn load_participants(conversation_id) {
@@ -124,12 +120,8 @@ pub fn load_messages(conversation_id) {
       assert Ok(author_email_address) =
         authentication.validate_email(author_email_address)
 
-
       let author =
-        Identifier(
-          id: authored_by,
-          email_address: author_email_address,
-        )
+        Identifier(id: authored_by, email_address: author_email_address)
       Message(counter, content, inserted_at, author)
     },
   )

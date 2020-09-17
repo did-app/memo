@@ -284,7 +284,6 @@ pub fn fetch_identifier(id) {
 }
 
 // https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com
-
 // TODO remove, or send in the correct write message for attemted login, might result in special sign in action not general auth one
 pub fn lookup_identifier(email_address: EmailAddress) {
   let sql =

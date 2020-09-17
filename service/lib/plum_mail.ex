@@ -1,2 +1,0 @@
-defmodule PlumMail do
-end

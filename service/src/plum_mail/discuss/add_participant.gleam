@@ -17,7 +17,8 @@ pub fn params(raw: Dynamic) {
 
 pub fn execute(participation, params) {
   let Params(email_address: email_address) = params
-  let Participation(conversation: conversation, identifier: author, ..) = participation
+  let Participation(conversation: conversation, identifier: author, ..) =
+    participation
 
   let sql =
     "
@@ -40,14 +41,23 @@ pub fn execute(participation, params) {
     UNION ALL
     SELECT identifier_id, conversation_id FROM participants WHERE conversation_id = $3 AND identifier_id = (SELECT id FROM invited)
     "
-  let args = [pgo.text(email_address.value), pgo.int(author.id), pgo.int(conversation.id)]
-  try [loaded] = run_sql.execute(sql, args, fn(row) {
-      assert Ok(invited_id) = dynamic.element(row, 0)
-      assert Ok(invited_id) = dynamic.int(invited_id)
-      assert Ok(conversation_id) = dynamic.element(row, 1)
-      assert Ok(conversation_id) = dynamic.int(conversation_id)
-      tuple(invited_id, conversation_id)
+  let args = [
+    pgo.text(email_address.value),
+    pgo.int(author.id),
+    pgo.int(conversation.id),
+  ]
+  try [loaded] =
+    run_sql.execute(
+      sql,
+      args,
+      fn(row) {
+        assert Ok(invited_id) = dynamic.element(row, 0)
+        assert Ok(invited_id) = dynamic.int(invited_id)
+        assert Ok(conversation_id) = dynamic.element(row, 1)
+        assert Ok(conversation_id) = dynamic.int(conversation_id)
+        tuple(invited_id, conversation_id)
+      },
+    )
 
-   })
   Ok(loaded)
 }
