@@ -131,6 +131,19 @@ fn send(config, message: Message) {
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
   ) = config
+  let conversation_link =
+    authenticated_link(client_origin, message.id.0, message.to.id)
+  let prefix =
+    [
+      "<div style=\"padding:0.5em;border:2px solid rgb(60, 54, 107);border-radius:0.5em;max-width:640px\"><a href=\"",
+      conversation_link,
+      "\">",
+      message.author.email_address.value,
+      "</a> sent you this message using Plum Mail. <a href=\"",
+      conversation_link,
+      "\">Click here to reply</a></div>",
+    ]
+    |> string.join("")
   let body =
     [
       "
@@ -143,18 +156,14 @@ fn send(config, message: Message) {
         <title></title>
       </head>
       <body>
-        <main>
+        <main style=\"max-width:640px;\">
+        <div style=\"max-width:640px;\">
+
     ",
+      prefix,
       as_html(message.content),
       "
-    <br>
-    <br>
-    <p><em style=\"font-style:italic;\">",
-      message.author.email_address.value,
-      " sent you this message using Plum Mail.</em></p>
-    <a href=\"",
-      authenticated_link(client_origin, message.id.0, message.to.id),
-      "\">Click here to reply</a>
+    </div>
     </main>
     ",
     ]
@@ -162,7 +171,28 @@ fn send(config, message: Message) {
 
   let data =
     json.object([
-      tuple("From", json.string(string.append(message.author.email_address.value, " <updates@plummail.co>"))),
+      tuple(
+        "From",
+        json.string(string.join(
+          [
+            message.author.email_address.value,
+            // It seems only updates
+            " <notify@plummail.co>",
+          ],
+          "",
+        )),
+      ),
+      tuple(
+        "ReplyTo",
+        json.string(string.join(
+          [
+            "c",
+            int.to_string(message.id.0),
+            "@plummail.co",
+          ],
+          "",
+        )),
+      ),
       tuple("To", json.string(message.to.email_address.value)),
       tuple(
         "Subject",
@@ -182,6 +212,7 @@ fn send(config, message: Message) {
     |> http.set_req_body(json.encode(data))
   io.debug(request)
   httpc.send(request)
+  |> io.debug()
 }
 
 pub fn execute() {
