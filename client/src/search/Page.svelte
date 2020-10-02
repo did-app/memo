@@ -1,7 +1,7 @@
 <script>
   const SEARCH = "SEARCH"
   const UNREAD = "UNREAD"
-  const INDEX = "INDEX"
+  const ARCHIVE = "ARCHIVE"
   export let results = [];
   export let newTopic;
   export let unread = [];
@@ -18,8 +18,8 @@
   function searchPage() {
     page = SEARCH
   }
-  function indexPage() {
-    page = INDEX
+  function archivePage() {
+    page = ARCHIVE
   }
 </script>
 
@@ -29,7 +29,7 @@
     <a on:click|preventDefault={unreadPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">New messages</a>
     {/if}
     {#if page === SEARCH}
-    <a on:click|preventDefault={indexPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">Index</a>
+    <a on:click|preventDefault={archivePage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">Archive</a>
     {/if}
     {#if page !== SEARCH}
     <a on:click|preventDefault={searchPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">Back to search</a>
@@ -51,7 +51,7 @@
     </div>
   </a>
   {/each}
-  {:else if page === INDEX}
+  {:else if page === ARCHIVE}
   <nav id="inbox">
     {#each all as {id, updated_at, next, topic, participants}}
     <a class="block my-2 py-1 px-2 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl" href="/c/{id}#{next}">
