@@ -26,6 +26,7 @@ import plum_mail/discuss/show_inbox
 import plum_mail/discuss/set_notification
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/add_pin
+import plum_mail/discuss/delete_pin
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
 
@@ -243,8 +244,9 @@ pub fn route(
             json.list(list.map(
               pins,
               fn(pin) {
-                let Pin(counter, identifier_id, content) = pin
+                let Pin(id, counter, identifier_id, content) = pin
                 json.object([
+                  tuple("id", json.int(id)),
                   tuple("counter", json.int(counter)),
                   tuple("identifier_id", json.int(identifier_id)),
                   tuple("content", json.string(content)),
@@ -316,6 +318,15 @@ pub fn route(
       try params = add_pin.params(params)
       try participation = load_participation(id, request, config.client_origin)
       try _ = add_pin.execute(participation, params)
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
+    }
+    ["c", id, "delete_pin"] -> {
+      try params = acl.parse_json(request)
+      try params = delete_pin.params(params)
+      try participation = load_participation(id, request, config.client_origin)
+      try _ = delete_pin.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok

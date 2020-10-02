@@ -4,7 +4,9 @@
   } from 'svelte-loading-spinners'
 
   import DOMPurify from 'dompurify';
+  import * as Client from "../client.js"
 
+  export let conversationId;
   export let displayName;
   export let emailAddress;
   export let topic;
@@ -37,6 +39,13 @@
     const $composeMenu = document.getElementById('compose-menu');
     // TODO reinstate but Breaks on iOS
     // $composeMenu.scrollIntoView();
+  }
+
+  function deletePin(pinId) {
+    pins = pins.filter(function (p) {
+      Client.deletePin(conversationId, pinId)
+      return p.id != pinId
+    })
   }
 </script>
 
@@ -124,8 +133,10 @@
       </style>
       <ul id="pins">
         <li class="last-only">Select message text to add first pin.</li>
-        {#each pins as {counter, content}}
-        <li class="bg-white border-indigo-700 border-l-4 m-1 p-2 shadow-lg text-xl"><a href="#{counter}">{content}</a></li>
+        {#each pins as {counter, content, id}}
+        <li class="bg-white border-indigo-700 border-l-4 m-1 p-1 shadow-lg text-lg">
+          <a on:click="{deletePin(id)}" href="#"><img class="inline-block w-6" src="/005-delete.svg" alt=""></a>
+          <a href="#{counter}">{content}</a></li>
         {/each}
       </ul>
       <h3 class="font-bold mt-8">Participants</h3>

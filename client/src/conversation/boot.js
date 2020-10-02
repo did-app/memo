@@ -49,7 +49,7 @@ export default async function() {
     messages[messages.length - 1].checked = false
   }
   document.title = topic
-  page.$set({emailAddress, displayName, topic, notify, closed, participants, messages, pins})
+  page.$set({conversationId, emailAddress, displayName, topic, notify, closed, participants, messages, pins})
   if (code) {
     window.location.hash = "#"
   } else {

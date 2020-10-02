@@ -69,6 +69,10 @@ export async function requestEmailAuthentication(emailAddress) {
   return await post("/authenticate/email", {email_address: emailAddress});
 }
 
+export async function deletePin(conversationId, pinId) {
+  return await post("/c/" + conversationId + "/delete_pin", {pin_id: pinId});
+}
+
 async function post(path, params) {
   let url = "__API_ORIGIN__" + path;
   let options = {
