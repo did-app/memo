@@ -18,34 +18,24 @@
   function searchPage() {
     page = SEARCH
   }
-  function handleKeypress(event) {
-    if (!event.target.closest("input#search") && event.key === "i") {
-      if (page !== INDEX) {
-        page = INDEX
-      } else {
-        page = SEARCH
-      }
-    }
+  function indexPage() {
+    page = INDEX
   }
 </script>
 
-<svelte:window on:keypress={handleKeypress}/>
 <header class="w-full max-w-2xl mx-auto text-right">
-  {#if unread.length === 0}
-  <div class="ml-auto text-lg p-4">
-    <span href="/c#1">Next update {nextHour} <img class="inline-block w-8" src="002-clock.svg" alt=""> </span>
-  </div>
-  {:else}
-  {#if page === UNREAD}
-  <div class="ml-auto text-lg p-4">
-    <a href="#inbox" on:click|preventDefault={searchPage}>Back to search <img class="inline-block w-8" src="004-magnifier.svg" alt=""></a>
-  </div>
-  {:else}
-  <div class="ml-auto text-lg p-4">
-    <a href="#inbox" on:click|preventDefault={unreadPage}>New messages <img class="inline-block w-8" src="003-chat.svg" alt=""> </a>
-  </div>
-  {/if}
-  {/if}
+  <nav class="ml-auto text-lg p-4">
+    {#if unread.length !== 0 && page === SEARCH}
+    <a on:click|preventDefault={unreadPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">New messages</a>
+    {/if}
+    {#if page === SEARCH}
+    <a on:click|preventDefault={indexPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">Index</a>
+    {/if}
+    {#if page !== SEARCH}
+    <a on:click|preventDefault={searchPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">Back to search</a>
+
+    {/if}
+  </nav>
 </header>
 <main class="w-full max-w-2xl m-auto p-6">
   <h1 class="flex-grow font-serif text-indigo-800 text-6xl text-center">plum mail</h1>
