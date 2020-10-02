@@ -39,7 +39,7 @@ export default async function() {
    let unread = conversations.filter(function (c) {
      return c.unread
    })
-   page.$set({unread})
+   page.$set({unread, all: conversations})
    conversationSearch.addAll(conversations)
 
 
