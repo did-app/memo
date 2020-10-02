@@ -38,7 +38,7 @@ export default async function() {
    })
    let unread = conversations.filter(function (c) {
      return c.unread
-   })
+   }).slice().reverse()
    page.$set({unread, all: conversations})
    conversationSearch.addAll(conversations)
 
