@@ -89,6 +89,8 @@ export default async function() {
     if (action === "addParticipant") {
       let { emailAddress } = form;
 
+      // Could be 204 for idempotent? although not quite idempotent
+      // Could have a map with key as participant id which is merged and displated in participant order?
       if (participants.find(p => p.emailAddress === emailAddress)) {
         event.target.reset()
       } else {
@@ -97,7 +99,8 @@ export default async function() {
           ok: function(_) {
             const [name] = emailAddress.split("@");
             const participant = { name, emailAddress };
-            participants.push(participant)
+            participants = participants.concat(participant)
+            page.$set({participants})
             event.target.reset()
           },
           fail: function({status}) {

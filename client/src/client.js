@@ -84,7 +84,7 @@ async function post(path, params) {
   let r = await doFetch(url, options);
   return r.asyncFlatMap(async function(response) {
     let status = response.status;
-    if (status === 200 || status === 201) {
+    if (status === 200) {
       return await parseJSON(response)
       // 400 is an error client shouldn't see
     } else if (status === 422) {
