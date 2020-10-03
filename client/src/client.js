@@ -5,17 +5,13 @@ export async function authenticate(linkToken) {
 }
 
 export async function fetchInbox() {
-  const response = await fetch("__API_ORIGIN__/inbox", {
-    credentials: "include"
-  });
-  return response;
+  return await get("/inbox")
 }
+
 export async function fetchConversation(id) {
-  const response = await fetch("__API_ORIGIN__/c/" + id, {
-    credentials: "include"
-  });
-  return response;
+  return await get("/c/" + id)
 }
+
 export async function addParticipant(id, emailAddress) {
   const path = "/c/" + id + "/participant"
   return await post(path, {email_address: emailAddress});
@@ -57,8 +53,17 @@ export async function deletePin(conversationId, pinId) {
   return await post("/c/" + conversationId + "/delete_pin", {pin_id: pinId});
 }
 
+async function get(path) {
+  let options = {
+    credentials: "include",
+    headers: {
+      accept: "application/json",
+    },
+  };
+  return myFetch(path, options)
+}
+
 async function post(path, params) {
-  let url = "__API_ORIGIN__" + path;
   let options = {
     method: "POST",
     credentials: "include",
@@ -68,7 +73,11 @@ async function post(path, params) {
     },
     body: JSON.stringify(params)
   };
+  return myFetch(path, options)
+}
 
+async function myFetch(path, options) {
+  let url = "__API_ORIGIN__" + path;
   let r = await doFetch(url, options);
   return r.asyncFlatMap(async function(response) {
     let status = response.status;

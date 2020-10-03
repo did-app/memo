@@ -23,17 +23,18 @@ export default async function() {
   });
 
   let response = await Client.fetchConversation(conversationId);
-  if (response.status != 200) {
-    // window.location.pathname = "/sign_in"
-    throw "Could not find conversation";
-  }
   let {
     conversation,
     participation,
     messages,
     pins,
     participants
-  } = await response.json();
+  } = response.match({ok: function (x) {
+    return x
+  }, fail: function (_) {
+    throw "Could not find conversation";
+  }});
+
   let emailAddress = participation["email_address"];
   let displayName = emailAddress.split("@")[0];
   let cursor = participation["cursor"];

@@ -19,13 +19,12 @@ export default async function() {
   });
 
   let response = await Client.fetchInbox();
-  if (response.status != 200) {
-    // window.location.pathname = "/sign_in"
-    throw "Could not find conversation"
+  let {conversations} = response.match({ok: function (data) {
+    return data
+  }, fail: function (_) {
+    throw "Could not load inbox"
+  }});
 
-  }
-  let {conversations} = await response.json()
-  console.log(conversations);
   let conversationSearch = new MiniSearch({
      fields: ['topic', 'participants', 'slug'], // fields to index for full-text search
      storeFields: ['topic', 'next', 'participants', 'slug', 'updated_at'], // fields to return with search results
