@@ -132,8 +132,12 @@ export default async function() {
   document.addEventListener("change", async function(event) {
     if (event.target.name === "notify") {
       let notify = event.target.value;
-      await Client.setNotification(conversationId, notify);
-      window.location.reload();
+      const response = await Client.setNotification(conversationId, notify);
+      response.match({ok: function (_) {
+        undefined
+      }, fail: function (_) {
+        page.$set({ failure: "Failed to save notification preferences" });
+      }})
     }
   });
 

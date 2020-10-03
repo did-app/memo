@@ -41,7 +41,7 @@ pub fn successfully_set_notification_preference_test() {
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
   let response = set_notification(session_token, conversation, "concluded")
 
-  should.equal(response.status, 201)
+  should.equal(response.status, 200)
   let Ok(participant) =
     discuss.load_participation(conversation.id, identifier.id)
   should.equal(participant.notify, discuss.Concluded)

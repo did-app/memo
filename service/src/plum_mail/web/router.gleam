@@ -296,8 +296,8 @@ pub fn route(
       try params = set_notification.params(params)
       try participation = load_participation(id, request, config.client_origin)
       try _ = set_notification.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
     // FIXME should add concurrency control
