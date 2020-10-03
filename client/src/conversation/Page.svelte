@@ -4,7 +4,6 @@
   } from 'svelte-loading-spinners'
 
   import DOMPurify from 'dompurify';
-  import * as Client from "../client.js"
 
   export let failure;
   export let conversationId;
@@ -40,17 +39,6 @@
     const $composeMenu = document.getElementById('compose-menu');
     // TODO reinstate but Breaks on iOS
     // $composeMenu.scrollIntoView();
-  }
-
-  async function deletePin(pinId) {
-    const response = await Client.deletePin(conversationId, pinId)
-    response.match({ok: function (_) {
-      pins = pins.filter(function (p) {
-        return p.id != pinId
-      })
-    }, fail: function (_) {
-      failure = "Failed to delete pin"
-    }})
   }
 
   function clearFailure() {
@@ -149,8 +137,14 @@
         <li class="last-only">Select message text to add first pin.</li>
         {#each pins as {counter, content, id}}
         <li class="bg-white border-indigo-700 border-l-4 m-1 p-1 shadow-lg text-lg">
-          <a on:click="{deletePin(id)}" href="#"><img class="inline-block w-6" src="/005-delete.svg" alt=""></a>
-          <a href="#{counter}">{content}</a></li>
+          <form class="inline-block" data-action="deletePin" method="post">
+            <input type="hidden" name="id" value={id}>
+            <button>
+              <img class="inline-block w-6" src="/005-delete.svg" alt="">
+            </button>
+          </form>
+          <a href="#{counter}">{content}</a>
+        </li>
         {/each}
       </ul>
       <h3 class="font-bold mt-8">Participants</h3>

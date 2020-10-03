@@ -126,6 +126,20 @@ export default async function() {
         resolve
       );
       window.location.reload();
+    } else if (action === "deletePin") {
+      const pinId = parseInt(form.id)
+      const response = await Client.deletePin(conversationId, pinId);
+      response.match({
+        ok: function(_) {
+          pins = pins.filter(function(p) {
+            return p.id != pinId;
+          });
+          page.$set({ pins });
+        },
+        fail: function(_) {
+          page.$set({ failure: "Failed to delete pin" });
+        }
+      });
     }
   });
 
@@ -133,11 +147,14 @@ export default async function() {
     if (event.target.name === "notify") {
       let notify = event.target.value;
       const response = await Client.setNotification(conversationId, notify);
-      response.match({ok: function (_) {
-        undefined
-      }, fail: function (_) {
-        page.$set({ failure: "Failed to save notification preferences" });
-      }})
+      response.match({
+        ok: function(_) {
+          undefined;
+        },
+        fail: function(_) {
+          page.$set({ failure: "Failed to save notification preferences" });
+        }
+      });
     }
   });
 
