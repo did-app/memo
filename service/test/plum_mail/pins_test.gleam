@@ -59,9 +59,10 @@ pub fn pin_content_test() {
   response.status
   |> should.equal(200)
 
-  assert Ok(body) = response.body
-  |>bit_builder.to_bit_string()
-  |> bit_string.to_string()
+  assert Ok(body) =
+    response.body
+    |> bit_builder.to_bit_string()
+    |> bit_string.to_string()
   assert Ok(data) = json.decode(body)
   let data = dynamic.from(data)
   assert Ok(pin_id) = dynamic.field(data, "id")

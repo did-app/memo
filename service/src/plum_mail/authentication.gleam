@@ -296,10 +296,6 @@ pub fn lookup_identifier(email_address: EmailAddress) {
   try rows = run_sql.execute(sql, args, row_to_identifier)
   case rows {
     [row] -> Ok(row)
-    [] ->
-      Error(error.Unprocessable(
-        field: "email_address",
-        failure: error.NotRecognised,
-      ))
+    [] -> Error(error.UnknownIdentifier(email_address.value))
   }
 }

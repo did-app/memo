@@ -109,17 +109,33 @@ pub fn as_bool(raw) {
   }
 }
 
-pub fn error_response(reason) {
-  let tuple(status, detail) = case reason {
-    error.BadRequest(detail) -> tuple(400, detail)
-    error.Unauthenticated -> tuple(401, "")
-    error.Forbidden -> tuple(403, "")
-    error.Unprocessable(field: field, ..) -> tuple(
-      422,
-      string.append("Could not process with invalid field ", field),
-    )
-  }
+pub fn make_response(status, code, detail) {
+  let error_data =
+    json.object([
+      tuple("status", json.int(status)),
+      tuple("code", json.string(code)),
+      tuple("detail", json.string(detail)),
+    ])
+
   http.response(status)
-  |> web.set_resp_json(json.object([tuple("detail", json.string(detail))]))
-  // |> http.set_resp_body(bit_builder.from_bit_string(bit_string.from_string(body)))
+  |> web.set_resp_json(error_data)
+}
+
+pub fn error_response(reason) {
+  case reason {
+    // error.BadRequest(detail) -> tuple(400, detail)
+    // error.Unauthenticated -> tuple(401, "")
+    error.Forbidden ->
+      make_response(403, "forbidden", "This action is forbidden")
+    // error.Unprocessable(field: field, failure: error.CastFailure(_)) -> tuple(
+    //   422,
+    //   string.append("Could not process with invalid field ", field),
+    // )
+    error.UnknownIdentifier(email_address) ->
+      make_response(
+        422,
+        "unknown_identifier",
+        "There is email address requires an invitation to access Plum Mail",
+      )
+  }
 }

@@ -170,7 +170,7 @@ pub fn route(
       |> Ok
     }
     ["sign_out"] -> {
-        // TODO delete the refresh token
+      // TODO delete the refresh token
       let cookie_defaults = http.cookie_defaults(request.scheme)
       redirect(string.append(config.client_origin, "/"))
       |> http.expire_resp_cookie("session", cookie_defaults)

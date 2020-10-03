@@ -31,10 +31,15 @@ pub fn execute(participation, params) {
     pgo.int(identifier.id),
     pgo.text(content),
   ]
-  try [inserted] = run_sql.execute(sql, args, fn(row) {
-      assert Ok(id) = dynamic.element(row, 0)
-      assert Ok(id) = dynamic.int(id)
-      id
-   })
+  try [inserted] =
+    run_sql.execute(
+      sql,
+      args,
+      fn(row) {
+        assert Ok(id) = dynamic.element(row, 0)
+        assert Ok(id) = dynamic.int(id)
+        id
+      },
+    )
   Ok(inserted)
 }
