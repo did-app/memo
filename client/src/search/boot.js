@@ -7,10 +7,16 @@ export default async function() {
   let fragment = window.location.hash.substring(1);
   let params = new URLSearchParams(fragment);
   let code = params.get("code");
-  let resp = await Client.authenticate(code)
-  if (resp.status != 200) {
-    window.location.pathname = "/sign_in"
-  }
+  let resp = await Client.authenticate(code);
+
+  resp.match({
+    ok: function(_) {
+      console.log("authenticated");
+    },
+    fail: function(e) {
+      window.location.pathname = "/sign_in";
+    }
+  });
 
   let response = await Client.fetchInbox();
   if (response.status != 200) {

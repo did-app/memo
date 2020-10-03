@@ -100,7 +100,7 @@ pub fn route(
         |> result.map_error(fn(e) { error.Unauthenticated })
       let cookie_defaults = http.cookie_defaults(request.scheme)
       http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> http.set_resp_cookie("session", session_token, cookie_defaults)
       |> http.set_resp_cookie(
         "refresh",

@@ -1,12 +1,7 @@
 import { OK, Fail } from "./result.js";
 
 export async function authenticate(linkToken) {
-  const response = await fetch("__API_ORIGIN__/authenticate", {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify({ link_token: linkToken })
-  });
-  return response;
+  return await post("/authenticate", { link_token: linkToken });
 }
 
 export async function fetchInbox() {

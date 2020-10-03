@@ -13,9 +13,14 @@ export default async function() {
   let code = params.get("code");
   let resp = await Client.authenticate(code);
 
-  if (resp.status != 200) {
-    window.location.pathname = "/sign_in";
-  }
+  resp.match({
+    ok: function(_) {
+      console.log("authenticated");
+    },
+    fail: function(_) {
+      window.location.pathname = "/sign_in";
+    }
+  });
 
   let response = await Client.fetchConversation(conversationId);
   if (response.status != 200) {
@@ -127,7 +132,7 @@ export default async function() {
       );
       window.location.reload();
     } else if (action === "deletePin") {
-      const pinId = parseInt(form.id)
+      const pinId = parseInt(form.id);
       const response = await Client.deletePin(conversationId, pinId);
       response.match({
         ok: function(_) {
