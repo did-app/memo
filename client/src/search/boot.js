@@ -1,23 +1,10 @@
 import Page from "./Page.svelte";
+import authenticate from "../authenticate.js"
 import * as Client from "../client.js";
 
 export default async function() {
   const page = new Page({ target: document.body });
-
-  let fragment = window.location.hash.substring(1);
-  let params = new URLSearchParams(fragment);
-  let code = params.get("code");
-  let resp = await Client.authenticate(code);
-
-  let self;
-  resp.match({
-    ok: function({identifier}) {
-      self = {id: identifier.id, emailAddress: identifier.email_address}
-    },
-    fail: function(e) {
-      window.location.pathname = "/sign_in";
-    }
-  });
+  const identifier = await authenticate()
 
   let response = await Client.fetchInbox();
   let {conversations} = response.match({ok: function (data) {

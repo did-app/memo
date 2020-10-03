@@ -1,5 +1,6 @@
 import DOMPurify from "dompurify";
 import Page from "./Page.svelte";
+import authenticate from "../authenticate.js"
 import * as Client from "../client.js";
 import { formValues } from "../dom";
 
@@ -8,19 +9,7 @@ export default async function() {
 
   const page = new Page({ target: document.body });
 
-  let fragment = window.location.hash.substring(1);
-  let params = new URLSearchParams(fragment);
-  let code = params.get("code");
-  let resp = await Client.authenticate(code);
-
-  resp.match({
-    ok: function(_) {
-      console.log("authenticated");
-    },
-    fail: function(_) {
-      window.location.pathname = "/sign_in";
-    }
-  });
+  const identifier = await authenticate()
 
   let response = await Client.fetchConversation(conversationId);
   let {
@@ -70,19 +59,15 @@ export default async function() {
     messages,
     pins
   });
-  if (code) {
-    window.location.hash = "#";
-  } else {
-    requestAnimationFrame(function() {
-      let id = window.location.hash.substr(1);
-      console.log(id);
-      let el = document.getElementById(id);
-      console.log(el);
-      if (el) {
-        el.scrollIntoView();
-      }
-    });
-  }
+
+  requestAnimationFrame(function() {
+    let id = window.location.hash.substr(1);
+    let el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView();
+    }
+  });
+
   Client.readMessage(conversationId, highest);
 
   document.addEventListener("submit", async function(event) {
