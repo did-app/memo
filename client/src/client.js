@@ -22,14 +22,10 @@ export async function fetchConversation(id) {
   return response;
 }
 export async function addParticipant(id, emailAddress) {
-  const response = await fetch("__API_ORIGIN__/c/" + id + "/participant", {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify({ email_address: emailAddress })
-  });
-  console.log(response);
-  return {};
+  const path = "/c/" + id + "/participant"
+  return await post(path, {email_address: emailAddress});
 }
+
 export async function writeMessage(id, content, conclusion) {
   const response = await fetch("__API_ORIGIN__/c/" + id + "/message", {
     method: "POST",
@@ -92,7 +88,9 @@ async function post(path, params) {
       return await parseJSON(response)
       // 400 is an error client shouldn't see
     } else if (status === 422) {
-      let error =  (await parseJSON(response)).unwrapOr({detail: "Bad response from server"})
+      // TODO need to create a client error type with all the same fields
+      let error = (await parseJSON(response)).unwrapOr({detail: "Bad response from server"})
+      error.status = 422
       return Fail(error)
     } else {
       // TODO this should alert
@@ -121,9 +119,7 @@ async function doFetch(url, options) {
 
 async function parseJSON(response) {
   try {
-    console.log("PART");
     const data = await response.json();
-    console.log(data);
     return OK(data);
   } catch (e) {
     if (e instanceof SyntaxError) {

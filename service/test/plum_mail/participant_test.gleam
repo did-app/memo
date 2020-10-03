@@ -54,7 +54,7 @@ pub fn successfully_add_new_participant_test() {
   let response =
     add_participant(session_token, conversation, invited_email_address)
 
-  should.equal(response.status, 201)
+  should.equal(response.status, 200)
   assert Ok(participants) = discuss.load_participants(conversation.id)
 
   participants
@@ -65,7 +65,7 @@ pub fn successfully_add_new_participant_test() {
   let response =
     add_participant(session_token, conversation, invited_email_address)
 
-  should.equal(response.status, 201)
+  should.equal(response.status, 200)
   assert Ok(participants) = discuss.load_participants(conversation.id)
   participants
   |> list.map(fn(x: authentication.Identifier) { x.email_address })
