@@ -1,7 +1,6 @@
 pub type InvalidField {
   Missing
   CastFailure(help: String)
-  NotRecognised
 }
 
 pub type Reason {
@@ -10,4 +9,13 @@ pub type Reason {
   Unauthenticated
   Forbidden
   InternalServerError(detail: String)
+
+  // specific
+  UnknownIdentifier(email_address: String)
 }
+// pub type Failure {
+//     Failure(
+//         id: String,
+//         reason:
+//     )
+// }
