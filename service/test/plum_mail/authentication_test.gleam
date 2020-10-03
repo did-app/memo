@@ -46,13 +46,13 @@ pub fn authenticate_with_link_token_test() {
 
   // let sql =
   let user_agent = "Agent-123"
-  assert Ok(tuple(r1, s1)) =
+  assert Ok(tuple(_, r1, s1)) =
     authentication.authenticate(Some(link_token), None, user_agent)
   authentication.load_session(s1)
   |> should.equal(Ok(identifier.id))
 
   // Use the refresh token
-  assert Ok(tuple(_r, s2)) =
+  assert Ok(tuple(_, _r, s2)) =
     authentication.authenticate(None, Some(r1), user_agent)
   authentication.load_session(s2)
   |> should.equal(Ok(identifier.id))
@@ -63,7 +63,7 @@ pub fn authenticate_with_link_token_test() {
   |> should.equal(Error(Nil))
 
   // link token remains valid
-  assert Ok(tuple(_r_other, s3)) =
+  assert Ok(tuple(_, _r_other, s3)) =
     authentication.authenticate(Some(link_token), None, user_agent)
   authentication.load_session(s3)
   |> should.equal(Ok(identifier.id))
@@ -75,7 +75,7 @@ pub fn refresh_token_tied_to_user_agent_test() {
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
 
   let user_agent = "Agent-123"
-  assert Ok(tuple(r1, _)) =
+  assert Ok(tuple(_, r1, _)) =
     authentication.authenticate(Some(link_token), None, user_agent)
   authentication.authenticate(None, Some(r1), "Other-fire")
   |> should.equal(Error(Nil))
@@ -101,7 +101,7 @@ pub fn link_token_should_not_be_valid_after_seven_days_test() {
 pub fn refresh_token_should_not_be_valid_after_two_days_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(refresh_token, _)) =
+  assert Ok(tuple(_, refresh_token, _)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(tuple(selector, _)) = string.split_once(refresh_token, ":")
@@ -121,7 +121,7 @@ pub fn refresh_token_should_not_be_valid_after_two_days_test() {
 pub fn refresh_token_not_valid_after_30_days_from_link_token_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(refresh_token, _)) =
+  assert Ok(tuple(_, refresh_token, _)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(tuple(selector, _)) = string.split_once(link_token, ":")
@@ -141,7 +141,7 @@ pub fn refresh_token_not_valid_after_30_days_from_link_token_test() {
 pub fn session_token_expires_after_one_day_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, session_token)) =
+  assert Ok(tuple(_, _, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(tuple(selector, _)) = string.split_once(session_token, ":")

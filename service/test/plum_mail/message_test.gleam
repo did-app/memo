@@ -39,7 +39,7 @@ fn write_message(user_session, conversation_id, content, conclusion) {
 pub fn write_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
   assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, session_token)) =
+  assert Ok(tuple(_, _, session_token)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(topic) = discuss.validate_topic("Test topic")
@@ -55,7 +55,7 @@ pub fn write_test() {
   // assert Ok(tuple(_, other_session)) =
   //   authentication.generate_client_tokens(invited.0, "ua", None)
   assert Ok(link_token) = authentication.generate_link_token(invited.0)
-  assert Ok(tuple(_, other_session)) =
+  assert Ok(tuple(_, _, other_session)) =
     authentication.authenticate(Some(link_token), None, "ua")
 
   let response =

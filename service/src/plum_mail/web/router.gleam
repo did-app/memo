@@ -95,12 +95,25 @@ pub fn route(
         "user_agent",
         http.get_req_header(request, "user-agent"),
       )
-      try tuple(refresh_token, session_token) =
+      try tuple(identifier, refresh_token, session_token) =
         authentication.authenticate(link_token, refresh_token, user_agent)
         |> result.map_error(fn(e) { error.Unauthenticated })
       let cookie_defaults = http.cookie_defaults(request.scheme)
+      let data =
+        json.object([
+          tuple(
+            "identifier",
+            json.object([
+              tuple("id", json.int(identifier.id)),
+              tuple(
+                "email_address",
+                json.string(identifier.email_address.value),
+              ),
+            ]),
+          ),
+        ])
       http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+      |> web.set_resp_json(data)
       |> http.set_resp_cookie("session", session_token, cookie_defaults)
       |> http.set_resp_cookie(
         "refresh",

@@ -178,6 +178,24 @@ fn maybe_from_refresh_token(link_token, user_agent) {
   }
 }
 
+pub type EmailAddress {
+  EmailAddress(value: String)
+}
+
+pub fn validate_email(email_address) {
+  let email_address = string.trim(email_address)
+  try parts = string.split_once(string.reverse(email_address), "@")
+  case parts {
+    tuple("", _) -> Error(Nil)
+    tuple(_, "") -> Error(Nil)
+    _ -> Ok(EmailAddress(email_address))
+  }
+}
+
+pub type Identifier {
+  Identifier(id: Int, email_address: EmailAddress)
+}
+
 pub fn generate_client_tokens(
   link_token_selector,
   user_agent,
@@ -194,9 +212,13 @@ pub fn generate_client_tokens(
       ), new_session AS (
           INSERT INTO session_tokens (selector, validator, refresh_token_selector)
           VALUES ($5, $6, $1)
+      ), old_refresh AS (
+          DELETE FROM refresh_tokens
+          WHERE selector = $7
       )
-      DELETE FROM refresh_tokens
-      WHERE selector = $7
+      SELECT i.id, i.email_address FROM link_tokens
+      JOIN identifiers AS i ON i.id = link_tokens.identifier_id
+      WHERE selector = $4
       "
   let args = [
     pgo.text(refresh_token.selector),
@@ -207,10 +229,23 @@ pub fn generate_client_tokens(
     pgo.text(hash_string(session_token.secret)),
     pgo.nullable(old_refresh_token_selector, pgo.text),
   ]
-  let mapper = fn(row) { row }
-  try _ = run_sql.execute(sql, args, mapper)
+  // TODO use row to identifier
+  let mapper = fn(row) {
+    assert Ok(id) = dynamic.element(row, 0)
+    assert Ok(id) = dynamic.int(id)
+    assert Ok(email_address) = dynamic.element(row, 1)
+    assert Ok(email_address) = dynamic.string(email_address)
+    assert Ok(email_address) = validate_email(email_address)
+    Identifier(id, email_address)
+  }
+  // It's possible this makes more sense on the maybe from refresh token step
+  try [identifier] = run_sql.execute(sql, args, mapper)
 
-  Ok(tuple(serialize_token(refresh_token), serialize_token(session_token)))
+  Ok(tuple(
+    identifier,
+    serialize_token(refresh_token),
+    serialize_token(session_token),
+  ))
 }
 
 // So it's all very circular and needs a flow diagram
@@ -242,24 +277,6 @@ pub fn authenticate(link_token, refresh_token, user_agent) {
     user_agent,
     old_refresh_token_selector,
   )
-}
-
-pub type EmailAddress {
-  EmailAddress(value: String)
-}
-
-pub fn validate_email(email_address) {
-  let email_address = string.trim(email_address)
-  try parts = string.split_once(string.reverse(email_address), "@")
-  case parts {
-    tuple("", _) -> Error(Nil)
-    tuple(_, "") -> Error(Nil)
-    _ -> Ok(EmailAddress(email_address))
-  }
-}
-
-pub type Identifier {
-  Identifier(id: Int, email_address: EmailAddress)
 }
 
 fn row_to_identifier(row) {

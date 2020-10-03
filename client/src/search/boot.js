@@ -9,9 +9,10 @@ export default async function() {
   let code = params.get("code");
   let resp = await Client.authenticate(code);
 
+  let self;
   resp.match({
-    ok: function(_) {
-      console.log("authenticated");
+    ok: function({identifier}) {
+      self = {id: identifier.id, emailAddress: identifier.email_address}
     },
     fail: function(e) {
       window.location.pathname = "/sign_in";
@@ -20,6 +21,7 @@ export default async function() {
 
   let response = await Client.fetchInbox();
   let {conversations} = response.match({ok: function (data) {
+    console.log(data);
     return data
   }, fail: function (_) {
     throw "Could not load inbox"
