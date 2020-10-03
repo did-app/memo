@@ -1,3 +1,6 @@
+import gleam/bit_builder
+import gleam/bit_string
+import gleam/dynamic
 import gleam/int
 import gleam/io
 import gleam/option.{None, Some}
@@ -52,10 +55,21 @@ pub fn pin_content_test() {
       write_message.Params("My Message", False),
     )
   let response = add_pin(session_token, conversation.id, 1, "Some sub content")
+
   response.status
-  |> should.equal(201)
+  |> should.equal(200)
+
+  assert Ok(body) = response.body
+  |>bit_builder.to_bit_string()
+  |> bit_string.to_string()
+  assert Ok(data) = json.decode(body)
+  let data = dynamic.from(data)
+  assert Ok(pin_id) = dynamic.field(data, "id")
+  assert Ok(pin_id) = dynamic.int(pin_id)
 
   assert Ok([pin]) = discuss.load_pins(conversation.id)
+  pin.id
+  |> should.equal(pin_id)
   pin.counter
   |> should.equal(1)
   pin.identifier_id
