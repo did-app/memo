@@ -33,8 +33,8 @@
     {/if}
     {#if page !== SEARCH}
     <a on:click|preventDefault={searchPage} class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="#">Back to search</a>
-
     {/if}
+    <a class="px-1 border-b-2 hover:text-indigo-800 hover:border-indigo-800" href="__API_ORIGIN__/sign_out">Sign out</a>
   </nav>
 </header>
 <main class="w-full max-w-2xl m-auto p-6">

@@ -24,10 +24,7 @@ pub fn execute(participation, params) {
         WHERE conversation_id = $1
         AND id = $2
         "
-  let args = [
-    pgo.int(conversation.id),
-    pgo.int(pin_id),
-  ]
+  let args = [pgo.int(conversation.id), pgo.int(pin_id)]
   try _ = run_sql.execute(sql, args, fn(x) { x })
   Ok(Nil)
 }

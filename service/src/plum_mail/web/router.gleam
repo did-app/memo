@@ -169,6 +169,13 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
+    ["sign_out"] -> {
+      let cookie_defaults = http.cookie_defaults(request.scheme)
+      redirect(string.append(config.client_origin, "/"))
+      |> http.expire_resp_cookie("session", cookie_defaults)
+      |> http.expire_resp_cookie("refresh", cookie_defaults)
+      |> Ok
+    }
     ["inbox"] -> {
       try identifier_id = load_session(request, config.client_origin)
       try conversations = show_inbox.execute(identifier_id)
