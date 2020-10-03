@@ -42,11 +42,15 @@
     // $composeMenu.scrollIntoView();
   }
 
-  function deletePin(pinId) {
-    pins = pins.filter(function (p) {
-      Client.deletePin(conversationId, pinId)
-      return p.id != pinId
-    })
+  async function deletePin(pinId) {
+    const response = await Client.deletePin(conversationId, pinId)
+    response.match({ok: function (_) {
+      pins = pins.filter(function (p) {
+        return p.id != pinId
+      })
+    }, fail: function (_) {
+      failure = "Failed to delete pin"
+    }})
   }
 
   function clearFailure() {
