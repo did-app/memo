@@ -92,22 +92,27 @@ export default async function() {
       // Could be 204 for idempotent? although not quite idempotent
       // Could have a map with key as participant id which is merged and displated in participant order?
       if (participants.find(p => p.emailAddress === emailAddress)) {
-        event.target.reset()
+        event.target.reset();
       } else {
-        let response = await Client.addParticipant(conversationId, emailAddress);
+        let response = await Client.addParticipant(
+          conversationId,
+          emailAddress
+        );
         response.match({
           ok: function(_) {
             const [name] = emailAddress.split("@");
             const participant = { name, emailAddress };
-            participants = participants.concat(participant)
-            page.$set({participants})
-            event.target.reset()
+            participants = participants.concat(participant);
+            page.$set({ participants });
+            event.target.reset();
           },
-          fail: function({status}) {
+          fail: function({ status }) {
             if (status === 422) {
-              page.$set({failure: "Unable to add participant because email is invalid"})
+              page.$set({
+                failure: "Unable to add participant because email is invalid"
+              });
             } else {
-              page.$set({failure: "Failed to add participant"})
+              page.$set({ failure: "Failed to add participant" });
             }
           }
         });
@@ -127,8 +132,12 @@ export default async function() {
   document.addEventListener("change", async function(event) {
     if (event.target.name === "notify") {
       let notify = event.target.value;
-      await Client.setNotification(conversationId, notify);
-      window.location.reload();
+      const response = await Client.setNotification(conversationId, notify);
+      response.match({ok: function (_) {
+        undefined
+      }, fail: function (_) {
+        page.$set({ failure: "Failed to save notification preferences" });
+      }})
     }
   });
 
@@ -202,18 +211,19 @@ export default async function() {
         const snippet = "\r\n> " + selectionContent.replace(/\r?\n/g, "\r\n> ");
         document.querySelector("textarea").value += snippet;
       } else if (action === "pinSelection") {
-        let response = await Client.addPin(
-          conversationId,
-          parseInt(selectionMessageCounter),
-          selectionContent
-        );
-        console.log(response);
-        if (response.status === 201) {
-          // page.$set({pins: pins.concat(selectionContent)})
-          window.location.reload();
-        } else {
-          alert("Failed to add pin");
-        }
+        const content = selectionContent;
+        const counter = parseInt(selectionMessageCounter);
+        let response = await Client.addPin(conversationId, counter, content);
+        response.match({
+          ok: function({ id }) {
+            const pin = { id, counter, content };
+            pins = pins.concat(pin);
+            page.$set({ pins });
+          },
+          fail: function(_) {
+            page.$set({ failure: "Failed to pin content" });
+          }
+        });
       }
     }
     if (delayClick) {

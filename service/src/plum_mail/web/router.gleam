@@ -296,8 +296,8 @@ pub fn route(
       try params = set_notification.params(params)
       try participation = load_participation(id, request, config.client_origin)
       try _ = set_notification.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
     // FIXME should add concurrency control
@@ -324,9 +324,10 @@ pub fn route(
       try params = acl.parse_json(request)
       try params = add_pin.params(params)
       try participation = load_participation(id, request, config.client_origin)
-      try _ = add_pin.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      try pin_id = add_pin.execute(participation, params)
+      let data = json.object([tuple("id", json.int(pin_id))])
+      http.response(200)
+      |> web.set_resp_json(data)
       |> Ok
     }
     ["c", id, "delete_pin"] -> {
@@ -334,8 +335,8 @@ pub fn route(
       try params = delete_pin.params(params)
       try participation = load_participation(id, request, config.client_origin)
       try _ = delete_pin.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
     _ ->

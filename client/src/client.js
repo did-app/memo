@@ -43,22 +43,15 @@ export async function readMessage(id, counter) {
   });
   return response;
 }
+
 export async function addPin(id, counter, content) {
-  const response = await fetch("__API_ORIGIN__/c/" + id + "/pin", {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify({ counter, content })
-  });
-  return response;
+  const path = "/c/" + id + "/pin"
+  return await post(path, { counter, content });
 }
+
 export async function setNotification(id, notify) {
-  const response = await fetch("__API_ORIGIN__/c/" + id + "/notify", {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify({ notify })
-  });
-  console.log(response);
-  return {};
+  const path = "/c/" + id + "/notify"
+  return await post(path, { notify });
 }
 
 export async function requestEmailAuthentication(emailAddress) {

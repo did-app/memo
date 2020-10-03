@@ -23,6 +23,7 @@ pub fn execute(participation, params) {
     "
         INSERT INTO pins (conversation_id, counter, authored_by, content)
         VALUES ($1, $2, $3, $4)
+        RETURNING id
         "
   let args = [
     pgo.int(conversation.id),
@@ -30,6 +31,10 @@ pub fn execute(participation, params) {
     pgo.int(identifier.id),
     pgo.text(content),
   ]
-  try _ = run_sql.execute(sql, args, fn(x) { x })
-  Ok(Nil)
+  try [inserted] = run_sql.execute(sql, args, fn(row) {
+      assert Ok(id) = dynamic.element(row, 0)
+      assert Ok(id) = dynamic.int(id)
+      id
+   })
+  Ok(inserted)
 }
