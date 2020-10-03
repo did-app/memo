@@ -44,6 +44,12 @@
   function clearFailure() {
     failure = undefined;
   }
+
+  // could be details + summary in future https://stackoverflow.com/questions/37033406/automatically-open-details-element-on-id-call
+  function openMessage(id) {
+    messages[id - 1].checked = false
+    messages = messages
+  }
 </script>
 
 <style media="screen">
@@ -143,7 +149,7 @@
               <img class="inline-block w-6" src="/005-delete.svg" alt="">
             </button>
           </form>
-          <a href="#{counter}">{content}</a>
+          <a href="#{counter}" on:click={openMessage(counter)}>{content}</a>
         </li>
         {/each}
       </ul>
