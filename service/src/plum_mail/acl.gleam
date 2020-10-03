@@ -123,14 +123,21 @@ pub fn make_response(status, code, detail) {
 
 pub fn error_response(reason) {
   case reason {
-    // error.BadRequest(detail) -> tuple(400, detail)
-    // error.Unauthenticated -> tuple(401, "")
+    error.BadRequest(detail) -> make_response(400, "bad_request", detail)
+    error.Unauthenticated ->
+      make_response(
+        401,
+        "unauthenticated",
+        "Authentication required for this action",
+      )
     error.Forbidden ->
       make_response(403, "forbidden", "This action is forbidden")
-    // error.Unprocessable(field: field, failure: error.CastFailure(_)) -> tuple(
-    //   422,
-    //   string.append("Could not process with invalid field ", field),
-    // )
+    error.Unprocessable(field: field, failure: error.CastFailure(_)) ->
+      make_response(
+        422,
+        "unprocessable",
+        string.append("Could not process with invalid field ", field),
+      )
     error.UnknownIdentifier(email_address) ->
       make_response(
         422,
