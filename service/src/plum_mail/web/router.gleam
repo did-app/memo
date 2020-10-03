@@ -170,6 +170,7 @@ pub fn route(
       |> Ok
     }
     ["sign_out"] -> {
+        // TODO delete the refresh token
       let cookie_defaults = http.cookie_defaults(request.scheme)
       redirect(string.append(config.client_origin, "/"))
       |> http.expire_resp_cookie("session", cookie_defaults)
@@ -286,9 +287,8 @@ pub fn route(
       try params = add_participant.params(params)
       try participation = load_participation(id, request, config.client_origin)
       try _ = add_participant.execute(participation, params)
-      // FIXME do we need to update http
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
     ["c", id, "notify"] -> {

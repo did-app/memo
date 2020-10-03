@@ -6,6 +6,7 @@
   import DOMPurify from 'dompurify';
   import * as Client from "../client.js"
 
+  export let failure;
   export let conversationId;
   export let displayName;
   export let emailAddress;
@@ -47,6 +48,10 @@
       return p.id != pinId
     })
   }
+
+  function clearFailure() {
+    failure = undefined;
+  }
 </script>
 
 <style media="screen">
@@ -59,6 +64,11 @@
   </div>
 </div>
 {:else}
+{#if failure}
+<div class="bg-indigo-100 font-bold mb-3 p-4 text-center cursor-pointer" on:click={clearFailure}>
+  {failure}
+</div>
+{/if}
 <header class="max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
   <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
   <h1 id="topic" class="flex-grow text-xl md:text-2xl">{topic}</h1>
@@ -146,7 +156,7 @@
         {/each}
       </ul>
       <form class="" data-action="addParticipant" method="post">
-        <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="text" name="emailAddress" value="" placeholder="email address">
+        <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="email" required name="emailAddress" value="" placeholder="email address">
         <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
       </form>
       <h3 class="font-bold mt-4">Notifications</h3>
