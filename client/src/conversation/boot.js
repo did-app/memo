@@ -64,6 +64,7 @@ export default async function() {
       const $answerFallback = document.createElement('div')
       $answerFallback.classList.add('fallback')
       $answerFallback.innerHTML = "There are no answers to this question yet"
+      $answerFallback.classList.add('border-l-4', 'border-gray-400', "px-2", "pt-1", "mb-2")
 
       $answerTray.append($answerFallback)
       $details.append($summary)
