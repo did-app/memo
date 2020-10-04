@@ -123,9 +123,9 @@ export default async function() {
     const checked = !(cursor < counter);
     highest = counter;
     return { counter, checked, author, date: inserted_at, intro, doc };
-  }).map(function ({ counter, checked, author, inserted_at, intro, doc }) {
+  }).map(function ({ counter, checked, author, date, intro, doc }) {
     const html = DOMPurify.sanitize(doc.body.innerHTML)
-    return { counter, checked, author, inserted_at, intro, html }
+    return { counter, checked, author, date, intro, html }
   });
 
   const questions = asked.filter(function ({awaiting}) {
