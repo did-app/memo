@@ -52,23 +52,6 @@
     messages[id - 1].checked = false
     messages = messages
   }
-
-  let embeddedAnswers = false
-  afterUpdate(function () {
-    if (questions.length && !embeddedAnswers) {
-      embeddedAnswers = true
-      console.log(questions);
-      questions.forEach(function ({id, answers}) {
-        const answerTray = document.querySelector(`article details#'Q:${id} > .answers`)
-        answers.forEach(function ({content}) {
-          let oneAnswer = document.createElement('div')
-          oneAnswer.innerHTML = content
-          answerTray.append(oneAnswer)
-        })
-        console.log(answerTray);
-      })
-    }
-  })
 </script>
 
 <style media="screen">
@@ -119,7 +102,7 @@
     <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <div class="">
-        {#each questions as {query, id, awaiting}}
+        {#each questions as {query, awaiting, id}}
         {#if awaiting}
         <a href="#Q:{id}">
           <blockquote class="px-4 my-2 border-l-4 border-indigo-800 hover:underline" >
@@ -130,7 +113,7 @@
         {/if}
         {/each}
       </div>
-      {#if questions.filter(function(q) {return q.awaiting}).length}
+      {#if questions.length}
       <hr class="mt-4">
       {/if}
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>

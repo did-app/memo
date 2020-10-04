@@ -37,68 +37,90 @@ export default async function() {
   });
 
   var highest;
-  let questions = []
-  let questionCounter = 0;
+
+  let asked = []
   // If we follow the numerical id's all the way, just do it might be problems
   messages = messages.map(function({ counter, content, author, inserted_at }) {
     const [intro] = content.trim().split(/\r?\n/);
-    let html = DOMPurify.sanitize(marked(content));
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(html, "text/html");
+    const html = marked(content)
+    // TODO sanitize
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
     let $questionLinks = doc.querySelectorAll('a[href="#?"]')
+
     $questionLinks.forEach(function ($link) {
-      let query = $link.innerHTML
+      const query = $link.innerHTML
+
       // Work off the questions array length
-      questionCounter = questionCounter + 1
-      let $details = document.createElement('details')
-      $details.id = "Q:" + questionCounter
-      // Make elements so access the div
-      $details.innerHTML = `
-        <summary>${query}</summary>
-        <div>
-          <div class="fallback">There are no answers to this question yet</div>
-        </div>
-      `
+      const $details = document.createElement('details')
+      $details.id = "Q:" + asked.length
+
+      const $summary = document.createElement('summary')
+      $summary.innerHTML = query
+
+      const $answerTray = document.createElement('div')
+
+      const $answerFallback = document.createElement('div')
+      $answerFallback.innerHTML = "There are no answers to this question yet"
+
+      $answerTray.append($answerFallback)
+      $details.append($summary)
+      $details.append($answerTray)
+
       $link.parentElement.replaceChild($details, $link)
-      questions = questions.concat({awaiting: true, answers: []})
-      // awaiting id author != me
+
+      // const awaiting = author != identifier.emailAddress
+      // TODO remove
+      const awaiting = true
+      asked = asked.concat({query, awaiting, $answerTray, id: asked.length})
     })
-    html = doc.body.innerHTML
 
     let $answerElements = doc.querySelectorAll('answer')
     $answerElements.forEach(function ($answer) {
-      let qid = parseInt($answer.dataset.id)
-      // Just start from question zero.
-      let {query, $answerTray} = questions[qid]
-      $answerTray.append("div of content")
-      $answer.parentElement.replaceChild(newFormat, $blockquote+rest)
-      question.awaiting = false if author = me
+      let qid = parseInt($answer.dataset.question)
+      let question = asked[qid]
+
+      const $answerDropdownContainer = document.createElement('div')
+      $answerDropdownContainer.innerHTML = $answer.innerHTML
+
+      question.$answerTray.append($answerDropdownContainer)
+
+      const $replyLink = document.createElement("a")
+      $replyLink.href = "#Q:" + qid
+      $replyLink.innerHTML = question.query
+
+      const $quoteQuestion = document.createElement("blockquote")
+      $quoteQuestion.append($replyLink)
+
+      const $replyContent = document.createElement("div")
+      $replyContent.innerHTML = $answer.innerHTML
+
+      const $answerContainer = document.createElement("div")
+      $answerContainer.append($quoteQuestion)
+      $answerContainer.append($replyContent)
+
+      $answer.parentElement.replaceChild($answerContainer, $answer)
+
+      const mine = author == identifier.emailAddress
+      if (mine) {
+        question.awaiting = false
+      }
     })
-    // Filter to awaiting Answers
-    // Send in small content
-    // <answer data-question="1"></answer>
-    // these aren't too hard to create and bundle
-    // document.createElement('answer')
-    // Create as text and concatinate to content.
-    // TODO pull out all the answers
-    let answers = Array.from(doc.querySelectorAll('[data-answer^=Q]'));
-    answers.map(function (el) {
-      let id = el.dataset.answer.slice(2);
-      el.children[0].remove()
-      let q = questions.find(function (q) {
-        return q.id === id
-      })
-      q.awaiting = false
-      q.answers = q.answers.concat({content: el.innerHTML})
-      // answers.removeChild(header)
-    })
-    console.log(questions);
 
     // checked = closed
     const checked = !(cursor < counter);
     highest = counter;
-    return { counter, checked, author, date: inserted_at, intro, html };
+    return { counter, checked, author, date: inserted_at, intro, doc };
+  }).map(function ({ counter, checked, author, inserted_at, intro, doc }) {
+    const html = DOMPurify.sanitize(doc.body.innerHTML)
+    return { counter, checked, author, inserted_at, intro, html }
   });
+
+  const questions = asked.filter(function ({awaiting}) {
+    return awaiting
+  })
 
   // Always leave the last open
   if (messages[messages.length - 1]) {
@@ -168,17 +190,19 @@ export default async function() {
       }
     } else if (action == "writeMessage") {
       let { content, resolve } = form;
-      // for (const [key, value] of Object.entries(form)) {
-      //   if (key.slice(0, 2) === "Q:") {
-      //     console.log(value);
-      //   }
-      // }
-      //
-      // throw "blah"
+      let $div = document.createElement('div')
+      for (const [key, value] of Object.entries(form)) {
+        if (key.slice(0, 2) === "Q:") {
+          let $answer = document.createElement('answer')
+          $answer.dataset.question = key.slice(2)
+          $answer.innerHTML = "\r\n\r\n" + value + "\r\n"
+          $div.append($answer)
+        }
+      }
 
       let response = await Client.writeMessage(
         conversationId,
-        content,
+        $div.innerHTML + "\r\n\r\n" + content,
         resolve
       );
       window.location.reload();
