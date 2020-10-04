@@ -1,5 +1,4 @@
 <script>
-  import { beforeUpdate, afterUpdate } from 'svelte';
   import {
     Circle2
   } from 'svelte-loading-spinners'

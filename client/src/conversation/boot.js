@@ -43,7 +43,6 @@ export default async function() {
   messages = messages.map(function({ counter, content, author, inserted_at }) {
     const [intro] = content.trim().split(/\r?\n/);
     const html = marked(content)
-    // TODO sanitize
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -72,9 +71,7 @@ export default async function() {
 
       $link.parentElement.replaceChild($details, $link)
 
-      // const awaiting = author != identifier.emailAddress
-      // TODO remove
-      const awaiting = true
+      const awaiting = author != identifier.emailAddress
       asked = asked.concat({query, awaiting, $answerTray, id: asked.length})
     })
 
