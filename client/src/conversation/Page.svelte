@@ -146,10 +146,10 @@
           <form class="inline-block" data-action="deletePin" method="post">
             <input type="hidden" name="id" value={id}>
             <button>
-              <img class="inline-block w-6" src="/005-delete.svg" alt="">
+              <img class="inline-block w-6 hover:opacity-50 transition duration-100" src="/005-delete.svg" alt="">
             </button>
           </form>
-          <a href="#{counter}" on:click={openMessage(counter)}>{content}</a>
+          <a class="hover:text-indigo-700" href="#{counter}" on:click={openMessage(counter)}>{content}</a>
         </li>
         {/each}
       </ul>
