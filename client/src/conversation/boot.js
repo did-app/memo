@@ -63,6 +63,7 @@ export default async function() {
       const $answerTray = document.createElement('div')
 
       const $answerFallback = document.createElement('div')
+      $answerFallback.classList.add('fallback')
       $answerFallback.innerHTML = "There are no answers to this question yet"
 
       $answerTray.append($answerFallback)
@@ -83,7 +84,16 @@ export default async function() {
       let question = asked[qid]
 
       const $answerDropdownContainer = document.createElement('div')
-      $answerDropdownContainer.innerHTML = $answer.innerHTML
+
+      const $answerAuthor = document.createElement('div')
+      $answerAuthor.innerHTML = `<a href="#${counter}" style="color:#434190">${author}</a>`
+      $answerAuthor.classList.add('border-l-4', 'border-indigo-800', "px-2", "mt-2")
+      $answerDropdownContainer.append($answerAuthor)
+
+      const $answerContent = document.createElement('div')
+      $answerContent.innerHTML = $answer.innerHTML
+      $answerContent.classList.add('border-l-4', 'border-gray-400', "px-2", "pt-1", "mb-2")
+      $answerDropdownContainer.append($answerContent)
 
       question.$answerTray.append($answerDropdownContainer)
 
@@ -95,11 +105,13 @@ export default async function() {
       $quoteQuestion.append($replyLink)
 
       const $replyContent = document.createElement("div")
+      $replyContent.classList.add("pl-4")
       $replyContent.innerHTML = $answer.innerHTML
 
       const $answerContainer = document.createElement("div")
       $answerContainer.append($quoteQuestion)
       $answerContainer.append($replyContent)
+      $answerContainer.append(document.createElement("hr"))
 
       $answer.parentElement.replaceChild($answerContainer, $answer)
 
@@ -190,19 +202,21 @@ export default async function() {
       }
     } else if (action == "writeMessage") {
       let { content, resolve } = form;
-      let $div = document.createElement('div')
+      let buffer = ""
       for (const [key, value] of Object.entries(form)) {
         if (key.slice(0, 2) === "Q:") {
-          let $answer = document.createElement('answer')
-          $answer.dataset.question = key.slice(2)
-          $answer.innerHTML = "\r\n\r\n" + value + "\r\n"
-          $div.append($answer)
+          buffer += `<answer data-question="${key.slice(2)}">
+
+${value}
+</answer>
+
+`
         }
       }
 
       let response = await Client.writeMessage(
         conversationId,
-        $div.innerHTML + "\r\n\r\n" + content,
+        buffer + content,
         resolve
       );
       window.location.reload();

@@ -52,9 +52,21 @@
     messages[id - 1].checked = false
     messages = messages
   }
+
+  window.onhashchange = function (event) {
+    let $target = document.getElementById(window.location.hash.slice(1))
+    if ($target) {
+      let $article = $target.closest('article')
+      if ($article) {
+        let id = parseInt($article.id)
+        openMessage(id)
+      }
+    }
+  }
 </script>
 
 <style media="screen">
+
 </style>
 
 {#if !topic}
