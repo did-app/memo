@@ -30,19 +30,76 @@ export default async function() {
   let topic = conversation.topic;
   let closed = conversation.closed;
   let notify = participation.notify;
+
   participants = participants.map(function({ email_address: emailAddress }) {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
+
   var highest;
+  let questions = []
+  let questionCounter = 0;
+  // If we follow the numerical id's all the way, just do it might be problems
   messages = messages.map(function({ counter, content, author, inserted_at }) {
     const [intro] = content.trim().split(/\r?\n/);
-    const html = DOMPurify.sanitize(marked(content));
+    let html = DOMPurify.sanitize(marked(content));
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(html, "text/html");
+    let $questionLinks = doc.querySelectorAll('a[href="#?"]')
+    $questionLinks.forEach(function ($link) {
+      let query = $link.innerHTML
+      // Work off the questions array length
+      questionCounter = questionCounter + 1
+      let $details = document.createElement('details')
+      $details.id = "Q:" + questionCounter
+      // Make elements so access the div
+      $details.innerHTML = `
+        <summary>${query}</summary>
+        <div>
+          <div class="fallback">There are no answers to this question yet</div>
+        </div>
+      `
+      $link.parentElement.replaceChild($details, $link)
+      questions = questions.concat({awaiting: true, answers: []})
+      // awaiting id author != me
+    })
+    html = doc.body.innerHTML
+
+    let $answerElements = doc.querySelectorAll('answer')
+    $answerElements.forEach(function ($answer) {
+      let qid = parseInt($answer.dataset.id)
+      // Just start from question zero.
+      let {query, $answerTray} = questions[qid]
+      $answerTray.append("div of content")
+      $answer.parentElement.replaceChild(newFormat, $blockquote+rest)
+      question.awaiting = false if author = me
+    })
+    // Filter to awaiting Answers
+    // Send in small content
+    // <answer data-question="1"></answer>
+    // these aren't too hard to create and bundle
+    // document.createElement('answer')
+    // Create as text and concatinate to content.
+    // TODO pull out all the answers
+    let answers = Array.from(doc.querySelectorAll('[data-answer^=Q]'));
+    answers.map(function (el) {
+      let id = el.dataset.answer.slice(2);
+      el.children[0].remove()
+      let q = questions.find(function (q) {
+        return q.id === id
+      })
+      q.awaiting = false
+      q.answers = q.answers.concat({content: el.innerHTML})
+      // answers.removeChild(header)
+    })
+    console.log(questions);
+
     // checked = closed
     const checked = !(cursor < counter);
     highest = counter;
     return { counter, checked, author, date: inserted_at, intro, html };
   });
+
   // Always leave the last open
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false;
@@ -57,7 +114,8 @@ export default async function() {
     closed,
     participants,
     messages,
-    pins
+    pins,
+    questions
   });
 
   requestAnimationFrame(function() {
@@ -110,6 +168,13 @@ export default async function() {
       }
     } else if (action == "writeMessage") {
       let { content, resolve } = form;
+      // for (const [key, value] of Object.entries(form)) {
+      //   if (key.slice(0, 2) === "Q:") {
+      //     console.log(value);
+      //   }
+      // }
+      //
+      // throw "blah"
 
       let response = await Client.writeMessage(
         conversationId,

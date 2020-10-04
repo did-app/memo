@@ -1,4 +1,5 @@
 <script>
+  import { beforeUpdate, afterUpdate } from 'svelte';
   import {
     Circle2
   } from 'svelte-loading-spinners'
@@ -17,6 +18,7 @@
   export let pins = [];
   export let left;
   export let bottom;
+  export let questions = [];
 
   let draft;
   $: preview = draft ? DOMPurify.sanitize(marked(draft)) : "No preview yet."
@@ -50,6 +52,23 @@
     messages[id - 1].checked = false
     messages = messages
   }
+
+  let embeddedAnswers = false
+  afterUpdate(function () {
+    if (questions.length && !embeddedAnswers) {
+      embeddedAnswers = true
+      console.log(questions);
+      questions.forEach(function ({id, answers}) {
+        const answerTray = document.querySelector(`article details#'Q:${id} > .answers`)
+        answers.forEach(function ({content}) {
+          let oneAnswer = document.createElement('div')
+          oneAnswer.innerHTML = content
+          answerTray.append(oneAnswer)
+        })
+        console.log(answerTray);
+      })
+    }
+  })
 </script>
 
 <style media="screen">
@@ -86,7 +105,6 @@
           </div>
         </label>
         <div class="content-intro px-2 md:px-20 truncate">{intro}</div>
-        <!-- TODO sanitize -->
         <div class="markdown-body py-2 px-2 md:px-20">{@html html}</div>
         <footer class="h-2 md:h-12 mb-2 mt-4">
 
@@ -100,6 +118,21 @@
 
     <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
+      <div class="">
+        {#each questions as {query, id, awaiting}}
+        {#if awaiting}
+        <a href="#Q:{id}">
+          <blockquote class="px-4 my-2 border-l-4 border-indigo-800 hover:underline" >
+            {@html query}
+          </blockquote>
+        </a>
+        <textarea class="w-full bg-white outline-none" name="Q:{id}" rows="1" style="min-height:0em;max-height:60vh;" placeholder="Answer" on:input={resize}></textarea>
+        {/if}
+        {/each}
+      </div>
+      {#if questions.filter(function(q) {return q.awaiting}).length}
+      <hr class="mt-4">
+      {/if}
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}
