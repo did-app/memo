@@ -17,6 +17,7 @@
   export let pins = [];
   export let left;
   export let bottom;
+  export let questions = [];
 
   let draft;
   $: preview = draft ? DOMPurify.sanitize(marked(draft)) : "No preview yet."
@@ -50,9 +51,21 @@
     messages[id - 1].checked = false
     messages = messages
   }
+
+  window.onhashchange = function (event) {
+    let $target = document.getElementById(window.location.hash.slice(1))
+    if ($target) {
+      let $article = $target.closest('article')
+      if ($article) {
+        let id = parseInt($article.id)
+        openMessage(id)
+      }
+    }
+  }
 </script>
 
 <style media="screen">
+
 </style>
 
 {#if !topic}
@@ -86,7 +99,6 @@
           </div>
         </label>
         <div class="content-intro px-2 md:px-20 truncate">{intro}</div>
-        <!-- TODO sanitize -->
         <div class="markdown-body py-2 px-2 md:px-20">{@html html}</div>
         <footer class="h-2 md:h-12 mb-2 mt-4">
 
@@ -100,6 +112,21 @@
 
     <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
+      <div class="">
+        {#each questions as {query, awaiting, id}}
+        {#if awaiting}
+        <a href="#Q:{id}">
+          <blockquote class="px-4 my-2 border-l-4 border-indigo-800 hover:underline" >
+            {@html query}
+          </blockquote>
+        </a>
+        <textarea class="w-full bg-white outline-none" name="Q:{id}" rows="1" style="min-height:0em;max-height:60vh;" placeholder="Answer" on:input={resize}></textarea>
+        {/if}
+        {/each}
+      </div>
+      {#if questions.length}
+      <hr class="mt-4">
+      {/if}
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}

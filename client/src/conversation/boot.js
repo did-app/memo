@@ -30,19 +30,107 @@ export default async function() {
   let topic = conversation.topic;
   let closed = conversation.closed;
   let notify = participation.notify;
+
   participants = participants.map(function({ email_address: emailAddress }) {
     const [name] = emailAddress.split("@");
     return { name, emailAddress };
   });
+
   var highest;
+
+  let asked = []
+  // If we follow the numerical id's all the way, just do it might be problems
   messages = messages.map(function({ counter, content, author, inserted_at }) {
     const [intro] = content.trim().split(/\r?\n/);
-    const html = DOMPurify.sanitize(marked(content));
+    const html = marked(content)
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    let $questionLinks = doc.querySelectorAll('a[href="#?"]')
+
+    $questionLinks.forEach(function ($link) {
+      const query = $link.innerHTML
+
+      // Work off the questions array length
+      const $details = document.createElement('details')
+      $details.id = "Q:" + asked.length
+
+      const $summary = document.createElement('summary')
+      $summary.innerHTML = query
+
+      const $answerTray = document.createElement('div')
+
+      const $answerFallback = document.createElement('div')
+      $answerFallback.classList.add('fallback')
+      $answerFallback.innerHTML = "There are no answers to this question yet"
+
+      $answerTray.append($answerFallback)
+      $details.append($summary)
+      $details.append($answerTray)
+
+      $link.parentElement.replaceChild($details, $link)
+
+      const awaiting = author != identifier.emailAddress
+      asked = asked.concat({query, awaiting, $answerTray, id: asked.length})
+    })
+
+    let $answerElements = doc.querySelectorAll('answer')
+    $answerElements.forEach(function ($answer) {
+      let qid = parseInt($answer.dataset.question)
+      let question = asked[qid]
+
+      const $answerDropdownContainer = document.createElement('div')
+
+      const $answerAuthor = document.createElement('div')
+      $answerAuthor.innerHTML = `<a href="#${counter}" style="color:#434190">${author}</a>`
+      $answerAuthor.classList.add('border-l-4', 'border-indigo-800', "px-2", "mt-2")
+      $answerDropdownContainer.append($answerAuthor)
+
+      const $answerContent = document.createElement('div')
+      $answerContent.innerHTML = $answer.innerHTML
+      $answerContent.classList.add('border-l-4', 'border-gray-400', "px-2", "pt-1", "mb-2")
+      $answerDropdownContainer.append($answerContent)
+
+      question.$answerTray.append($answerDropdownContainer)
+
+      const $replyLink = document.createElement("a")
+      $replyLink.href = "#Q:" + qid
+      $replyLink.innerHTML = question.query
+
+      const $quoteQuestion = document.createElement("blockquote")
+      $quoteQuestion.append($replyLink)
+
+      const $replyContent = document.createElement("div")
+      $replyContent.classList.add("pl-4")
+      $replyContent.innerHTML = $answer.innerHTML
+
+      const $answerContainer = document.createElement("div")
+      $answerContainer.append($quoteQuestion)
+      $answerContainer.append($replyContent)
+      $answerContainer.append(document.createElement("hr"))
+
+      $answer.parentElement.replaceChild($answerContainer, $answer)
+
+      const mine = author == identifier.emailAddress
+      if (mine) {
+        question.awaiting = false
+      }
+    })
+
     // checked = closed
     const checked = !(cursor < counter);
     highest = counter;
-    return { counter, checked, author, date: inserted_at, intro, html };
+    return { counter, checked, author, date: inserted_at, intro, doc };
+  }).map(function ({ counter, checked, author, inserted_at, intro, doc }) {
+    const html = DOMPurify.sanitize(doc.body.innerHTML)
+    return { counter, checked, author, inserted_at, intro, html }
   });
+
+  const questions = asked.filter(function ({awaiting}) {
+    return awaiting
+  })
+
   // Always leave the last open
   if (messages[messages.length - 1]) {
     messages[messages.length - 1].checked = false;
@@ -57,7 +145,8 @@ export default async function() {
     closed,
     participants,
     messages,
-    pins
+    pins,
+    questions
   });
 
   requestAnimationFrame(function() {
@@ -110,10 +199,21 @@ export default async function() {
       }
     } else if (action == "writeMessage") {
       let { content, resolve } = form;
+      let buffer = ""
+      for (const [key, value] of Object.entries(form)) {
+        if (key.slice(0, 2) === "Q:") {
+          buffer += `<answer data-question="${key.slice(2)}">
+
+${value}
+</answer>
+
+`
+        }
+      }
 
       let response = await Client.writeMessage(
         conversationId,
-        content,
+        buffer + content,
         resolve
       );
       window.location.reload();

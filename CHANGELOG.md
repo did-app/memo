@@ -1,3 +1,26 @@
+## 2020-10-04
+
+### Asking questions
+```html
+<details id="Q:1">
+  <summary>Would you find it helpful to get the answer to questions?</summary>
+  <ul>
+    <li class="fallback">There are no answers to this question yet</li>
+  </ul>
+</details>
+<!-- Autocomplete leaves a mess in the messages cant switch ul to divs -->
+
+<div data-answer="Q:1">
+  <blockquote>
+    <a href="#Q:1">Would you find it helpful?</a>
+  </blockquote>
+  <!-- Need empty line -->
+  # Markdown content
+</div>
+<!-- Need empty line -->
+
+```
+
 ## 2020-09-17
 
 ### Concluding a conversation
