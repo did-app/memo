@@ -202,7 +202,7 @@ export default async function() {
       let { content, resolve } = form;
       let buffer = ""
       for (const [key, value] of Object.entries(form)) {
-        if (key.slice(0, 2) === "Q:") {
+        if (key.slice(0, 2) === "Q:" && value.trim().length) {
           buffer += `<answer data-question="${key.slice(2)}">
 
 ${value}
