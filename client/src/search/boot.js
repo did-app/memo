@@ -16,7 +16,7 @@ export default async function() {
 
   let conversationSearch = new MiniSearch({
      fields: ['topic', 'participants', 'slug'], // fields to index for full-text search
-     storeFields: ['topic', 'next', 'participants', 'slug', 'updated_at'], // fields to return with search results
+     storeFields: ['topic', 'next', 'participants', 'slug', 'updated_at', 'closed'], // fields to return with search results
      tokenize: (string, fieldName) => {
        return string.split(/[\s,@]+/)
      },
@@ -34,7 +34,7 @@ export default async function() {
      return c.unread
    }).slice().reverse()
    page.$set({unread, all: conversations})
-   conversationSearch.addAll(conversations)
+   conversationSearch.addAll(conversations.slice().reverse())
 
 
    function searchAll(term) {
