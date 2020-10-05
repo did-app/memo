@@ -317,8 +317,12 @@ ${value}
       // perhaops only select within one paragraph for pins replies.
       const action = button.dataset.action;
       if (action === "quoteInReply") {
-        const snippet = "\r\n> " + selectionContent.replace(/\r?\n/g, "\r\n> ");
-        document.querySelector("textarea").value += snippet;
+        const snippet = selectionContent.replace(/\r?\n/g, "\r\n> ");
+        const $composeContent = document.querySelector("textarea[name='content']")
+        const written = $composeContent.value.trimEnd()
+        const prePadding = written ? "\r\n\r\n> " : "> "
+        $composeContent.value = written + prePadding + snippet + "\r\n\r\n";
+        $composeContent.focus()
       } else if (action === "pinSelection") {
         const content = selectionContent;
         const counter = parseInt(selectionMessageCounter);
