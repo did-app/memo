@@ -40,6 +40,15 @@ fn as_html(markdown) {
   }
 }
 
+pub fn to_email_html(markdown, conversation_link) {
+  markdown
+  |> as_html()
+  |> string.replace(
+    "href=\"#?\"",
+    string.join(["href=\"", conversation_link, "\""], ""),
+  )
+}
+
 pub fn load() {
   // TODO this is the same as whats needed for the detail of the notifications tab
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
@@ -161,7 +170,7 @@ fn send(config, message: Message) {
 
     ",
       prefix,
-      as_html(message.content),
+      to_email_html(message.content, conversation_link),
       "
     </div>
     </main>
