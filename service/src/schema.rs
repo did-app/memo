@@ -34,6 +34,7 @@ table! {
         counter -> Int4,
         identifier_id -> Int4,
         inserted_at -> Timestamp,
+        success -> Bool,
     }
 }
 

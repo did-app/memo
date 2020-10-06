@@ -113,20 +113,29 @@ pub fn load() {
   // Test last 1 should be
 }
 
-pub fn record_sent(message: Message) {
+pub fn record_result(message: Message, success: Bool) {
   // TODO rename to recipient id
   let sql =
     "
-    INSERT INTO message_notifications (conversation_id, counter, identifier_id)
-    VALUES ($1, $2, $3)
+    INSERT INTO message_notifications (conversation_id, counter, identifier_id, success)
+    VALUES ($1, $2, $3, $4)
     "
   let args = [
     pgo.int(message.id.0),
     pgo.int(message.id.1),
     pgo.int(message.to.id),
+    pgo.bool(success),
   ]
   let mapper = fn(x) { x }
   run_sql.execute(sql, args, mapper)
+}
+
+pub fn record_sent(message) {
+  record_result(message, True)
+}
+
+pub fn record_failed(message) {
+  record_result(message, False)
 }
 
 fn authenticated_link(origin, conversation_id, identifier_id) {
@@ -228,7 +237,17 @@ pub fn execute() {
       case send(config.from_env(), message) {
         Ok(http.Response(status: 200, ..)) -> record_sent(message)
         // TODO why was that, handle case of bad email addresses
-        Ok(http.Response(status: 422, ..)) -> Ok([])
+        Ok(http.Response(status: 422, body: body, ..)) -> {
+          assert Ok(data) = json.decode(body)
+          let data = dynamic.from(data)
+          assert Ok(error_code) = dynamic.field(data, "ErrorCode")
+          assert Ok(error_code) = dynamic.int(error_code)
+          case error_code {
+            406 -> record_failed(message)
+            // Other error code retry
+            _ -> Ok([])
+          }
+        }
       }
     },
   )
