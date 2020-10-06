@@ -98,7 +98,7 @@
           <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 ">
           </div>
         </label>
-        <div class="content-intro px-2 md:px-20 truncate">{intro}</div>
+        <div class="content-intro px-2 md:px-20 truncate markdown-body">{@html intro}</div>
         <div class="markdown-body py-2 px-2 md:px-20">{@html html}</div>
         <footer class="h-2 md:h-12 mb-2 mt-4">
 

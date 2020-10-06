@@ -41,13 +41,15 @@ export default async function() {
   let asked = []
   // If we follow the numerical id's all the way, just do it might be problems
   messages = messages.map(function({ counter, content, author, inserted_at }) {
-    const [intro] = content.trim().split(/\r?\n/);
     // marked doesn't like an html bumping up against markdown content
     content = content.replaceAll("</answer>", "\r\n</answer>\r\n")
     const html = marked(content)
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
+    const firstElement = doc.body.children[0]
+    // It's possible there are empty messges
+    const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
 
     let $questionLinks = doc.querySelectorAll('a[href="#?"]')
 
