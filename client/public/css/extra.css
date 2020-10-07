@@ -7,6 +7,14 @@ input:checked+svg {
   display: block;
 }
 
+/* Warning box */
+input + div.warning {
+  display: none;
+}
+input:invalid + div.warning {
+  display: block;
+}
+
 body {
   background: #f6f6f6;
 }
