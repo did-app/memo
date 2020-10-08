@@ -136,7 +136,7 @@
   {:else}
   {#if panel === SEARCH}
   <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Search by name, email, topic or content, also start conversation" id="search" autofocus autocomplete="off" bind:value={searchTerm}/>
-  {#if searchTerm.length > 2 && !searchTerm.includes('@')}
+  {#if searchTerm.length > 2 && searchTerm.length =< 100 && !searchTerm.includes('@')}
   <form class="" action="__API_ORIGIN__/c/create" method="post">
     <input type="hidden" name="topic" value="{searchTerm}">
     <button class="block w-full text-left my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl" type="submit">
