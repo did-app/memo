@@ -9,7 +9,22 @@ export default async function() {
 
   const page = new Page({ target: document.body });
 
-  const identifier = await authenticate()
+  let identifier
+  let authenticationRequired
+  (await authenticate()).match({
+    ok: function(i) {
+      identifier = i
+    },
+    fail: function(e) {
+      authenticationRequired = true;
+    }
+  })
+  if (!identifier) {
+    console.log("setting this");
+    page.$set({authenticationRequired})
+    return
+  }
+  // const identifier = await authenticate()
 
   let response = await Client.fetchConversation(conversationId);
   let {
