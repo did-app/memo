@@ -84,7 +84,7 @@
   {failure}
 </div>
 {/if}
-<header class="max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
+<header class="w-full max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
   <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
   <h1 id="topic" class="flex-grow text-xl md:text-2xl">{topic}</h1>
 </header>

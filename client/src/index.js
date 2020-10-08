@@ -1,7 +1,5 @@
 import { default as conversation } from "./conversation/boot.js";
-
 import Inbox from "./Inbox.svelte";
-import Begin from "./Begin.svelte";
 
 // pane, panel, console, controls
 
