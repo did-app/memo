@@ -7,12 +7,15 @@
   const SEARCH = "SEARCH"
   const UNREAD = "UNREAD"
   const ARCHIVE = "ARCHIVE"
+  const BEGIN_CONVERSATION = "BEGIN_CONVERSATION"
 
   function panelFromHash(hash) {
     if (hash.substring(1) === "archive") {
       return ARCHIVE
     } else if (hash.substring(1) === "unread") {
       return UNREAD
+    } else if (hash.substring(1) === "begin") {
+      return BEGIN_CONVERSATION
     } else {
       return SEARCH
     }
@@ -126,6 +129,16 @@
 </header>
 <main class="w-full max-w-2xl m-auto p-6" on:keydown={handleKeyDown}>
   <h1 class="flex-grow font-serif text-indigo-800 text-6xl text-center">plum mail</h1>
+  {#if panel === BEGIN_CONVERSATION}
+  <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Conversation topic" required pattern="[^@]*" minlength="2" maxlength="100" autofocus autocomplete="off"/>
+  <div class="warning">
+    Conversation topics must not contain '@'.
+  </div>
+  <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Email address" required type="email" autofocus autocomplete="off"/>
+  <div class="warning">
+    Not a valid email address
+  </div>
+  {:else}
   {#if panel === SEARCH}
   <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Search by name, email, topic or content, also start conversation" id="search" autofocus autocomplete="off" bind:value={searchTerm}/>
   {#if searchTerm.length > 2 && !searchTerm.includes('@')}
@@ -150,6 +163,7 @@
     </a>
     {/each}
   </nav>
+  {/if}
 </main>
 {#if authenticationRequired}
 <SignIn/>

@@ -11,7 +11,12 @@ input:checked+svg {
 input + div.warning {
   display: none;
 }
-input:invalid + div.warning {
+/* https://www.stefanjudis.com/notes/target-non-empty-but-invalid-input-element-with-css/ */
+input:not(:placeholder-shown):not(:focus):invalid  {
+  border-color: red;
+}
+
+input:not(:placeholder-shown):not(:focus):invalid + div.warning {
   display: block;
 }
 
