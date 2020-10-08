@@ -9,15 +9,18 @@ export default async function authenticate() {
     window.location.hash = "#";
   }
 
-  let self;
-  resp.match({
-    ok: function({identifier}) {
-      self = {id: identifier.id, emailAddress: identifier.email_address}
-    },
-    fail: function(e) {
-      window.location.pathname = "/sign_in";
-    }
-  });
-
-  return self
+  // let self;
+  // resp.match({
+  //   ok: function({identifier}) {
+  //     self = {id: identifier.id, emailAddress: identifier.email_address}
+  //   },
+  //   fail: function(e) {
+  //     window.location.pathname = "/sign_in";
+  //   }
+  // });
+  //
+  // return self
+  return resp.map(function ({identifier}) {
+    return {id: identifier.id, emailAddress: identifier.email_address}
+  })
 }

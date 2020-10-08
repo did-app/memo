@@ -15,8 +15,16 @@ input:invalid + div.warning {
   display: block;
 }
 
-body {
-  background: #f6f6f6;
+/* target-only */
+.target-only {
+  display: none;
+}
+.target-only:target {
+  display: initial;
+}
+
+body, .bg-body {
+  background: #f6f6f6cc;
 }
 
 .my-shadow {
