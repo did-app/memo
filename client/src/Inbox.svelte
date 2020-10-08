@@ -55,11 +55,6 @@
   let results;
   $: results = (panel === ARCHIVE) ? conversations : ((panel === UNREAD) ? unread : found);
 
-  $: console.log(conversations, "m");
-  $: console.log(unread, "u");
-  $: console.log(found, "s");
-
-
   (async function () {
     const identifier = (await authenticate()).match({
       ok: function(identifier) {

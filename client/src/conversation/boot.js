@@ -20,7 +20,6 @@ export default async function() {
     }
   })
   if (!identifier) {
-    console.log("setting this");
     page.$set({authenticationRequired})
     return
   }
