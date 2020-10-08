@@ -19,7 +19,7 @@ pub opaque type Topic {
 }
 
 pub fn validate_topic(topic) {
-  assert Ok(re) = regex.from_string("^[\\w][\\w\\-,\\. ]{3,48}[\\w\\.\\?!]$")
+  assert Ok(re) = regex.from_string("^[^@]{2,100}$")
   let topic = string.trim(topic)
   case regex.check(re, topic) {
     True -> Ok(Topic(topic))

@@ -34,17 +34,11 @@ pub fn topic_validation_test() {
   |> should.equal(Error(Nil))
 
   // Too long
-  validate_topic(string.repeat("a", 51))
+  validate_topic(string.repeat("a", 101))
   |> result.map(topic_to_string)
   |> should.equal(Error(Nil))
 
-  // Can't start with .
-  validate_topic("..new topic")
-  |> result.map(topic_to_string)
-  |> should.equal(Error(Nil))
-
-  // Can't end with ,
-  validate_topic("new topic,,")
+  validate_topic("my@email.example")
   |> result.map(topic_to_string)
   |> should.equal(Error(Nil))
 }
