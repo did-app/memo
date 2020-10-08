@@ -208,6 +208,22 @@ pub fn route(
       try topic = start_conversation.params(params)
       try identifier_id = load_session(request, config.client_origin)
       try conversation = start_conversation.execute(topic, identifier_id)
+      try _ = case map.get(params, "participant") {
+        Error(Nil) -> Ok(Nil)
+        Ok(email_address) -> {
+          try participation =
+            load_participation(
+              int.to_string(conversation.id),
+              request,
+              config.client_origin,
+            )
+          let params =
+            dynamic.from(map.from_list([tuple("email_address", email_address)]))
+          try params = add_participant.params(params)
+          try _ = add_participant.execute(participation, params)
+          Ok(Nil)
+        }
+      }
       redirect(string.append(
         string.append(config.client_origin, "/c/"),
         int.to_string(conversation.id),

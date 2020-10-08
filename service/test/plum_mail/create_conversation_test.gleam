@@ -47,3 +47,46 @@ pub fn create_conversation_test() {
   participation.owner
   |> should.equal(True)
 }
+
+pub fn create_conversation_with_participant_test() {
+  assert Ok(identifier) = support.generate_identifier("example.test")
+  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
+  assert Ok(tuple(_, _, session_token)) =
+    authentication.authenticate(Some(link_token), None, "ua")
+
+  let topic = "Test topic"
+  assert Ok(other) = support.generate_identifier("example.test")
+
+  let body =
+    string.append("topic=", topic)
+    |> bit_string.from_string
+    |> bit_string.append(bit_string.from_string("&participant="))
+    |> bit_string.append(bit_string.from_string(other.email_address.value))
+
+  let request =
+    http.default_req()
+    |> http.set_method(http.Post)
+    |> http.set_path("/c/create")
+    |> http.set_req_cookie("session", session_token)
+    |> http.prepend_req_header("origin", support.test_config().client_origin)
+    |> http.set_req_body(body)
+
+  let response = handle(request, support.test_config())
+
+  should.equal(response.status, 303)
+  assert Ok(location) = http.get_resp_header(response, "location")
+  assert Ok(tuple(_, id)) = string.split_once(location, "/c/")
+  assert Ok(id) = int.parse(id)
+
+  assert Ok(participation) = discuss.load_participation(id, identifier.id)
+  participation.conversation.topic
+  |> dynamic.from
+  |> dynamic.element(1)
+  |> should.equal(Ok(dynamic.from(topic)))
+  participation.owner
+  |> should.equal(True)
+
+  assert Ok(participation) = discuss.load_participation(id, other.id)
+  participation.owner
+  |> should.equal(False)
+}
