@@ -7,8 +7,29 @@ input:checked+svg {
   display: block;
 }
 
-body {
-  background: #f6f6f6;
+/* Warning box */
+input + div.warning {
+  display: none;
+}
+/* https://www.stefanjudis.com/notes/target-non-empty-but-invalid-input-element-with-css/ */
+input:not(:placeholder-shown):not(:focus):invalid  {
+  border-color: red;
+}
+
+input:not(:placeholder-shown):not(:focus):invalid + div.warning {
+  display: block;
+}
+
+/* target-only */
+.target-only {
+  display: none;
+}
+.target-only:target {
+  display: initial;
+}
+
+body, .bg-body {
+  background: #f6f6f6cc;
 }
 
 .my-shadow {

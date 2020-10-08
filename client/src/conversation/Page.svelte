@@ -2,10 +2,12 @@
   import {
     Circle2
   } from 'svelte-loading-spinners'
+  import SignIn from "../SignIn.svelte"
 
   import DOMPurify from 'dompurify';
 
   export let failure;
+  export let authenticationRequired;
   export let conversationId;
   export let displayName;
   export let emailAddress;
@@ -68,19 +70,21 @@
 
 </style>
 
-{#if !topic}
+{#if !topic && !authenticationRequired}
 <div class="flex min-h-screen flex-col">
   <div class="m-auto">
     <Circle2 size="25" colorOuter="#3c366b" colorCenter="#3c366b" colorInner="#3c366b" unit="vw"></Circle2>
   </div>
 </div>
+{:else if authenticationRequired}
+<SignIn/>
 {:else}
 {#if failure}
 <div class="bg-indigo-100 font-bold mb-3 p-4 text-center cursor-pointer" on:click={clearFailure}>
   {failure}
 </div>
 {/if}
-<header class="max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
+<header class="w-full max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
   <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
   <h1 id="topic" class="flex-grow text-xl md:text-2xl">{topic}</h1>
 </header>
