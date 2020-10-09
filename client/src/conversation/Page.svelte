@@ -64,6 +64,47 @@
       }
     }
   }
+
+  let makeQuestion;
+  function watchQuestions(event) {
+    const $area = event.target
+    if (document.activeElement !== $area) return
+    // let selection = document.getSelection()
+    // let range = selection.getRangeAt(0)
+    const cursor = $area.selectionStart;
+    const textValue = $area.value
+    const leftChar = textValue.slice(cursor - 1, cursor)
+
+    if (leftChar !== "?") {
+      makeQuestion = undefined
+      return
+    }
+
+    let pre = textValue.slice(0, cursor -1)
+    let post = textValue.slice(cursor)
+    let lineBreak = pre.lastIndexOf("\n")
+    let question = pre.slice(lineBreak + 1)
+    pre = pre.slice(0, lineBreak + 1)
+
+    if (question[0] === "[") return
+    if (question.trim() === "") return
+    makeQuestion = function () {
+
+     // Only replace up to first two new lines for the newlines added
+     $area.value = pre + "[" + question + "?](#?)\n\n" + post.trimStart();
+
+     $area.setSelectionRange(cursor + 8, cursor + 8)
+     makeQuestion = undefined
+   }
+  }
+  function tryMakeQuestion(event) {
+  if (event.key === "Enter" && makeQuestion) {
+    event.preventDefault()
+    makeQuestion()
+  } else {
+    watchQuestions()
+  }
+}
 </script>
 
 <style media="screen">
@@ -131,10 +172,14 @@
       {#if questions.length}
       <hr class="mt-4">
       {/if}
-      <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize}></textarea>
+      <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize} on:input={watchQuestions} on:keypress={tryMakeQuestion}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}
       </div>
+
+      {#if makeQuestion}
+      <button class="bg-indigo-100 p-1 my-1 rounded shadow w-full" on:click="{makeQuestion}" type="button">Make question (press Enter)</button>
+      {/if}
       <section class="pb-1 whitespace-no-wrap overflow-hidden">
         <span class="font-bold text-gray-700">From:</span>
         <!-- <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="{displayName}" value=""> -->
