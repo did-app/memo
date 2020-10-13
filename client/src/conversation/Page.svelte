@@ -5,6 +5,7 @@
   import SignIn from "../SignIn.svelte"
 
   import DOMPurify from 'dompurify';
+  import {beautifyWherebyLinks} from '../content.js'
 
   export let failure;
   export let authenticationRequired;
@@ -21,8 +22,19 @@
   export let bottom;
   export let questions = [];
 
+  function process(content) {
+    if (!content) return "No preview yet."
+    const html = marked(content)
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    beautifyWherebyLinks(doc)
+    return DOMPurify.sanitize(doc.body.innerHTML)
+  }
+
   let draft;
-  $: preview = draft ? DOMPurify.sanitize(marked(draft)) : "No preview yet."
+  $: preview = process(draft)
 
   // https://svelte.dev/repl/ead0f1fcd2d4402bbbd64eca1d665341?version=3.14.1
   function resize(event) {

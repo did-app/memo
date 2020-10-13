@@ -3,6 +3,7 @@ import Page from "./Page.svelte";
 import authenticate from "../authenticate.js"
 import * as Client from "../client.js";
 import { formValues } from "../dom";
+import {beautifyWherebyLinks} from '../content.js'
 
 export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
@@ -61,6 +62,8 @@ export default async function() {
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
+    beautifyWherebyLinks(doc)
+
     const firstElement = doc.body.children[0]
     // It's possible there are empty messges
     const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
