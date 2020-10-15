@@ -3,7 +3,7 @@ import Page from "./Page.svelte";
 import authenticate from "../authenticate.js"
 import * as Client from "../client.js";
 import { formValues } from "../dom";
-import {beautifyWherebyLinks} from '../content.js'
+import {extractQuestions, beautifyWherebyLinks} from '../content.js'
 
 export default async function() {
   const conversationId = parseInt(window.location.pathname.substr(3));
@@ -62,40 +62,12 @@ export default async function() {
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    beautifyWherebyLinks(doc)
-
     const firstElement = doc.body.children[0]
     // It's possible there are empty messges
     const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
 
-    let $questionLinks = doc.querySelectorAll('a[href="#?"]')
-
-    $questionLinks.forEach(function ($link) {
-      const query = $link.innerHTML
-
-      // Work off the questions array length
-      const $details = document.createElement('details')
-      $details.id = "Q:" + asked.length
-
-      const $summary = document.createElement('summary')
-      $summary.innerHTML = query
-
-      const $answerTray = document.createElement('div')
-
-      const $answerFallback = document.createElement('div')
-      $answerFallback.classList.add('fallback')
-      $answerFallback.innerHTML = "There are no answers to this question yet"
-      $answerFallback.classList.add('border-l-4', 'border-gray-400', "px-2", "pt-1", "mb-2")
-
-      $answerTray.append($answerFallback)
-      $details.append($summary)
-      $details.append($answerTray)
-
-      $link.parentElement.replaceChild($details, $link)
-
-      const awaiting = author != identifier.emailAddress
-      asked = asked.concat({query, awaiting, $answerTray, id: asked.length})
-    })
+    beautifyWherebyLinks(doc)
+    asked = asked.concat(extractQuestions(doc, author == identifier.emailAddress))
 
     let $answerElements = doc.querySelectorAll('answer')
     $answerElements.forEach(function ($answer) {

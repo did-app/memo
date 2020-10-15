@@ -5,7 +5,7 @@
   import SignIn from "../SignIn.svelte"
 
   import DOMPurify from 'dompurify';
-  import {beautifyWherebyLinks} from '../content.js'
+  import {extractQuestions, beautifyWherebyLinks} from '../content.js'
 
   export let failure;
   export let authenticationRequired;
@@ -30,6 +30,7 @@
     const doc = parser.parseFromString(html, "text/html");
 
     beautifyWherebyLinks(doc)
+    extractQuestions(doc, true)
     return DOMPurify.sanitize(doc.body.innerHTML)
   }
 
@@ -103,7 +104,7 @@
     makeQuestion = function () {
 
      // Only replace up to first two new lines for the newlines added
-     $area.value = pre + "[" + question + "?](#?)\n\n" + post.trimStart();
+     draft = pre + "[" + question + "?](#?)\n\n" + post.trimStart();
 
      $area.setSelectionRange(cursor + 8, cursor + 8)
      makeQuestion = undefined
@@ -114,7 +115,7 @@
     event.preventDefault()
     makeQuestion()
   } else {
-    watchQuestions()
+    watchQuestions(event)
   }
 }
 </script>
