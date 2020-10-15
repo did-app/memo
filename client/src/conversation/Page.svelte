@@ -30,7 +30,8 @@
     const doc = parser.parseFromString(html, "text/html");
 
     beautifyWherebyLinks(doc)
-    extractQuestions(doc, true)
+    // Maybe this should be questions already
+    extractQuestions(doc, true, asked)
     return DOMPurify.sanitize(doc.body.innerHTML)
   }
 
@@ -119,11 +120,17 @@
   }
 }
 function dismiss(id) {
-  questions[id].dismissed = true
-  questions[id].answer = "Dismissed"
+  const index = questions.findIndex(function (q) {
+    return q.id === id
+  })
+  questions[index].dismissed = true
+  questions[index].answer = "Dismissed"
 }
 function setAnswer(id, value) {
-  questions[id].answer = value
+  const index = questions.findIndex(function (q) {
+    return q.id === id
+  })
+  questions[index].answer = value
 }
 </script>
 

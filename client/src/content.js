@@ -26,8 +26,9 @@ export function beautifyWherebyLinks(doc) {
   })
 }
 
-export function extractQuestions(doc, authoredByMe) {
+export function extractQuestions(doc, authoredByMe, asked) {
   const $questionLinks = doc.querySelectorAll('a[href="#?"]')
+  console.log(asked);
 
   return Array.from($questionLinks).reduce(function (asked, $link) {
     const query = $link.innerHTML
@@ -54,6 +55,6 @@ export function extractQuestions(doc, authoredByMe) {
 
     const awaiting = !authoredByMe
     return asked.concat({query, awaiting, $answerTray, id: asked.length, answer: ""})
-  }, [])
+  }, asked)
 
 }

@@ -67,7 +67,7 @@ export default async function() {
     const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
 
     beautifyWherebyLinks(doc)
-    asked = asked.concat(extractQuestions(doc, author == identifier.emailAddress))
+    asked = extractQuestions(doc, author == identifier.emailAddress, asked)
 
     let $answerElements = doc.querySelectorAll('answer')
     $answerElements.forEach(function ($answer) {
