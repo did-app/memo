@@ -53,7 +53,7 @@ export function extractQuestions(doc, authoredByMe) {
     $link.parentElement.replaceChild($details, $link)
 
     const awaiting = !authoredByMe
-    return asked.concat({query, awaiting, $answerTray, id: asked.length})
+    return asked.concat({query, awaiting, $answerTray, id: asked.length, answer: ""})
   }, [])
 
 }

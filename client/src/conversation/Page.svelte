@@ -118,6 +118,13 @@
     watchQuestions(event)
   }
 }
+function dismiss(id) {
+  questions[id].dismissed = true
+  questions[id].answer = "Dismissed"
+}
+function setAnswer(id, value) {
+  questions[id].answer = value
+}
 </script>
 
 <style media="screen">
@@ -171,20 +178,28 @@
     <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <div class="">
-        {#each questions as {query, awaiting, id}}
+        {#each questions as {query, awaiting, id, answer, dismissed}}
         {#if awaiting}
-        <a href="#Q:{id}">
-          <blockquote class="px-4 my-2 border-l-4 border-indigo-800 hover:underline" >
-            {@html query}
+        <div class:hidden={dismissed}>
+          <blockquote class="flex px-4 my-2 border-l-4 border-indigo-800" >
+            <a class="flex-1  hover:underline" href="#Q:{id}">
+              {@html query}
+            </a>
+            <nav>
+              <button class="bg-gray-200 p-1 rounded" type="button" on:click={(e) => setAnswer(id, e.target.innerText)}>👍</button>
+              <button class="bg-gray-200 p-1 rounded" type="button" on:click={(e) => setAnswer(id, e.target.innerText)}>👎</button>
+              <button class="bg-gray-200 p-1 rounded" type="button" on:click={() => dismiss(id)}>&#x274C;</button>
+            </nav>
           </blockquote>
-        </a>
-        <textarea class="w-full bg-white outline-none" name="Q:{id}" rows="1" style="min-height:0em;max-height:60vh;" placeholder="Answer" on:input={resize}></textarea>
+          <textarea class="w-full bg-white outline-none" name="Q:{id}" rows="1" style="min-height:0em;max-height:60vh;" placeholder="Answer" on:input={resize}>{answer}</textarea>
+        </div>
         {/if}
         {/each}
       </div>
       {#if questions.length}
       <hr class="mt-4">
       {/if}
+      <!-- <p>Write any more content here</p> -->
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize} on:input={watchQuestions} on:keypress={tryMakeQuestion}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}
