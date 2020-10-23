@@ -31,7 +31,7 @@
 
     beautifyWherebyLinks(doc)
     // Maybe this should be questions already
-    extractQuestions(doc, true, asked)
+    extractQuestions(doc, true, [])
     return DOMPurify.sanitize(doc.body.innerHTML)
   }
 
