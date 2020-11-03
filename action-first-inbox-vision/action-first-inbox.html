@@ -1,0 +1,428 @@
+<html lang="en" dir="ltr" class="js-focus-visible" data-js-focus-visible="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://app.plummail.co/vendor/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/vendor/github-markdown.min.css" crossorigin="anonymous">
+  <script src="https://app.plummail.co/vendor/marked.min.js"></script>
+  <script src="https://kit.fontawesome.com/f868aafb81.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://app.plummail.co/vendor/TextTip.css">
+  <link rel="stylesheet" href="https://app.plummail.co/css/extra.css">
+  <script src="https://app.plummail.co/vendor/minisearch.min.js"></script>
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-16x16.png" sizes="16x16">
+  <title>plum mail</title>
+  <script async="" defer="" src="/build/main.js"></script>
+  <script async="" defer="" data-domain="app.plummail.co" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    #account-settings {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #account-settings:target {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .toggle-checkbox:checked {
+      @apply: right-0 border-green-400;
+      right: 0;
+      border-color: #68D391;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      @apply: bg-green-400;
+      background-color: #68D391;
+    }
+
+    #actions:target {
+      background: #edf2f7;
+    }
+
+    #messages:target {
+      background: #edf2f7;
+    }
+
+    #contacts:target {
+      background: #edf2f7;
+    }
+
+    #actionsMain {
+      display: none;
+    }
+
+  </style>
+</head>
+
+<body class="min-h-screen text-gray-800 bg-gray-100">
+  <main class="flex flex-col md:flex-row">
+    <section class="w-full ">
+      <header class="h-16 fixed w-full bg-white mx-auto text-left border-b-2">
+        <nav class="ml-auto p-4">
+          <a href="/">
+            <span class="px-1 hover:text-indigo-800 hover:border-indigo-800 pt-2 text-lg font-semibold">Richard</span>
+          </a>
+          <div class="ml-16 shadow-md w-2/4 inline-block rounded border-2 border-gray-500">
+            <svg class="absolute ml-2 mt-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 396.819 396.819" style="enable-background:new 0 0 396.819 396.819;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M352.103,44.679c-59.237-59.401-155.412-59.535-214.813-0.298c-57.316,57.157-59.741,149.218-5.515,209.314l-11.6,11.6    c-9.372-9.373-24.568-9.375-33.941-0.003c-0.001,0.001-0.002,0.002-0.003,0.003l-79.2,79.2    c-9.373,9.372-9.375,24.568-0.003,33.941c0.001,0.001,0.002,0.002,0.003,0.003l11.312,11.312c9.372,9.369,24.564,9.369,33.936,0    l79.2-79.2c9.373-9.372,9.375-24.568,0.003-33.941c-0.001-0.001-0.002-0.002-0.003-0.003l11.6-11.6    c62.24,56.247,158.292,51.388,214.539-10.851C411.948,194.037,409.521,101.856,352.103,44.679z M120.175,299.231l-79.2,79.2    c-3.124,3.123-8.188,3.123-11.312,0l-11.312-11.32c-3.118-3.123-3.118-8.181,0-11.304l79.2-79.2c3.164-3.025,8.148-3.025,11.312,0    l11.312,11.32C123.293,291.05,123.293,296.108,120.175,299.231z M340.799,248.327c-53.112,53.11-139.223,53.109-192.333-0.003    s-53.109-139.223,0.003-192.333c53.111-53.109,139.219-53.109,192.33,0C393.824,109.139,393.824,195.179,340.799,248.327z" />
+                </g>
+              </g>
+              <g>
+                <g>
+                  <path d="M329.479,67.303L329.479,67.303l-11.312,11.312c40.545,40.644,40.545,106.436,0,147.08l11.312,11.312    C376.275,190.117,376.275,114.193,329.479,67.303z" />
+                </g>
+              </g>
+            </svg>
+            <input class="inline-block w-full rounded pl-8 pr-2 py-1 focus:bg-gray-100 text-black focus:border-indigo-800 outline-none" placeholder="" id="search" autofocus="" autocomplete="off">
+          </div>
+          <a href="#account-settings" class="block float-right">
+            <svg href="#account-settings" class="w-8" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 56 56" style="enable-background:new 0 0 56 56;" xml:space="preserve">
+              <path d="M28,0C12.561,0,0,12.561,0,28s12.561,28,28,28s28-12.561,28-28S43.439,0,28,0z M40,41H16c-1.104,0-2-0.896-2-2s0.896-2,2-2
+	h24c1.104,0,2,0.896,2,2S41.104,41,40,41z M40,30H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,30,40,30z
+	 M40,19H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,19,40,19z" />
+            </svg>
+          </a>
+        </nav>
+      </header>
+      <div class="mt-16 flex">
+        <div class="w-1/12 border-r">
+          <aside class="fixed w-1/12">
+            <a href="#actions">
+              <div id="actions" class="py-16 px-4 border-b text-center bg-white hover:bg-gray-100" style="height:30vh;">
+                <p class="font-medium text-gray-800 leading-none pb-4">Actions</p>
+                <p class="text-xs text-gray-700">2/5 today</p>
+                <div class="mt-2 bg-gray-300 mx-2 rounded-full">
+                  <div class="w-2/5 mt-2 bg-purple-800 py-1 rounded-full"></div>
+                </div>
+              </div>
+            </a>
+            <a href="#messages">
+              <div id="messages" class="py-8 px-4 border-b text-center bg-white hover:bg-gray-100" style="height:30vh;">
+                <p class="font-medium text-gray-800 leading-none">Messages</p>
+                <p class="mt-4 border text-xs font-bold px-2 py-1 rounded bg-white hover:bg-gray-400">New: 3
+                </p>
+                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-green-400 hover:bg-green-600">House: 3
+                </p>
+                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-orange-400 hover:bg-orange-600">Website: 1
+                </p>
+                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-indigo-400 hover:bg-indigo-600">Classes: 7
+                </p>
+              </div>
+            </a>
+            <a href="#contacts">
+              <div id="contacts" class="py-16 px-4 border-b text-center bg-white hover:bg-gray-100" style="height:30vh;">
+                <p class="font-medium text-gray-800 leading-none">Contacts</p>
+              </div>
+            </a>
+          </aside>
+        </div>
+        <div class="w-11/12 pt-6 pb-12">
+          <section class="w-8/12 mx-auto flex">
+            <div class="w-1/12 p-4">
+              1/5
+            </div>
+            <div class="w-11/12">
+              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                <div class="flex">
+                  <h2 class="flex-grow font-medium my-1"> Please can you give me the login details for the website?</h2> <span class="my-1 text-xs text-gray-500">29 October</span>
+                </div>
+                <div class="block w-full border rounded p-4">
+                  <textarea class="outline-none w-full"></textarea>
+                  <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                </div>
+                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                    <g>
+                      <g>
+                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                      </g>
+                    </g>
+
+                  </svg>Website Access Details.</a>
+                <p class="text-gray-700 text-sm">jane.carter@plummail.co, marylou@plummail.co</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="w-8/12 mx-auto flex">
+            <div class="w-1/12 p-4">
+              2/5
+            </div>
+            <div class="w-11/12">
+              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                <div class="flex">
+                  <h2 class="flex-grow font-medium my-1"> How many of us are there for the board meeting on Thursday?</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                </div>
+                <div class="block w-full border rounded p-4">
+                  <textarea class="outline-none w-full"></textarea>
+                  <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                </div>
+                <div class="flex">
+                  <h2 class="flex-grow font-medium my-1"> Have you booked a meeting room and if so, which one?</h2>
+                </div>
+                <div class="block w-full border rounded p-4">
+                  <textarea class="outline-none w-full"></textarea>
+                  <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                </div>
+                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                    <g>
+                      <g>
+                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                      </g>
+                    </g>
+
+                  </svg>Board meeting arrangements.</a>
+                <p class="text-gray-700 text-sm">walter@plummail.co, mrs-carrington@plummail.co</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="w-8/12 mx-auto flex">
+            <div class="w-1/12 p-4">
+              3/5
+            </div>
+            <div class="w-11/12">
+              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                <div class="flex">
+                  <h2 class="flex-grow font-medium my-1">Write formal estimate for System Solutions &amp; Co</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                </div>
+                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                    <g>
+                      <g>
+                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                      </g>
+                    </g>
+
+                  </svg>New project estimate request.</a>
+                <p class="text-gray-700 text-sm">graham.spinach@systemsandsolutions.co</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="w-8/12 mx-auto flex">
+            <div class="w-1/12 p-4">
+              4/5
+            </div>
+            <div class="w-11/12">
+              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                <div class="flex">
+                  <h2 class="flex-grow font-medium my-1">Reading List</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                </div>
+                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                    <g>
+                      <g>
+                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                      </g>
+                    </g>
+
+                  </svg>Ten Ways to Get More Productive</a>
+                <p class="text-gray-700 text-sm">newsletter@productive-blog.io</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="w-8/12 mx-auto flex">
+            <div class="w-1/12 p-4">
+              5/5
+            </div>
+            <div class="w-11/12">
+              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                <div class="flex">
+                  <h2 class="flex-grow font-medium my-1">Checklist</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                </div>
+                <div class="flex">
+                  <ol>
+                    <li>
+                      <input type="checkbox"> Fix logo spacing
+                    </li>
+                    <li>
+                      <input type="checkbox"> Indent paragraphs
+                    </li>
+                    <li>
+                      <input type="checkbox"> Add links to ts and cs
+                    </li>
+                  </ol>
+                </div>
+                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                    <g>
+                      <g>
+                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                      </g>
+                    </g>
+
+                  </svg>Minor Website Alterations</a>
+                <p class="text-gray-700 text-sm">jessica@perfectclient.wales</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <section id="account-settings" class="w-3/12 bg-white duration-1000 fixed right-0 transition transition-all">
+      <nav class="p-4 mb-10">
+        <a href="#0" class="float-right">
+          <svg class="w-8" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 56 56" enable-background="new 0 0 56 56" xml:space="preserve">
+            <path fill="none" d="M28,0C12.6,0,0,12.6,0,28s12.6,28,28,28s28-12.6,28-28S43.4,0,28,0z M14,39c0-1.1,0.9-2,2-2h24c1.1,0,2,0.9,2,2
+	s-0.9,2-2,2H16C14.9,41,14,40.1,14,39z M14,28c0-1.1,0.9-2,2-2h24c1.1,0,2,0.9,2,2s-0.9,2-2,2H16C14.9,30,14,29.1,14,28z M40,19H16
+	c-1.1,0-2-0.9-2-2s0.9-2,2-2h24c1.1,0,2,0.9,2,2S41.1,19,40,19z" />
+            <path fill="#1D1D1B" d="M42,17c0,1.1-0.9,2-2,2H16c-1.1,0-2-0.9-2-2s0.9-2,2-2h24C41.1,15,42,15.9,42,17z" />
+            <path fill="#1D1D1B" d="M42,39c0,1.1-0.9,2-2,2H16c-1.1,0-2-0.9-2-2s0.9-2,2-2h24C41.1,37,42,37.9,42,39z" />
+            <path fill="#1D1D1B" d="M42,28c0,1.1-0.9,2-2,2H16c-1.1,0-2-0.9-2-2s0.9-2,2-2h24C41.1,26,42,26.9,42,28z" />
+            <path fill="#1D1D1B" d="M28,0C12.6,0,0,12.6,0,28s12.6,28,28,28s28-12.6,28-28S43.4,0,28,0z M28,54.6C13.3,54.6,1.4,42.7,1.4,28
+	S13.3,1.4,28,1.4c14.7,0,26.6,11.9,26.6,26.6S42.7,54.6,28,54.6z" />
+          </svg>
+        </a>
+      </nav>
+      <div class="clear-both h-screen bg-white rounded overflow-hidden shadow-lg">
+        <div class="px-6 pt-2 pb-6 border-b">
+          <p class="pt-2 text-lg font-semibold">Richard Shepherd</p>
+          <div class="block">
+            <p class="inline-block text-sm text-left text-gray-600">richard.shepherd@plummail.co
+            </p>
+            <div class="relative inline-block w-6 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input type="checkbox" name="toggle" id="toggle" class="outline-none toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+              <label for="toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+          <div class="block">
+            <p class="inline-block text-sm text-left text-gray-600">richard@did.app</p>
+            <div class="relative inline-block w-6 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input checked type="checkbox" name="toggle" id="toggle" class="outline-none toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+              <label for="toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+          <div class="block">
+            <p class="inline-block text-sm text-left text-gray-600">yesplease@plummail.co</p>
+            <div class="relative inline-block w-6 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input checked type="checkbox" name="toggle" id="toggle" class="outline-none toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+              <label for="toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+        </div>
+        <div class="border-b">
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 452.84 452.84" enable-background="new 0 0 452.84 452.84">
+                <g>
+                  <path d="m449.483,190.4l.001-.001-57.824-38.335v-128.134c0-4.142-3.358-7.5-7.5-7.5h-315.49c-4.142,0-7.5,3.358-7.5,7.5v128.143l-57.814,38.326 .001,.002c-2.022,1.343-3.357,3.639-3.357,6.249v232.26c0,4.142 3.358,7.5 7.5,7.5h437.84c4.142,0 7.5-3.358 7.5-7.5v-232.26c0-2.61-1.335-4.906-3.357-6.25zm-388.313,26.229l-23.525-12.479h23.525v12.479zm-46.17-7.511l172.475,91.49-172.475,114.327v-205.817zm211.417,83.671l194.037,128.621h-388.073l194.036-128.621zm38.945,7.82l172.477-91.491v205.821l-172.477-114.33zm126.298-96.459h23.536l-23.536,12.484v-12.484zm28.794-15h-28.794v-19.09l28.794,19.09zm-43.794-157.72v193.161l-125.527,66.586-20.573-13.637c-2.511-1.665-5.776-1.665-8.287,0l-20.57,13.635-125.533-66.589v-193.156h300.49zm-315.49,157.72h-28.782l28.782-19.08v19.08z" />
+                  <path d="m226.415,213.671h59.754c4.142,0 7.5-3.358 7.5-7.5s-3.358-7.5-7.5-7.5h-59.754c-28.813,0-52.254-23.441-52.254-52.254v-2.213c0-28.813 23.441-52.254 52.254-52.254s52.254,23.441 52.254,52.254v5.533c0,6.237-5.074,11.312-11.312,11.312s-11.312-5.074-11.312-11.312v-10.512c0-17.864-14.533-32.398-32.397-32.398s-32.397,14.533-32.397,32.398c0,17.864 14.533,32.397 32.397,32.397 8.169,0 15.636-3.045 21.34-8.052 4.644,7.483 12.932,12.478 22.369,12.478 14.508,0 26.312-11.803 26.312-26.312v-5.533c0-37.084-30.17-67.254-67.254-67.254s-67.254,30.17-67.254,67.254v2.213c5.68434e-14,37.085 30.17,67.255 67.254,67.255zm-2.767-57.049c-9.593,0-17.397-7.804-17.397-17.397s7.805-17.398 17.397-17.398 17.397,7.805 17.397,17.398-7.804,17.397-17.397,17.397z" />
+                </g>
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Inbox Settings</p>
+              <p class="text-xs text-gray-500">Delivery schedules, dark mode, fonts &amp; teams</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" height="512pt" viewBox="0 0 512 512.0005" width="512pt">
+                <path d="m220 0h-200c-11.046875 0-20 8.953125-20 20v200c0 11.046875 8.953125 20 20 20h200c11.046875 0 20-8.953125 20-20v-200c0-11.046875-8.953125-20-20-20zm-20 200h-160v-160h160zm299.65625 73.523438c-7.472656-3.097657-16.078125-1.386719-21.796875 4.332031l-200 200c-5.722656 5.722656-7.433594 14.324219-4.335937 21.796875 3.097656 7.476562 10.386718 12.347656 18.476562 12.347656h200c11.046875 0 20-8.953125 20-20v-200c0-8.089844-4.871094-15.382812-12.34375-18.476562zm-27.65625 198.476562h-131.714844l131.714844-131.714844zm-80-232c66.167969 0 120-53.832031 120-120s-53.832031-120-120-120-120 53.832031-120 120 53.832031 120 120 120zm0-200c44.113281 0 80 35.886719 80 80s-35.886719 80-80 80-80-35.886719-80-80 35.886719-80 80-80zm-157.859375 266.144531-85.855469 85.855469 85.855469 85.855469c7.8125 7.8125 7.8125 20.476562 0 28.285156-7.808594 7.808594-20.472656 7.8125-28.28125 0l-85.859375-85.855469-85.859375 85.859375c-7.808594 7.808594-20.472656 7.808594-28.28125 0-7.8125-7.8125-7.8125-20.476562 0-28.285156l85.855469-85.859375-85.855469-85.855469c-7.8125-7.8125-7.8125-20.476562 0-28.285156 7.808594-7.8125 20.472656-7.8125 28.28125 0l85.859375 85.855469 85.859375-85.859375c7.808594-7.808594 20.472656-7.808594 28.28125 0 7.8125 7.8125 7.8125 20.476562 0 28.289062zm0 0" /></svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Message Routing</p>
+              <p class="text-xs text-gray-500">Filtering, tags, notifications</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Personal settings</p>
+              <p class="text-xs text-gray-500">How you appear to others</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Manage Account</p>
+              <p class="text-xs text-gray-500">Billing, terms &amp; support</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-green-600">
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">
+                Apps &amp; integrations
+              </p>
+              <p class="text-xs text-gray-500">Whereby, Calendly</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="">
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Product updates</p>
+          </a>
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Status updates</p>
+          </a>
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Support FAQ</p>
+          </a>
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Logout</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <!--<div class="py-6 w-full">
+    <svg class="mx-auto my-auto w-16" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 3332 583" enable-background="new 0 0 3332 583" xml:space="preserve">
+      <path fill="#312E59" d="M34.5,79.1c0-7,5.1-12.9,12-13.9c35.3-5,84.1-8.8,151.5-8.8c71.4,0,122.5,12.9,157.2,39.5
+	c33.8,25,56.5,68.8,56.5,119.4c0,50.2-16.7,94.2-48.2,122.3c-40.1,35.9-98.2,51.9-165.2,51.9c-6.3,0-12.2-0.3-17.5-0.6
+	c-8-0.5-14.8,5.9-14.8,14l0,139.2c0,7.7-6.3,14-14,14H48.5c-7.7,0-14-6.3-14-14L34.5,79.1z M166,273.4c0,7.4,5.8,13.6,13.2,14
+	c4.7,0.3,10.3,0.4,17.1,0.4c51.7,0,84-26.7,84-69.3c0-37-24.5-62-75-62c-10.9,0-19.9,0.5-26.8,1.2c-7.1,0.7-12.6,6.7-12.6,13.9
+	L166,273.4z" />
+      <path fill="#312E59" d="M486.4,33.8h104.8c7.7,0,14,6.3,14,14v494.3c0,7.7-6.3,14-14,14H486.4c-7.7,0-14-6.3-14-14V47.8
+	C472.4,40,478.6,33.8,486.4,33.8z" />
+      <path fill="#312E59" d="M1044.3,432.8c0,43.3,1.1,79.8,2.3,108.6c0.3,8-6,14.6-14,14.6l-87.4,0c-7.1,0-13-5.3-13.9-12.3l-4.2-33.8
+	c-0.1-0.9-0.9-1.6-1.8-1.6l0,0c-0.6,0-1.2,0.3-1.5,0.8c-13.4,19.7-45.2,54.9-109.3,54.9c-80.7,0-128.2-52-128.2-156.7V208.1
+	c0-7.7,6.3-14,14-14h104.8c7.7,0,14,6.3,14,14v178.2c0,46.2,15.1,71.4,46.3,71.4c24.8,0,37.5-17.1,42.7-30.7
+	c2.6-5.3,3.3-12.1,3.3-19.7V208.1c0-7.7,6.3-14,14-14h104.8c7.7,0,14,6.3,14,14V432.8z" />
+      <path fill="#312E59" d="M1127.1,317.4c0-41.4-1.1-77.9-2.3-108.7c-0.3-7.9,6-14.6,14-14.6l84.2,0c7.1,0,13.1,5.3,13.9,12.4l3.7,31.1
+	c0.1,0.9,0.9,1.6,1.8,1.6l0,0c0.6,0,1.1-0.3,1.5-0.7c13.6-18.2,45.2-52.4,106.5-52.4c45.8,0,81.7,21.2,97.5,56.8
+	c0.2,0.5,0.7,0.8,1.2,0.8l0,0c0.4,0,0.8-0.2,1-0.5c14.3-18.3,30.9-32.5,49.3-42.4c18.6-9.7,40.1-14.7,64-14.7
+	c78,0,122.8,56.5,122.8,157.1v199c0,7.7-6.3,14-14,14h-100.7c-7.7,0-14-6.3-14-14V363c0-44.9-13.1-70.6-42.5-70.6
+	c-21.2,0-34.6,13.6-40.5,30.7c-2.6,7.5-3.5,18.8-3.5,26.7v192.3c0,7.7-6.3,14-14,14h-100.7c-7.7,0-14-6.3-14-14V359.3
+	c0-40.5-12.3-66.9-42.3-66.9c-23.7,0-35.3,17.7-40.3,29.6c-3.3,8.5-3.9,18.2-3.9,26.9v193.3c0,7.7-6.3,14-14,14h-100.7
+	c-7.7,0-14-6.3-14-14V317.4z" />
+      <path fill="#312E59" d="M2340.9,191.2c-19.7,75.1-90.4,295.8-106.2,344.8c-1.9,5.8-7.2,9.7-13.3,9.7h-82.9
+	c-6.4,0-11.9-4.3-13.5-10.4l-91.9-349.5c-0.5-1.8-3-1.5-3.1,0.4c-1.9,74.8-0.5,297.5-0.1,355.8c0.1,7.8-6.2,14.1-14,14.1h-94.1
+	c-7.8,0-14-6.3-14-14.1l1.8-466.9c0-7.5,6-13.7,13.5-13.9l181.9-6.1c6.6-0.2,12.5,4.3,14.1,10.7l30.6,127.9
+	c13.5,54.8,28.1,119.9,38.4,180.4c0.1,0.8,0.8,1.3,1.5,1.3l0,0c0.7,0,1.4-0.5,1.5-1.2c13.7-60.2,30.2-129.7,44.6-181.6l33-127.1
+	c1.6-6.3,7.5-10.7,14-10.5l175.2,6c7.5,0.3,13.5,6.4,13.5,14l0.9,466.9c0,7.7-6.3,14-14,14h-100.9c-7.7,0-14-6.3-14-14l0.4-350.4
+	C2344,189.8,2341.4,189.5,2340.9,191.2z" />
+      <path fill="#312E59" d="M2756.2,545.1l-4.2-19.2c-0.2-0.9-1-1.6-2-1.6l0,0c-0.6,0-1.1,0.3-1.5,0.7c-25.2,28.5-60.9,39.2-99.6,39.2
+	c-73.9,0-119.7-53.3-119.7-113.7c0-96.6,86.2-139.8,208.2-140.5c1.1,0,2-0.9,2-2v-1.3c0-14.9-11.2-30.9-59.4-30.9
+	c-31.2,0-63.7,9-87.4,19.6c-7.8,3.5-17-0.8-19.2-9l-15.6-56.4c-1.8-6.6,1.4-13.6,7.7-16.5c26.6-12.1,74.1-27.4,138.9-27.4
+	c124.7,0,167.5,69.3,167.5,159.6V468c0,27.4,1.2,53.4,3.4,72.4c1,8.3-5.5,15.7-13.9,15.7l-91.6,0
+	C2763.3,556.1,2757.7,551.5,2756.2,545.1z M2743.6,392.8c0-1.1-0.9-2.1-2.1-2.1c-52.8,0.6-82.5,15.5-82.5,46.7
+	c0,23.2,15.1,34.9,37.5,34.9c18.9,0,39.4-13.4,45.4-33.5c1.5-5.3,1.7-12.1,1.7-18.6V392.8z" />
+      <path fill="#312E59" d="M3087.5,94.5c0.2,35.1-26.1,62.7-68.4,62.7c-40.6,0-66.8-27.6-66.6-62.7c-0.2-36.2,26.3-62.9,67.5-62.9
+	C3061.4,31.6,3086.9,58.2,3087.5,94.5z M2953.6,542.1V208.1c0-7.7,6.3-14,14-14h104.8c7.7,0,14,6.3,14,14v333.9c0,7.7-6.3,14-14,14
+	h-104.8C2959.9,556.1,2953.6,549.8,2953.6,542.1z" />
+      <path fill="#312E59" d="M3182.4,33.8h104.8c7.7,0,14,6.3,14,14v494.3c0,7.7-6.3,14-14,14h-104.8c-7.7,0-14-6.3-14-14V47.8
+	C3168.4,40,3174.7,33.8,3182.4,33.8z" />
+    </svg>
+  </div>-->
+</body>
+
+</html>
