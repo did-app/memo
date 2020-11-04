@@ -16,6 +16,14 @@
   <script async="" defer="" src="/build/main.js"></script>
   <script async="" defer="" data-domain="app.plummail.co" src="https://plausible.io/js/plausible.js"></script>
   <style>
+    .bottom-full {
+      bottom: 100%
+    }
+
+    .top-full {
+      top: 100%
+    }
+
     #account-settings {
       opacity: 0;
       visibility: hidden;
@@ -50,6 +58,14 @@
     }
 
     #actionsMain {
+      display: block;
+    }
+
+    #messagesMain {
+      display: none;
+    }
+
+    #contactsMain {
       display: none;
     }
 
@@ -91,7 +107,7 @@
       <div class="mt-16 flex">
         <div class="w-1/12 border-r">
           <aside class="fixed w-1/12">
-            <a href="#actions">
+            <a href="#actions" onclick="actions();">
               <div id="actions" class="py-16 px-4 border-b text-center bg-white hover:bg-gray-100" style="height:30vh;">
                 <p class="font-medium text-gray-800 leading-none pb-4">Actions</p>
                 <p class="text-xs text-gray-700">2/5 today</p>
@@ -100,167 +116,285 @@
                 </div>
               </div>
             </a>
-            <a href="#messages">
+            <a href="#messages" onclick="messages();">
               <div id="messages" class="py-8 px-4 border-b text-center bg-white hover:bg-gray-100" style="height:30vh;">
                 <p class="font-medium text-gray-800 leading-none">Messages</p>
                 <p class="mt-4 border text-xs font-bold px-2 py-1 rounded bg-white hover:bg-gray-400">New: 3
                 </p>
-                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-green-400 hover:bg-green-600">House: 3
+                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-green-600 hover:bg-green-400">House: 3
                 </p>
-                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-orange-400 hover:bg-orange-600">Website: 1
+                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-orange-600 hover:bg-orange-400">Website: 1
                 </p>
-                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-indigo-400 hover:bg-indigo-600">Classes: 7
+                <p class="transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-400">Classes: 7
                 </p>
               </div>
             </a>
-            <a href="#contacts">
+            <a href="#contacts" onclick="contacts();">
               <div id="contacts" class="py-16 px-4 border-b text-center bg-white hover:bg-gray-100" style="height:30vh;">
                 <p class="font-medium text-gray-800 leading-none">Contacts</p>
               </div>
             </a>
           </aside>
         </div>
-        <div class="w-11/12 pt-6 pb-12">
-          <section class="w-8/12 mx-auto flex">
-            <div class="w-1/12 p-4">
-              1/5
-            </div>
-            <div class="w-11/12">
-              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
-                <div class="flex">
-                  <h2 class="flex-grow font-medium my-1"> Please can you give me the login details for the website?</h2> <span class="my-1 text-xs text-gray-500">29 October</span>
-                </div>
-                <div class="block w-full border rounded p-4">
-                  <textarea class="outline-none w-full"></textarea>
-                  <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
-                </div>
-                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-                    <g>
-                      <g>
-                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
-                      </g>
-                    </g>
-
-                  </svg>Website Access Details.</a>
-                <p class="text-gray-700 text-sm">jane.carter@plummail.co, marylou@plummail.co</p>
+        <div class="w-11/12 pb-12">
+          <div id="actionsMain" class="pt-6">
+            <section class="w-8/12 mx-auto flex">
+              <div class="w-1/12 p-4">
+                1/5
               </div>
-            </div>
-          </section>
-
-          <section class="w-8/12 mx-auto flex">
-            <div class="w-1/12 p-4">
-              2/5
-            </div>
-            <div class="w-11/12">
-              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
-                <div class="flex">
-                  <h2 class="flex-grow font-medium my-1"> How many of us are there for the board meeting on Thursday?</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
-                </div>
-                <div class="block w-full border rounded p-4">
-                  <textarea class="outline-none w-full"></textarea>
-                  <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
-                </div>
-                <div class="flex">
-                  <h2 class="flex-grow font-medium my-1"> Have you booked a meeting room and if so, which one?</h2>
-                </div>
-                <div class="block w-full border rounded p-4">
-                  <textarea class="outline-none w-full"></textarea>
-                  <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
-                </div>
-                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-                    <g>
+              <div class="w-11/12">
+                <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1"> Please can you give me the login details for the website?</h2> <span class="my-1 text-xs text-gray-500">29 October</span>
+                  </div>
+                  <div class="block w-full border rounded p-4">
+                    <textarea class="outline-none w-full"></textarea>
+                    <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                  </div>
+                  <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                       <g>
-                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
                       </g>
-                    </g>
 
-                  </svg>Board meeting arrangements.</a>
-                <p class="text-gray-700 text-sm">walter@plummail.co, mrs-carrington@plummail.co</p>
-              </div>
-            </div>
-          </section>
-
-          <section class="w-8/12 mx-auto flex">
-            <div class="w-1/12 p-4">
-              3/5
-            </div>
-            <div class="w-11/12">
-              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
-                <div class="flex">
-                  <h2 class="flex-grow font-medium my-1">Write formal estimate for System Solutions &amp; Co</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                    </svg>Website Access Details.</a>
+                  <p class="text-gray-700 text-sm">jane.carter@plummail.co, marylou@plummail.co</p>
                 </div>
-                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-                    <g>
+              </div>
+            </section>
+
+            <section class="w-8/12 mx-auto flex">
+              <div class="w-1/12 p-4">
+                2/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1"> How many of us are there for the board meeting on Thursday?</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                  </div>
+                  <div class="block w-full border rounded p-4">
+                    <textarea class="outline-none w-full"></textarea>
+                    <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                  </div>
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1"> Have you booked a meeting room and if so, which one?</h2>
+                  </div>
+                  <div class="block w-full border rounded p-4">
+                    <textarea class="outline-none w-full"></textarea>
+                    <input type="submit" class="py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                  </div>
+                  <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                       <g>
-                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
                       </g>
-                    </g>
 
-                  </svg>New project estimate request.</a>
-                <p class="text-gray-700 text-sm">graham.spinach@systemsandsolutions.co</p>
-              </div>
-            </div>
-          </section>
-
-          <section class="w-8/12 mx-auto flex">
-            <div class="w-1/12 p-4">
-              4/5
-            </div>
-            <div class="w-11/12">
-              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
-                <div class="flex">
-                  <h2 class="flex-grow font-medium my-1">Reading List</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                    </svg>Board meeting arrangements.</a>
+                  <p class="text-gray-700 text-sm">walter@plummail.co, mrs-carrington@plummail.co</p>
                 </div>
-                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-                    <g>
+              </div>
+            </section>
+
+            <section class="w-8/12 mx-auto flex">
+              <div class="w-1/12 p-4">
+                3/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1">Write formal estimate for System Solutions &amp; Co</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                  </div>
+                  <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                       <g>
-                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
                       </g>
-                    </g>
 
-                  </svg>Ten Ways to Get More Productive</a>
-                <p class="text-gray-700 text-sm">newsletter@productive-blog.io</p>
+                    </svg>New project estimate request.</a>
+                  <p class="text-gray-700 text-sm">graham.spinach@systemsandsolutions.co</p>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="w-8/12 mx-auto flex">
-            <div class="w-1/12 p-4">
-              5/5
-            </div>
-            <div class="w-11/12">
-              <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
-                <div class="flex">
-                  <h2 class="flex-grow font-medium my-1">Checklist</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
-                </div>
-                <div class="flex">
-                  <ol>
-                    <li>
-                      <input type="checkbox"> Fix logo spacing
-                    </li>
-                    <li>
-                      <input type="checkbox"> Indent paragraphs
-                    </li>
-                    <li>
-                      <input type="checkbox"> Add links to ts and cs
-                    </li>
-                  </ol>
-                </div>
-                <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-                    <g>
+            <section class="w-8/12 mx-auto flex">
+              <div class="w-1/12 p-4">
+                4/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1">Reading List</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                  </div>
+                  <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                       <g>
-                        <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
                       </g>
-                    </g>
 
-                  </svg>Minor Website Alterations</a>
-                <p class="text-gray-700 text-sm">jessica@perfectclient.wales</p>
+                    </svg>Ten Ways to Get More Productive</a>
+                  <p class="text-gray-700 text-sm">newsletter@productive-blog.io</p>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
+            <section class="w-8/12 mx-auto flex">
+              <div class="w-1/12 p-4">
+                5/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1">Checklist</h2> <span class="my-1 text-xs text-gray-500">26 October</span>
+                  </div>
+                  <div class="flex">
+                    <ol>
+                      <li>
+                        <input type="checkbox"> Fix logo spacing
+                      </li>
+                      <li>
+                        <input type="checkbox"> Indent paragraphs
+                      </li>
+                      <li>
+                        <input type="checkbox"> Add links to ts and cs
+                      </li>
+                    </ol>
+                  </div>
+                  <a href="#conversation" class="block mt-2 text-gray-700 text-sm font-medium hover:text-blue-600"><svg class="w-6 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
+                      </g>
+
+                    </svg>Minor Website Alterations</a>
+                  <p class="text-gray-700 text-sm">jessica@perfectclient.wales</p>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div id="messagesMain">
+            <section id="tags" class="w-8/12 mx-auto py-4 h-20 overflow-hidden">
+              <a href="" class="inline-block transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-green-600 hover:bg-green-400">House: 3
+              </a>
+              <a href="" class="inline-block transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-orange-600 hover:bg-orange-400">Website: 1
+              </a>
+              <a href="" class="inline-block transition duration-300 mt-1 text-xs text-white font-bold px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-400">Classes: 7
+              </a>
+              <a href="" class="inline-block border text-xs font-bold px-2 py-1 rounded bg-white hover:bg-gray-400">Transactional
+              </a>
+              <a href="" class="inline-block border text-xs font-bold px-2 py-1 rounded bg-white hover:bg-gray-400">Identity
+              </a>
+              <a href="" class="inline-block border text-xs font-bold px-2 py-1 rounded bg-white hover:bg-gray-400">Notifications
+              </a>
+              <a href="" class="inline-block border text-xs font-bold px-2 py-1 rounded bg-white hover:bg-gray-400">Create Tag +
+              </a>
+            </section>
+            <section class="w-8/12 mx-auto flex">
+              <label class="inline-flex items-center">
+                <input type="checkbox" class="form-checkbox h-5 w-5 mr-4 text-green-600"><span class="ml-2 text-gray-700"></span>
+              </label>
+              <div href="" class="shadow-md w-full block my-2 py-2 px-4 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                <div class="flex">
+                  <div class="w-8/12">
+                    <h2 class="flex-grow font-medium my-1">Flat 37 - roof leak</h2>
+                    <p class="truncate text-gray-700 text-sm"><span class="my-1 text-xs mr-4 ">29 October</span> jane.carter@plummail.co, marylou@plummail.co</p>
+                  </div>
+                  <div class="w-4/12 opacity-25 hover:opacity-100">
+                    <nav class="block h-8">
+                      <button class="float-right bg-gray-100 p-1 rounded hover:bg-gray-300 w-8 h-8" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 472.615 472.615" style="enable-background:new 0 0 472.615 472.615;" xml:space="preserve">
+                          <g>
+                            <g>
+                              <path d="M462.769,112.271h-28.124V91.108c0-3.944-2.353-7.507-5.981-9.056c-59.396-25.355-132.473-14.609-192.357,27.865    C176.424,67.443,103.345,56.7,43.951,82.052c-3.628,1.549-5.981,5.112-5.981,9.056v21.163H9.846c-5.437,0-9.846,4.408-9.846,9.846    v272.151c0,5.438,4.409,9.846,9.846,9.846h226.462h226.461c5.438,0,9.846-4.409,9.846-9.846V122.118    C472.615,116.68,468.207,112.271,462.769,112.271z M19.692,384.422V131.964H37.97v231.295c0,3.308,1.661,6.393,4.42,8.216    c2.76,1.822,6.249,2.136,9.291,0.839c46.12-19.688,101.816-14.764,151.25,12.108H19.692z M226.462,375.442    c-35.936-22.9-75.911-34.79-114.498-34.79c-18.629,0-36.932,2.771-54.301,8.413V122.232c0-0.039,0.006-0.076,0.006-0.114    s-0.005-0.076-0.006-0.114V97.768c52.517-19.684,116.197-8.676,168.799,29.315V375.442z M246.154,127.083    c52.601-37.992,116.285-48.999,168.799-29.315v24.235c0,0.038-0.006,0.076-0.006,0.114s0.005,0.076,0.006,0.114v226.832    c-53.348-17.329-115.515-7.576-168.799,26.378V127.083z M452.923,384.422h-183.24c49.435-26.872,105.13-31.795,151.251-12.108    c3.042,1.3,6.534,0.984,9.291-0.839c2.76-1.823,4.42-4.909,4.42-8.216V131.964h18.278V384.422z" />
+                            </g>
+                          </g>
+                        </svg>
+                      </button>
+
+                      <button class="float-right bg-gray-100 p-1 rounded hover:bg-gray-300 w-8 h-8" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                          <g>
+                            <g>
+                              <path d="M256,0C114.84,0,0,114.84,0,256s114.84,256,256,256s256-114.84,256-256S397.16,0,256,0z M256,475.429    c-120.997,0-219.429-98.432-219.429-219.429S135.003,36.571,256,36.571S475.429,135.003,475.429,256S376.997,475.429,256,475.429z    " />
+                            </g>
+                          </g>
+                          <g>
+                            <g>
+                              <path d="M256,134.095c-10.1,0-18.286,8.186-18.286,18.286v207.238c0,10.1,8.186,18.286,18.286,18.286    c10.1,0,18.286-8.186,18.286-18.286V152.381C274.286,142.281,266.1,134.095,256,134.095z" />
+                            </g>
+                          </g>
+                          <g>
+                            <g>
+                              <path d="M359.619,237.714H152.381c-10.1,0-18.286,8.186-18.286,18.286c0,10.1,8.186,18.286,18.286,18.286h207.238    c10.1,0,18.286-8.186,18.286-18.286C377.905,245.9,369.719,237.714,359.619,237.714z" />
+                            </g>
+                          </g>
+                        </svg>
+
+                      </button>
+                      <button class="float-right tooltip bg-gray-100 p-1 rounded hover:bg-gray-300 w-8 h-8" type="button">
+                        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 478 412" enable-background="new 0 0 478 412" xml:space="preserve">
+                          <g>
+                            <g>
+                              <path d="M99,212c-5.5,0-10,4.5-10,10s4.5,10,10,10s10-4.5,10-10S104.5,212,99,212z" />
+                            </g>
+                          </g>
+                          <g>
+                            <g>
+                              <path d="M469,192c0-22.1-17.9-40-40-40h-74.7c11.6-29.6,16.2-64.4,15.3-95.5c-0.2-5.9-0.4-9.3-0.7-11.5c-0.5-21.6-18.3-39-40-39
+			c-22.1,0-40,17.9-40,40v10c0,63.2-81.2,98.8-142.5,114c-4.6-10.6-15.2-18-27.5-18H19c-5.5,0-10,4.5-10,10v240c0,5.5,4.5,10,10,10
+			h100c12.2,0,22.7-7.3,27.4-17.8c5.1,1.3,9.8,2.5,14.1,3.7c34.9,9.1,54.1,14.1,100.9,14.1H369c22.1,0,40-17.9,40-40
+			c0-8.2-2.5-15.9-6.8-22.2c15.4-5.4,26.8-20.2,26.8-37.8c0-8.2-2.4-15.9-6.7-22.3c15.4-5.4,26.7-20.1,26.7-37.7
+			c0-8.2-2.5-15.9-6.8-22.2C457.7,224.4,469,209.6,469,192z M129,382c0,5.5-4.5,10-10,10H29V172h90c5.5,0,10,4.5,10,10V382z
+			 M429,212c-21.4,0-26.6,0-50,0c-5.5,0-10,4.5-10,10s4.5,10,10,10h30c11,0,20,9,20,20c0,11-9,20-20,20h-50c-5.5,0-10,4.5-10,10
+			s4.5,10,10,10h30c10.9,0,20,8.7,20,20c0,11-9,20-20,20c-21.4,0-26.6,0-50,0c-5.5,0-10,4.5-10,10s4.5,10,10,10h30c11,0,20,9,20,20
+			s-9,20-20,20H261.5c-44.2,0-61.5-4.5-95.9-13.5c-5-1.3-10.6-2.8-16.6-4.3V190c72.4-17.2,160-59.3,160-134V46c0-11,9-20,20-20
+			c11,0,20,9,20,20v0c0,4.3,5.4,57.7-16.3,106H299c-5.5,0-10,4.5-10,10s4.5,10,10,10c7,0,118.6,0,130,0c11,0,20,9,20,20
+			C449,203,440,212,429,212z" />
+                            </g>
+                          </g>
+                          <g>
+                            <g>
+                              <path d="M99,252c-5.5,0-10,4.5-10,10v80c0,5.5,4.5,10,10,10s10-4.5,10-10v-80C109,256.5,104.5,252,99,252z" />
+                            </g>
+                          </g>
+                        </svg>
+                      </button>
+                    </nav>
+                    <div class="block h-8 text-xs text-right">
+                      <button  id="today" class="p-1 rounded bg-white bg-gray-100 hover:bg-gray-300" onclick="today();">
+                        Today
+                      </button>
+                      <button class="p-1 rounded bg-white bg-gray-100 hover:bg-gray-300" onclick="tomorrow();">
+                        Tomorrow
+                      </button>
+                      <button class="p-1 rounded bg-white bg-gray-100 hover:bg-gray-300" onclick="week();">
+                        This Week
+                      </button>
+                      <button class="p-1 rounded bg-white bg-gray-100 hover:bg-gray-300" onclick="hurry();">
+                        No Hurry
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+              <script>
+                function today() {
+                  document.getElementById("today").classList.remove("bg-gray-100");
+                  document.getElementById("today").classList.remove("hover:bg-gray-300");
+                  document.getElementById("today").classList.add("bg-green-600");                  
+                }
+              </script>
+            </section>
+            <div id="contactsMain">
+              contacts
+            </div>
+          </div>
         </div>
-      </div>
     </section>
     <section id="account-settings" class="w-3/12 bg-white duration-1000 fixed right-0 transition transition-all">
       <nav class="p-4 mb-10">
@@ -423,6 +557,26 @@
 	C3168.4,40,3174.7,33.8,3182.4,33.8z" />
     </svg>
   </div>-->
+  <script>
+    function actions() {
+      document.getElementById("actionsMain").style.display = "block";
+      document.getElementById("messagesMain").style.display = "none";
+      document.getElementById("contactsMain").style.display = "none";
+    }
+
+    function messages() {
+      document.getElementById("messagesMain").style.display = "block";
+      document.getElementById("actionsMain").style.display = "none";
+      document.getElementById("contactsMain").style.display = "none";
+    }
+
+    function contacts() {
+      document.getElementById("contactsMain").style.display = "block";
+      document.getElementById("messagesMain").style.display = "none";
+      document.getElementById("actionsMain").style.display = "none";
+    }
+
+  </script>
 </body>
 
 </html>
