@@ -1,0 +1,852 @@
+<html lang="en" dir="ltr" class="js-focus-visible" data-js-focus-visible="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://app.plummail.co/vendor/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/vendor/github-markdown.min.css" crossorigin="anonymous">
+  <script src="https://app.plummail.co/vendor/marked.min.js"></script>
+  <script src="https://kit.fontawesome.com/f868aafb81.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://app.plummail.co/vendor/TextTip.css">
+  <link rel="stylesheet" href="https://app.plummail.co/css/extra.css">
+  <script src="https://app.plummail.co/vendor/minisearch.min.js"></script>
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-16x16.png" sizes="16x16">
+  <title>plum mail</title>
+  <script async="" defer="" src="/build/main.js"></script>
+  <script async="" defer="" data-domain="app.plummail.co" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    .bottom-full {
+      bottom: 100%
+    }
+
+    .top-full {
+      top: 100%
+    }
+
+    #account-settings {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #account-settings:target {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .toggle-checkbox:checked {
+      @apply: right-0 border-green-400;
+      right: 0;
+      border-color: #68D391;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      @apply: bg-green-400;
+      background-color: #68D391;
+    }
+
+    #actions {
+      display: none;
+    }
+
+    #actions:target {
+      display: block;
+    }
+
+    #pineapple {
+      display: none;
+    }
+
+    #pineapple:target {
+      display: block;
+    }
+
+    #results {
+      display: none;
+    }
+
+    #results:target {
+      display: block;
+    }
+
+    #conversation {
+      display: none;
+    }
+
+    #conversation:target {
+      display: block;
+    }
+
+    #maketask {
+      display: none;
+    }
+
+    #tag {
+      display: none;
+    }
+
+    #auto {
+      display: none;
+    }
+
+    #del {
+      display: none;
+    }
+
+  </style>
+</head>
+
+<body class="min-h-screen text-gray-800 bg-gray-200">
+  <main class="flex flex-col md:flex-row">
+    <section class="w-full ">
+      <header class="z-20 h-16 fixed w-full bg-white mx-auto text-left border-b-2">
+        <nav class="ml-auto p-4">
+          <a href="/">
+            <span class="px-1 mr-8 hover:text-indigo-800 hover:border-indigo-800 pt-2 text-lg font-semibold">Richard</span>
+          </a>
+          <a style="padding-top:0.28em; padding-bottom:0.5em;" class="bg-green-500 hover:bg-green-700 transition duration-200 px-4 rounded-lg text-white leading-none" href="#compose">
+            <svg style="margin-bottom:0.1em;" class="fill-current w-6 mr-2 inline leading-none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z"></path>
+                </g>
+              </g>
+
+            </svg>Compose</a>
+          <p class="ml-8 inline text-xs text-gray-700">Next update at 3pm today</p>
+          <p class="ml-8 inline text-xs text-gray-700">Actions 2/5 today</p>
+          <div class="bg-gray-300 inline-block mt-2 mx-2 rounded-full w-24">
+            <div class="bg-purple-800 inline-block py-1 rounded-full w-2/5"></div>
+          </div>
+          <a href="#account-settings" class="block float-right">
+            <svg href="#account-settings" class="w-8" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 56 56" style="enable-background:new 0 0 56 56;" xml:space="preserve">
+              <path d="M28,0C12.561,0,0,12.561,0,28s12.561,28,28,28s28-12.561,28-28S43.439,0,28,0z M40,41H16c-1.104,0-2-0.896-2-2s0.896-2,2-2
+	h24c1.104,0,2,0.896,2,2S41.104,41,40,41z M40,30H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,30,40,30z
+	 M40,19H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,19,40,19z" />
+            </svg>
+          </a>
+        </nav>
+      </header>
+      <div class="mt-16 flex">
+        <div class="w-full pb-12">
+          <div class="w-8/12 mt-6 mx-auto mb-6 flex inline-block">
+            <svg class="z-10 absolute ml-2 mt-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 396.819 396.819" style="enable-background:new 0 0 396.819 396.819;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M352.103,44.679c-59.237-59.401-155.412-59.535-214.813-0.298c-57.316,57.157-59.741,149.218-5.515,209.314l-11.6,11.6    c-9.372-9.373-24.568-9.375-33.941-0.003c-0.001,0.001-0.002,0.002-0.003,0.003l-79.2,79.2    c-9.373,9.372-9.375,24.568-0.003,33.941c0.001,0.001,0.002,0.002,0.003,0.003l11.312,11.312c9.372,9.369,24.564,9.369,33.936,0    l79.2-79.2c9.373-9.372,9.375-24.568,0.003-33.941c-0.001-0.001-0.002-0.002-0.003-0.003l11.6-11.6    c62.24,56.247,158.292,51.388,214.539-10.851C411.948,194.037,409.521,101.856,352.103,44.679z M120.175,299.231l-79.2,79.2    c-3.124,3.123-8.188,3.123-11.312,0l-11.312-11.32c-3.118-3.123-3.118-8.181,0-11.304l79.2-79.2c3.164-3.025,8.148-3.025,11.312,0    l11.312,11.32C123.293,291.05,123.293,296.108,120.175,299.231z M340.799,248.327c-53.112,53.11-139.223,53.109-192.333-0.003    s-53.109-139.223,0.003-192.333c53.111-53.109,139.219-53.109,192.33,0C393.824,109.139,393.824,195.179,340.799,248.327z" />
+                </g>
+              </g>
+              <g>
+                <g>
+                  <path d="M329.479,67.303L329.479,67.303l-11.312,11.312c40.545,40.644,40.545,106.436,0,147.08l11.312,11.312    C376.275,190.117,376.275,114.193,329.479,67.303z" />
+                </g>
+              </g>
+            </svg>
+            <input class="focus:shadow-md focus:bg-white border-2 border-gray-300 bg-gray-200 inline-block w-full rounded pl-8 pr-2 py-1 text-black focus:border-indigo-800 outline-none" placeholder="" id="search" autofocus="" autocomplete="off">
+          </div>
+          <div id="conversation">
+            <section class="w-8/12 mx-auto flex mb-4">
+              <h1 class="block text-3xl font-medium text-center flex-grow">The way to Wisconsin</h1>
+            </section>
+            <section class="w-8/12 mx-auto flex mb-4">
+              <aside class="w-2/12">
+                menu
+              </aside>
+              <main class="w-7/12">
+                <article id="1" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white"><input id="message-1" class="message-checkbox hidden" type="checkbox"> <label class="cursor-pointer" for="message-1">
+                    <header class="py-1 md:py-4 flex text-gray-600"><span class="font-bold ml-2 md:ml-20 truncate">lizshepherd09@gmail.com</span> <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">6 November</span></header>
+                    <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 "></div>
+                  </label>
+                  <div class="content-intro px-2 md:px-20 truncate markdown-body">Happy Christmas</div>
+                  <div class="markdown-body py-2 px-2 md:px-20">
+                    <p>Happy Christmas</p>
+                    <p>xxx</p>
+                  </div>
+                  <footer class="h-2 md:h-12 mb-2 mt-4"></footer>
+                </article>
+              </main>
+              <aside class="w-3/12">
+                pins etc
+              </aside>
+            </section>
+          </div>
+          <div id="results">
+            <section class="w-8/12 mx-auto mb-4">
+              <div class="w-full">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="cursor-pointer inline my-1">
+                    Start a new conversation with topic: <span class="font-medium">Hello Peter</span>
+                  </div>
+                </div>
+              </div>
+              <div class="w-full">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1"> Hello Peter and Mary</h2> <span class="my-1">5 October</span>
+                  </div>
+                  <p class="text-gray-600 text-sm">peter@plummail.co, marylou@plummail.co, richard@plummail.co</p>
+                </div>
+              </div>
+              <div class="w-full">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+                  <div class="flex">
+                    <h2 class="flex-grow font-medium my-1"> Say hello to spectacular savings</h2> <span class="my-1">9 March</span>
+                  </div>
+                  <p class="text-gray-600 text-sm">mrpickle@jamsandchutneys.online</p>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div id="actions">
+            <!-- New Messages -->
+            <section class="w-8/12 mx-auto flex mb-4">
+              <div class="w-1/12 p-4 text-lg font-medium">
+                New
+              </div>
+              <div class="w-11/12">
+                <div class="bg-gray-800 text-white p-6 border rounded shadow-lg">
+                  <div class="flex">
+                    <a href="" class="transition duration-200 py-2 px-4 mr-2 rounded bg-green-500 hover:bg-green-700">
+                      <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 511.996 511.996" style="enable-background:new 0 0 511.996 511.996;" xml:space="preserve">
+                        <g>
+                          <g>
+                            <path d="M410.716,220.103l-160-144c-4.704-4.224-11.456-5.312-17.248-2.72c-5.76,2.592-9.472,8.32-9.472,14.624v80.448    c-114.752,6.432-202.432,81.952-215.68,188.064l-8.192,65.472c-0.928,7.456,3.424,14.56,10.528,17.056    c1.76,0.64,3.552,0.96,5.344,0.96c5.376,0,10.592-2.752,13.568-7.52l16.096-25.792c31.936-51.072,95.84-110.688,170.88-110.688    h7.456v80c0,6.304,3.712,12.032,9.472,14.624c5.792,2.496,12.512,1.536,17.216-2.72l160-144c3.36-3.04,5.312-7.36,5.312-11.904    S414.044,223.143,410.716,220.103z" />
+                          </g>
+                        </g>
+                        <g>
+                          <g>
+                            <path d="M506.716,220.103l-160-144c-6.56-5.888-16.672-5.344-22.624,1.184c-5.92,6.592-5.376,16.704,1.184,22.624l146.816,132.096    L325.276,364.103c-6.56,5.952-7.104,16.032-1.184,22.624c3.2,3.488,7.52,5.28,11.904,5.28c3.808,0,7.648-1.344,10.72-4.096    l160-144c3.328-3.04,5.28-7.36,5.28-11.904S510.044,223.143,506.716,220.103z" />
+                          </g>
+                        </g>
+
+                      </svg>Reply
+                    </a>
+                    <a onclick="maketask();" class="cursor-pointer transition duration-200 py-2 px-4 mx-2 rounded hover:bg-orange-700 bg-orange-500">
+                      <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                        <g>
+                          <g>
+                            <path d="M256,0C114.84,0,0,114.84,0,256s114.84,256,256,256s256-114.84,256-256S397.16,0,256,0z M256,475.429    c-120.997,0-219.429-98.432-219.429-219.429S135.003,36.571,256,36.571S475.429,135.003,475.429,256S376.997,475.429,256,475.429z    "></path>
+                          </g>
+                        </g>
+                        <g>
+                          <g>
+                            <path d="M256,134.095c-10.1,0-18.286,8.186-18.286,18.286v207.238c0,10.1,8.186,18.286,18.286,18.286    c10.1,0,18.286-8.186,18.286-18.286V152.381C274.286,142.281,266.1,134.095,256,134.095z"></path>
+                          </g>
+                        </g>
+                        <g>
+                          <g>
+                            <path d="M359.619,237.714H152.381c-10.1,0-18.286,8.186-18.286,18.286c0,10.1,8.186,18.286,18.286,18.286h207.238    c10.1,0,18.286-8.186,18.286-18.286C377.905,245.9,369.719,237.714,359.619,237.714z"></path>
+                          </g>
+                        </g>
+                      </svg>
+                      Make Task
+                    </a>
+                    <a href="" class="transition duration-200 py-2 px-4 mx-2 rounded hover:bg-blue-700 bg-blue-500">
+
+                      <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 472.615 472.615" style="enable-background:new 0 0 472.615 472.615;" xml:space="preserve">
+                        <g>
+                          <g>
+                            <path d="M462.769,112.271h-28.124V91.108c0-3.944-2.353-7.507-5.981-9.056c-59.396-25.355-132.473-14.609-192.357,27.865    C176.424,67.443,103.345,56.7,43.951,82.052c-3.628,1.549-5.981,5.112-5.981,9.056v21.163H9.846c-5.437,0-9.846,4.408-9.846,9.846    v272.151c0,5.438,4.409,9.846,9.846,9.846h226.462h226.461c5.438,0,9.846-4.409,9.846-9.846V122.118    C472.615,116.68,468.207,112.271,462.769,112.271z M19.692,384.422V131.964H37.97v231.295c0,3.308,1.661,6.393,4.42,8.216    c2.76,1.822,6.249,2.136,9.291,0.839c46.12-19.688,101.816-14.764,151.25,12.108H19.692z M226.462,375.442    c-35.936-22.9-75.911-34.79-114.498-34.79c-18.629,0-36.932,2.771-54.301,8.413V122.232c0-0.039,0.006-0.076,0.006-0.114    s-0.005-0.076-0.006-0.114V97.768c52.517-19.684,116.197-8.676,168.799,29.315V375.442z M246.154,127.083    c52.601-37.992,116.285-48.999,168.799-29.315v24.235c0,0.038-0.006,0.076-0.006,0.114s0.005,0.076,0.006,0.114v226.832    c-53.348-17.329-115.515-7.576-168.799,26.378V127.083z M452.923,384.422h-183.24c49.435-26.872,105.13-31.795,151.251-12.108    c3.042,1.3,6.534,0.984,9.291-0.839c2.76-1.823,4.42-4.909,4.42-8.216V131.964h18.278V384.422z"></path>
+                          </g>
+                        </g>
+                      </svg>
+
+                      Read Later
+                    </a>
+                    <a onclick="maketag();" class="cursor-pointer transition duration-200 py-2 px-4 mx-2 rounded hover:bg-purple-700 bg-purple-500">
+                      <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 436.38 436.38" style="enable-background:new 0 0 436.38 436.38;" xml:space="preserve">
+                        <g>
+                          <g>
+                            <path d="M340.38,23.224H206.396c-8.48,0-16.624,3.376-22.624,9.376L9.372,206.968c-12.496,12.496-12.496,32.752,0,45.264    l133.984,133.984c12.496,12.496,32.752,12.496,45.248,0l174.4-174.368c6-6.016,9.376-14.16,9.376-22.656V55.224    C372.38,37.544,358.06,23.224,340.38,23.224z M284.38,135.224c-13.248,0-24-10.752-24-24s10.752-24,24-24s24,10.752,24,24    S297.628,135.224,284.38,135.224z" />
+                          </g>
+                        </g>
+                        <g>
+                          <g>
+                            <path d="M404.38,55.224l-0.016,148.944c0,7.376-2.928,14.464-8.16,19.68L218.988,401.064l2.72,2.72    c12.496,12.496,32.752,12.496,45.248,0l160.032-160c6.016-6,9.392-14.144,9.392-22.624V87.224    C436.38,69.544,422.06,55.224,404.38,55.224z" />
+                          </g>
+                        </g>
+                      </svg>
+                      Tag
+                    </a>
+                    <a onclick="makeauto();" class="cursor-pointer transition duration-200 py-2 px-4 mx-2 rounded hover:bg-yellow-800 bg-yellow-600">
+                      <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                        <path d="M284.682,405.593l6.398-1.297c8.444-1.712,8.444-13.781,0-15.493l-6.398-1.297  c-16.119-3.268-28.717-15.866-31.985-31.985l-1.297-6.398c-1.712-8.444-13.781-8.444-15.493,0l-1.297,6.398  c-3.268,16.119-15.866,28.717-31.985,31.985l-6.398,1.297c-8.444,1.712-8.444,13.781,0,15.493l6.398,1.297  c16.119,3.268,28.717,15.866,31.985,31.985l1.297,6.398c1.712,8.444,13.781,8.444,15.493,0l1.297-6.398  C255.965,421.459,268.563,408.861,284.682,405.593z" />
+                        <g>
+                          <path d="M397.203,445.72c-4.267,0-7.726-3.459-7.726-7.726v-20.92c0-4.267,3.459-7.726,7.726-7.726   s7.726,3.459,7.726,7.726v20.92C404.929,442.261,401.47,445.72,397.203,445.72z" />
+                          <path d="M397.203,502.04c-4.267,0-7.726-3.459-7.726-7.726v-20.92c0-4.267,3.459-7.726,7.726-7.726   s7.726,3.459,7.726,7.726v20.92C404.929,498.582,401.47,502.04,397.203,502.04z" />
+                          <path d="M435.823,463.421h-20.92c-4.267,0-7.726-3.459-7.726-7.726s3.459-7.726,7.726-7.726h20.92   c4.267,0,7.726,3.459,7.726,7.726S440.09,463.421,435.823,463.421z" />
+                          <path d="M379.502,463.421h-20.92c-4.267,0-7.726-3.459-7.726-7.726s3.459-7.726,7.726-7.726h20.92   c4.267,0,7.726,3.459,7.726,7.726S383.769,463.421,379.502,463.421z" />
+                          <path d="M46.346,348.37c-4.267,0-7.726-3.459-7.726-7.726v-20.92c0-4.267,3.459-7.726,7.726-7.726   s7.726,3.459,7.726,7.726v20.92C54.072,344.911,50.613,348.37,46.346,348.37z" />
+                          <path d="M46.346,404.691c-4.267,0-7.726-3.459-7.726-7.726v-20.92c0-4.267,3.459-7.726,7.726-7.726   s7.726,3.459,7.726,7.726v20.92C54.072,401.232,50.613,404.691,46.346,404.691z" />
+                          <path d="M84.967,366.07h-20.92c-4.267,0-7.726-3.459-7.726-7.726s3.459-7.726,7.726-7.726h20.92   c4.267,0,7.726,3.459,7.726,7.726S89.234,366.07,84.967,366.07z" />
+                          <path d="M28.646,366.07H7.726c-4.267,0-7.726-3.459-7.726-7.726s3.459-7.726,7.726-7.726h20.92   c4.267,0,7.726,3.459,7.726,7.726S32.913,366.07,28.646,366.07z" />
+                          <path d="M398.204,46.332c-4.267,0-7.726-3.459-7.726-7.726v-20.92c0-4.267,3.459-7.726,7.726-7.726   c4.267,0,7.726,3.459,7.726,7.726v20.92C405.93,42.872,402.472,46.332,398.204,46.332z" />
+                          <path d="M398.204,102.652c-4.267,0-7.726-3.459-7.726-7.726V74.007c0-4.267,3.459-7.726,7.726-7.726   c4.267,0,7.726,3.459,7.726,7.726v20.92C405.93,99.193,402.472,102.652,398.204,102.652z" />
+                          <path d="M436.825,64.032h-20.92c-4.267,0-7.726-3.459-7.726-7.726s3.459-7.726,7.726-7.726h20.92   c4.267,0,7.726,3.459,7.726,7.726S441.092,64.032,436.825,64.032z" />
+                          <path d="M380.504,64.032h-20.92c-4.267,0-7.726-3.459-7.726-7.726s3.459-7.726,7.726-7.726h20.92   c4.267,0,7.726,3.459,7.726,7.726S384.771,64.032,380.504,64.032z" />
+                        </g>
+                        <g>
+                          <path d="M262.382,156.253l30.626-6.209c14.458-2.932,14.458-23.595,0-26.527l-30.626-6.209   c-30.18-6.119-53.767-29.706-59.886-59.886l-6.209-30.626c-2.932-14.458-23.595-14.458-26.527,0l-6.209,30.626   c-6.119,30.18-29.706,53.767-59.886,59.886l-30.626,6.209c-14.458,2.932-14.458,23.595,0,26.527l30.626,6.209   c30.18,6.119,53.767,29.706,59.886,59.886l6.209,30.626c2.932,14.458,23.595,14.458,26.527,0l6.209-30.626   C208.614,185.959,232.202,162.373,262.382,156.253z" />
+                          <path d="M480.152,262.816l23.52-4.769c11.104-2.251,11.104-18.121,0-20.372l-23.52-4.769   c-23.178-4.7-41.292-22.813-45.991-45.991l-4.769-23.52c-2.251-11.104-18.121-11.104-20.371,0l-4.769,23.52   c-4.7,23.178-22.813,41.292-45.991,45.991l-23.52,4.769c-11.104,2.251-11.104,18.121,0,20.372l23.52,4.769   c23.178,4.7,41.292,22.813,45.991,45.991l4.769,23.52c2.251,11.104,18.121,11.104,20.371,0l4.769-23.52   C438.861,285.63,456.976,267.515,480.152,262.816z" />
+                        </g>
+
+                      </svg>
+                      Automate
+                    </a>
+                    <a onclick="makedel();" class="cursor-pointer transition duration-200 py-2 px-4 mx-2 rounded hover:bg-red-700 bg-red-500">
+                      <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" id="Layer_1" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512">
+                        <g>
+                          <path d="m424 64h-88v-16c0-26.51-21.49-48-48-48h-64c-26.51 0-48 21.49-48 48v16h-88c-22.091 0-40 17.909-40 40v32c0 8.837 7.163 16 16 16h384c8.837 0 16-7.163 16-16v-32c0-22.091-17.909-40-40-40zm-216-16c0-8.82 7.18-16 16-16h64c8.82 0 16 7.18 16 16v16h-96z" />
+                          <path d="m78.364 184c-2.855 0-5.13 2.386-4.994 5.238l13.2 277.042c1.22 25.64 22.28 45.72 47.94 45.72h242.98c25.66 0 46.72-20.08 47.94-45.72l13.2-277.042c.136-2.852-2.139-5.238-4.994-5.238zm241.636 40c0-8.84 7.16-16 16-16s16 7.16 16 16v208c0 8.84-7.16 16-16 16s-16-7.16-16-16zm-80 0c0-8.84 7.16-16 16-16s16 7.16 16 16v208c0 8.84-7.16 16-16 16s-16-7.16-16-16zm-80 0c0-8.84 7.16-16 16-16s16 7.16 16 16v208c0 8.84-7.16 16-16 16s-16-7.16-16-16z" />
+                        </g>
+                      </svg>
+                      Delete
+                    </a>
+                    <p class="flex-grow text-2xl text-right">
+                      1/12
+                    </p>
+                  </div>
+                  <div id="maketask" class="p-4 mt-4 text-white border-2 border-orange-500 rounded-lg">
+
+                    <input type="text" class="bg-gray-800 border-b mt-2 p-2 w-full" placeholder="Describe the task" value="Reply to marylou@plummail.co">
+                    <div class="flex">
+                      <details class="my-4">
+                        <summary class="text-sm">
+                          Assigned to: peter@plummail.co
+                        </summary>
+                        <ul class="text-sm">
+                          <li class="my-2">
+                            <input type="checkbox" checked> peter@plummail.co
+                          </li>
+                          <li class="my-2">
+                            <input type="checkbox"> richard@plummail.co
+                          </li>
+                          <li class="my-2">
+                            <input type="checkbox"> marylou@plummail.co
+                          </li>
+                        </ul>
+                      </details>
+                      <details class="my-4 ml-6 ">
+                        <summary class="text-sm">
+                          Due: 2020-02-11
+                        </summary>
+                        <input type="date" class="bg-gray-800 border-b mt-2 p-2 w-full" value="2020-02-11">
+
+                      </details>
+                    </div>
+                    <div class="flex">
+                      <button class="bg-orange-500 rounded hover:bg-orange-700 py-2 px-4">Make Task</button>
+                      <button onclick="forgettask();" class="text-gray-300 bg-gray-700 rounded hover:bg-gray-600 py-2 px-4 ml-4">Never mind</button>
+                    </div>
+
+                  </div>
+
+                  <div id="tag" class="p-4 mt-4 border-2 border-purple-500 rounded-lg">
+                    <section class="pb-4">
+                      <a href="" class="inline-block transition duration-300 mt-1 text-xs text-white font-medium mr-2 px-2 py-1 rounded bg-green-600 hover:bg-green-400">House: 3
+                      </a>
+                      <a href="" class="inline-block transition duration-300 mt-1 text-xs text-white font-medium mr-2 px-2 py-1 rounded bg-orange-600 hover:bg-orange-400">Website: 1
+                      </a>
+                      <a href="" class="inline-block transition duration-300 mt-1 text-xs text-white font-medium mr-2 px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-400">Classes: 7
+                      </a>
+                      <a href="" class="inline-block border text-xs font-medium px-2 text-gray-800 py-1 rounded bg-gray-200 mr-2 hover:bg-gray-400">Transactional
+                      </a>
+                      <a href="" class="inline-block border text-xs font-medium px-2 text-gray-800 py-1 rounded bg-gray-200 mr-2 hover:bg-gray-400">Identity
+                      </a>
+                      <a href="" class="inline-block border text-xs font-medium px-2 text-gray-800 py-1 rounded bg-gray-200 mr-2 hover:bg-gray-400">Notifications
+                      </a>
+                      <a href="" class="inline-block border text-xs font-medium px-2 text-gray-800 py-1 rounded bg-gray-200 mr-2 hover:bg-gray-400">Create Tag +
+                      </a>
+                    </section>
+
+                    <div class="flex">
+                      <button onclick="forgettag();" class="text-white bg-purple-500 rounded hover:bg-purple-700 py-2 px-4">Done tagging</button>
+                      <button onclick="forgettag();" class="text-white bg-purple-500 rounded hover:bg-purple-700 py-2 px-4 ml-4">Tag &amp; Archive</button>
+                    </div>
+
+                  </div>
+
+                  <div id="auto" class="p-4 mt-4 border-2 border-yellow-600 rounded-lg">
+                    <p class="font-bold font-lg">Add conditions</p>
+                    <div class="flex my-4">
+                      <div>
+                        For every email
+                      </div>
+                      <div>
+                        <select class="mx-4 bg-gray-800 border-b border-white">
+                          <option>from notify@plummail.co</option>
+                          <option>from Richard</option>
+                          <option>with the subject: 'A new way to Wisconsin'</option>
+                        </select>
+                      </div>
+                      <div>
+                        do this:
+                      </div>
+                      <div>
+                        <select class="mx-4 bg-gray-800 border-b border-white">
+                          <option>Make 'Read' Task</option>
+                          <option>delete</option>
+                          <option>archive</option>
+                          <option>tag: notification</option>
+                          <option>tag: identity</option>
+                          <option>tag: transactional</option>
+                          <option>tag: classes</option>
+                          <option>tag: website</option>
+                          <option>tag: house</option>
+                        </select>
+                      </div>
+
+                    </div>
+                    <p class="font-bold font-lg">Change conversation notification settings (send straight to archive):</p>
+                    <ul class="my-4">
+                      <li class="mb-2">
+                        <input type="checkbox" checked> All messages
+                      </li>
+                      <li class="mb-2">
+                        <input type="checkbox"> When concluded
+                      </li>
+                      <li class="mb-2">
+                        <input type="checkbox"> only richard@richardplummail.co
+                      </li>
+                      <li class="mb-2">
+                        <input type="checkbox"> only peter@richardplummail.co
+                      </li>
+                      <li class="mb-2">
+                        <input type="checkbox"> only marylou@richardplummail.co
+                      </li>
+                      <li class="mb-2">
+                        <input type="checkbox"> Never
+                      </li>
+                    </ul>
+
+                    <div class="flex">
+                      <button onclick="forgetauto();" class="text-white bg-yellow-600 rounded hover:bg-yellow-800 py-2 px-4">Done Automating</button>
+                    </div>
+
+                  </div>
+
+                  <div id="del" class="p-4 mt-4 border-2 border-red-500 rounded-lg">
+                    <p class="font-bold mb-4">Are you sure? Deleting an email cannot be undone.</p>
+
+                    <div class="flex">
+                      <button onclick="forgetdel();" class="text-white bg-red-500 rounded hover:bg-red-700 py-2 px-4">Delete</button>
+                      <button onclick="forgetdel();" class="text-gray-300 bg-gray-700 rounded hover:bg-gray-600 py-2 px-4 ml-4">Archive Instead</button>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div class="bg-white p-6 mx-4 rounded-b">
+                  <header class="mb-6">
+                    <h1 class="font-medium text-2xl mb-2 ">A new way to Wisconsin</h1>
+                    <div class="flex">
+                      <details>
+                        <summary class="text-sm text-gray-700 font-medium">
+                          marylou@plummail.co <span class="italic ml-6 font-normal">Reply expected: <span class="font-medium mr-6">Today</span> Set expectation:
+
+                            <details class="inline ml-4">
+                              <summary>
+                                Today
+                              </summary>
+                              <div class="absolute bg-gray-800 mt-2 p-2 rounded text-xs text-white shadow-lg">
+                                <a class="mr-2 font-medium hover:text-yellow-400" href="">Tomorrow</a>
+                                <a class="mr-2 font-medium hover:text-yellow-400" href="">This week</a>
+                                <a class="mr-2 font-medium hover:text-yellow-400" href="">Next week</a>
+                                <a class="mr-2 font-medium hover:text-yellow-400" href="">No hurry</a>
+                              </div>
+
+                            </details>
+
+                          </span>
+                        </summary>
+                        <div class="absolute bg-gray-800 p-2 rounded mt-2 shadow">
+                          <p class="text-xs text-white ">peter@plummail.co, richard@plummail.co, june@plummail.co, jane@plummail.co</p>
+                        </div>
+                      </details>
+                      <p class="text-xs text-gray-700 font-medium flex-grow text-right">3 Nov 2020</p>
+                    </div>
+
+
+                    <hr class="border-b-2 border-gray-400 mt-4" />
+                  </header>
+                  <div class="flex">
+                    <section class="w-9/12 pr-2">
+                      <p class="mb-4">Dear Peter,</p>
+                      <p class="mb-4">It's worth clarifying that Plum Mail is not a total replacement to your email. It is a shared space which you can access by only having access to an email address.</p>
+                      <p class="mb-4">Once you have clicked into Plum Mail once, your account is set up and you can start talking to anyone via Plum Mail (if you have there email address).</p>
+                      <p class="mb-4">Sincerely, Mary</p>
+                      <button class="transition duration-200 py-2 px-4 mr-2 mt-4 rounded bg-gray-300 hover:bg-gray-500">
+                        <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 -26 512 512">
+                          <path d="m256 100c-5.519531 0-10 4.480469-10 10s4.480469 10 10 10 10-4.480469 10-10-4.480469-10-10-10zm0 0" />
+                          <path d="m90 280c5.519531 0 10-4.480469 10-10s-4.480469-10-10-10-10 4.480469-10 10 4.480469 10 10 10zm0 0" />
+                          <path d="m336 0c-90.027344 0-163.917969 62.070312-169.632812 140.253906-85.738282 4.300782-166.367188 66.125-166.367188 149.746094 0 34.945312 13.828125 68.804688 39 95.632812 4.980469 20.53125-1.066406 42.292969-16.070312 57.296876-2.859376 2.859374-3.714844 7.160156-2.167969 10.898437 1.546875 3.734375 5.191406 6.171875 9.238281 6.171875 28.519531 0 56.003906-11.183594 76.425781-30.890625 19.894531 6.78125 45.851563 10.890625 69.574219 10.890625 90.015625 0 163.898438-62.054688 169.628906-140.222656 20.9375-.929688 42.714844-4.796875 59.945313-10.667969 20.421875 19.707031 47.90625 30.890625 76.425781 30.890625 4.046875 0 7.691406-2.4375 9.238281-6.171875 1.546875-3.738281.691407-8.039063-2.167969-10.898437-15.003906-15.003907-21.050781-36.765626-16.070312-57.296876 25.171875-26.828124 39-60.6875 39-95.632812 0-86.886719-86.839844-150-176-150zm-160 420c-23.601562 0-50.496094-4.632812-68.511719-11.800781-3.859375-1.539063-8.269531-.527344-11.078125 2.539062-12.074218 13.199219-27.773437 22.402344-44.878906 26.632813 9.425781-18.058594 11.832031-39.347656 6.097656-59.519532-.453125-1.589843-1.292968-3.042968-2.445312-4.226562-22.6875-23.367188-35.183594-53.066406-35.183594-83.625 0-70.46875 71.4375-130 156-130 79.851562 0 150 55.527344 150 130 0 71.683594-67.289062 130-150 130zm280.816406-186.375c-1.152344 1.1875-1.992187 2.640625-2.445312 4.226562-5.734375 20.171876-3.328125 41.460938 6.097656 59.519532-17.105469-4.226563-32.804688-13.433594-44.878906-26.632813-2.808594-3.0625-7.21875-4.078125-11.078125-2.539062-15.613281 6.210937-37.886719 10.511719-58.914063 11.550781-2.921875-37.816406-21.785156-73.359375-54.035156-99.75h130.4375c5.523438 0 10-4.476562 10-10s-4.476562-10-10-10h-161.160156c-22.699219-11.554688-48.1875-18.292969-74.421875-19.707031 5.746093-67.164063 70.640625-120.292969 149.582031-120.292969 84.5625 0 156 59.53125 156 130 0 30.558594-12.496094 60.257812-35.183594 83.625zm0 0" />
+                          <path d="m256 260h-126c-5.523438 0-10 4.476562-10 10s4.476562 10 10 10h126c5.523438 0 10-4.476562 10-10s-4.476562-10-10-10zm0 0" />
+                          <path d="m256 320h-166c-5.523438 0-10 4.476562-10 10s4.476562 10 10 10h166c5.523438 0 10-4.476562 10-10s-4.476562-10-10-10zm0 0" />
+                          <path d="m422 100h-126c-5.523438 0-10 4.476562-10 10s4.476562 10 10 10h126c5.523438 0 10-4.476562 10-10s-4.476562-10-10-10zm0 0" /></svg>
+                        View Conversation
+                      </button>
+                      <button class="transition duration-200 py-2 px-4 mr-2 mt-4 rounded bg-gray-300 hover:bg-gray-500">
+                        <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-5 inline mr-2 w-5" xmlns="http://www.w3.org/2000/svg" id="icons" height="512" viewBox="0 0 24 24" width="512">
+                          <path d="m4 21h16a1 1 0 0 0 1-1v-11a1 1 0 0 0 -.29-.71l-5-5a1 1 0 0 0 -.71-.29h-11a1 1 0 0 0 -1 1v16a1 1 0 0 0 1 1zm10-2h-4v-5h4zm-9-14h9.59l4.41 4.41v9.59h-3v-6a1 1 0 0 0 -1-1h-6a1 1 0 0 0 -1 1v6h-3z" /></svg>
+                        Archive
+                      </button>
+                    </section>
+                    <aside class="w-3/12 pl-4">
+
+                    </aside>
+                  </div>
+
+                </div>
+                <hr class="border-b-2 border-gray-800 mt-6" />
+              </div>
+
+            </section>
+            <section class="w-8/12 mx-auto flex mb-4">
+              <div class="w-1/12 p-4">
+                1/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+
+                  <details class="block pb-2 w-full">
+                    <summary class="cursor-pointer text-lg inline font-medium my-1">
+                      Please can you give me the login details for the website?
+                    </summary>
+                    <div class="block w-full border rounded p-4 mt-2">
+                      <textarea class="outline-none w-full" placeholder="start typing..."></textarea>
+                      <input type="submit" class="cursor-pointer mt-2 py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                    </div>
+                  </details>
+                  <a href="#conversation" class="block mt-2 text-gray-600 text-sm hover:text-blue-600">
+                    <svg style="margin-top: -0.2em;" class="w-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
+                      </g>
+
+                    </svg>Website Access Details. <span class="my-1 text-xs ttext-right ext-gray-500">29 October</span></a>
+
+                  <p class="text-gray-600 text-sm">jane.carter@plummail.co, marylou@plummail.co</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="w-8/12 mx-auto flex mb-4">
+              <div class="w-1/12 p-4">
+                2/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+
+
+                  <details class="block pb-2 w-full">
+                    <summary class="cursor-pointer text-lg inline font-medium my-1">
+                      How many of us are there for the board meeting on Thursday?
+
+                    </summary>
+                    <div class="block w-full border rounded p-4 mt-2">
+                      <textarea class="outline-none w-full" placeholder="start typing..."></textarea>
+                      <input type="submit" class="cursor-pointer mt-2 py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                    </div>
+                  </details>
+
+
+                  <details class="block pb-2 w-full">
+                    <summary class="cursor-pointer text-lg inline font-medium my-1">
+                      Have you booked a meeting room and if so, which one?
+
+                    </summary>
+                    <div class="block w-full border rounded p-4 mt-2">
+                      <textarea class="outline-none w-full" placeholder="start typing..."></textarea>
+                      <input type="submit" class="cursor-pointer mt-2 py-1 px-4 rounded text-sm hover:bg-gray-500" value="Send">
+                    </div>
+                  </details>
+
+                  <a href="#conversation" class="block mt-2 text-gray-600 text-sm hover:text-blue-600">
+                    <svg style="margin-top: -0.2em;" class="w-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
+                      </g>
+
+                    </svg>Board meeting arrangements.</a>
+                  <p class="text-gray-700 text-sm">walter@plummail.co, mrs-carrington@plummail.co</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="w-8/12 mx-auto flex mb-4">
+              <div class="w-1/12 p-4">
+                3/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+
+                  <div class="block pb-2 w-full">
+                    <summary class="cursor-pointer text-lg inline font-medium my-1">
+                      <input style="margin-bottom:0.2em;" type="checkbox" class="align-bottom form-checkbox h-5 w-5 form-checkbox"> Write formal estimate for System Solutions &amp; Co
+
+                    </summary>
+                  </div>
+
+                  <a href="#conversation" class="block mt-2 text-gray-600 text-sm hover:text-blue-600">
+                    <svg style="margin-top: -0.2em;" class="w-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
+                      </g>
+
+                    </svg>New Project Estimate.</a>
+                  <p class="text-gray-700 text-sm">graham.spinach@systemssolutions.co</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="w-8/12 mx-auto flex mb-4">
+              <div class="w-1/12 p-4">
+                4/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+
+                  <div class="block pb-2 w-full">
+                    <summary class="cursor-pointer text-lg inline font-medium my-1">
+                      <div style="margin-bottom:0.2em;" class="align-bottom inline-block h-5 w-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 472.615 472.615" style="enable-background:new 0 0 472.615 472.615;" xml:space="preserve">
+                          <g>
+                            <g>
+                              <path d="M462.769,112.271h-28.124V91.108c0-3.944-2.353-7.507-5.981-9.056c-59.396-25.355-132.473-14.609-192.357,27.865    C176.424,67.443,103.345,56.7,43.951,82.052c-3.628,1.549-5.981,5.112-5.981,9.056v21.163H9.846c-5.437,0-9.846,4.408-9.846,9.846    v272.151c0,5.438,4.409,9.846,9.846,9.846h226.462h226.461c5.438,0,9.846-4.409,9.846-9.846V122.118    C472.615,116.68,468.207,112.271,462.769,112.271z M19.692,384.422V131.964H37.97v231.295c0,3.308,1.661,6.393,4.42,8.216    c2.76,1.822,6.249,2.136,9.291,0.839c46.12-19.688,101.816-14.764,151.25,12.108H19.692z M226.462,375.442    c-35.936-22.9-75.911-34.79-114.498-34.79c-18.629,0-36.932,2.771-54.301,8.413V122.232c0-0.039,0.006-0.076,0.006-0.114    s-0.005-0.076-0.006-0.114V97.768c52.517-19.684,116.197-8.676,168.799,29.315V375.442z M246.154,127.083    c52.601-37.992,116.285-48.999,168.799-29.315v24.235c0,0.038-0.006,0.076-0.006,0.114s0.005,0.076,0.006,0.114v226.832    c-53.348-17.329-115.515-7.576-168.799,26.378V127.083z M452.923,384.422h-183.24c49.435-26.872,105.13-31.795,151.251-12.108    c3.042,1.3,6.534,0.984,9.291-0.839c2.76-1.823,4.42-4.909,4.42-8.216V131.964h18.278V384.422z"></path>
+                            </g>
+                          </g>
+                        </svg>
+                      </div>
+                      Ten Ways to Get More Productive
+
+                    </summary>
+                  </div>
+
+                  <p class="text-gray-700 text-sm">newsletter@productive-blog.io</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="w-8/12 mx-auto flex mb-4">
+              <div class="w-1/12 p-4">
+                5/5
+              </div>
+              <div class="w-11/12">
+                <div class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl">
+
+                  <div class="block pb-2 w-full">
+                    <summary class="cursor-pointer text-lg inline font-medium my-1">
+                      <div class="flex">
+                        <ol>
+                          <li class="mb-4">
+                            <input style="margin-bottom:0.2em;" type="checkbox" class="align-bottom form-checkbox h-5 w-5 form-checkbox"> Fix logo spacing
+                          </li>
+                          <li class="mb-4">
+                            <input style="margin-bottom:0.2em;" type="checkbox" class="align-bottom form-checkbox h-5 w-5 form-checkbox"> Indent paragraphs
+                          </li>
+                          <li class="mb-4">
+                            <input style="margin-bottom:0.2em;" type="checkbox" class="align-bottom form-checkbox h-5 w-5 form-checkbox"> Add links to ts and cs
+                          </li>
+                        </ol>
+                      </div>
+
+                    </summary>
+                  </div>
+
+                  <a href="#conversation" class="block mt-2 text-gray-600 text-sm hover:text-blue-600">
+                    <svg style="margin-top: -0.2em;" class="w-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z" />
+                        </g>
+                      </g>
+
+                    </svg>Minor website alterations.</a>
+                  <p class="text-gray-700 text-sm">jessica@perfectclient.wales</p>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div id="pineapple">
+            <img class="w-6/12 mx-auto rounded-2xl mt-6 shadow-2xl" src="https://images.unsplash.com/photo-1496707783091-854ecd84ae5e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80">
+
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="account-settings" class="w-3/12 bg-white duration-1000 fixed right-0 transition transition-all">
+      <nav class="p-4 mb-10">
+        <a href="#0" class="float-right">
+          <svg class="w-8" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 56 56" enable-background="new 0 0 56 56" xml:space="preserve">
+            <path fill="none" d="M28,0C12.6,0,0,12.6,0,28s12.6,28,28,28s28-12.6,28-28S43.4,0,28,0z M14,39c0-1.1,0.9-2,2-2h24c1.1,0,2,0.9,2,2
+	s-0.9,2-2,2H16C14.9,41,14,40.1,14,39z M14,28c0-1.1,0.9-2,2-2h24c1.1,0,2,0.9,2,2s-0.9,2-2,2H16C14.9,30,14,29.1,14,28z M40,19H16
+	c-1.1,0-2-0.9-2-2s0.9-2,2-2h24c1.1,0,2,0.9,2,2S41.1,19,40,19z" />
+            <path fill="#1D1D1B" d="M42,17c0,1.1-0.9,2-2,2H16c-1.1,0-2-0.9-2-2s0.9-2,2-2h24C41.1,15,42,15.9,42,17z" />
+            <path fill="#1D1D1B" d="M42,39c0,1.1-0.9,2-2,2H16c-1.1,0-2-0.9-2-2s0.9-2,2-2h24C41.1,37,42,37.9,42,39z" />
+            <path fill="#1D1D1B" d="M42,28c0,1.1-0.9,2-2,2H16c-1.1,0-2-0.9-2-2s0.9-2,2-2h24C41.1,26,42,26.9,42,28z" />
+            <path fill="#1D1D1B" d="M28,0C12.6,0,0,12.6,0,28s12.6,28,28,28s28-12.6,28-28S43.4,0,28,0z M28,54.6C13.3,54.6,1.4,42.7,1.4,28
+	S13.3,1.4,28,1.4c14.7,0,26.6,11.9,26.6,26.6S42.7,54.6,28,54.6z" />
+          </svg>
+        </a>
+      </nav>
+      <div class="clear-both h-screen bg-white rounded overflow-hidden shadow-lg">
+        <div class="px-6 pt-2 pb-6 border-b">
+          <p class="pt-2 text-lg font-semibold">Richard Shepherd</p>
+          <div class="block">
+            <p class="inline-block text-sm text-left text-gray-600">richard.shepherd@plummail.co
+            </p>
+            <div class="relative inline-block w-6 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input type="checkbox" name="toggle" id="toggle" class="outline-none toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+              <label for="toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+          <div class="block">
+            <p class="inline-block text-sm text-left text-gray-600">richard@did.app</p>
+            <div class="relative inline-block w-6 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input checked type="checkbox" name="toggle" id="toggle" class="outline-none toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+              <label for="toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+          <div class="block">
+            <p class="inline-block text-sm text-left text-gray-600">yesplease@plummail.co</p>
+            <div class="relative inline-block w-6 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input checked type="checkbox" name="toggle" id="toggle" class="outline-none toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+              <label for="toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+        </div>
+        <div class="border-b">
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 452.84 452.84" enable-background="new 0 0 452.84 452.84">
+                <g>
+                  <path d="m449.483,190.4l.001-.001-57.824-38.335v-128.134c0-4.142-3.358-7.5-7.5-7.5h-315.49c-4.142,0-7.5,3.358-7.5,7.5v128.143l-57.814,38.326 .001,.002c-2.022,1.343-3.357,3.639-3.357,6.249v232.26c0,4.142 3.358,7.5 7.5,7.5h437.84c4.142,0 7.5-3.358 7.5-7.5v-232.26c0-2.61-1.335-4.906-3.357-6.25zm-388.313,26.229l-23.525-12.479h23.525v12.479zm-46.17-7.511l172.475,91.49-172.475,114.327v-205.817zm211.417,83.671l194.037,128.621h-388.073l194.036-128.621zm38.945,7.82l172.477-91.491v205.821l-172.477-114.33zm126.298-96.459h23.536l-23.536,12.484v-12.484zm28.794-15h-28.794v-19.09l28.794,19.09zm-43.794-157.72v193.161l-125.527,66.586-20.573-13.637c-2.511-1.665-5.776-1.665-8.287,0l-20.57,13.635-125.533-66.589v-193.156h300.49zm-315.49,157.72h-28.782l28.782-19.08v19.08z" />
+                  <path d="m226.415,213.671h59.754c4.142,0 7.5-3.358 7.5-7.5s-3.358-7.5-7.5-7.5h-59.754c-28.813,0-52.254-23.441-52.254-52.254v-2.213c0-28.813 23.441-52.254 52.254-52.254s52.254,23.441 52.254,52.254v5.533c0,6.237-5.074,11.312-11.312,11.312s-11.312-5.074-11.312-11.312v-10.512c0-17.864-14.533-32.398-32.397-32.398s-32.397,14.533-32.397,32.398c0,17.864 14.533,32.397 32.397,32.397 8.169,0 15.636-3.045 21.34-8.052 4.644,7.483 12.932,12.478 22.369,12.478 14.508,0 26.312-11.803 26.312-26.312v-5.533c0-37.084-30.17-67.254-67.254-67.254s-67.254,30.17-67.254,67.254v2.213c5.68434e-14,37.085 30.17,67.255 67.254,67.255zm-2.767-57.049c-9.593,0-17.397-7.804-17.397-17.397s7.805-17.398 17.397-17.398 17.397,7.805 17.397,17.398-7.804,17.397-17.397,17.397z" />
+                </g>
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Inbox Settings</p>
+              <p class="text-xs text-gray-500">Delivery schedules, dark mode, fonts &amp; teams</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" height="512pt" viewBox="0 0 512 512.0005" width="512pt">
+                <path d="m220 0h-200c-11.046875 0-20 8.953125-20 20v200c0 11.046875 8.953125 20 20 20h200c11.046875 0 20-8.953125 20-20v-200c0-11.046875-8.953125-20-20-20zm-20 200h-160v-160h160zm299.65625 73.523438c-7.472656-3.097657-16.078125-1.386719-21.796875 4.332031l-200 200c-5.722656 5.722656-7.433594 14.324219-4.335937 21.796875 3.097656 7.476562 10.386718 12.347656 18.476562 12.347656h200c11.046875 0 20-8.953125 20-20v-200c0-8.089844-4.871094-15.382812-12.34375-18.476562zm-27.65625 198.476562h-131.714844l131.714844-131.714844zm-80-232c66.167969 0 120-53.832031 120-120s-53.832031-120-120-120-120 53.832031-120 120 53.832031 120 120 120zm0-200c44.113281 0 80 35.886719 80 80s-35.886719 80-80 80-80-35.886719-80-80 35.886719-80 80-80zm-157.859375 266.144531-85.855469 85.855469 85.855469 85.855469c7.8125 7.8125 7.8125 20.476562 0 28.285156-7.808594 7.808594-20.472656 7.8125-28.28125 0l-85.859375-85.855469-85.859375 85.859375c-7.808594 7.808594-20.472656 7.808594-28.28125 0-7.8125-7.8125-7.8125-20.476562 0-28.285156l85.855469-85.859375-85.855469-85.855469c-7.8125-7.8125-7.8125-20.476562 0-28.285156 7.808594-7.8125 20.472656-7.8125 28.28125 0l85.859375 85.855469 85.859375-85.859375c7.808594-7.808594 20.472656-7.808594 28.28125 0 7.8125 7.8125 7.8125 20.476562 0 28.289062zm0 0" /></svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Message Routing</p>
+              <p class="text-xs text-gray-500">Filtering, tags, notifications</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Personal settings</p>
+              <p class="text-xs text-gray-500">How you appear to others</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-gray-800">
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">Manage Account</p>
+              <p class="text-xs text-gray-500">Billing, terms &amp; support</p>
+            </div>
+          </a>
+          <a href="#" class="px-4 py-2 hover:bg-gray-100 flex">
+            <div class="text-green-600">
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div class="pl-3">
+              <p class="text-sm font-medium text-gray-800 leading-none">
+                Apps &amp; integrations
+              </p>
+              <p class="text-xs text-gray-500">Whereby, Calendly</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="">
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Product updates</p>
+          </a>
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Status updates</p>
+          </a>
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Support FAQ</p>
+          </a>
+          <a href="#" class="px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p class="text-sm font-medium text-gray-800 leading-none">Logout</p>
+          </a>
+        </div>
+      </div>
+    </section>
+    <script>
+      function maketask() {
+        document.getElementById("maketask").style.display = "block";
+        document.getElementById("tag").style.display = "none";
+        document.getElementById("del").style.display = "none";
+        document.getElementById("auto").style.display = "none";
+      }
+
+      function forgettask() {
+        document.getElementById("maketask").style.display = "none";
+      }
+
+      function maketag() {
+        document.getElementById("tag").style.display = "block";
+        document.getElementById("maketask").style.display = "none";
+        document.getElementById("del").style.display = "none";
+        document.getElementById("auto").style.display = "none";
+      }
+
+      function forgettag() {
+        document.getElementById("tag").style.display = "none";
+      }
+
+      function makedel() {
+        document.getElementById("del").style.display = "block";
+        document.getElementById("maketask").style.display = "none";
+        document.getElementById("tag").style.display = "none";
+        document.getElementById("auto").style.display = "none";
+      }
+
+      function forgetdel() {
+        document.getElementById("del").style.display = "none";
+      }
+
+      function makeauto() {
+        document.getElementById("auto").style.display = "block";
+        document.getElementById("del").style.display = "none";
+        document.getElementById("maketask").style.display = "none";
+        document.getElementById("tag").style.display = "none";
+      }
+
+      function forgetauto() {
+        document.getElementById("auto").style.display = "none";
+      }
+
+    </script>
+  </main>
+</body>
+
+</html>
