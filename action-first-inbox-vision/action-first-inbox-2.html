@@ -161,15 +161,41 @@
     #taskMaker {
       display: none;
     }
-    
+
     #answers {
+      display: none;
+    }
+    
+    #welcome {
       display:none;
     }
 
+    #welcome:target {
+      display:block;
+    }
   </style>
 </head>
 
 <body class="min-h-screen text-gray-800 bg-gray-200">
+  <div id="welcome" class="w-full h-full fixed py-32 z-30">
+    <div class="text-center shadow-2xl mx-auto bg-gray-800 p-6 rounded-lg text-white w-5/12">
+      <a href="#conversation" class="cursor-pointer hover:text-yellow-600 -mt-3 block float-right font-bold leading-none text-3xl text-white">&times;</a>
+      <h1 class="mb-4 text-3xl font-medium">Welcome to Plum Mail</h1>
+      <p class="text-lg font-medium mb-4"><span class="text-purple-300">peter@plummail.co </span>uses Plum Mail to send emails. </p>
+      <p class="text-lg font-medium mb-8">You can write your reply on this page.</p>
+      <div class="px-12 border-t-2 border-white mt-6 pt-6">
+        <p class="text-sm mb-4">We will send a copy of what you write to your email address for safe keeping.</p>
+        <p class="text-sm mb-4">Why not become a Plum Mail user and benefit from a range of features that will help make your communication more producitve.</p>
+        <p class="text-sm mb-4">To find out more, visit our <a class="text-yellow-400" href="https://plummail.co">website</a>.</p>
+        <p class="text-xs"><a class="text-yellow-400" href="https://app.plummail.co/privacy">Privacy Policy</a></p>
+
+      </div>
+
+    </div>
+    <div class="bg-green-300 border-2 border-green-600 mt-6 mx-auto p-6 rounded-lg shadow-2xl text-center w-5/12">
+      <p class="font-medium text-green-800 hover:text-green-900">Message sent to peter@plummail successfully. <a class="underline" href="#conversation" >Return to Message</a></p>
+    </div>
+  </div>
   <main class="flex flex-col md:flex-row">
     <section class="w-full ">
       <header class="z-20 h-16 fixed w-full bg-white mx-auto text-left border-b-2">
@@ -288,6 +314,7 @@
 
                 </div>
                 <div class="fixed">
+
                   <div id="menu" class="pl-8 mb-6">
                     <div id="submenu" class="bg-gray-800 flex transition duration-200 hover:opacity-100 opacity-0 ml-32 p-4 rounded-2xl">
                       <a onclick="showtask();" class="cursor-pointer text-white p-1 mr-2 rounded-full transition duration-200 hover:bg-orange-300 bg-orange-500 w-10 h-10">
@@ -479,20 +506,20 @@
                           </span>
                           <span id="answers">
                             <span class="block mb-2 ml-4">
-                                <span class="block border-l-4 border-blue-500 px-2 mt-2">
-                                  <a class="text-blue-500 font-medium" href="#11">richard@plummail.co</a>
-                                </span>
-                                <span class="block border-l-4 border-gray-400 px-2 pt-1 mb-2">
-                                  Four fishes fished on Friday for Fillipe.
-                                </span>
+                              <span class="block border-l-4 border-blue-500 px-2 mt-2">
+                                <a class="text-blue-500 font-medium" href="#11">richard@plummail.co</a>
+                              </span>
+                              <span class="block border-l-4 border-gray-400 px-2 pt-1 mb-2">
+                                Four fishes fished on Friday for Fillipe.
+                              </span>
                             </span>
                             <span class="block mb-2 ml-4">
-                                <span class="block border-l-4 border-blue-500 px-2 mt-2">
-                                  <a class="text-blue-500 font-medium" href="#11">peter@plummail.co</a>
-                                </span>
-                                <span class="block border-l-4 border-gray-400 px-2 pt-1 mb-2">
-                                  Waxy lemons should not be used for winning waces.
-                                </span>
+                              <span class="block border-l-4 border-blue-500 px-2 mt-2">
+                                <a class="text-blue-500 font-medium" href="#11">peter@plummail.co</a>
+                              </span>
+                              <span class="block border-l-4 border-gray-400 px-2 pt-1 mb-2">
+                                Waxy lemons should not be used for winning waces.
+                              </span>
                             </span>
                           </span>
 
@@ -1918,6 +1945,7 @@ Kind regards, Davos
       function showanswers() {
         document.getElementById("answers").style.display = "block";
       }
+
     </script>
   </main>
 </body>
