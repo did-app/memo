@@ -5,6 +5,9 @@ volumes:
   _build:
   deps:
   gen:
+  _build_glance:
+  deps_glance:
+  gen_glance:
 services:
   client:
     image: node:14.8.0
@@ -19,6 +22,20 @@ services:
     command: bash -c "npm i && npm run start:dev"
     environment:
       API_ORIGIN: http://localhost:8000
+  glance:
+    build:
+      context: ./glance
+      dockerfile: Dockerfile
+    working_dir: /opt/app
+    volumes:
+      - ./glance:/opt/app
+      - _build_glance:/opt/app/_build
+      - deps_glance:/opt/app/deps
+      # NOTE Issue Gleam shouldn't delete gen directory.
+      # - gen_glance:/opt/app/gen
+    network_mode: host
+    environment:
+      PORT: 9000
   service:
     build:
       context: ./service
