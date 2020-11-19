@@ -372,6 +372,8 @@ pub fn route(
       io.debug(request)
       try params = acl.parse_json(request)
       try to_full = acl.required(params, "ToFull", Ok)
+      io.debug(to_full)
+      assert Ok([to_full]) = dynamic.list(to_full)
       try conversation_id = acl.required(to_full, "MailboxHash", acl.as_string)
       assert Ok(conversation_id) = int.parse(conversation_id)
       try email_address = acl.required(params, "From", acl.as_email)
