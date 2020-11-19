@@ -369,10 +369,21 @@ pub fn route(
       |> Ok
     }
     ["inbound"] -> {
-        io.debug(request)
-        http.response(500)
-        |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-        |> Ok
+      io.debug(request)
+      try params = acl.parse_json(request)
+      try to_full = acl.required(params, "ToFull", Ok)
+      try conversation_id = acl.required(to_full, "MailboxHash", acl.as_string)
+      assert Ok(conversation_id) = int.parse(conversation_id)
+      try email_address = acl.required(params, "From", acl.as_email)
+      try reply = acl.required(params, "StrippedTextReply", acl.as_string)
+      let params = write_message.Params(reply, False)
+      assert Ok(identifier) = authentication.lookup_identifier(email_address)
+      assert Ok(participation) =
+        discuss.load_participation(conversation_id, identifier.id)
+      try _ = write_message.execute(participation, params)
+      http.response(500)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+      |> Ok
     }
     _ ->
       http.response(404)
