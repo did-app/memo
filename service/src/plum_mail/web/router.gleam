@@ -383,7 +383,7 @@ pub fn route(
       assert Ok(participation) =
         discuss.load_participation(conversation_id, identifier.id)
       try _ = write_message.execute(participation, params)
-      http.response(500)
+      http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
     }
