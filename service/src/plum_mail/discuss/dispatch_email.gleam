@@ -203,7 +203,7 @@ fn send(config, message: Message) {
       tuple(
         "ReplyTo",
         json.string(string.join(
-          ["c", int.to_string(message.id.0), "@plummail.co"],
+          ["c+", int.to_string(message.id.0), "@reply.plummail.co"],
           "",
         )),
       ),
