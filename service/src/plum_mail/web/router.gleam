@@ -368,6 +368,12 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
+    ["inbound"] -> {
+        io.debug(request)
+        http.response(500)
+        |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
+        |> Ok
+    }
     _ ->
       http.response(404)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
