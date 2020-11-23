@@ -1,7 +1,11 @@
 name: test
 on:
   push:
+    paths:
+      - "service/**"
   pull_request:
+    paths:
+      - "service/**"
 jobs:
   test:
     runs-on: ubuntu-latest
