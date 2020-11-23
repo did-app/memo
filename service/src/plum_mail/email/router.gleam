@@ -18,6 +18,8 @@ pub fn handle(params, config) {
 
   try from_email_address = acl.required(params, "From", acl.as_email)
 
+  io.debug(params)
+  io.debug(to_email_address)
   case tuple(to_email_address.value, to_hash) {
     tuple("c@reply.plummail.co", conversation_id) -> {
       assert Ok(conversation_id) = int.parse(conversation_id)
