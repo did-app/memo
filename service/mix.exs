@@ -24,11 +24,14 @@ defmodule PlumMail.MixProject do
   defp deps do
     [
       {:mix_gleam, "~> 0.1.0"},
+      # gleam libraries are linked to any pre 1.x version likely to have breaking changes
+      # so we pin stdlib to all < 0.13 | 1.0
+      {:gleam_stdlib, "~> 0.12.0", override: true},
+      {:gleam_otp, "~> 0.1.3", override: true},
       {:earmark, "~> 1.4"},
-      {:gleam_cowboy, "~> 0.1.2"},
+      {:gleam_cowboy, "~> 0.2.2"},
       {:gleam_crypto, "~> 0.1.2"},
-      {:gleam_http,
-       github: "midas-framework/http", branch: "max-age-bug", manager: :rebar3, override: true},
+      {:gleam_http, "~> 1.6"},
       {:gleam_httpc, "~> 0.1.1"},
       {:gleam_json, "~> 0.1.0"},
       {:gleam_pgo, "~> 0.1.0"}
