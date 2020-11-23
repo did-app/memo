@@ -28,7 +28,7 @@ pub fn handle(params, config) {
       // TODO look up profile/account/contact
       let from = to_email_address
       let to = from_email_address
-      let subject = "Please and some context"
+      let subject = "Please add some context"
       let body =
         "
         Hi
