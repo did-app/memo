@@ -1,5 +1,3 @@
-
-
  Routify is a good example,
  also has code for listening to clicks
  https://github.com/roxiness/routify/blob/master/runtime/navigator.js
