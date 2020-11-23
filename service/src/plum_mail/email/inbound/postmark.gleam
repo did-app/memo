@@ -41,7 +41,7 @@ pub fn handle(params, config) {
       |> Ok
     }
     // Note this address has the full email address including the hash
-    tuple(<<c:utf8_codepoint, _>>, conversation_id) -> {
+    tuple(<<c:utf8_codepoint, _:binary>>, conversation_id) -> {
       assert Ok(conversation_id) = int.parse(conversation_id)
       try reply = acl.required(params, "StrippedTextReply", acl.as_string)
       let params = write_message.Params(reply, False)
