@@ -33,7 +33,7 @@ pub fn handle(params, config) {
         "
         Hi
 
-        Please can you visit https://plummail.co/peter
+        Please can you visit https://app.plummail.co/peter
         "
       try _ = client.send_email(from, to, subject, body, postmark_api_token)
       http.response(200)
