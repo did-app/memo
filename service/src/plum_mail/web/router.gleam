@@ -29,7 +29,7 @@ import plum_mail/discuss/add_pin
 import plum_mail/discuss/delete_pin
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
-import plum_mail/email/router as postmark_router
+import plum_mail/email/inbound/postmark
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -371,7 +371,7 @@ pub fn route(
     }
     ["inbound"] -> {
       try params = acl.parse_json(request)
-      postmark_router.handle(params, config)
+      postmark.handle(params, config)
     }
     _ ->
       http.response(404)
