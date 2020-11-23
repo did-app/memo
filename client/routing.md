@@ -1,9 +1,9 @@
- Routify is a good example,
- also has code for listening to clicks
- https://github.com/roxiness/routify/blob/master/runtime/navigator.js
- There is an issue with starting the router with svelte dirty componets I am not sure of the details
+Routify is a good example,
+also has code for listening to clicks
+https://github.com/roxiness/routify/blob/master/runtime/navigator.js
+There is an issue with starting the router with svelte dirty componets I am not sure of the details
 
- Very simple walk through parameterised routes vulnerable to XSS
+Very simple walk through parameterised routes vulnerable to XSS
 https://willtaylor.blog/client-side-routing-in-vanilla-js/
 
 simple router uses interval and polling, not sure why
