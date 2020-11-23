@@ -187,19 +187,16 @@ fn send(config, message: Message) {
     ]
     |> string.join("")
 
+  // TODO check valid domain and then addresses
+  let from_string = case message.author.email_address.value {
+    "richard@plummail.co" -> "Richard Shepherd <richard@plummail.co>"
+    "peter@plummail.co" -> "Peter Saxton <peter@plummail.co>"
+    string_email -> string.concat([string_email, " <notify@plummail.co>"])
+  }
+
   let data =
     json.object([
-      tuple(
-        "From",
-        json.string(string.join(
-          [
-            message.author.email_address.value,
-            // It seems only updates
-            " <notify@plummail.co>",
-          ],
-          "",
-        )),
-      ),
+      tuple("From", json.string(from_string)),
       tuple(
         "ReplyTo",
         json.string(string.join(
