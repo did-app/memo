@@ -29,6 +29,7 @@ import plum_mail/discuss/add_pin
 import plum_mail/discuss/delete_pin
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
+import plum_mail/email/router as postmark_router
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -369,23 +370,8 @@ pub fn route(
       |> Ok
     }
     ["inbound"] -> {
-      io.debug(request)
       try params = acl.parse_json(request)
-      try to_full = acl.required(params, "ToFull", Ok)
-      io.debug(to_full)
-      assert Ok([to_full]) = dynamic.list(to_full)
-      try conversation_id = acl.required(to_full, "MailboxHash", acl.as_string)
-      assert Ok(conversation_id) = int.parse(conversation_id)
-      try email_address = acl.required(params, "From", acl.as_email)
-      try reply = acl.required(params, "StrippedTextReply", acl.as_string)
-      let params = write_message.Params(reply, False)
-      assert Ok(identifier) = authentication.lookup_identifier(email_address)
-      assert Ok(participation) =
-        discuss.load_participation(conversation_id, identifier.id)
-      try _ = write_message.execute(participation, params)
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-      |> Ok
+      postmark_router.handle(params, config)
     }
     _ ->
       http.response(404)
