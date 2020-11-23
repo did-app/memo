@@ -372,6 +372,7 @@ pub fn route(
     ["inbound"] -> {
       try params = acl.parse_json(request)
       postmark.handle(params, config)
+      |> io.debug
     }
     _ ->
       http.response(404)
