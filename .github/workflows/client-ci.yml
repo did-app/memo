@@ -15,4 +15,4 @@ jobs:
       #   run: docker-compose up -d
       - name: Test the build process
         # NOTE gleam build is required due to an ordering problem with deps compiling
-        run: docker-compose run client bash -c "npm run build"
+        run: docker-compose run client bash -c "npm i && npm run build"
