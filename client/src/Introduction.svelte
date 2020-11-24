@@ -13,7 +13,7 @@
       <ul>
         <li>Be explicit about if you need a reply, and how quickly.</li>
         <li>If I don't know you, share a link to your website, bio or twitter</li>
-        <li>Recruiters, I'm very happy building Plum Mail and not looking for new opportunities</li>
+        <li>Recruiters, I'm very happy building <a href="https://plummail.co">Plum Mail</a> and not looking for new opportunities</li>
       </ul>
       <!-- <p>
         I respond faster to emails that are short.
