@@ -29,7 +29,11 @@ defmodule PlumMail.MixProject do
       {:gleam_http, "~> 1.6"},
       {:gleam_httpc, "~> 0.1.1"},
       {:gleam_json, "~> 0.1.0"},
-      {:floki, github: "midas-framework/floki", branch: "gleam", manager: :mix, override: true}
+      {:floki,
+       github: "midas-framework/floki",
+       tag: "4bae91f3129fbf517aae084695db5671eb115931",
+       manager: :mix,
+       override: true}
     ]
   end
 end
