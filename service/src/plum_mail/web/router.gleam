@@ -153,6 +153,35 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+      // This might not be a good name as we want a to introduce b
+      // this might be reach out or something.
+    ["introduction"] -> {
+        try params = acl.parse_form(request)
+        assert Ok(topic) = map.get(params, "subject")
+        assert Ok(topic) = discuss.validate_topic(topic)
+        assert Ok(message) = map.get(params, "message")
+        assert Ok(from) = map.get(params, "from")
+        assert Ok(from) = authentication.validate_email(from)
+
+        // start conversation add me add other
+        assert Ok(email_address) = authentication.validate_email("peter@plummail.co")
+        assert Ok(identifier) = authentication.lookup_identifier(email_address)
+        try conversation = start_conversation.execute(topic, identifier.id)
+        assert Ok(me) = discuss.load_participation(conversation.id, identifier.id)
+
+        // TODO need a load participation function that takes integers
+        let params = add_participant.Params(from)
+        // TODO note why does this not return participation
+        try tuple(identifier_id, conversation_id) = add_participant.execute(me, params)
+        assert Ok(participation) = discuss.load_participation(conversation.id, identifier_id)
+
+        let params = write_message.Params(content: message, conclusion: False)
+        try _ = write_message.execute(participation, params)
+
+        http.response(201)
+        |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
+        |> Ok
+    }
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)

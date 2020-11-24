@@ -25,21 +25,21 @@
       </p>
     </div>
   </article>
-  <form class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white py-4" action="" method="post">
+  <form class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white py-4" action="__API_ORIGIN__/introduction" method="post">
     <section class="py-2 px-2 md:px-20 flex">
       <span class="font-bold text-gray-700 mr-1">Subject:</span>
-      <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="Please be specific" value="">
+      <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="subject" placeholder="Please be specific" required>
     </section>
 
     <section class="py-2 px-2 md:px-20 flex">
       <span class="font-bold text-gray-700 mr-1">Message:</span>
       <textarea class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" name="message" rows="8" placeholder="I respond faster to emails that are short. Two-liners are best.
-You can write Markdown in this box" value="" ></textarea>
+You can write Markdown in this box" required ></textarea>
     </section>
 
     <section class="py-2 px-2 md:px-20 flex">
       <span class="font-bold text-gray-700 mr-1">From:</span>
-      <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="Your email address" value="">
+      <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="email" name="from" placeholder="Your email address" required>
     </section>
 
     <div class="py-2 px-2 md:px-20 flex">
