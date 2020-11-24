@@ -89,10 +89,41 @@ pub fn route(
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
+    // Hardcoded because we don't want password word field on db model yet.
+    // looking at alternative (OAuth) solutions
+    // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
+    ["authenticate", name, password] -> {
+      assert Ok(email_address) = case name {
+        "peter" -> {
+          let True = password == "onion"
+          assert Ok(email_address) =
+            authentication.validate_email("peter@plummail.co")
+          Ok(email_address)
+        }
+      }
+      assert Ok(identifier) = authentication.lookup_identifier(email_address)
+      assert Ok(link_token) = authentication.generate_link_token(identifier.id)
+      assert Ok(tuple(_, refresh_token, session_token)) =
+        authentication.authenticate(Some(link_token), option.None, "ua TODO")
+      let cookie_defaults = http.cookie_defaults(request.scheme)
+
+      io.debug(refresh_token)
+      redirect(string.append(config.client_origin, "/"))
+      |> http.set_resp_cookie("session", session_token, cookie_defaults)
+      |> http.set_resp_cookie(
+        "refresh",
+        refresh_token,
+        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
+      )
+      |> Ok
+      |> io.debug()
+    }
     ["authenticate"] -> {
       try params = acl.parse_json(request)
+      io.debug(params)
       try link_token = acl.optional(params, "link_token", acl.as_string)
       let tuple(refresh_token, _) = load_cookies(request, config.client_origin)
+      io.debug(refresh_token)
       assert tuple("user_agent", Ok(user_agent)) = tuple(
         "user_agent",
         http.get_req_header(request, "user-agent"),
@@ -153,34 +184,33 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
-      // This might not be a good name as we want a to introduce b
-      // this might be reach out or something.
+    // This might not be a good name as we want a to introduce b
+    // this might be reach out or something.
     ["introduction"] -> {
-        try params = acl.parse_form(request)
-        assert Ok(topic) = map.get(params, "subject")
-        assert Ok(topic) = discuss.validate_topic(topic)
-        assert Ok(message) = map.get(params, "message")
-        assert Ok(from) = map.get(params, "from")
-        assert Ok(from) = authentication.validate_email(from)
-
-        // start conversation add me add other
-        assert Ok(email_address) = authentication.validate_email("peter@plummail.co")
-        assert Ok(identifier) = authentication.lookup_identifier(email_address)
-        try conversation = start_conversation.execute(topic, identifier.id)
-        assert Ok(me) = discuss.load_participation(conversation.id, identifier.id)
-
-        // TODO need a load participation function that takes integers
-        let params = add_participant.Params(from)
-        // TODO note why does this not return participation
-        try tuple(identifier_id, conversation_id) = add_participant.execute(me, params)
-        assert Ok(participation) = discuss.load_participation(conversation.id, identifier_id)
-
-        let params = write_message.Params(content: message, conclusion: False)
-        try _ = write_message.execute(participation, params)
-
-        http.response(201)
-        |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
-        |> Ok
+      try params = acl.parse_form(request)
+      assert Ok(topic) = map.get(params, "subject")
+      assert Ok(topic) = discuss.validate_topic(topic)
+      assert Ok(message) = map.get(params, "message")
+      assert Ok(from) = map.get(params, "from")
+      assert Ok(from) = authentication.validate_email(from)
+      // start conversation add me add other
+      assert Ok(email_address) =
+        authentication.validate_email("peter@plummail.co")
+      assert Ok(identifier) = authentication.lookup_identifier(email_address)
+      try conversation = start_conversation.execute(topic, identifier.id)
+      assert Ok(me) = discuss.load_participation(conversation.id, identifier.id)
+      // TODO need a load participation function that takes integers
+      let params = add_participant.Params(from)
+      // TODO note why does this not return participation
+      try tuple(identifier_id, conversation_id) =
+        add_participant.execute(me, params)
+      assert Ok(participation) =
+        discuss.load_participation(conversation.id, identifier_id)
+      let params = write_message.Params(content: message, conclusion: False)
+      try _ = write_message.execute(participation, params)
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
+      |> Ok
     }
     ["c", "create"] -> {
       try params = acl.parse_form(request)

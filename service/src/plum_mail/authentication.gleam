@@ -264,6 +264,7 @@ pub fn authenticate(link_token, refresh_token, user_agent) {
       }
     None -> Ok(None)
   }
+  io.debug(refresh_token)
   try link_token_selector = case maybe_from_link_token(link_token) {
     Ok(link_token_selector) -> Ok(link_token_selector)
     Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
