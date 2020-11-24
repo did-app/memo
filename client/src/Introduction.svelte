@@ -33,7 +33,8 @@
 
     <section class="py-2 px-2 md:px-20 flex">
       <span class="font-bold text-gray-700 mr-1">Message:</span>
-      <textarea class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" name="message" rows="8" placeholder="I respond faster to emails that are short. Two-liners are best" value="" ></textarea>
+      <textarea class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" name="message" rows="8" placeholder="I respond faster to emails that are short. Two-liners are best.
+You can write Markdown in this box" value="" ></textarea>
     </section>
 
     <section class="py-2 px-2 md:px-20 flex">
