@@ -205,6 +205,7 @@ pub fn route(
       assert Ok(message) = map.get(params, "message")
       assert Ok(email_address) = map.get(params, "email")
       assert Ok(email_address) = authentication.validate_email(email_address)
+      io.debug(email_address)
       try conversation = start_conversation.execute(topic, author_id)
       assert Ok(author_participation) =
         discuss.load_participation(conversation.id, author_id)
@@ -223,7 +224,8 @@ pub fn route(
       let params = add_participant.Params(email_address)
       assert Ok(_) = add_participant.execute(author_participation, params)
       Nil
-      http.response(201)
+      io.debug("here")
+      http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
       |> Ok
     }
