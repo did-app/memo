@@ -19,6 +19,8 @@ pub fn params(raw: Dynamic) {
   |> Ok
 }
 
+// TODO some profiles e.g. yesplease@plummail.co have no authentication information
+// some accounts have more than one authentication id
 pub fn execute(params, config) {
   let Params(email_address: email_address) = params
   try identifier = authentication.lookup_identifier(email_address)
