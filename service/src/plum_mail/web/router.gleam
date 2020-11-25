@@ -199,8 +199,9 @@ pub fn route(
       assert Ok(topic) = discuss.validate_topic(topic)
       assert Ok(author_id) = map.get(params, "author_id")
       assert Ok(author_id) = int.parse(author_id)
-      assert Ok(cc_id) = map.get(params, "cc_id")
-      assert Ok(cc_id) = int.parse(cc_id)
+      // TODO email lib should have comma separated parser
+      assert Ok(cc) = map.get(params, "cc")
+      assert Ok(cc) = authentication.validate_email(cc)
       assert Ok(message) = map.get(params, "message")
       assert Ok(email_address) = map.get(params, "email")
       assert Ok(email_address) = authentication.validate_email(email_address)
@@ -217,6 +218,8 @@ pub fn route(
       //     identifier
       //   }
       // }
+      let params = add_participant.Params(cc)
+      assert Ok(_) = add_participant.execute(author_participation, params)
       let params = add_participant.Params(email_address)
       assert Ok(_) = add_participant.execute(author_participation, params)
       Nil
