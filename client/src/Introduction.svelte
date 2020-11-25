@@ -1,6 +1,10 @@
 <script type="typescript">
+  const placeholders = {
+    peter: "I respond faster to emails that are short. Two-liners are best. You can write Markdown in this box",
+    team: "I'm looking forward to trying plum mail because ..."
+  }
   export let label;
-  let placeholder = label === 'peter' ? "I respond faster to emails that are short. Two-liners are best. You can write Markdown in this box" : "";
+  let placeholder = placeholders[label] || ""
 </script>
 
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2 my-4">
@@ -51,6 +55,19 @@
       </p>
       <p>
         Richard
+      </p>
+      {:else if label === 'team'}
+      <p>
+        Greetings,
+      </p>
+      <p>
+        It's great to have you reaching out to Plum Mail.
+      </p>
+      <p>
+        We're currently operating a waitlist, to join please send us a message below.
+      </p>
+      <p>
+        <strong>Cheers, Peter &amp; Richard</strong>
       </p>
       {/if}
     </div>

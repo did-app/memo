@@ -15,6 +15,7 @@ import gleam/httpc
 import gleam/json
 // Web/utils let session = utils.extractsession
 import datetime
+import plum_mail
 import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
@@ -200,21 +201,37 @@ pub fn route(
       assert Ok(message) = map.get(params, "message")
       assert Ok(from) = map.get(params, "from")
       assert Ok(from) = authentication.validate_email(from)
-      let email_address = string.concat([label, "@plummail.co"])
-      // start conversation add me add other
-      assert Ok(email_address) = authentication.validate_email(email_address)
-      assert Ok(identifier) = authentication.lookup_identifier(email_address)
+      let identifier = case authentication.lookup_identifier(from) {
+        Ok(identifier) -> identifier
+        Error(_) -> {
+          assert Ok(identifier) =
+            plum_mail.identifier_from_email(dynamic.from(from.value))
+          identifier
+        }
+      }
       try conversation = start_conversation.execute(topic, identifier.id)
-      assert Ok(me) = discuss.load_participation(conversation.id, identifier.id)
-      // TODO need a load participation function that takes integers
-      let params = add_participant.Params(from)
-      // TODO note why does this not return participation
-      try tuple(identifier_id, conversation_id) =
-        add_participant.execute(me, params)
-      assert Ok(participation) =
-        discuss.load_participation(conversation.id, identifier_id)
+      assert Ok(starter_participation) =
+        discuss.load_participation(conversation.id, identifier.id)
       let params = write_message.Params(content: message, conclusion: False)
-      try _ = write_message.execute(participation, params)
+      try _ = write_message.execute(starter_participation, params)
+      let email_address = string.concat([label, "@plummail.co"])
+      let addresses = case email_address == "team@plummail.co" {
+        True -> ["peter@plummail.co", "richard@plummail.co"]
+        False -> [email_address]
+      }
+      // TODO need a load participation function that takes integers
+      list.each(
+        addresses,
+        fn(email_address) {
+          assert Ok(email_address) =
+            authentication.validate_email(email_address)
+          let params = add_participant.Params(email_address)
+          // TODO note why does this not return participation
+          assert Ok(tuple(identifier_id, conversation_id)) =
+            add_participant.execute(starter_participation, params)
+          Nil
+        },
+      )
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
       |> Ok

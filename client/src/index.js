@@ -16,6 +16,9 @@ function route(path) {
   } else if (path === "/richard") {
     const target = document.body;
     new Introduction({ target, props: {label: "richard"} });
+  } else if (path === "/team") {
+    const target = document.body;
+    new Introduction({ target, props: {label: "team"} });
   } else {
     throw "Unknown page: " + path;
   }
