@@ -192,6 +192,38 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok()
     }
+    ["welcome"] -> {
+      io.debug(request)
+      try params = acl.parse_form(request)
+      assert Ok(topic) = map.get(params, "topic")
+      assert Ok(topic) = discuss.validate_topic(topic)
+      assert Ok(author_id) = map.get(params, "author_id")
+      assert Ok(author_id) = int.parse(author_id)
+      assert Ok(cc_id) = map.get(params, "cc_id")
+      assert Ok(cc_id) = int.parse(cc_id)
+      assert Ok(message) = map.get(params, "message")
+      assert Ok(email_address) = map.get(params, "email")
+      assert Ok(email_address) = authentication.validate_email(email_address)
+      try conversation = start_conversation.execute(topic, author_id)
+      assert Ok(author_participation) =
+        discuss.load_participation(conversation.id, author_id)
+      let params = write_message.Params(content: message, conclusion: False)
+      try _ = write_message.execute(author_participation, params)
+      // let identifier = case authentication.lookup_identifier(email_address) {
+      //   Ok(identifier) -> identifier
+      //   Error(_) -> {
+      //     assert Ok(identifier) =
+      //       plum_mail.identifier_from_email(dynamic.from(email_address.value))
+      //     identifier
+      //   }
+      // }
+      let params = add_participant.Params(email_address)
+      assert Ok(_) = add_participant.execute(author_participation, params)
+      Nil
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
+      |> Ok
+    }
     // This might not be a good name as we want a to introduce b
     // this might be reach out or something.
     ["introduction", label] -> {
@@ -419,7 +451,7 @@ pub fn handle(
 ) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
   // io.debug(request)
-  case request.method {
+  let response = case request.method {
     http.Options ->
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -429,11 +461,24 @@ pub fn handle(
         Error(reason) -> acl.error_response(reason)
       }
   }
-  |> http.prepend_resp_header(
-    "access-control-allow-origin",
-    config.client_origin,
-  )
-  |> http.prepend_resp_header("access-control-allow-credentials", "true")
-  |> http.prepend_resp_header("access-control-allow-headers", "content-type")
+  case request.path {
+    "/welcome" ->
+      response
+      |> http.prepend_resp_header("access-control-allow-origin", "*")
+    _ ->
+      response
+      // TODO put everthing under /api /client
+      |> http.prepend_resp_header(
+        "access-control-allow-origin",
+        // TODO does this need limiting to just the client origin
+        // can't be wild card with credentials included
+        config.client_origin,
+      )
+      |> http.prepend_resp_header("access-control-allow-credentials", "true")
+      |> http.prepend_resp_header(
+        "access-control-allow-headers",
+        "content-type",
+      )
+  }
   // |> io.debug()
 }
