@@ -52,6 +52,7 @@ pub fn to_email_html(markdown, conversation_link) {
 pub fn load() {
   // TODO this is the same as whats needed for the detail of the notifications tab
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
+  // TODO Add to recipient a field that says don't email me because I check plummail
   let sql =
     "
     SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, m.conclusion, recipient.id, recipient.email_address, author.email_address
@@ -65,6 +66,8 @@ pub fn load() {
     JOIN identifiers AS recipient ON recipient.id = p.identifier_id
     JOIN identifiers AS author ON author.id = m.authored_by
     WHERE p.identifier_id <> m.authored_by
+    AND recipient.email_address <> 'peter@plummail.co'
+    AND recipient.email_address <> 'richard@plummail.co'
     AND p.cursor < m.counter
     AND n.id IS NULL
     AND (p.notify = 'all' OR (p.notify = 'concluded' AND m.conclusion))
