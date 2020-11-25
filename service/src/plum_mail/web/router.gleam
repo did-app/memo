@@ -20,6 +20,7 @@ import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/authentication.{Identifier}
 import plum_mail/authentication/claim_email_address
+import plum_mail/profile
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss.{Message, Pin}
 import plum_mail/discuss/start_conversation
@@ -106,7 +107,6 @@ pub fn route(
       assert Ok(tuple(_, refresh_token, session_token)) =
         authentication.authenticate(Some(link_token), option.None, "ua TODO")
       let cookie_defaults = http.cookie_defaults(request.scheme)
-
       io.debug(refresh_token)
       redirect(string.append(config.client_origin, "/"))
       |> http.set_resp_cookie("session", session_token, cookie_defaults)
@@ -184,18 +184,25 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+    ["contact", label] -> {
+      try profile = profile.lookup(label)
+      let data = json.object([tuple("greeting", json.string(profile.greeting))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
     // This might not be a good name as we want a to introduce b
     // this might be reach out or something.
-    ["introduction"] -> {
+    ["introduction", label] -> {
       try params = acl.parse_form(request)
       assert Ok(topic) = map.get(params, "subject")
       assert Ok(topic) = discuss.validate_topic(topic)
       assert Ok(message) = map.get(params, "message")
       assert Ok(from) = map.get(params, "from")
       assert Ok(from) = authentication.validate_email(from)
+      let email_address = string.concat([label, "@plummail.co"])
       // start conversation add me add other
-      assert Ok(email_address) =
-        authentication.validate_email("peter@plummail.co")
+      assert Ok(email_address) = authentication.validate_email(email_address)
       assert Ok(identifier) = authentication.lookup_identifier(email_address)
       try conversation = start_conversation.execute(topic, identifier.id)
       assert Ok(me) = discuss.load_participation(conversation.id, identifier.id)

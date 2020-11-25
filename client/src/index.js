@@ -12,7 +12,10 @@ function route(path) {
     conversation()
   } else if (path === "/peter") {
     const target = document.body;
-    new Introduction({ target });
+    new Introduction({ target, props: {label: "peter"} });
+  } else if (path === "/richard") {
+    const target = document.body;
+    new Introduction({ target, props: {label: "richard"} });
   } else {
     throw "Unknown page: " + path;
   }
