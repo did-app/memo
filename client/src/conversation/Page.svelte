@@ -29,9 +29,9 @@
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    beautifyWherebyLinks(doc)
     // Maybe this should be questions already
     extractQuestions(doc, true, [])
+    beautifyWherebyLinks(doc)
     return DOMPurify.sanitize(doc.body.innerHTML)
   }
 

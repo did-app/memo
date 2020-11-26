@@ -66,8 +66,8 @@ export default async function() {
     // It's possible there are empty messges
     const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
 
-    beautifyWherebyLinks(doc)
     asked = extractQuestions(doc, author == identifier.emailAddress, asked)
+    beautifyWherebyLinks(doc)
 
     let $answerElements = doc.querySelectorAll('answer')
     $answerElements.forEach(function ($answer) {
