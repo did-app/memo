@@ -115,7 +115,7 @@
 <header class="z-20 md:h-16 h-auto fixed w-full bg-white text-left border-b-2">
   <nav class="ml-auto md:p-4 p-0 px-2 py-1">
     <a class="block md:inline text-center md:text-left" href="/">
-      <span class="px-1 md:mr-8 mr-0 hover:text-indigo-800 hover:border-indigo-800 text-sm md:text-base font-semibold">Plum Mail*</span>
+      <span class="px-1 md:mr-8 mr-0 hover:text-indigo-800 hover:border-indigo-800 text-sm md:text-base font-semibold">Plum Mail</span>
     </a>
     <a style="padding-top:0.28em; padding-bottom:0.5em;" class="bg-green-500 hover:bg-green-700 transition duration-200 px-4 text-sm rounded-lg text-white leading-normal md:leading-none block sm:inline-block md:inline text-center sm:text-left w-8/12 mx-auto sm:w-auto" href="#begin">
       <svg class="fill-current w-4 mr-2 inline leading-none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
