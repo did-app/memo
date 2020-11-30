@@ -5,10 +5,17 @@
   export let text;
   let url = new URL(href, window.location.origin);
 
-  let snapshot = fetch("https://glance.did.app/?" + href).then(async (r) => {
-		const {snapshot} = await r.json()
-    return snapshot
-	})
+  let snapshot = (async function () {
+    if (url.origin === window.location.origin) {
+      return {snapshot: "plain"}
+    } else {
+      return fetch("https://glance.did.app/?" + href).then(async (r) => {
+        const {snapshot} = await r.json()
+        return snapshot
+      })
+
+    }
+  }())
 </script>
 
 {#await snapshot}
@@ -18,6 +25,8 @@
 <Card {...data} />
 {:else if snapshot === 'image_reel'}
 <ImageReel {...data} />
+{:else if snapshot === 'plain'}
+<a href="{href}">text</a>
 {:else}
 Unknown snapshot type
 {/if}
