@@ -26,7 +26,7 @@
 {:else if snapshot === 'image_reel'}
 <ImageReel {...data} />
 {:else if snapshot === 'plain'}
-<a href="{href}">text</a>
+<a href="{href}">{text}</a>
 {:else}
 Unknown snapshot type
 {/if}
