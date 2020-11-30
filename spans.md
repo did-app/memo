@@ -26,3 +26,25 @@ pub fn handle(request, config) {
 }
 ```
 Are there browser tools for this tracing information
+
+
+### Getting started
+
+https://github.com/open-telemetry/opentelemetry-js/tree/master/getting-started
+
+### Exporter
+
+https://github.com/census-instrumentation/opencensus-node/blob/master/packages/opencensus-core/src/exporters/console-exporter.ts#L36
+
+has become
+
+https://github.com/open-telemetry/opentelemetry-js/pull/300
+
+```js
+// TODO ConsoleSpanExporter doesn't exist
+// import { SimpleSpanProcessor } from '@opentelemetry/tracing';
+// import * as WebTracerProvider from '@opentelemetry/web';
+// console.log(WebTracerProvider);
+import opentelemetry from '@opentelemetry/api';
+console.log(opentelemetry);
+```
