@@ -1,16 +1,24 @@
 <script type="text/javascript">
+  import Card from "./glance/Card.svelte"
+  import ImageReel from "./glance/ImageReel.svelte"
   export let href;
   export let text;
   let url = new URL(href, window.location.origin);
+
+  let snapshot = fetch("https://glance.did.app/?" + href).then(async (r) => {
+		const {snapshot} = await r.json()
+    return snapshot
+	})
 </script>
 
-{#if url.host === "whereby.com"}
-  <a class="flex items-center items-stretch" {href} target="_blank">
-    <img class="w-10" src="https://d32wid4gq0d4kh.cloudfront.net/favicon_whereby-196x196.png" alt="">
-    <span class="align-middle p-2 border-b-4" style="border-color:#f8dbd5;">{text.trim() || 'Meet with Whereby'}</span>
-  </a>
+{#await snapshot}
+<a href="{href}">{href}</a>
+{:then {snapshot, ...data}}
+{#if snapshot === 'card'}
+<Card {...data} />
+{:else if snapshot === 'image_reel'}
+<ImageReel {...data} />
 {:else}
-<a { href }>
-  { text }
-</a>
+Unknown snapshot type
 {/if}
+{/await}
