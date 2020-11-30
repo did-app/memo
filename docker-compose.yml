@@ -22,6 +22,7 @@ services:
     command: bash -c "npm i && npm run start:dev"
     environment:
       API_ORIGIN: http://localhost:8000
+      GLANCE_ORIGIN: http://localhost:9000
   service:
     build:
       context: ./service

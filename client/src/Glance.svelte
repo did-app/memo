@@ -1,33 +1,33 @@
 <script type="text/javascript">
-  import Card from "./glance/Card.svelte"
+  import Page from "./glance/Page.svelte"
   import ImageReel from "./glance/ImageReel.svelte"
   export let href;
   export let text;
   let url = new URL(href, window.location.origin);
 
-  let snapshot = (async function () {
+  let preview = (async function () {
     if (url.origin === window.location.origin) {
-      return {snapshot: "plain"}
+      return {preview: "plain"}
     } else {
-      return fetch("https://glance.did.app/?" + href).then(async (r) => {
-        const {snapshot} = await r.json()
-        return snapshot
+      return fetch("__GLANCE_ORIGIN__/?" + href).then(async (r) => {
+        const {preview} = await r.json()
+        return preview
       })
 
     }
   }())
 </script>
 
-{#await snapshot}
+{#await preview}
 <a href="{href}">{href}</a>
-{:then {snapshot, ...data}}
-{#if snapshot === 'card'}
-<Card {...data} />
-{:else if snapshot === 'image_reel'}
+{:then {item, ...data}}
+{#if item === 'page'}
+<Page {...data} />
+{:else if item === 'image_reel'}
 <ImageReel {...data} />
-{:else if snapshot === 'plain'}
+{:else if item === 'plain'}
 <a href="{href}">{text}</a>
 {:else}
-Unknown snapshot type
+Unknown item type
 {/if}
 {/await}
