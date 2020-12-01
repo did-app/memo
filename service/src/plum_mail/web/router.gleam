@@ -15,10 +15,13 @@ import gleam/httpc
 import gleam/json
 // Web/utils let session = utils.extractsession
 import datetime
+import plum_mail
 import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/authentication.{Identifier}
+import plum_mail/authentication/claim_email_address
+import plum_mail/profile
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss.{Message, Pin}
 import plum_mail/discuss/start_conversation
@@ -29,6 +32,7 @@ import plum_mail/discuss/add_pin
 import plum_mail/discuss/delete_pin
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
+import plum_mail/email/inbound/postmark
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -87,10 +91,40 @@ pub fn route(
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
+    // Hardcoded because we don't want password word field on db model yet.
+    // looking at alternative (OAuth) solutions
+    // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
+    ["authenticate", name, password] -> {
+      assert Ok(email_address) = case name {
+        "peter" -> {
+          let True = password == "onion"
+          assert Ok(email_address) =
+            authentication.validate_email("peter@plummail.co")
+          Ok(email_address)
+        }
+      }
+      assert Ok(identifier) = authentication.lookup_identifier(email_address)
+      assert Ok(link_token) = authentication.generate_link_token(identifier.id)
+      assert Ok(tuple(_, refresh_token, session_token)) =
+        authentication.authenticate(Some(link_token), option.None, "ua TODO")
+      let cookie_defaults = http.cookie_defaults(request.scheme)
+      io.debug(refresh_token)
+      redirect(string.append(config.client_origin, "/"))
+      |> http.set_resp_cookie("session", session_token, cookie_defaults)
+      |> http.set_resp_cookie(
+        "refresh",
+        refresh_token,
+        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
+      )
+      |> Ok
+      |> io.debug()
+    }
     ["authenticate"] -> {
       try params = acl.parse_json(request)
+      io.debug(params)
       try link_token = acl.optional(params, "link_token", acl.as_string)
       let tuple(refresh_token, _) = load_cookies(request, config.client_origin)
+      io.debug(refresh_token)
       assert tuple("user_agent", Ok(user_agent)) = tuple(
         "user_agent",
         http.get_req_header(request, "user-agent"),
@@ -124,60 +158,8 @@ pub fn route(
     }
     ["authenticate", "email"] -> {
       try params = acl.parse_json(request)
-      try email_address = acl.required(params, "email_address", acl.as_email)
-      try identifier = authentication.lookup_identifier(email_address)
-      assert Ok(token) = authentication.generate_link_token(identifier.id)
-      let config.Config(
-        postmark_api_token: postmark_api_token,
-        client_origin: client_origin,
-      ) = config
-      let body =
-        [
-          "
-          <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
-          <html xmlns=\"http://www.w3.org/1999/xhtml\">
-            <head>
-              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
-              <meta name=\"x-apple-disable-message-reformatting\" />
-              <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
-              <title></title>
-            </head>
-            <body>
-              <main>
-              Sign in to your plum mail account with the authentication link below
-              <br>
-              <br>
-          ",
-          "<a href=\"",
-          client_origin,
-          "/#code=",
-          token,
-          "\">Click here to sign in</a>
-          </main>
-          ",
-        ]
-        |> string.join("")
-      let data =
-        json.object([
-          tuple("From", json.string("updates@plummail.co")),
-          tuple("To", json.string(email_address.value)),
-          tuple("Subject", json.string("Welcome back to plum mail")),
-          // tuple("TextBody", json.string(message.content)),
-          tuple("HtmlBody", json.string(body)),
-        ])
-      let request =
-        http.default_req()
-        |> http.set_method(http.Post)
-        |> http.set_host("api.postmarkapp.com")
-        |> http.set_path("/email")
-        |> http.prepend_req_header("content-type", "application/json")
-        |> http.prepend_req_header("accept", "application/json")
-        |> http.prepend_req_header(
-          "x-postmark-server-token",
-          postmark_api_token,
-        )
-        |> http.set_req_body(json.encode(data))
-      assert Ok(http.Response(status: 200, ..)) = httpc.send(request)
+      try params = claim_email_address.params(params)
+      try _ = claim_email_address.execute(params, config)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
@@ -203,6 +185,94 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+    ["contact", label] -> {
+      try profile = profile.lookup(label)
+      let data = json.object([tuple("greeting", json.string(profile.greeting))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
+    ["welcome"] -> {
+      io.debug(request)
+      try params = acl.parse_form(request)
+      assert Ok(topic) = map.get(params, "topic")
+      assert Ok(topic) = discuss.validate_topic(topic)
+      assert Ok(author_id) = map.get(params, "author_id")
+      assert Ok(author_id) = int.parse(author_id)
+      // TODO email lib should have comma separated parser
+      assert Ok(cc) = map.get(params, "cc")
+      assert Ok(cc) = authentication.validate_email(cc)
+      assert Ok(message) = map.get(params, "message")
+      assert Ok(email_address) = map.get(params, "email")
+      assert Ok(email_address) = authentication.validate_email(email_address)
+      io.debug(email_address)
+      try conversation = start_conversation.execute(topic, author_id)
+      assert Ok(author_participation) =
+        discuss.load_participation(conversation.id, author_id)
+      let params = write_message.Params(content: message, conclusion: False)
+      try _ = write_message.execute(author_participation, params)
+      // let identifier = case authentication.lookup_identifier(email_address) {
+      //   Ok(identifier) -> identifier
+      //   Error(_) -> {
+      //     assert Ok(identifier) =
+      //       plum_mail.identifier_from_email(dynamic.from(email_address.value))
+      //     identifier
+      //   }
+      // }
+      let params = add_participant.Params(cc)
+      assert Ok(_) = add_participant.execute(author_participation, params)
+      let params = add_participant.Params(email_address)
+      assert Ok(_) = add_participant.execute(author_participation, params)
+      Nil
+      io.debug("here")
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
+      |> Ok
+    }
+    // This might not be a good name as we want a to introduce b
+    // this might be reach out or something.
+    ["introduction", label] -> {
+      try params = acl.parse_form(request)
+      assert Ok(topic) = map.get(params, "subject")
+      assert Ok(topic) = discuss.validate_topic(topic)
+      assert Ok(message) = map.get(params, "message")
+      assert Ok(from) = map.get(params, "from")
+      assert Ok(from) = authentication.validate_email(from)
+      let identifier = case authentication.lookup_identifier(from) {
+        Ok(identifier) -> identifier
+        Error(_) -> {
+          assert Ok(identifier) =
+            plum_mail.identifier_from_email(dynamic.from(from.value))
+          identifier
+        }
+      }
+      try conversation = start_conversation.execute(topic, identifier.id)
+      assert Ok(starter_participation) =
+        discuss.load_participation(conversation.id, identifier.id)
+      let params = write_message.Params(content: message, conclusion: False)
+      try _ = write_message.execute(starter_participation, params)
+      let email_address = string.concat([label, "@plummail.co"])
+      let addresses = case email_address == "team@plummail.co" {
+        True -> ["peter@plummail.co", "richard@plummail.co"]
+        False -> [email_address]
+      }
+      // TODO need a load participation function that takes integers
+      list.each(
+        addresses,
+        fn(email_address) {
+          assert Ok(email_address) =
+            authentication.validate_email(email_address)
+          let params = add_participant.Params(email_address)
+          // TODO note why does this not return participation
+          assert Ok(tuple(identifier_id, conversation_id)) =
+            add_participant.execute(starter_participation, params)
+          Nil
+        },
+      )
+      http.response(201)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
+      |> Ok
+    }
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
@@ -368,6 +438,11 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
+    ["inbound"] -> {
+      try params = acl.parse_json(request)
+      postmark.handle(params, config)
+      |> io.debug
+    }
     _ ->
       http.response(404)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -381,7 +456,7 @@ pub fn handle(
 ) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
   // io.debug(request)
-  case request.method {
+  let response = case request.method {
     http.Options ->
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -391,11 +466,24 @@ pub fn handle(
         Error(reason) -> acl.error_response(reason)
       }
   }
-  |> http.prepend_resp_header(
-    "access-control-allow-origin",
-    config.client_origin,
-  )
-  |> http.prepend_resp_header("access-control-allow-credentials", "true")
-  |> http.prepend_resp_header("access-control-allow-headers", "content-type")
+  case request.path {
+    "/welcome" ->
+      response
+      |> http.prepend_resp_header("access-control-allow-origin", "*")
+    _ ->
+      response
+      // TODO put everthing under /api /client
+      |> http.prepend_resp_header(
+        "access-control-allow-origin",
+        // TODO does this need limiting to just the client origin
+        // can't be wild card with credentials included
+        config.client_origin,
+      )
+      |> http.prepend_resp_header("access-control-allow-credentials", "true")
+      |> http.prepend_resp_header(
+        "access-control-allow-headers",
+        "content-type",
+      )
+  }
   // |> io.debug()
 }

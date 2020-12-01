@@ -3,6 +3,13 @@ defmodule PlumMail.Application do
 
   use Application
 
+  def start_cowboy(config) do
+    case :gleam@http@cowboy.start(&:plum_mail@web@router.handle(&1, config), port) do
+      {:ok, {:sender, pid, _other}} -> {:ok, pid}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   def start(_type, _args) do
     port = port()
     {:ok, db_config} = :gleam@pgo.url_config(System.get_env("DATABASE_URL"))
@@ -15,7 +22,7 @@ defmodule PlumMail.Application do
       %{id: :pgo, start: {:gleam@pgo, :start_link, [:default, db_config]}, type: :supervisor},
       %{
         id: :cowboy,
-        start: {:gleam@http@cowboy, :start, [&:plum_mail@web@router.handle(&1, config), port]}
+        start: {__MODULE__, :start_cowboy, [config]}
       }
     ]
 

@@ -52,6 +52,7 @@ pub fn to_email_html(markdown, conversation_link) {
 pub fn load() {
   // TODO this is the same as whats needed for the detail of the notifications tab
   // https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails
+  // TODO Add to recipient a field that says don't email me because I check plummail
   let sql =
     "
     SELECT m.counter, m.content, m.inserted_at, author.id, c.id, c.topic, m.conclusion, recipient.id, recipient.email_address, author.email_address
@@ -65,6 +66,8 @@ pub fn load() {
     JOIN identifiers AS recipient ON recipient.id = p.identifier_id
     JOIN identifiers AS author ON author.id = m.authored_by
     WHERE p.identifier_id <> m.authored_by
+    AND recipient.email_address <> 'peter@plummail.co'
+    AND recipient.email_address <> 'richard@plummail.co'
     AND p.cursor < m.counter
     AND n.id IS NULL
     AND (p.notify = 'all' OR (p.notify = 'concluded' AND m.conclusion))
@@ -187,23 +190,20 @@ fn send(config, message: Message) {
     ]
     |> string.join("")
 
+  // TODO check valid domain and then addresses
+  let from_string = case message.author.email_address.value {
+    "richard@plummail.co" -> "Richard Shepherd <richard@plummail.co>"
+    "peter@plummail.co" -> "Peter Saxton <peter@plummail.co>"
+    string_email -> string.concat([string_email, " <notify@plummail.co>"])
+  }
+
   let data =
     json.object([
-      tuple(
-        "From",
-        json.string(string.join(
-          [
-            message.author.email_address.value,
-            // It seems only updates
-            " <notify@plummail.co>",
-          ],
-          "",
-        )),
-      ),
+      tuple("From", json.string(from_string)),
       tuple(
         "ReplyTo",
         json.string(string.join(
-          ["c", int.to_string(message.id.0), "@plummail.co"],
+          ["c+", int.to_string(message.id.0), "@reply.plummail.co"],
           "",
         )),
       ),
