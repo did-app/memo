@@ -1,0 +1,680 @@
+<html lang="en" dir="ltr" class="js-focus-visible" data-js-focus-visible="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/vendor/github-markdown.min.css" crossorigin="anonymous">
+  <script src="https://app.plummail.co/vendor/marked.min.js"></script>
+  <script src="https://kit.fontawesome.com/f868aafb81.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://app.plummail.co/vendor/TextTip.css">
+  <link rel="stylesheet" href="https://app.plummail.co/css/extra.css">
+  <script src="https://app.plummail.co/vendor/minisearch.min.js"></script>
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-16x16.png" sizes="16x16">
+  <title>plum mail</title>
+  <script async="" defer="" src="/build/main.js"></script>
+  <script async="" defer="" data-domain="app.plummail.co" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    .bottom-full {
+      bottom: 100%
+    }
+
+    .top-full {
+      top: 100%
+    }
+
+    #account-settings {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #account-settings:target {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .toggle-checkbox:checked {
+      @apply: right-0 border-green-400;
+      right: 0;
+      border-color: #68D391;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      @apply: bg-green-400;
+      background-color: #68D391;
+    }
+
+    #actions {
+      display: none;
+    }
+
+    #actions:target {
+      display: block;
+    }
+
+    #pineapple {
+      display: none;
+    }
+
+    #pineapple:target {
+      display: block;
+    }
+
+    #results {
+      display: none;
+    }
+
+    #results:target {
+      display: block;
+    }
+
+    #conversation {
+      display: none;
+    }
+
+    #conversation:target {
+      display: block;
+    }
+
+    #non-user {
+      display: none;
+    }
+
+    #non-user:target {
+      display: block;
+    }
+
+    #maketask {
+      display: none;
+    }
+
+    #tag {
+      display: none;
+    }
+
+    #auto {
+      display: none;
+    }
+
+    #del {
+      display: none;
+    }
+
+    #wiscmsg {
+      visibility: hidden;
+      height: 0;
+    }
+
+    #editor2 {
+      visibility: hidden;
+      height: 0;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2 {
+      border: none;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .markdown-body h1 {
+      font-size: 1.5em;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      /* font-weight: normal; */
+    }
+
+    .markdown-body h3,
+    .markdown-body h4 {
+      font-size: inherit;
+    }
+
+    .markdown-body h2 {
+      font-size: 1.3em;
+      /* font-weight: normal; */
+    }
+
+    .markdown-body p {
+      margin-bottom: 16px;
+    }
+
+    .markdown-body ul {
+      list-style: initial;
+    }
+
+    .markdown-body ol {
+      list-style: decimal;
+    }
+
+    .markdown-body ol,
+    .markdown-body ul {
+      padding-left: 2em;
+      margin-bottom: 2em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 6px;
+    }
+
+    #task-suggestion {
+      display: none;
+    }
+
+    #questionMaker {
+      display: none;
+    }
+
+    #taskMaker {
+      display: none;
+    }
+
+    #answers {
+      display: none;
+    }
+
+    #welcome {
+      display: none;
+    }
+
+    #welcome:target {
+      display: block;
+    }
+
+  </style>
+</head>
+
+<body class="body-scroll-off min-h-screen text-gray-800 bg-gray-200">
+  <main class="flex flex-col md:flex-row">
+    <section class="w-full ">
+      <header class="z-20 h-16 fixed w-full bg-white mx-auto text-left border-b-2">
+        <nav class="ml-auto p-4">
+          <a href="/">
+            <span class="px-1 mr-8 hover:text-indigo-800 hover:border-indigo-800 pt-2 text-lg font-semibold">Richard</span>
+          </a>
+          <a style="padding-top:0.28em; padding-bottom:0.5em;" class="bg-green-500 hover:bg-green-700 transition duration-200 px-4 rounded-lg text-white leading-none" href="#compose">
+            <svg style="margin-bottom:0.1em;" class="fill-current w-6 mr-2 inline leading-none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z"></path>
+                </g>
+              </g>
+
+            </svg>Compose</a>
+          <p class="ml-8 inline text-xs text-gray-700">Next update at 3pm today</p>
+          <p class="ml-8 inline text-xs text-gray-700">Actions 2/5 today</p>
+          <div class="bg-gray-300 inline-block mt-2 mx-2 rounded-full w-24">
+            <div class="bg-purple-800 inline-block py-1 rounded-full w-2/5"></div>
+          </div>
+
+          <div class="-mt-1 inline-block pl-8 w-5/12">
+            <svg class="z-10 absolute ml-2 mt-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 396.819 396.819" style="enable-background:new 0 0 396.819 396.819;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M352.103,44.679c-59.237-59.401-155.412-59.535-214.813-0.298c-57.316,57.157-59.741,149.218-5.515,209.314l-11.6,11.6    c-9.372-9.373-24.568-9.375-33.941-0.003c-0.001,0.001-0.002,0.002-0.003,0.003l-79.2,79.2    c-9.373,9.372-9.375,24.568-0.003,33.941c0.001,0.001,0.002,0.002,0.003,0.003l11.312,11.312c9.372,9.369,24.564,9.369,33.936,0    l79.2-79.2c9.373-9.372,9.375-24.568,0.003-33.941c-0.001-0.001-0.002-0.002-0.003-0.003l11.6-11.6    c62.24,56.247,158.292,51.388,214.539-10.851C411.948,194.037,409.521,101.856,352.103,44.679z M120.175,299.231l-79.2,79.2    c-3.124,3.123-8.188,3.123-11.312,0l-11.312-11.32c-3.118-3.123-3.118-8.181,0-11.304l79.2-79.2c3.164-3.025,8.148-3.025,11.312,0    l11.312,11.32C123.293,291.05,123.293,296.108,120.175,299.231z M340.799,248.327c-53.112,53.11-139.223,53.109-192.333-0.003    s-53.109-139.223,0.003-192.333c53.111-53.109,139.219-53.109,192.33,0C393.824,109.139,393.824,195.179,340.799,248.327z" />
+                </g>
+              </g>
+              <g>
+                <g>
+                  <path d="M329.479,67.303L329.479,67.303l-11.312,11.312c40.545,40.644,40.545,106.436,0,147.08l11.312,11.312    C376.275,190.117,376.275,114.193,329.479,67.303z" />
+                </g>
+              </g>
+            </svg>
+            <input class="focus:shadow-md focus:bg-white border-2 border-gray-300 bg-gray-200 inline-block w-full rounded pl-8 pr-2 py-1 text-black focus:border-indigo-800 outline-none" placeholder="" id="search" autofocus="" autocomplete="off">
+          </div>
+
+          <a href="#account-settings" class="block float-right">
+            <svg href="#account-settings" class="w-8" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 56 56" style="enable-background:new 0 0 56 56;" xml:space="preserve">
+              <path d="M28,0C12.561,0,0,12.561,0,28s12.561,28,28,28s28-12.561,28-28S43.439,0,28,0z M40,41H16c-1.104,0-2-0.896-2-2s0.896-2,2-2
+	h24c1.104,0,2,0.896,2,2S41.104,41,40,41z M40,30H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,30,40,30z
+	 M40,19H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,19,40,19z" />
+            </svg>
+          </a>
+        </nav>
+      </header>
+      <div class="mt-20 flex">
+        <div class="w-full pb-12">
+          <div id="conversation">
+            <section class="w-full mb-4">
+              <h1 class="block text-3xl mt-6 mb-4 font-medium text-center flex-grow">Plum Mail - Prospective Investor Update #2</h1>
+              <div class="flex mx-auto text-center text-gray-600 text-sm w-4/12">
+                <p class="truncate">richard@plummail.co, peter@plummail.co, june@plummail.co, marylou@plummail.co, jack@plummail.co</p>
+                <p class="ml-2 hover:text-gray-900 cursor-pointer">
+                  <svg class="fill-current h-4 inline w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 384 384" style="enable-background:new 0 0 384 384;" xml:space="preserve">
+                    <g>
+                      <g>
+                        <path d="M368,176c-8.832,0-16,7.168-16,16c0,88.224-71.776,160-160,160S32,280.224,32,192S103.776,32,192,32    c42.952,0,83.272,16.784,113.544,47.264c6.216,6.272,16.352,6.312,22.624,0.08c6.272-6.224,6.304-16.352,0.08-22.624    C291.928,20.144,243.536,0,192,0C86.128,0,0,86.128,0,192s86.128,192,192,192s192-86.128,192-192C384,183.168,376.832,176,368,176    z" />
+                      </g>
+                    </g>
+                    <g>
+                      <g>
+                        <path d="M256,176h-48v-48c0-8.832-7.168-16-16-16c-8.832,0-16,7.168-16,16v48h-48c-8.832,0-16,7.168-16,16c0,8.832,7.168,16,16,16    h48v48c0,8.832,7.168,16,16,16c8.832,0,16-7.168,16-16v-48h48c8.832,0,16-7.168,16-16C272,183.168,264.832,176,256,176z" />
+                      </g>
+                    </g>
+                  </svg>
+                </p>
+              </div>
+            </section>
+            <section class="w-full mx-auto flex mb-4">
+              <aside class="w-3/12">
+                <div id="conversation-tags" class="absolute mt-20 top-0 mx-6 ">
+                  <div class="rounded inline bg-pink-500 text-white font-medium px-4 mr-2 py-2">
+                    <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-4 inline mr-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 436.38 436.38" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M340.38,23.224H206.396c-8.48,0-16.624,3.376-22.624,9.376L9.372,206.968c-12.496,12.496-12.496,32.752,0,45.264    l133.984,133.984c12.496,12.496,32.752,12.496,45.248,0l174.4-174.368c6-6.016,9.376-14.16,9.376-22.656V55.224    C372.38,37.544,358.06,23.224,340.38,23.224z M284.38,135.224c-13.248,0-24-10.752-24-24s10.752-24,24-24s24,10.752,24,24    S297.628,135.224,284.38,135.224z"></path>
+                        </g>
+                      </g>
+                      <g>
+                        <g>
+                          <path d="M404.38,55.224l-0.016,148.944c0,7.376-2.928,14.464-8.16,19.68L218.988,401.064l2.72,2.72    c12.496,12.496,32.752,12.496,45.248,0l160.032-160c6.016-6,9.392-14.144,9.392-22.624V87.224    C436.38,69.544,422.06,55.224,404.38,55.224z"></path>
+                        </g>
+                      </g>
+                    </svg>Investors
+                  </div>
+                  <div class="rounded inline bg-yellow-500 text-white font-medium px-4 mr-2 py-2">
+                    <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-4 inline mr-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 436.38 436.38" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M340.38,23.224H206.396c-8.48,0-16.624,3.376-22.624,9.376L9.372,206.968c-12.496,12.496-12.496,32.752,0,45.264    l133.984,133.984c12.496,12.496,32.752,12.496,45.248,0l174.4-174.368c6-6.016,9.376-14.16,9.376-22.656V55.224    C372.38,37.544,358.06,23.224,340.38,23.224z M284.38,135.224c-13.248,0-24-10.752-24-24s10.752-24,24-24s24,10.752,24,24    S297.628,135.224,284.38,135.224z"></path>
+                        </g>
+                      </g>
+                      <g>
+                        <g>
+                          <path d="M404.38,55.224l-0.016,148.944c0,7.376-2.928,14.464-8.16,19.68L218.988,401.064l2.72,2.72    c12.496,12.496,32.752,12.496,45.248,0l160.032-160c6.016-6,9.392-14.144,9.392-22.624V87.224    C436.38,69.544,422.06,55.224,404.38,55.224z"></path>
+                        </g>
+                      </g>
+                    </svg>Plum Mail
+                  </div>
+                  <div class="rounded inline bg-gray-300 text-gray-400 cursor-pointer hover:bg-gray-800 hover:text-white font-medium px-4 mr-2 py-2">
+                    <svg style="margin-bottom:0.1em;" class="align-bottom fill-current h-4 inline mr-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 436.38 436.38" xml:space="preserve">
+                      <g>
+                        <g>
+                          <path d="M340.38,23.224H206.396c-8.48,0-16.624,3.376-22.624,9.376L9.372,206.968c-12.496,12.496-12.496,32.752,0,45.264    l133.984,133.984c12.496,12.496,32.752,12.496,45.248,0l174.4-174.368c6-6.016,9.376-14.16,9.376-22.656V55.224    C372.38,37.544,358.06,23.224,340.38,23.224z M284.38,135.224c-13.248,0-24-10.752-24-24s10.752-24,24-24s24,10.752,24,24    S297.628,135.224,284.38,135.224z"></path>
+                        </g>
+                      </g>
+                      <g>
+                        <g>
+                          <path d="M404.38,55.224l-0.016,148.944c0,7.376-2.928,14.464-8.16,19.68L218.988,401.064l2.72,2.72    c12.496,12.496,32.752,12.496,45.248,0l160.032-160c6.016-6,9.392-14.144,9.392-22.624V87.224    C436.38,69.544,422.06,55.224,404.38,55.224z"></path>
+                        </g>
+                      </g>
+                    </svg>Tag
+                  </div>
+
+                </div>
+                <div class="fixed">
+
+                  <div id="menu" class="pl-8 mb-6">
+                    <div id="submenu" class="bg-gray-800 flex transition duration-200 hover:opacity-100 opacity-0 ml-32 p-4 rounded-2xl">
+                      <a onclick="showtask();" class="cursor-pointer text-white p-1 mr-2 rounded-full transition duration-200 hover:bg-orange-300 bg-orange-500 w-10 h-10">
+                        <svg class="align-bottom fill-current h-8 inline w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" xml:space="preserve">
+                          <g>
+                            <g>
+                              <path d="M256,0C114.84,0,0,114.84,0,256s114.84,256,256,256s256-114.84,256-256S397.16,0,256,0z M256,475.429    c-120.997,0-219.429-98.432-219.429-219.429S135.003,36.571,256,36.571S475.429,135.003,475.429,256S376.997,475.429,256,475.429z    "></path>
+                            </g>
+                          </g>
+                          <g>
+                            <g>
+                              <path d="M256,134.095c-10.1,0-18.286,8.186-18.286,18.286v207.238c0,10.1,8.186,18.286,18.286,18.286    c10.1,0,18.286-8.186,18.286-18.286V152.381C274.286,142.281,266.1,134.095,256,134.095z"></path>
+                            </g>
+                          </g>
+                          <g>
+                            <g>
+                              <path d="M359.619,237.714H152.381c-10.1,0-18.286,8.186-18.286,18.286c0,10.1,8.186,18.286,18.286,18.286h207.238    c10.1,0,18.286-8.186,18.286-18.286C377.905,245.9,369.719,237.714,359.619,237.714z"></path>
+                            </g>
+                          </g>
+                        </svg>
+                      </a>
+
+                      <a class="cursor-pointer text-white p-2 mr-2 rounded-full transition duration-200 hover:bg-blue-300 bg-blue-500 w-10 h-10">
+                        <svg class="align-bottom fill-current h-6 inline w-6" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="365.442px" height="365.442px" viewBox="0 0 365.442 365.442" style="enable-background:new 0 0 365.442 365.442;" xml:space="preserve">
+                          <g>
+                            <g>
+                              <path d="M212.994,274.074h-68.522c-3.042,0-5.708,1.149-7.992,3.429c-2.286,2.286-3.427,4.948-3.427,7.994v68.525    c0,3.046,1.145,5.712,3.427,7.994c2.284,2.279,4.947,3.426,7.992,3.426h68.522c3.042,0,5.715-1.144,7.99-3.426    c2.29-2.282,3.433-4.948,3.433-7.994v-68.525c0-3.046-1.14-5.708-3.433-7.994C218.709,275.217,216.036,274.074,212.994,274.074z" />
+                              <path d="M302.935,68.951c-7.806-14.378-17.891-26.506-30.266-36.406c-12.367-9.896-26.271-17.799-41.685-23.697    C215.567,2.952,200.246,0,185.016,0C127.157,0,83,25.315,52.544,75.946c-1.521,2.473-2.046,5.137-1.571,7.993    c0.478,2.852,1.953,5.232,4.427,7.135l46.824,35.691c2.474,1.52,4.854,2.281,7.139,2.281c3.427,0,6.375-1.525,8.852-4.57    c13.702-17.128,23.887-28.072,30.548-32.833c8.186-5.518,18.461-8.276,30.833-8.276c11.61,0,21.838,3.046,30.692,9.132    c8.85,6.092,13.271,13.135,13.271,21.129c0,8.942-2.375,16.178-7.135,21.698c-4.757,5.518-12.754,10.845-23.986,15.986    c-14.842,6.661-28.457,16.988-40.823,30.978c-12.375,13.991-18.558,28.885-18.558,44.682v12.847c0,3.62,0.994,7.187,2.996,10.708    c2,3.524,4.425,5.283,7.282,5.283h68.521c3.046,0,5.708-1.472,7.994-4.432c2.279-2.942,3.426-6.036,3.426-9.267    c0-4.757,2.617-11.14,7.847-19.13c5.235-7.994,11.752-14.186,19.562-18.565c7.419-4.186,13.219-7.56,17.411-10.133    c4.196-2.566,9.664-6.715,16.423-12.421c6.756-5.712,11.991-11.375,15.698-16.988c3.713-5.614,7.046-12.896,9.996-21.844    c2.956-8.945,4.428-18.558,4.428-28.835C314.639,98.397,310.734,83.314,302.935,68.951z" />
+                            </g>
+                          </g>
+                        </svg>
+                      </a>
+                      <a class="cursor-pointer text-white p-2 mr-2 rounded-full transition duration-200 hover:bg-purple-300 bg-purple-500 w-10 h-10">
+                        <svg class="align-bottom fill-current h-6 inline w-6" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="975.036px" height="975.036px" viewBox="0 0 975.036 975.036" style="enable-background:new 0 0 975.036 975.036;" xml:space="preserve">
+                          <g>
+                            <path d="M925.036,57.197h-304c-27.6,0-50,22.4-50,50v304c0,27.601,22.4,50,50,50h145.5c-1.9,79.601-20.4,143.3-55.4,191.2   c-27.6,37.8-69.399,69.1-125.3,93.8c-25.7,11.3-36.8,41.7-24.8,67.101l36,76c11.6,24.399,40.3,35.1,65.1,24.399   c66.2-28.6,122.101-64.8,167.7-108.8c55.601-53.7,93.7-114.3,114.3-181.9c20.601-67.6,30.9-159.8,30.9-276.8v-239   C975.036,79.598,952.635,57.197,925.036,57.197z" />
+                            <path d="M106.036,913.497c65.4-28.5,121-64.699,166.9-108.6c56.1-53.7,94.4-114.1,115-181.2c20.6-67.1,30.899-159.6,30.899-277.5   v-239c0-27.6-22.399-50-50-50h-304c-27.6,0-50,22.4-50,50v304c0,27.601,22.4,50,50,50h145.5c-1.9,79.601-20.4,143.3-55.4,191.2   c-27.6,37.8-69.4,69.1-125.3,93.8c-25.7,11.3-36.8,41.7-24.8,67.101l35.9,75.8C52.336,913.497,81.236,924.298,106.036,913.497z" />
+                          </g>
+                        </svg>
+                      </a>
+                      <a class="text-white cursor-pointer text-white p-1 rounded-full transition duration-200 hover:bg-green-300 bg-green-500 w-10 h-10">
+                        <svg class="align-bottom fill-current h-8 inline w-8" xmlns="http://www.w3.org/2000/svg" height="512" viewBox="0 0 48 48" width="512">
+                          <g id="10-mark,-paper,-paper-pin,-pin,-reminder" fill="none" fill-rule="evenodd">
+                            <path id="Path" d="m25.5355339 6.90811691c1.5100273-1.51002726 4.0175988-1.60312726 5.6568543 0l9.8994949 9.89949489c1.5620972 1.5620972 1.5620972 4.0947571 0 5.6568543-1.5100273 1.5100273-4.0174922 1.6209134-5.6568543 0l-.7070288-.7074661-5.903 5.903c1.7807931 4.8196364.5885215 10.7674208-3.2894661 14.603456-.4186208.4140921-1.0629234.3601707-1.4142136 0l-8.4856695-8.485912-6.36357286 6.3645916c-.39052429.3905243-1.02368927.3905243-1.41421356 0-.36048397-.3604839-.42382887-.986896 0-1.4142135l6.36378642-6.3643781-8.48510677-8.4848643c-.36048396-.360484-.42985458-.984359 0-1.4142136 3.78366667-3.7836667 9.53069437-5.1378986 14.60245597-3.2904661l5.903-5.903-.7064661-.7060288c-1.611847-1.6201541-1.5100273-4.14682703 0-5.65685429z" fill="rgb(255,255,255)" fill-rule="nonzero" />
+                          </g>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                  <div id="popupmenu">
+                    <div id="questionMaker" class="bg-gray-800 flex transition duration-200 hover:opacity-100 opacity-100 ml-6 p-6 rounded-2xl">
+                      <div>
+                        <p class="border-b-2 border-blue-500 text-lg text-white font-medium mb-4">Question Options</p>
+                        <p class="text-white mb-6">Ask:
+                          <select class="p-1 bg-transparent border-b">
+                            <option class="p-1 bg-gray-800">Every participant</option>
+                            <option class="p-1 bg-gray-800">richard@plummail.co</option>
+                            <option class="p-1 bg-gray-800">peter@plummail.co</option>
+                            <option class="p-1 bg-gray-800">marylou@plummail.co</option>
+                            <option class="p-1 bg-gray-800">jane@plummail.co</option>
+                            <option class="p-1 bg-gray-800">jack@plummail.co</option>
+
+                          </select>
+                        </p>
+                        <p class="text-white mb-6">Due by:
+                          <select class="p-1 bg-transparent border-b">
+                            <option class="p-1 bg-gray-800">Open ended</option>
+                            <option class="p-1 bg-gray-800">Today</option>
+                            <option class="p-1 bg-gray-800">Tomorrow</option>
+                            <option class="p-1 bg-gray-800">This Week</option>
+                            <option class="p-1 bg-gray-800">Next Week</option>
+                            <option class="p-1 bg-gray-800">Custom</option>
+
+                          </select>
+
+                        </p>
+                        <input class="p-1 bg-transparent border-b" type="date">
+                      </div>
+                    </div>
+                    <div id="taskMaker" class="bg-gray-800 flex transition duration-200 hover:opacity-100 opacity-100 ml-6 p-6 rounded-2xl">
+                      <div>
+                        <p class="border-b-2 border-orange-500 text-lg text-white font-medium mb-4">Task Options</p>
+                        <p class="text-white mb-6">Assign to:
+                          <select class="p-1 bg-transparent border-b">
+                            <option class="p-1 bg-gray-800">Every participant</option>
+                            <option class="p-1 bg-gray-800">richard@plummail.co</option>
+                            <option class="p-1 bg-gray-800">peter@plummail.co</option>
+                            <option class="p-1 bg-gray-800">marylou@plummail.co</option>
+                            <option class="p-1 bg-gray-800">jane@plummail.co</option>
+                            <option class="p-1 bg-gray-800">jack@plummail.co</option>
+
+                          </select>
+                        </p>
+                        <p class="text-white mb-6">Due by:
+                          <select class="p-1 bg-transparent border-b">
+                            <option class="p-1 bg-gray-800">Open ended</option>
+                            <option class="p-1 bg-gray-800">Today</option>
+                            <option class="p-1 bg-gray-800">Tomorrow</option>
+                            <option class="p-1 bg-gray-800">This Week</option>
+                            <option class="p-1 bg-gray-800">Next Week</option>
+                            <option class="p-1 bg-gray-800">Custom</option>
+
+                          </select>
+
+                        </p>
+                        <input class="p-1 bg-transparent border-b" type="date">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </aside>
+              <main class="w-6/12">
+
+                <div class="bg-white rounded-lg shadow-md py-4 mx-6 ">
+                  <header class="py-1 flex text-gray-600 w-full px-24"><span class="font-bold truncate">richard@plummail.co</span> <span class="ml-auto whitespace-no-wrap">5 November</span>
+                  </header>
+                  <style>
+                    .inline-menu {
+                      opacity: 0;
+                      display: block;
+                      text-align: right;
+                      cursor: pointer;
+                      margin-top: -0.2em;
+                      color: gray;
+                      font-size: 1.3em;
+                    }
+
+                    .inline-menu:hover {
+                      opacity: 100;
+                    }
+
+                    .opac100 {
+                      opacity: 100;
+                    }
+
+                  </style>
+                  <div class="flex">
+                    <div class="w-1/12">
+                      <div class="markdown-body py-6">
+                        <p id="p1m" class="inline-menu">&#9776;</p>
+                        <p id="p2m" class="h-12 inline-menu opac100">
+                          <a class="cursor-pointer transition duration-200 ">
+                            <svg class="fill-current h-6 inline w-6" xmlns="http://www.w3.org/2000/svg" height="512" viewBox="0 0 48 48" width="512">
+                              <g id="10-mark,-paper,-paper-pin,-pin,-reminder" fill="none" fill-rule="evenodd">
+                                <path id="Path" d="m25.5355339 6.90811691c1.5100273-1.51002726 4.0175988-1.60312726 5.6568543 0l9.8994949 9.89949489c1.5620972 1.5620972 1.5620972 4.0947571 0 5.6568543-1.5100273 1.5100273-4.0174922 1.6209134-5.6568543 0l-.7070288-.7074661-5.903 5.903c1.7807931 4.8196364.5885215 10.7674208-3.2894661 14.603456-.4186208.4140921-1.0629234.3601707-1.4142136 0l-8.4856695-8.485912-6.36357286 6.3645916c-.39052429.3905243-1.02368927.3905243-1.41421356 0-.36048397-.3604839-.42382887-.986896 0-1.4142135l6.36378642-6.3643781-8.48510677-8.4848643c-.36048396-.360484-.42985458-.984359 0-1.4142136 3.78366667-3.7836667 9.53069437-5.1378986 14.60245597-3.2904661l5.903-5.903-.7064661-.7060288c-1.611847-1.6201541-1.5100273-4.14682703 0-5.65685429z" fill="rgb(160,174,192)" fill-rule="nonzero"></path>
+                              </g>
+                            </svg>
+                          </a>
+                        </p>
+                        <h2 id="h2-3m" class="inline-menu">&#9776;</h2>
+                        <p id="p4m" class="pt-6 inline-menu">
+                          <svg class="fill-current inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" height="339pt" viewBox="0 -20 339.22533 339" width="339pt">
+                            <path d="m282.972656 64.425781h-226.945312c-3.136719 0-5.675782 2.542969-5.675782 5.675781v158.863282c0 3.132812 2.542969 5.671875 5.675782 5.671875h226.945312c3.132813 0 5.671875-2.539063 5.671875-5.671875v-158.863282c0-3.132812-2.539062-5.675781-5.671875-5.675781zm-215.921875 158.863281 45.710938-63.996093 25.023437 34.976562-16.929687 29.019531zm66.949219 0 69.539062-119.230468 69.554688 119.230468zm143.296875-147.515624v132.199218l-68.851563-118.015625c-1.820312-2.707031-5.492187-3.425781-8.199218-1.605469-.632813.425782-1.179688.972657-1.605469 1.605469l-54.59375 93.617188-26.664063-37.292969c-1.058593-1.507812-2.777343-2.414062-4.621093-2.421875-1.832031 0-3.550781.882813-4.617188 2.375l-46.441406 65.019531v-135.480468zm0 0" />
+                            <path d="m338.4375 210.019531-15.75-58.785156v-103.828125c0-9.398438-7.621094-17.019531-17.019531-17.019531h-15.386719l-4.726562-17.726563c-2.472657-9.042968-11.785157-14.398437-20.84375-11.980468l-110.933594 29.707031h-120.445313c-9.398437 0-17.019531 7.621093-17.019531 17.019531v19.808594l-3.699219.984375c-9.050781 2.472656-14.425781 11.769531-12.050781 20.847656l15.75 58.785156v103.828125c0 9.398438 7.621094 17.019532 17.019531 17.019532h15.386719l4.726562 17.722656c2.441407 9.0625 11.765626 14.429687 20.828126 11.988281.003906-.003906.011718-.003906.015624-.003906l110.933594-29.707031h120.445313c9.398437 0 17.019531-7.621094 17.019531-17.023438v-19.804688l3.699219-.988281c9.050781-2.46875 14.425781-11.765625 12.050781-20.84375zm-70.785156-198.355469c3.011718-.804687 6.105468.96875 6.933594 3.96875l3.9375 14.753907h-80.882813zm-256.125 74.464844c-.789063-3.035156 1.007812-6.140625 4.027344-6.972656l.757812-.199219v25.03125zm59.816406 201.300782c-3.007812.804687-6.101562-.96875-6.933594-3.96875l-3.945312-14.78125h80.894531zm239.996094-35.769532c0 3.132813-2.539063 5.671875-5.671875 5.671875h-272.335938c-3.132812 0-5.671875-2.539062-5.671875-5.671875v-204.253906c0-3.132812 2.539063-5.671875 5.671875-5.671875h272.335938c3.132812 0 5.671875 2.539063 5.671875 5.671875zm12.101562-31.773437-.753906.21875v-25.03125l4.785156 17.859375c.773438 3.027344-1.019531 6.121094-4.03125 6.953125zm0 0" />
+                            <path d="m135.457031 138.183594c12.535157 0 22.695313-10.160156 22.695313-22.691406 0-12.535157-10.160156-22.695313-22.695313-22.695313-12.535156 0-22.695312 10.160156-22.695312 22.695313 0 12.53125 10.160156 22.691406 22.695312 22.691406zm0-34.039063c6.265625 0 11.347657 5.078125 11.347657 11.347657 0 6.265624-5.082032 11.34375-11.347657 11.34375s-11.347656-5.078126-11.347656-11.34375c0-6.269532 5.082031-11.347657 11.347656-11.347657zm0 0" /></svg>
+                        </p>
+                        <p style="padding-top: 327px;" id="p5m" class="inline-menu opac100">
+                          <svg style="margin-bottom:0.1em;" class="fill-current w-5 h-5 inline leading-none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512.005 512.005" xml:space="preserve" width="512" height="512">
+                            <g>
+                              <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M482.406,181.101H112.91l317.772-87.087c5.326-1.46,8.46-6.961,7.001-12.288   c-1.46-5.326-6.962-8.46-12.288-7.001l-16.874,4.624l-63.91-42.929l54.571-14.955c18.071-4.951,37.232,2.952,46.617,19.215   c2.761,4.781,8.876,6.421,13.66,3.662c4.783-2.762,6.423-8.877,3.662-13.66C449.19,6.546,420.729-5.177,393.896,2.176   L64.636,92.412c-0.054,0.015-0.106,0.033-0.16,0.049c-0.04,0.011-0.079,0.023-0.118,0.035c-32.379,9.037-51.47,42.67-42.577,75.128   l6.804,24.822v76.949v181.4c0,33.751,27.458,61.21,61.209,61.21h341.4c33.752,0,61.211-27.459,61.211-61.21v-181.4v-78.294   C492.406,185.578,487.929,181.101,482.406,181.101z M472.406,259.395h-97.794l50.292-58.294h47.502V259.395z M286.951,259.395   l50.291-58.294h61.248l-50.291,58.294H286.951z M199.291,259.395l50.291-58.294h61.247l-50.292,58.294H199.291z M111.629,259.395   l50.291-58.294h61.247l-50.292,58.294H111.629z M48.586,259.395v-58.294h86.92l-50.291,58.294H48.586z M150.051,89.741   l63.911,42.929l-59.07,16.189l-63.911-42.93L150.051,89.741z M234.594,66.572l63.911,42.929l-59.069,16.188l-63.911-42.93   L234.594,66.572z M383.047,86.33l-59.067,16.188L260.068,59.59l59.068-16.188L383.047,86.33z M65.764,113.083l63.654,42.756   l-83.831,22.975l-4.516-16.477C35.456,141.848,46.406,120.662,65.764,113.083z M472.406,450.795   c0,22.724-18.487,41.21-41.211,41.21h-341.4c-22.723,0-41.209-18.486-41.209-41.21v-171.4h423.82V450.795z"></path>
+                              <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M419.662,386.114H101.327c-5.523,0-10,4.478-10,10s4.477,10,10,10h107.669   v21.785c0,5.522,4.477,10,10,10c5.523,0,10-4.478,10-10v-21.785h62.997l-0.001,21.784c0,5.523,4.477,10.001,9.999,10.001   c0.001,0,0.001,0,0.001,0c5.522,0,10-4.477,10-9.999l0.001-21.786h107.669c5.522,0,10-4.478,10-10S425.185,386.114,419.662,386.114   z"></path>
+                              <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M91.327,336.669c0,5.522,4.477,10,10,10h318.335c5.522,0,10-4.478,10-10   c0-5.522-4.478-10-10-10H101.327C95.804,326.669,91.327,331.147,91.327,336.669z"></path>
+                              <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M456.623,73.795c0,5.508,4.492,10,10,10c5.508,0,10-4.492,10-10   c0-5.508-4.492-10-10-10C461.115,63.795,456.623,68.287,456.623,73.795z"></path>
+                            </g>
+                          </svg>
+                        </p>
+                        <p class="inline-menu" style="padding-top:20px;">&#9776;</p>
+                        <a onclick="showanswers();" style="margin-top: 40px;" class="bg-blue-500 block cursor-pointer duration-200 h-6 hover:bg-blue-300 ml-10 p-1 rounded-full text-white transition w-6">
+                          <svg class="block fill-current h-4 inline w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="365.442px" height="365.442px" viewBox="0 0 365.442 365.442" style="enable-background:new 0 0 365.442 365.442;" xml:space="preserve">
+                            <g>
+                              <g>
+                                <path d="M212.994,274.074h-68.522c-3.042,0-5.708,1.149-7.992,3.429c-2.286,2.286-3.427,4.948-3.427,7.994v68.525    c0,3.046,1.145,5.712,3.427,7.994c2.284,2.279,4.947,3.426,7.992,3.426h68.522c3.042,0,5.715-1.144,7.99-3.426    c2.29-2.282,3.433-4.948,3.433-7.994v-68.525c0-3.046-1.14-5.708-3.433-7.994C218.709,275.217,216.036,274.074,212.994,274.074z"></path>
+                                <path d="M302.935,68.951c-7.806-14.378-17.891-26.506-30.266-36.406c-12.367-9.896-26.271-17.799-41.685-23.697    C215.567,2.952,200.246,0,185.016,0C127.157,0,83,25.315,52.544,75.946c-1.521,2.473-2.046,5.137-1.571,7.993    c0.478,2.852,1.953,5.232,4.427,7.135l46.824,35.691c2.474,1.52,4.854,2.281,7.139,2.281c3.427,0,6.375-1.525,8.852-4.57    c13.702-17.128,23.887-28.072,30.548-32.833c8.186-5.518,18.461-8.276,30.833-8.276c11.61,0,21.838,3.046,30.692,9.132    c8.85,6.092,13.271,13.135,13.271,21.129c0,8.942-2.375,16.178-7.135,21.698c-4.757,5.518-12.754,10.845-23.986,15.986    c-14.842,6.661-28.457,16.988-40.823,30.978c-12.375,13.991-18.558,28.885-18.558,44.682v12.847c0,3.62,0.994,7.187,2.996,10.708    c2,3.524,4.425,5.283,7.282,5.283h68.521c3.046,0,5.708-1.472,7.994-4.432c2.279-2.942,3.426-6.036,3.426-9.267    c0-4.757,2.617-11.14,7.847-19.13c5.235-7.994,11.752-14.186,19.562-18.565c7.419-4.186,13.219-7.56,17.411-10.133    c4.196-2.566,9.664-6.715,16.423-12.421c6.756-5.712,11.991-11.375,15.698-16.988c3.713-5.614,7.046-12.896,9.996-21.844    c2.956-8.945,4.428-18.558,4.428-28.835C314.639,98.397,310.734,83.314,302.935,68.951z"></path>
+                              </g>
+                            </g>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                    <article class="w-11/12 pl-10 pr-24 mr-6">
+                      <div class="markdown-body">
+                        <p>Wow you shared a lot of links in the previous message, makes it a good test case. Go back and have a look at the links in the messages.</p>
+                        <p>Also here's a link to my photo album</p>
+
+                          <style>
+                            .gallery img {
+                              transition: 1s;
+                            }
+
+                            .gallery img:hover {
+                              transition: 1s;
+                              transform: scale(1.05);
+                              cursor: pointer;
+                            }
+
+                            .gallery-toggle+section {
+                              display: none;
+                            }
+
+                            .gallery-toggle:checked+section {
+                              display: block;
+                            }
+
+                          </style>
+                          <h2>5 new photos by Peter Saxton</h2>
+                          <div name="gallery_container" class="flex flex-wrap border border-gray-400 rounded-lg p-1">
+                            <div name="thumbnail_container" class="w-1/2 md:w-1/3 h-32 p-1">
+                              <label for="expand-img-1" class="gallery block overflow-hidden">
+                                <img class="mx-auto object-cover h-full w-full" src="https://lh3.googleusercontent.com/w4KvpxVydOk_P6yC63zzj12W_hsn6UE3UCcVD-FqpsiVqYWm70-jeL5TcNBU2UgJbLS7AfDFAfpJVhk0kqXTw4iCytOtYo5ocVL4bG1kP98Pxd1IVQxJElGZLz9tK2zd_P3D0OM9mg" alt="" />
+                              </label>
+                              <input type="checkbox" class="hidden gallery-toggle" id="expand-img-1">
+                              <section class="bg-gray-200 fixed h-screen left-0 pt-16 top-0 w-full z-10">
+                                <div class="w-full max-w-4xl mx-auto">
+                                  <label for="expand-img-1" class="-ml-16 mt-8 bg-gray-900 hover:bg-gray-700 block fixed h-8 p-2 rounded-full text-white w-8 cursor-pointer">
+                                    <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 492 492" style="enable-background:new 0 0 492 492;" xml:space="preserve">
+                                      <g>
+                                        <g>
+                                          <path d="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872    c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872    c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052    L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116    c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952    c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116    c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" />
+                                        </g>
+                                      </g>
+                                    </svg>
+                                  </label>
+                                      <img class="mx-auto h-full py-8" src="https://lh3.googleusercontent.com/w4KvpxVydOk_P6yC63zzj12W_hsn6UE3UCcVD-FqpsiVqYWm70-jeL5TcNBU2UgJbLS7AfDFAfpJVhk0kqXTw4iCytOtYo5ocVL4bG1kP98Pxd1IVQxJElGZLz9tK2zd_P3D0OM9mg" alt="" />
+                                </div>
+                              </section>
+                            </div>
+                            <div name="thumbnail_container" class="w-1/2 md:w-1/3 h-32 p-1">
+                              <label for="expand-img-2" class="gallery block overflow-hidden">
+                                <img class="mx-auto object-cover h-full w-full" src="https://lh3.googleusercontent.com/FKw9KHO501oTVEIeGQD6HKOXwxzQQwOFMhPhIGbMrJqPEsyBIdP1Z_aEQoGUzekFZyU3Ues_rtA1NEwTOgsibP7wzTjM3XFxozQ7MHRsw2C1VW83ZtHVnnoNEoH472TgKm8HzzgezA" alt="" />
+                              </label>
+                              <input type="checkbox" class="hidden gallery-toggle" id="expand-img-2">
+                              <section class="bg-gray-200 fixed h-screen left-0 pt-16 top-0 w-full z-10">
+                                <div class="w-full max-w-4xl mx-auto">
+                                  <label for="expand-img-2" class="-ml-16 mt-8 bg-gray-900 hover:bg-gray-700 block fixed h-8 p-2 rounded-full text-white w-8 cursor-pointer">
+                                    <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 492 492" style="enable-background:new 0 0 492 492;" xml:space="preserve">
+                                      <g>
+                                        <g>
+                                          <path d="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872    c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872    c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052    L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116    c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952    c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116    c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" />
+                                        </g>
+                                      </g>
+                                    </svg>
+                                  </label>
+                                    <img class="mx-auto h-full py-8" src="https://lh3.googleusercontent.com/FKw9KHO501oTVEIeGQD6HKOXwxzQQwOFMhPhIGbMrJqPEsyBIdP1Z_aEQoGUzekFZyU3Ues_rtA1NEwTOgsibP7wzTjM3XFxozQ7MHRsw2C1VW83ZtHVnnoNEoH472TgKm8HzzgezA" alt="" />
+                                </div>
+                              </section>
+
+                            </div>
+                            <div name="thumbnail_container" class="w-1/2 md:w-1/3 h-32 p-1">
+                              <label for="expand-img-3" class="gallery block overflow-hidden">
+                                <img class="mx-auto object-cover h-full w-full" src="https://lh3.googleusercontent.com/WyYW8XwZCVQUpCraqM7zpMoCGrXfScyt6gVFjn75DxY6ExIY5IQywYdO7ukwziffrrCktJ18RDIEuE9CwJzHqohb8MiY70fQwlKgVtiSg1eew6q0F3fD8BNX3hpJV29SkHfxjckHwQ" alt="" />
+                              </label>
+                              <input type="checkbox" class="hidden gallery-toggle" id="expand-img-3">
+                              <section class="bg-gray-200 fixed h-screen left-0 pt-16 top-0 w-full z-10">
+                                <div class="w-full max-w-4xl mx-auto">
+                                  <label for="expand-img-3" class="-ml-16 mt-8 bg-gray-900 hover:bg-gray-700 block fixed h-8 p-2 rounded-full text-white w-8 cursor-pointer">
+                                    <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 492 492" style="enable-background:new 0 0 492 492;" xml:space="preserve">
+                                      <g>
+                                        <g>
+                                          <path d="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872    c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872    c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052    L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116    c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952    c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116    c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" />
+                                        </g>
+                                      </g>
+                                    </svg>
+                                  </label>
+                                      <img class="mx-auto h-full py-8" src="https://lh3.googleusercontent.com/WyYW8XwZCVQUpCraqM7zpMoCGrXfScyt6gVFjn75DxY6ExIY5IQywYdO7ukwziffrrCktJ18RDIEuE9CwJzHqohb8MiY70fQwlKgVtiSg1eew6q0F3fD8BNX3hpJV29SkHfxjckHwQ" alt="" />
+                                </div>
+                              </section>
+                            </div>
+                            <div name="thumbnail_container" class="w-1/2 md:w-1/3 h-32 p-1">
+                              <label for="expand-img-4" class="gallery block overflow-hidden">
+                                <img class="mx-auto object-cover h-full w-full" src="https://images.unsplash.com/photo-1491002052546-bf38f186af56?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1083&q=80" alt="" />
+                              </label>
+                              <input type="checkbox" class="hidden gallery-toggle" id="expand-img-4">
+                              <section class="bg-gray-200 fixed h-screen left-0 pt-16 top-0 w-full z-10">
+                                <div class="w-full max-w-4xl mx-auto">
+                                  <label for="expand-img-4" class="-ml-16 mt-8 bg-gray-900 hover:bg-gray-700 block fixed h-8 p-2 rounded-full text-white w-8 cursor-pointer">
+                                    <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 492 492" style="enable-background:new 0 0 492 492;" xml:space="preserve">
+                                      <g>
+                                        <g>
+                                          <path d="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872    c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872    c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052    L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116    c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952    c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116    c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" />
+                                        </g>
+                                      </g>
+                                    </svg>
+                                  </label>
+                                      <img class="mx-auto h-full py-8" src="https://images.unsplash.com/photo-1491002052546-bf38f186af56?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1083&q=80" alt="" />
+                                </div>
+                              </section>
+                            </div>
+                            <div name="thumbnail_container" class="w-1/2 md:w-1/3 h-32 p-1">
+                              <label for="expand-img-5" class="gallery block overflow-hidden">
+                                <img class="mx-auto object-cover h-full w-full" src="https://images.unsplash.com/photo-1483737946376-7c6c89443adb?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=967&q=80" alt="" />
+                              </label>
+                              <input type="checkbox" class="hidden gallery-toggle" id="expand-img-5">
+                              <section class="bg-gray-200 fixed h-screen left-0 pt-16 top-0 w-full z-10">
+                                <div class="w-full max-w-4xl mx-auto">
+                                  <label for="expand-img-5" class="-ml-16 mt-8 bg-gray-900 hover:bg-gray-700 block fixed h-8 p-2 rounded-full text-white w-8 cursor-pointer">
+                                    <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 492 492" style="enable-background:new 0 0 492 492;" xml:space="preserve">
+                                      <g>
+                                        <g>
+                                          <path d="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872    c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872    c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052    L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116    c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952    c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116    c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" />
+                                        </g>
+                                      </g>
+                                    </svg>
+                                  </label>
+                                      <img class="mx-auto h-full py-8" src="https://images.unsplash.com/photo-1483737946376-7c6c89443adb?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=967&q=80" alt="" />
+                                </div>
+                              </section>
+                            </div>
+                          </div>
+
+                      </div>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="flex bg-white mt-6 rounded-lg shadow-md py-4 mx-6 ">
+                  <div class="w-1/12">
+                    <p style="padding-top:174px;" class="inline-menu">&#9776;</p>
+                    <p id="disp" onclick="showoptions();" style="padding-top:20px;" class="inline-menu">&#9776;</p>
+                    <p style="padding-top:20px;" class="inline-menu">&#9776;</p>
+                    <a onclick="questionMaker();" style="margin-top: 50px;" class="bg-blue-500 block cursor-pointer duration-200 h-6 hover:bg-blue-300 ml-10 p-1 rounded-full text-white transition w-6">
+                      <svg class="block fill-current h-4 inline w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="365.442px" height="365.442px" viewBox="0 0 365.442 365.442" style="enable-background:new 0 0 365.442 365.442;" xml:space="preserve">
+                        <g>
+                          <g>
+                            <path d="M212.994,274.074h-68.522c-3.042,0-5.708,1.149-7.992,3.429c-2.286,2.286-3.427,4.948-3.427,7.994v68.525    c0,3.046,1.145,5.712,3.427,7.994c2.284,2.279,4.947,3.426,7.992,3.426h68.522c3.042,0,5.715-1.144,7.99-3.426    c2.29-2.282,3.433-4.948,3.433-7.994v-68.525c0-3.046-1.14-5.708-3.433-7.994C218.709,275.217,216.036,274.074,212.994,274.074z"></path>
+                            <path d="M302.935,68.951c-7.806-14.378-17.891-26.506-30.266-36.406c-12.367-9.896-26.271-17.799-41.685-23.697    C215.567,2.952,200.246,0,185.016,0C127.157,0,83,25.315,52.544,75.946c-1.521,2.473-2.046,5.137-1.571,7.993    c0.478,2.852,1.953,5.232,4.427,7.135l46.824,35.691c2.474,1.52,4.854,2.281,7.139,2.281c3.427,0,6.375-1.525,8.852-4.57    c13.702-17.128,23.887-28.072,30.548-32.833c8.186-5.518,18.461-8.276,30.833-8.276c11.61,0,21.838,3.046,30.692,9.132    c8.85,6.092,13.271,13.135,13.271,21.129c0,8.942-2.375,16.178-7.135,21.698c-4.757,5.518-12.754,10.845-23.986,15.986    c-14.842,6.661-28.457,16.988-40.823,30.978c-12.375,13.991-18.558,28.885-18.558,44.682v12.847c0,3.62,0.994,7.187,2.996,10.708    c2,3.524,4.425,5.283,7.282,5.283h68.521c3.046,0,5.708-1.472,7.994-4.432c2.279-2.942,3.426-6.036,3.426-9.267    c0-4.757,2.617-11.14,7.847-19.13c5.235-7.994,11.752-14.186,19.562-18.565c7.419-4.186,13.219-7.56,17.411-10.133    c4.196-2.566,9.664-6.715,16.423-12.421c6.756-5.712,11.991-11.375,15.698-16.988c3.713-5.614,7.046-12.896,9.996-21.844    c2.956-8.945,4.428-18.558,4.428-28.835C314.639,98.397,310.734,83.314,302.935,68.951z"></path>
+                          </g>
+                        </g>
+                      </svg>
+                    </a>
+                  </div>
+                  <article class="w-11/12 pl-10 pr-24 mr-6">
+
+                    <div class="mb-6 pb-6 border-b-4 border-gray-300">
+
+                      <blockquote class="flex px-4 my-2 border-l-4 border-blue-500">
+                        <a class="flex-1  hover:underline" href="#Q:0">When are we going skiing again?</a>
+                        <nav>
+                          <button class="opacity-0 hover:opacity-100 bg-gray-200 p-1 rounded" type="button">❌</button>
+                        </nav>
+                      </blockquote>
+                      <textarea class="p-6 border rounded-lg w-full bg-white outline-none" name="Q:0" rows="1" placeholder="Answer" style="min-height: 0em; max-height: 60vh;"></textarea>
+
+                    </div>
+                  </article>
+                </div>
+                <footer id="compose-menu" class="px-8 py-4 flex flex-wrap items-baseline border-t">
+                  <label class="font-medium flex py-1 justify-start items-start">
+                    <span class="text-gray-700 pr-2">Conclude</span>
+                    <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                      <input type="checkbox" class="opacity-0 absolute" name="resolve">
+                      <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
+                        <path d="M0 11l2-2 5 5L18 3l2 2L7 18z"></path>
+                      </svg>
+                    </div>
+                  </label>
+                  <div class="ml-auto">
+                    <button class="my-1 py-2 px-4 rounded-lg bg-green-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">
+                      <svg class="-mt-1 fill-current h-4 inline mr-2 w-4" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="512" viewBox="0 0 24 24" width="512">
+                        <path d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                        <path d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" /></svg>
+                      Send</button>
+                  </div>
+                </footer>
+              </main>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+</body>
+
+</html>
