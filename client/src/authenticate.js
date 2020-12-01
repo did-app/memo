@@ -9,7 +9,11 @@ export default async function authenticate() {
     window.location.hash = "#";
   }
 
-  return resp.map(function ({identifier}) {
-    return {id: identifier.id, emailAddress: identifier.email_address}
-  })
+  return resp.map(function({ identifier }) {
+    return {
+      id: identifier.id,
+      emailAddress: identifier.email_address,
+      hasAccount: identifier.has_account
+    };
+  });
 }

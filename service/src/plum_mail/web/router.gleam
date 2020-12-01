@@ -133,6 +133,11 @@ pub fn route(
         authentication.authenticate(link_token, refresh_token, user_agent)
         |> result.map_error(fn(e) { error.Unauthenticated })
       let cookie_defaults = http.cookie_defaults(request.scheme)
+      // TODO add to the database
+      let has_account = case identifier.email_address.value {
+          "peter@plummail.co" | "richard@plummail.co" -> True
+          _ -> False
+      }
       let data =
         json.object([
           tuple(
@@ -142,6 +147,10 @@ pub fn route(
               tuple(
                 "email_address",
                 json.string(identifier.email_address.value),
+              ),
+              tuple(
+                "has_account",
+                json.bool(has_account),
               ),
             ]),
           ),
