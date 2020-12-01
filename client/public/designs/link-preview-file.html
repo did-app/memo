@@ -1,0 +1,552 @@
+<html lang="en" dir="ltr" class="js-focus-visible" data-js-focus-visible="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/vendor/github-markdown.min.css" crossorigin="anonymous">
+  <script src="https://app.plummail.co/vendor/marked.min.js"></script>
+  <script src="https://kit.fontawesome.com/f868aafb81.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://app.plummail.co/vendor/TextTip.css">
+  <link rel="stylesheet" href="https://app.plummail.co/css/extra.css">
+  <script src="https://app.plummail.co/vendor/minisearch.min.js"></script>
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-16x16.png" sizes="16x16">
+  <title>plum mail</title>
+  <script async="" defer="" src="/build/main.js"></script>
+  <script async="" defer="" data-domain="app.plummail.co" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    .bottom-full {
+      bottom: 100%
+    }
+
+    .top-full {
+      top: 100%
+    }
+
+    #account-settings {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #account-settings:target {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .toggle-checkbox:checked {
+      @apply: right-0 border-green-400;
+      right: 0;
+      border-color: #68D391;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      @apply: bg-green-400;
+      background-color: #68D391;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2 {
+      border: none;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .markdown-body h1 {
+      font-size: 1.5em;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      /* font-weight: normal; */
+    }
+
+    .markdown-body h3,
+    .markdown-body h4 {
+      font-size: inherit;
+    }
+
+    .markdown-body h2 {
+      font-size: 1.3em;
+      /* font-weight: normal; */
+    }
+
+    .markdown-body p {
+      margin-bottom: 16px;
+    }
+
+    .markdown-body ul {
+      list-style: initial;
+    }
+
+    .markdown-body ol {
+      list-style: decimal;
+    }
+
+    .markdown-body ol,
+    .markdown-body ul {
+      padding-left: 2em;
+      margin-bottom: 2em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 6px;
+    }
+
+    #task-suggestion {
+      display: none;
+    }
+
+    #questionMaker {
+      display: none;
+    }
+
+    #taskMaker {
+      display: none;
+    }
+
+    #answers {
+      display: none;
+    }
+
+    #welcome {
+      display: none;
+    }
+
+    #welcome:target {
+      display: block;
+    }
+
+  </style>
+</head>
+
+<body class="body-scroll-off min-h-screen text-gray-800 bg-gray-200">
+  <main class="flex flex-col md:flex-row">
+    <section class="w-full ">
+      <header class="z-20 h-16 fixed w-full bg-white mx-auto text-left border-b-2">
+        <nav class="ml-auto p-4">
+          <a href="/">
+            <span class="px-1 mr-8 hover:text-indigo-800 hover:border-indigo-800 pt-2 text-lg font-semibold">Richard</span>
+          </a>
+          <a style="padding-top:0.28em; padding-bottom:0.5em;" class="bg-green-500 hover:bg-green-700 transition duration-200 px-4 rounded-lg text-white leading-none" href="#compose">
+            <svg style="margin-bottom:0.1em;" class="fill-current w-6 mr-2 inline leading-none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M485.743,85.333H26.257C11.815,85.333,0,97.148,0,111.589V400.41c0,14.44,11.815,26.257,26.257,26.257h459.487    c14.44,0,26.257-11.815,26.257-26.257V111.589C512,97.148,500.185,85.333,485.743,85.333z M475.89,105.024L271.104,258.626    c-3.682,2.802-9.334,4.555-15.105,4.529c-5.77,0.026-11.421-1.727-15.104-4.529L36.109,105.024H475.89z M366.5,268.761    l111.59,137.847c0.112,0.138,0.249,0.243,0.368,0.368H33.542c0.118-0.131,0.256-0.23,0.368-0.368L145.5,268.761    c3.419-4.227,2.771-10.424-1.464-13.851c-4.227-3.419-10.424-2.771-13.844,1.457l-110.5,136.501V117.332l209.394,157.046    c7.871,5.862,17.447,8.442,26.912,8.468c9.452-0.02,19.036-2.6,26.912-8.468l209.394-157.046v275.534L381.807,256.367    c-3.42-4.227-9.623-4.877-13.844-1.457C363.729,258.329,363.079,264.534,366.5,268.761z"></path>
+                </g>
+              </g>
+
+            </svg>Compose</a>
+          <p class="ml-8 inline text-xs text-gray-700">Next update at 3pm today</p>
+          <p class="ml-8 inline text-xs text-gray-700">Actions 2/5 today</p>
+          <div class="bg-gray-300 inline-block mt-2 mx-2 rounded-full w-24">
+            <div class="bg-purple-800 inline-block py-1 rounded-full w-2/5"></div>
+          </div>
+
+          <div class="-mt-1 inline-block pl-8 w-5/12">
+            <svg class="z-10 absolute ml-2 mt-2 w-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 396.819 396.819" style="enable-background:new 0 0 396.819 396.819;" xml:space="preserve">
+              <g>
+                <g>
+                  <path d="M352.103,44.679c-59.237-59.401-155.412-59.535-214.813-0.298c-57.316,57.157-59.741,149.218-5.515,209.314l-11.6,11.6    c-9.372-9.373-24.568-9.375-33.941-0.003c-0.001,0.001-0.002,0.002-0.003,0.003l-79.2,79.2    c-9.373,9.372-9.375,24.568-0.003,33.941c0.001,0.001,0.002,0.002,0.003,0.003l11.312,11.312c9.372,9.369,24.564,9.369,33.936,0    l79.2-79.2c9.373-9.372,9.375-24.568,0.003-33.941c-0.001-0.001-0.002-0.002-0.003-0.003l11.6-11.6    c62.24,56.247,158.292,51.388,214.539-10.851C411.948,194.037,409.521,101.856,352.103,44.679z M120.175,299.231l-79.2,79.2    c-3.124,3.123-8.188,3.123-11.312,0l-11.312-11.32c-3.118-3.123-3.118-8.181,0-11.304l79.2-79.2c3.164-3.025,8.148-3.025,11.312,0    l11.312,11.32C123.293,291.05,123.293,296.108,120.175,299.231z M340.799,248.327c-53.112,53.11-139.223,53.109-192.333-0.003    s-53.109-139.223,0.003-192.333c53.111-53.109,139.219-53.109,192.33,0C393.824,109.139,393.824,195.179,340.799,248.327z" />
+                </g>
+              </g>
+              <g>
+                <g>
+                  <path d="M329.479,67.303L329.479,67.303l-11.312,11.312c40.545,40.644,40.545,106.436,0,147.08l11.312,11.312    C376.275,190.117,376.275,114.193,329.479,67.303z" />
+                </g>
+              </g>
+            </svg>
+            <input class="focus:shadow-md focus:bg-white border-2 border-gray-300 bg-gray-200 inline-block w-full rounded pl-8 pr-2 py-1 text-black focus:border-indigo-800 outline-none" placeholder="" id="search" autofocus="" autocomplete="off">
+          </div>
+
+          <a href="#account-settings" class="block float-right">
+            <svg href="#account-settings" class="w-8" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 56 56" style="enable-background:new 0 0 56 56;" xml:space="preserve">
+              <path d="M28,0C12.561,0,0,12.561,0,28s12.561,28,28,28s28-12.561,28-28S43.439,0,28,0z M40,41H16c-1.104,0-2-0.896-2-2s0.896-2,2-2
+	h24c1.104,0,2,0.896,2,2S41.104,41,40,41z M40,30H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,30,40,30z
+	 M40,19H16c-1.104,0-2-0.896-2-2s0.896-2,2-2h24c1.104,0,2,0.896,2,2S41.104,19,40,19z" />
+            </svg>
+          </a>
+        </nav>
+      </header>
+      <div class="mt-20 flex">
+        <div class="w-full pb-12">
+          <div id="conversation">
+            <section class="w-full mx-auto flex mb-4">
+              <aside class="w-3/12">
+
+
+              </aside>
+              <main class="w-6/12">
+                <article id="2" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
+                  <input id="message-2" class="message-checkbox hidden" type="checkbox">
+                  <label class="cursor-pointer" for="message-2">
+                    <header class="py-1 md:py-4 flex text-gray-600"><span class="font-bold ml-2 md:ml-20 truncate">richard@plummail.co</span> <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">1 December</span></header>
+                    <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 "></div>
+                  </label>
+                  <div class="content-intro px-2 md:px-20 truncate markdown-body">This is an 'anyone with the link' kinda link</div>
+                  <div class="markdown-body py-2 px-2 md:px-20">
+                    <p>This is a Google Drive Link for a document that is viewable by anyone. </p>
+                    <div class="bg-gray-100 border px-2 rounded">
+                      <h2 style="margin-top:10px; margin-bottom:6px;">
+                        <img class="inline h-6 w-6 align-baseline -mb-1" src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+                        Attachment</h2>
+                      <p class="font-medium">website pages draft march 2020.pptx</p>
+                      <div class="flex">
+                        <a class="md:w-1/3 bg-white border-gray-400 rounded border" href="https://drive.google.com/file/d/1t6ICeuUoF13aR_9DQuvtk0hGGgn8Q85_/view?usp=embed_facebook" target="_blank">
+                          <img class="p-2" src="https://lh4.googleusercontent.com/UTisZc4kz2MOKEGwcqQ23qK-XQwLlygV-BZJyZkmSHTnf7lV5LWTLkxkO83L8cg=w1200-h630-p" alt="">
+                        </a>
+                        <div class="md:w-2/3">
+                          <p class="pl-2 text-sm">Blue Barn presentation folder for website June 2020. Here are all the images of the things we make, they are very nice and I think you should buy some...</p>
+                        </div>
+
+                      </div>
+
+
+                      <p class="mt-4 text-sm">
+                        <a class="px-4 py-2 bg-purple-700 hover:bg-purple-500 rounded-lg inline-block text-white font-medium" target="_blank" href="https://drive.google.com/file/d/1t6ICeuUoF13aR_9DQuvtk0hGGgn8Q85_/view?usp=embed_facebook">
+                          <svg class="-mt-1 fill-current w-4 h-4 mr-1 inline" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd" height="512" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" width="512">
+                            <g transform="translate(-216.731 -90.903)">
+                              <path d="m227.731 92.903h-5c-2.209 0-4 1.791-4 4v12c0 2.209 1.791 4 4 4h12c2.209 0 4-1.791 4-4 0-2.271 0-5 0-5 0-.552-.448-1-1-1s-1 .448-1 1v5c0 1.104-.896 2-2 2-3.33 0-8.671 0-12 0-1.105 0-2-.896-2-2 0-3.33 0-8.671 0-12 0-1.105.895-2 2-2h5c.552 0 1-.448 1-1s-.448-1-1-1zm7.586 2h-3.586c-.552 0-1-.448-1-1s.448-1 1-1h6c.552 0 1 .448 1 1v6c0 .552-.448 1-1 1s-1-.448-1-1v-3.586l-7.293 7.293c-.39.39-1.024.39-1.414 0-.391-.39-.391-1.024 0-1.414z" />
+                            </g>
+                          </svg>
+                          Open</a>
+                        <input onclick="copylinka();" id="link-a" class="outline-none focus:bg-gray-300 focus:font-medium inline py-2 px-4 bg-white rounded-lg border-gray-500 border-2 ml-4" type="text" value="https://drive.google.com/file/d/1t6ICeuUoF13aR_9DQuvtk0hGGgn8Q85_/view?usp=embed_facebook">
+                        <label for="link-a" class="cursor-pointer inline-block text-gray-600">
+                          <svg class="-mb-1 fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" id="Capa_1" enable-background="new 0 0 520 520" height="512" viewBox="0 0 520 520" width="512">
+                            <g>
+                              <path d="m460.821 112.251-103.334-107.639c-2.828-2.946-6.736-4.612-10.82-4.612h-180.834c-22.515 0-40.833 18.317-40.833 40.833v27.223h-29.167c-22.515 0-40.833 18.317-40.833 40.833v370.277c0 22.516 18.318 40.834 40.833 40.834h258.333c22.516 0 40.834-18.318 40.834-40.834v-27.222h29.167c22.516 0 40.833-18.317 40.833-40.833v-288.472c0-3.872-1.498-7.595-4.179-10.388zm-95.821 366.915c0 5.974-4.86 10.834-10.833 10.834h-258.334c-5.973 0-10.833-4.86-10.833-10.834v-370.277c0-5.974 4.86-10.833 10.833-10.833h29.167v313.056c0 22.516 18.318 40.833 40.833 40.833h199.167zm70-68.055c0 5.974-4.86 10.833-10.833 10.833h-44.167-214.167c-5.974 0-10.833-4.859-10.833-10.833v-328.055-42.223c0-5.974 4.86-10.833 10.833-10.833h174.44l94.727 98.674z" />
+                              <path d="m335.833 70.973c0-8.284-6.716-15-15-15s-15 6.716-15 15v77.5c0 8.284 6.716 15 15 15h77.5c8.284 0 15-6.716 15-15s-6.716-15-15-15h-62.5z" />
+                            </g>
+                          </svg>
+                          
+                        </label>
+                        <span id="link-a-copied">Link Copied!</span>
+                        <style>
+                          #link-a-copied {
+                            display:none;
+                          }
+                        </style>
+                        <script>
+                          function copylinka() {
+                            /* Get the text field */
+                            var copyText = document.getElementById("link-a");
+
+                            /* Select the text field */
+                            copyText.select();
+                            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+                            /* Copy the text inside the text field */
+                            document.execCommand("copy");
+
+                            /* Alert the copied text */
+                            document.getElementById("link-a-copied").style.display ="inline";
+                          }
+
+                        </script>
+
+                      </p>
+                    </div>
+                  </div>
+                  <footer class="h-2 md:h-12 mb-2 mt-4"></footer>
+                </article>
+                
+                <article id="2" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
+                  <input id="message-2" class="message-checkbox hidden" type="checkbox">
+                  <label class="cursor-pointer" for="message-2">
+                    <header class="py-1 md:py-4 flex text-gray-600"><span class="font-bold ml-2 md:ml-20 truncate">richard@plummail.co</span> <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">1 December</span></header>
+                    <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 "></div>
+                  </label>
+                  <div class="content-intro px-2 md:px-20 truncate markdown-body">This is an 'anyone with the link' kinda link</div>
+                  <div class="markdown-body py-2 px-2 md:px-20">
+                    <p>This is a Google Drive Link for a document that is viewable by anyone. </p>
+                    <div class="bg-gray-100 border px-2 rounded">
+                      <h2 style="margin-top:10px; margin-bottom:6px;">
+                        <img class="inline h-6 w-6 align-baseline -mb-1" src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+                        Attachment</h2>
+                      <p class="font-medium">website future</p>
+                      <div class="flex">
+                        <a class="md:w-1/3 bg-white border-gray-400 rounded border" href="https://docs.google.com/document/d/1kGXN-D3XimmJkLWPoxivG0REkH_KyciUlS6y9FAtJMc/edit?usp=embed_facebook" target="_blank">
+                          <img class="p-2" src="https://lh3.googleusercontent.com/Hi7VIsnDTXVEFxpaWqPSV-5uG4W2zZQyDi3PEj9TH8fwRNxn0WbBR8Jjm3NJKIThxK_VlXGotw=w1200-h630-p" alt="">
+                        </a>
+                        <div class="md:w-2/3">
+                          <p class="pl-2 text-sm">What do we want from the site? The concept was to encourage visitors to ask questions about benefits. These questions would allow us to filter out possible clients. Initially the concept was fine and was coupled with efforts to increase traffic to generate revenue in the form of advertising. Thi...</p>
+                        </div>
+
+                      </div>
+
+
+                      <p class="mt-4 text-sm">
+                        <a class="px-4 py-2 bg-purple-700 hover:bg-purple-500 rounded-lg inline-block text-white font-medium" target="_blank" href="https://docs.google.com/document/d/1kGXN-D3XimmJkLWPoxivG0REkH_KyciUlS6y9FAtJMc/edit?usp=embed_facebook">
+                          <svg class="-mt-1 fill-current w-4 h-4 mr-1 inline" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd" height="512" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" width="512">
+                            <g transform="translate(-216.731 -90.903)">
+                              <path d="m227.731 92.903h-5c-2.209 0-4 1.791-4 4v12c0 2.209 1.791 4 4 4h12c2.209 0 4-1.791 4-4 0-2.271 0-5 0-5 0-.552-.448-1-1-1s-1 .448-1 1v5c0 1.104-.896 2-2 2-3.33 0-8.671 0-12 0-1.105 0-2-.896-2-2 0-3.33 0-8.671 0-12 0-1.105.895-2 2-2h5c.552 0 1-.448 1-1s-.448-1-1-1zm7.586 2h-3.586c-.552 0-1-.448-1-1s.448-1 1-1h6c.552 0 1 .448 1 1v6c0 .552-.448 1-1 1s-1-.448-1-1v-3.586l-7.293 7.293c-.39.39-1.024.39-1.414 0-.391-.39-.391-1.024 0-1.414z" />
+                            </g>
+                          </svg>
+                          Open</a>
+                        <input onclick="copylinkb();" id="link-b" class="outline-none focus:bg-gray-300 focus:font-medium inline py-2 px-4 bg-white rounded-lg border-gray-500 border-2 ml-4" type="text" value="https://docs.google.com/document/d/1kGXN-D3XimmJkLWPoxivG0REkH_KyciUlS6y9FAtJMc/edit?usp=embed_facebook">
+                        <label for="link-b" class="cursor-pointer inline-block text-gray-600">
+                          <svg class="-mb-1 fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" id="Capa_1" enable-background="new 0 0 520 520" height="512" viewBox="0 0 520 520" width="512">
+                            <g>
+                              <path d="m460.821 112.251-103.334-107.639c-2.828-2.946-6.736-4.612-10.82-4.612h-180.834c-22.515 0-40.833 18.317-40.833 40.833v27.223h-29.167c-22.515 0-40.833 18.317-40.833 40.833v370.277c0 22.516 18.318 40.834 40.833 40.834h258.333c22.516 0 40.834-18.318 40.834-40.834v-27.222h29.167c22.516 0 40.833-18.317 40.833-40.833v-288.472c0-3.872-1.498-7.595-4.179-10.388zm-95.821 366.915c0 5.974-4.86 10.834-10.833 10.834h-258.334c-5.973 0-10.833-4.86-10.833-10.834v-370.277c0-5.974 4.86-10.833 10.833-10.833h29.167v313.056c0 22.516 18.318 40.833 40.833 40.833h199.167zm70-68.055c0 5.974-4.86 10.833-10.833 10.833h-44.167-214.167c-5.974 0-10.833-4.859-10.833-10.833v-328.055-42.223c0-5.974 4.86-10.833 10.833-10.833h174.44l94.727 98.674z" />
+                              <path d="m335.833 70.973c0-8.284-6.716-15-15-15s-15 6.716-15 15v77.5c0 8.284 6.716 15 15 15h77.5c8.284 0 15-6.716 15-15s-6.716-15-15-15h-62.5z" />
+                            </g>
+                          </svg>
+                          
+                        </label>
+                        <span id="link-b-copied">Link Copied!</span>
+                        <style>
+                          #link-b-copied {
+                            display:none;
+                          }
+                        </style>
+                        <script>
+                          function copylinkb() {
+                            /* Get the text field */
+                            var copyText = document.getElementById("link-b");
+
+                            /* Select the text field */
+                            copyText.select();
+                            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+                            /* Copy the text inside the text field */
+                            document.execCommand("copy");
+
+                            /* Alert the copied text */
+                            document.getElementById("link-b-copied").style.display ="inline";
+                          }
+
+                        </script>
+
+                      </p>
+                    </div>
+                  </div>
+                  <footer class="h-2 md:h-12 mb-2 mt-4"></footer>
+                </article>
+                
+                <article id="3" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
+                  <input id="message-2" class="message-checkbox hidden" type="checkbox">
+                  <label class="cursor-pointer" for="message-2">
+                    <header class="py-1 md:py-4 flex text-gray-600"><span class="font-bold ml-2 md:ml-20 truncate">richard@plummail.co</span> <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">1 December</span></header>
+                    <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 "></div>
+                  </label>
+                  <div class="content-intro px-2 md:px-20 truncate markdown-body">This is an 'anyone with the link' kinda link</div>
+                  <div class="markdown-body py-2 px-2 md:px-20">
+                    <p>This is a Google Drive Link for a document that is viewable by anyone. </p>
+                    <div class="bg-gray-100 border px-2 rounded">
+                      <h2 style="margin-top:10px; margin-bottom:6px;">
+                        <img class="inline h-6 w-6 align-baseline -mb-1" src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+                        Attachment</h2>
+                      <p class="font-medium">Untitled spreadsheet</p>
+                      <div class="flex">
+                        <a class="md:w-1/3 bg-white border-gray-400 rounded border" href="https://docs.google.com/spreadsheets/d/13gVu0D_nsACS2o54RJ8ynEIdBlRna3B40SPzL29ad_Y/edit?usp=embed_facebook" target="_blank">
+                          <img class="p-2" src="https://lh5.googleusercontent.com/akiuyewlAGL9jBIu16pcHHQLi7KF11dJIA6NEV7gESa4Sj2Xlf_Zxv71BEhqn8d31lAbdQyBGw=w1200-h630-p" alt="">
+                        </a>
+                        <div class="md:w-2/3">
+                          
+                        </div>
+
+                      </div>
+
+
+                      <p class="mt-4 text-sm">
+                        <a class="px-4 py-2 bg-purple-700 hover:bg-purple-500 rounded-lg inline-block text-white font-medium" target="_blank" href="https://docs.google.com/spreadsheets/d/13gVu0D_nsACS2o54RJ8ynEIdBlRna3B40SPzL29ad_Y/edit?usp=embed_facebook">
+                          <svg class="-mt-1 fill-current w-4 h-4 mr-1 inline" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd" height="512" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" width="512">
+                            <g transform="translate(-216.731 -90.903)">
+                              <path d="m227.731 92.903h-5c-2.209 0-4 1.791-4 4v12c0 2.209 1.791 4 4 4h12c2.209 0 4-1.791 4-4 0-2.271 0-5 0-5 0-.552-.448-1-1-1s-1 .448-1 1v5c0 1.104-.896 2-2 2-3.33 0-8.671 0-12 0-1.105 0-2-.896-2-2 0-3.33 0-8.671 0-12 0-1.105.895-2 2-2h5c.552 0 1-.448 1-1s-.448-1-1-1zm7.586 2h-3.586c-.552 0-1-.448-1-1s.448-1 1-1h6c.552 0 1 .448 1 1v6c0 .552-.448 1-1 1s-1-.448-1-1v-3.586l-7.293 7.293c-.39.39-1.024.39-1.414 0-.391-.39-.391-1.024 0-1.414z" />
+                            </g>
+                          </svg>
+                          Open</a>
+                        <input onclick="copylinkc();" id="link-c" class="outline-none focus:bg-gray-300 focus:font-medium inline py-2 px-4 bg-white rounded-lg border-gray-500 border-2 ml-4" type="text" value="https://docs.google.com/spreadsheets/d/13gVu0D_nsACS2o54RJ8ynEIdBlRna3B40SPzL29ad_Y/edit?usp=embed_facebook">
+                        <label for="link-c" class="cursor-pointer inline-block text-gray-600">
+                          <svg class="-mb-1 fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" id="Capa_1" enable-background="new 0 0 520 520" height="512" viewBox="0 0 520 520" width="512">
+                            <g>
+                              <path d="m460.821 112.251-103.334-107.639c-2.828-2.946-6.736-4.612-10.82-4.612h-180.834c-22.515 0-40.833 18.317-40.833 40.833v27.223h-29.167c-22.515 0-40.833 18.317-40.833 40.833v370.277c0 22.516 18.318 40.834 40.833 40.834h258.333c22.516 0 40.834-18.318 40.834-40.834v-27.222h29.167c22.516 0 40.833-18.317 40.833-40.833v-288.472c0-3.872-1.498-7.595-4.179-10.388zm-95.821 366.915c0 5.974-4.86 10.834-10.833 10.834h-258.334c-5.973 0-10.833-4.86-10.833-10.834v-370.277c0-5.974 4.86-10.833 10.833-10.833h29.167v313.056c0 22.516 18.318 40.833 40.833 40.833h199.167zm70-68.055c0 5.974-4.86 10.833-10.833 10.833h-44.167-214.167c-5.974 0-10.833-4.859-10.833-10.833v-328.055-42.223c0-5.974 4.86-10.833 10.833-10.833h174.44l94.727 98.674z" />
+                              <path d="m335.833 70.973c0-8.284-6.716-15-15-15s-15 6.716-15 15v77.5c0 8.284 6.716 15 15 15h77.5c8.284 0 15-6.716 15-15s-6.716-15-15-15h-62.5z" />
+                            </g>
+                          </svg>
+                          
+                        </label>
+                        <span id="link-c-copied">Link Copied!</span>
+                        <style>
+                          #link-c-copied {
+                            display:none;
+                          }
+                        </style>
+                        <script>
+                          function copylinkc() {
+                            /* Get the text field */
+                            var copyText = document.getElementById("link-c");
+
+                            /* Select the text field */
+                            copyText.select();
+                            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+                            /* Copy the text inside the text field */
+                            document.execCommand("copy");
+
+                            /* Alert the copied text */
+                            document.getElementById("link-c-copied").style.display ="inline";
+                          }
+
+                        </script>
+
+                      </p>
+                    </div>
+                  </div>
+                  <footer class="h-2 md:h-12 mb-2 mt-4"></footer>
+                </article>
+             
+                <article id="4" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
+                  <input id="message-2" class="message-checkbox hidden" type="checkbox">
+                  <label class="cursor-pointer" for="message-2">
+                    <header class="py-1 md:py-4 flex text-gray-600"><span class="font-bold ml-2 md:ml-20 truncate">richard@plummail.co</span> <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">1 December</span></header>
+                    <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 "></div>
+                  </label>
+                  <div class="content-intro px-2 md:px-20 truncate markdown-body">This is an 'anyone with the link' kinda link</div>
+                  <div class="markdown-body py-2 px-2 md:px-20">
+                    <p>This is a document I have set to 'anyone with the link' in Dropbox. </p>
+                    <div class="bg-gray-100 border px-2 rounded">
+                      <h2 style="margin-top:10px; margin-bottom:6px;">
+                        <img class="inline h-6 w-6 align-baseline -mb-1" src="https://cfl.dropboxstatic.com/static/images/favicon-vflUeLeeY.ico">
+                        Attachment</h2>
+                      <p class="font-medium">Curly Cottage Media Limited Estimate 000033 for Lauder Consultancy LTD 1.10.18[2].pdf.pdf</p>
+                      <div class="flex">
+                        <a class="md:w-1/3 border-gray-400 bg-white rounded border" href="https://www.dropbox.com/s/clvs4d4yf55vit0/Curly%20Cottage%20Media%20Limited%20Estimate%20000033%20for%20Lauder%20Consultancy%20LTD%201.10.18%5B2%5D.pdf.pdf" target="_blank">
+                          <img class="p-2" src="https://www.dropbox.com/static/images/spectrum-icons/generated/content/content-pdf-large.png" alt="">
+                        </a>
+                        <div class="md:w-2/3">
+                          <p class="pl-2 text-sm">Shared with Dropbox</p>
+                        </div>
+
+                      </div>
+
+
+                      <p class="mt-4 text-sm">
+                        <a class="px-4 py-2 bg-purple-700 hover:bg-purple-500 rounded-lg inline-block text-white font-medium" target="_blank" href="https://www.dropbox.com/s/clvs4d4yf55vit0/Curly%20Cottage%20Media%20Limited%20Estimate%20000033%20for%20Lauder%20Consultancy%20LTD%201.10.18%5B2%5D.pdf.pdf">
+                          <svg class="-mt-1 fill-current w-4 h-4 mr-1 inline" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd" height="512" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" width="512">
+                            <g transform="translate(-216.731 -90.903)">
+                              <path d="m227.731 92.903h-5c-2.209 0-4 1.791-4 4v12c0 2.209 1.791 4 4 4h12c2.209 0 4-1.791 4-4 0-2.271 0-5 0-5 0-.552-.448-1-1-1s-1 .448-1 1v5c0 1.104-.896 2-2 2-3.33 0-8.671 0-12 0-1.105 0-2-.896-2-2 0-3.33 0-8.671 0-12 0-1.105.895-2 2-2h5c.552 0 1-.448 1-1s-.448-1-1-1zm7.586 2h-3.586c-.552 0-1-.448-1-1s.448-1 1-1h6c.552 0 1 .448 1 1v6c0 .552-.448 1-1 1s-1-.448-1-1v-3.586l-7.293 7.293c-.39.39-1.024.39-1.414 0-.391-.39-.391-1.024 0-1.414z" />
+                            </g>
+                          </svg>
+                          Open</a>
+                        <input onclick="copylinkd();" id="link-d" class="outline-none focus:bg-gray-300 focus:font-medium inline py-2 px-4 bg-white rounded-lg border-gray-500 border-2 ml-4" type="text" value="https://www.dropbox.com/s/clvs4d4yf55vit0/Curly%20Cottage%20Media%20Limited%20Estimate%20000033%20for%20Lauder%20Consultancy%20LTD%201.10.18%5B2%5D.pdf.pdf">
+                        <label for="link-d" class="cursor-pointer inline-block text-gray-600">
+                          <svg class="-mb-1 fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" id="Capa_1" enable-background="new 0 0 520 520" height="512" viewBox="0 0 520 520" width="512">
+                            <g>
+                              <path d="m460.821 112.251-103.334-107.639c-2.828-2.946-6.736-4.612-10.82-4.612h-180.834c-22.515 0-40.833 18.317-40.833 40.833v27.223h-29.167c-22.515 0-40.833 18.317-40.833 40.833v370.277c0 22.516 18.318 40.834 40.833 40.834h258.333c22.516 0 40.834-18.318 40.834-40.834v-27.222h29.167c22.516 0 40.833-18.317 40.833-40.833v-288.472c0-3.872-1.498-7.595-4.179-10.388zm-95.821 366.915c0 5.974-4.86 10.834-10.833 10.834h-258.334c-5.973 0-10.833-4.86-10.833-10.834v-370.277c0-5.974 4.86-10.833 10.833-10.833h29.167v313.056c0 22.516 18.318 40.833 40.833 40.833h199.167zm70-68.055c0 5.974-4.86 10.833-10.833 10.833h-44.167-214.167c-5.974 0-10.833-4.859-10.833-10.833v-328.055-42.223c0-5.974 4.86-10.833 10.833-10.833h174.44l94.727 98.674z" />
+                              <path d="m335.833 70.973c0-8.284-6.716-15-15-15s-15 6.716-15 15v77.5c0 8.284 6.716 15 15 15h77.5c8.284 0 15-6.716 15-15s-6.716-15-15-15h-62.5z" />
+                            </g>
+                          </svg>
+                          
+                        </label>
+                        <span id="link-d-copied">Link Copied!</span>
+                        <style>
+                          #link-d-copied {
+                            display:none;
+                          }
+                        </style>
+                        <script>
+                          function copylinkd() {
+                            /* Get the text field */
+                            var copyText = document.getElementById("link-d");
+
+                            /* Select the text field */
+                            copyText.select();
+                            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+                            /* Copy the text inside the text field */
+                            document.execCommand("copy");
+
+                            /* Alert the copied text */
+                            document.getElementById("link-d-copied").style.display ="inline";
+                          }
+
+                        </script>
+
+                      </p>
+                    </div>
+                  </div>
+                  <footer class="h-2 md:h-12 mb-2 mt-4"></footer>
+                </article>
+                
+                <article id="5" class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
+                  <input id="message-5" class="message-checkbox hidden" type="checkbox">
+                  <label class="cursor-pointer" for="message-2">
+                    <header class="py-1 md:py-4 flex text-gray-600"><span class="font-bold ml-2 md:ml-20 truncate">richard@plummail.co</span> <span class="ml-auto mr-2 md:mr-8 whitespace-no-wrap">1 December</span></header>
+                    <div class="message-overlay absolute bottom-0 top-0 right-0 left-0 "></div>
+                  </label>
+                  <div class="content-intro px-2 md:px-20 truncate markdown-body">This is an 'anyone with the link' kinda link</div>
+                  <div class="markdown-body py-2 px-2 md:px-20">
+                    <p>This is a OneDrive document I have set to 'anyone with the link' in Dropbox. </p>
+                    <div class="bg-gray-100 border px-2 rounded">
+                      <h2 style="margin-top:10px; margin-bottom:6px;">
+                        <img class="inline h-6 w-6 align-baseline -mb-1" src="https://c.s-microsoft.com/favicon.ico?v2">
+                        Attachment</h2>
+                      <p class="font-medium">Getting started with OneDrive.pdf</p>
+                      <div class="flex">
+                        <a class="md:w-1/3 border-gray-400 bg-white rounded border" href="https://onedrive.live.com/redir?resid=3591BF9CFC619045!102&authkey=!AJ-kpjGvLsf8qkg&ithint=file%2cpdf" target="_blank">
+                          <img class="p-2" src="https://p.sfx.ms/icons/v2/Large/Pdf.png" alt="">
+                        </a>
+                        <div class="md:w-2/3">
+                          <p class="pl-2 text-sm">PDF File</p>
+                        </div>
+
+                      </div>
+
+
+                      <p class="mt-4 text-sm">
+                        <a class="px-4 py-2 bg-purple-700 hover:bg-purple-500 rounded-lg inline-block text-white font-medium" target="_blank" href="https://onedrive.live.com/redir?resid=3591BF9CFC619045!102&authkey=!AJ-kpjGvLsf8qkg&ithint=file%2cpdf">
+                          <svg class="-mt-1 fill-current w-4 h-4 mr-1 inline" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd" height="512" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" width="512">
+                            <g transform="translate(-216.731 -90.903)">
+                              <path d="m227.731 92.903h-5c-2.209 0-4 1.791-4 4v12c0 2.209 1.791 4 4 4h12c2.209 0 4-1.791 4-4 0-2.271 0-5 0-5 0-.552-.448-1-1-1s-1 .448-1 1v5c0 1.104-.896 2-2 2-3.33 0-8.671 0-12 0-1.105 0-2-.896-2-2 0-3.33 0-8.671 0-12 0-1.105.895-2 2-2h5c.552 0 1-.448 1-1s-.448-1-1-1zm7.586 2h-3.586c-.552 0-1-.448-1-1s.448-1 1-1h6c.552 0 1 .448 1 1v6c0 .552-.448 1-1 1s-1-.448-1-1v-3.586l-7.293 7.293c-.39.39-1.024.39-1.414 0-.391-.39-.391-1.024 0-1.414z" />
+                            </g>
+                          </svg>
+                          Open</a>
+                        <input onclick="copylinke();" id="link-e" class="outline-none focus:bg-gray-300 focus:font-medium inline py-2 px-4 bg-white rounded-lg border-gray-500 border-2 ml-4" type="text" value="https://onedrive.live.com/redir?resid=3591BF9CFC619045!102&authkey=!AJ-kpjGvLsf8qkg&ithint=file%2cpdf">
+                        <label for="link-e" class="cursor-pointer inline-block text-gray-600">
+                          <svg class="-mb-1 fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" id="Capa_1" enable-background="new 0 0 520 520" height="512" viewBox="0 0 520 520" width="512">
+                            <g>
+                              <path d="m460.821 112.251-103.334-107.639c-2.828-2.946-6.736-4.612-10.82-4.612h-180.834c-22.515 0-40.833 18.317-40.833 40.833v27.223h-29.167c-22.515 0-40.833 18.317-40.833 40.833v370.277c0 22.516 18.318 40.834 40.833 40.834h258.333c22.516 0 40.834-18.318 40.834-40.834v-27.222h29.167c22.516 0 40.833-18.317 40.833-40.833v-288.472c0-3.872-1.498-7.595-4.179-10.388zm-95.821 366.915c0 5.974-4.86 10.834-10.833 10.834h-258.334c-5.973 0-10.833-4.86-10.833-10.834v-370.277c0-5.974 4.86-10.833 10.833-10.833h29.167v313.056c0 22.516 18.318 40.833 40.833 40.833h199.167zm70-68.055c0 5.974-4.86 10.833-10.833 10.833h-44.167-214.167c-5.974 0-10.833-4.859-10.833-10.833v-328.055-42.223c0-5.974 4.86-10.833 10.833-10.833h174.44l94.727 98.674z" />
+                              <path d="m335.833 70.973c0-8.284-6.716-15-15-15s-15 6.716-15 15v77.5c0 8.284 6.716 15 15 15h77.5c8.284 0 15-6.716 15-15s-6.716-15-15-15h-62.5z" />
+                            </g>
+                          </svg>
+                          
+                        </label>
+                        <span id="link-e-copied">Link Copied!</span>
+                        <style>
+                          #link-e-copied {
+                            display:none;
+                          }
+                        </style>
+                        <script>
+                          function copylinke() {
+                            /* Get the text field */
+                            var copyText = document.getElementById("link-e");
+
+                            /* Select the text field */
+                            copyText.select();
+                            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+                            /* Copy the text inside the text field */
+                            document.execCommand("copy");
+
+                            /* Alert the copied text */
+                            document.getElementById("link-e-copied").style.display ="inline";
+                          }
+
+                        </script>
+
+                      </p>
+                    </div>
+                  </div>
+                  <footer class="h-2 md:h-12 mb-2 mt-4"></footer>
+                </article>
+             
+              </main>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+</body>
+
+</html>
