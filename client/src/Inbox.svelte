@@ -54,7 +54,7 @@
   $: found = searchAll(searchTerm)
   let results;
   let hasAccount = false;
-  let emailAddress;
+  let emailAddress = "";
   $: results = (function () {
     if (hasAccount) {
       return (panel === ARCHIVE) ? conversations : ((panel === UNREAD) ? unread : found);
@@ -233,7 +233,7 @@ Feel free to use this conversation to ask Richard and myself anything you like.
 p.s. Richard will say hi in the next few days">
           <input type="hidden" name="author_id" value="1">
           <input type="hidden" name="cc" value="richard@plummail.co">
-          <input class="border-2 rounded-lg bg-gray-100 border-gray-500 m-4 px-4 py-2" disabled type="email" name="email" value="123@foo.com">
+          <input class="border-2 rounded-lg bg-gray-100 border-gray-500 m-4 px-4 py-2" disabled type="email" name="email" value={emailAddress}>
           <button class="font-medium text-center bg-purple-700 hover:bg-purple-500 cursor-pointer transition duration-100 rounded-lg px-4 py-2 text-white text-lg">
             Join the waitlist
           </button>
