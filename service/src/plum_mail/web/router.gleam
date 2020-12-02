@@ -34,33 +34,6 @@ import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
 import plum_mail/email/inbound/postmark
 
-fn load_cookies(request, client_origin) {
-  let origin =
-    http.get_req_header(request, "origin")
-    |> option.from_result()
-  let referrer =
-    http.get_req_header(request, "referer`")
-    |> option.from_result()
-    |> option.map(fn(referrer) {
-      assert Ok(referrer) = uri.parse(referrer)
-      assert Ok(origin) = uri.origin(referrer)
-      origin
-    })
-
-  // Test in router test, return 403 if cookies are set.
-  // Would it be easier to return a single result/option
-  assert Some(client_origin) = option.or(origin, referrer)
-
-  let cookies = http.get_req_cookies(request)
-  let refresh_token =
-    list.key_find(cookies, "refresh")
-    |> option.from_result()
-  let session_token =
-    list.key_find(cookies, "session")
-    |> option.from_result()
-  tuple(refresh_token, session_token)
-}
-
 fn load_participation(conversation_id, request, config) {
   try conversation_id =
     int.parse(conversation_id)
@@ -89,35 +62,21 @@ pub fn route(
         }
       }
       assert Ok(identifier) = authentication.lookup_identifier(email_address)
-      assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-      assert Ok(tuple(_, refresh_token, session_token)) =
-        authentication.authenticate(Some(link_token), option.None, "ua TODO")
+      assert Ok(user_agent) = http.get_req_header(request, "user-agent")
       let cookie_defaults = http.cookie_defaults(request.scheme)
-      io.debug(refresh_token)
+      let token = web.auth_token(identifier.id, user_agent, config.secret)
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.set_resp_cookie("session", session_token, cookie_defaults)
-      |> http.set_resp_cookie(
-        "refresh",
-        refresh_token,
-        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-      )
+      |> http.set_resp_cookie("token", token, cookie_defaults)
       |> Ok
-      |> io.debug()
     }
     ["authenticate"] -> {
+      // link tokens last for ever so might as well be a signed message as well
+      // delete and use purpose link token
       try params = acl.parse_json(request)
-      io.debug(params)
-      try link_token = acl.optional(params, "link_token", acl.as_string)
-      let tuple(refresh_token, _) = load_cookies(request, config.client_origin)
-      io.debug(refresh_token)
-      assert tuple("user_agent", Ok(user_agent)) = tuple(
-        "user_agent",
-        http.get_req_header(request, "user-agent"),
-      )
-      try tuple(identifier, refresh_token, session_token) =
-        authentication.authenticate(link_token, refresh_token, user_agent)
-        |> result.map_error(fn(e) { error.Unauthenticated })
-      let cookie_defaults = http.cookie_defaults(request.scheme)
+      try link_token = acl.required(params, "link_token", acl.as_string)
+      try identifier =
+        authentication.validate_link_token(link_token)
+        |> result.map_error(fn(_: Nil) { error.Forbidden })
       // TODO add to the database
       let has_account = case identifier.email_address.value {
         "peter@plummail.co" | "richard@plummail.co" -> True
@@ -137,14 +96,12 @@ pub fn route(
             ]),
           ),
         ])
+      assert Ok(user_agent) = http.get_req_header(request, "user-agent")
+      let token = web.auth_token(identifier.id, user_agent, config.secret)
+      let cookie_defaults = http.cookie_defaults(request.scheme)
       http.response(200)
       |> web.set_resp_json(data)
-      |> http.set_resp_cookie("session", session_token, cookie_defaults)
-      |> http.set_resp_cookie(
-        "refresh",
-        refresh_token,
-        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-      )
+      |> http.set_resp_cookie("token", token, cookie_defaults)
       |> Ok
     }
     ["authenticate", "email"] -> {
