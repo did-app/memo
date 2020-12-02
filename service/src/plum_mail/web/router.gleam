@@ -44,6 +44,12 @@ fn load_participation(conversation_id, request, config) {
   discuss.load_participation(conversation_id, identifier_id)
 }
 
+fn token_cookie_settings(request) {
+  let Request(scheme: scheme, ..) = request
+  let defaults = http.cookie_defaults(scheme)
+  http.CookieAttributes(..defaults, max_age: Some(604800))
+}
+
 pub fn route(
   request,
   config: config.Config,
@@ -63,10 +69,9 @@ pub fn route(
       }
       assert Ok(identifier) = authentication.lookup_identifier(email_address)
       assert Ok(user_agent) = http.get_req_header(request, "user-agent")
-      let cookie_defaults = http.cookie_defaults(request.scheme)
       let token = web.auth_token(identifier.id, user_agent, config.secret)
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.set_resp_cookie("token", token, cookie_defaults)
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
     }
     ["authenticate"] -> {
@@ -98,10 +103,9 @@ pub fn route(
         ])
       assert Ok(user_agent) = http.get_req_header(request, "user-agent")
       let token = web.auth_token(identifier.id, user_agent, config.secret)
-      let cookie_defaults = http.cookie_defaults(request.scheme)
       http.response(200)
       |> web.set_resp_json(data)
-      |> http.set_resp_cookie("token", token, cookie_defaults)
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
     }
     ["authenticate", "email"] -> {
@@ -112,14 +116,10 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
-    ["sign_out"] -> {
-      // TODO delete the refresh token
-      let cookie_defaults = http.cookie_defaults(request.scheme)
+    ["sign_out"] ->
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.expire_resp_cookie("session", cookie_defaults)
-      |> http.expire_resp_cookie("refresh", cookie_defaults)
+      |> http.expire_resp_cookie("token", token_cookie_settings(request))
       |> Ok
-    }
     ["inbox"] -> {
       try identifier_id = web.identify_client(request, config)
       try conversations = show_inbox.execute(identifier_id)
