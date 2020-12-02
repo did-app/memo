@@ -1,15 +1,28 @@
 import gleam/beam
-import gleam/bit_builder
+import gleam/bit_builder.{BitBuilder}
 import gleam/bit_string
 import gleam/dynamic
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/option.{Some}
 import gleam/order
-import gleam/http
+import gleam/os
+import gleam/result
+import gleam/string
+import gleam/http.{Response}
 import gleam/json
 import midas/signed_message
 import plum_mail/config.{Config}
+import plum_mail/error
+
+pub fn redirect(uri: String) -> Response(BitBuilder) {
+  let body =
+    string.append("You are being redirected to ", uri)
+    |> bit_string.from_string
+    |> bit_builder.from_bit_string
+  http.Response(status: 303, headers: [tuple("location", uri)], body: body)
+}
 
 pub fn set_req_json(request, data) {
   let body =
@@ -48,7 +61,14 @@ fn check_timestamp(issued, duration, now) {
   }
 }
 
-pub fn identify_client(request, config, now) {
+pub fn auth_token(identifier_id, user_agent, secret) {
+  let now = os.system_time(os.Second)
+  let term = tuple("cookie_token", identifier_id, now, now, user_agent)
+  let data = beam.term_to_binary(term)
+  signed_message.encode(data, secret)
+}
+
+fn do_identify_client(request, config, now) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try Nil = case http.get_req_origin(request) {
     Some(from) if from == client_origin -> Ok(Nil)
@@ -69,4 +89,10 @@ pub fn identify_client(request, config, now) {
     Ok(ua) if ua == user_agent -> Ok(Nil)
   }
   Ok(identifier_id)
+}
+
+pub fn identify_client(request, config) {
+  let now = os.system_time(os.Second)
+  do_identify_client(request, config, now)
+  |> result.map_error(fn(_) { error.Forbidden })
 }
