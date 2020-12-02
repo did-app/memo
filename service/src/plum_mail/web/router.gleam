@@ -34,56 +34,33 @@ import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
 import plum_mail/email/inbound/postmark
 
-pub fn redirect(uri: String) -> Response(BitBuilder) {
-  let body =
-    string.append("You are being redirected to ", uri)
-    |> bit_string.from_string
-    |> bit_builder.from_bit_string
-  http.Response(status: 303, headers: [tuple("location", uri)], body: body)
-}
-
-fn load_cookies(request, client_origin) {
-  let origin =
-    http.get_req_header(request, "origin")
-    |> option.from_result()
-  let referrer =
-    http.get_req_header(request, "referer`")
-    |> option.from_result()
-    |> option.map(fn(referrer) {
-      assert Ok(referrer) = uri.parse(referrer)
-      assert Ok(origin) = uri.origin(referrer)
-      origin
-    })
-
-  // Test in router test, return 403 if cookies are set.
-  // Would it be easier to return a single result/option
-  assert Some(client_origin) = option.or(origin, referrer)
-
-  let cookies = http.get_req_cookies(request)
-  let refresh_token =
-    list.key_find(cookies, "refresh")
-    |> option.from_result()
-  let session_token =
-    list.key_find(cookies, "session")
-    |> option.from_result()
-  tuple(refresh_token, session_token)
-}
-
-fn load_session(request, client_origin) {
-  let tuple(_, session_token) = load_cookies(request, client_origin)
-  try session = option.to_result(session_token, error.Unauthenticated)
-  authentication.load_session(session)
-  |> result.map_error(fn(_: Nil) { error.Unauthenticated })
-}
-
-fn load_participation(conversation_id, request, client_origin) {
+fn load_participation(conversation_id, request, config) {
   try conversation_id =
     int.parse(conversation_id)
     |> result.map_error(fn(_: Nil) {
       error.BadRequest("Invalid conversation id")
     })
-  try identifier_id = load_session(request, client_origin)
+  try identifier_id = web.identify_client(request, config)
   discuss.load_participation(conversation_id, identifier_id)
+}
+
+fn token_cookie_settings(request) {
+  let Request(scheme: scheme, ..) = request
+  let defaults = http.cookie_defaults(scheme)
+  http.CookieAttributes(..defaults, max_age: Some(604800))
+}
+
+fn identifier_data(identifier: Identifier) {
+  let has_account = case identifier.email_address.value {
+    "peter@plummail.co" | "richard@plummail.co" -> True
+    _ -> False
+  }
+
+  json.object([
+    tuple("id", json.int(identifier.id)),
+    tuple("email_address", json.string(identifier.email_address.value)),
+    tuple("has_account", json.bool(has_account)),
+  ])
 }
 
 pub fn route(
@@ -104,56 +81,27 @@ pub fn route(
         }
       }
       assert Ok(identifier) = authentication.lookup_identifier(email_address)
-      assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-      assert Ok(tuple(_, refresh_token, session_token)) =
-        authentication.authenticate(Some(link_token), option.None, "ua TODO")
-      let cookie_defaults = http.cookie_defaults(request.scheme)
-      io.debug(refresh_token)
-      redirect(string.append(config.client_origin, "/"))
-      |> http.set_resp_cookie("session", session_token, cookie_defaults)
-      |> http.set_resp_cookie(
-        "refresh",
-        refresh_token,
-        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-      )
+      assert Ok(user_agent) = http.get_req_header(request, "user-agent")
+      let token = web.auth_token(identifier.id, user_agent, config.secret)
+      web.redirect(string.append(config.client_origin, "/"))
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
-      |> io.debug()
     }
     ["authenticate"] -> {
+      // link tokens last for ever so might as well be a signed message as well
+      // delete and use purpose link token
       try params = acl.parse_json(request)
-      io.debug(params)
-      try link_token = acl.optional(params, "link_token", acl.as_string)
-      let tuple(refresh_token, _) = load_cookies(request, config.client_origin)
-      io.debug(refresh_token)
-      assert tuple("user_agent", Ok(user_agent)) = tuple(
-        "user_agent",
-        http.get_req_header(request, "user-agent"),
-      )
-      try tuple(identifier, refresh_token, session_token) =
-        authentication.authenticate(link_token, refresh_token, user_agent)
-        |> result.map_error(fn(e) { error.Unauthenticated })
-      let cookie_defaults = http.cookie_defaults(request.scheme)
-      let data =
-        json.object([
-          tuple(
-            "identifier",
-            json.object([
-              tuple("id", json.int(identifier.id)),
-              tuple(
-                "email_address",
-                json.string(identifier.email_address.value),
-              ),
-            ]),
-          ),
-        ])
+      try link_token = acl.required(params, "link_token", acl.as_string)
+      try identifier =
+        authentication.validate_link_token(link_token)
+        |> result.map_error(fn(_: Nil) { error.Forbidden })
+      // TODO add to the database
+      let data = json.object([tuple("identifier", identifier_data(identifier))])
+      assert Ok(user_agent) = http.get_req_header(request, "user-agent")
+      let token = web.auth_token(identifier.id, user_agent, config.secret)
       http.response(200)
       |> web.set_resp_json(data)
-      |> http.set_resp_cookie("session", session_token, cookie_defaults)
-      |> http.set_resp_cookie(
-        "refresh",
-        refresh_token,
-        http.CookieAttributes(..cookie_defaults, max_age: Some(604800)),
-      )
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
     }
     ["authenticate", "email"] -> {
@@ -164,22 +112,23 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
-    ["sign_out"] -> {
-      // TODO delete the refresh token
-      let cookie_defaults = http.cookie_defaults(request.scheme)
-      redirect(string.append(config.client_origin, "/"))
-      |> http.expire_resp_cookie("session", cookie_defaults)
-      |> http.expire_resp_cookie("refresh", cookie_defaults)
+    ["sign_out"] ->
+      web.redirect(string.append(config.client_origin, "/"))
+      |> http.expire_resp_cookie("token", token_cookie_settings(request))
       |> Ok
-    }
     ["inbox"] -> {
-      try identifier_id = load_session(request, config.client_origin)
+      try identifier_id = web.identify_client(request, config)
       try conversations = show_inbox.execute(identifier_id)
-      // |> result.map_error(fn(x) { todo("mapping show inbox") })
+      // can only show conversations if there is an identifier
+      assert Ok(Some(identifier)) =
+        authentication.fetch_identifier(identifier_id)
       // If this conversations is the same as the top level conversation object for a page,
       // it can be the start value when switching pages
       http.response(200)
-      |> web.set_resp_json(json.object([tuple("conversations", conversations)]))
+      |> web.set_resp_json(json.object([
+        tuple("conversations", conversations),
+        tuple("identifier", identifier_data(identifier)),
+      ]))
       |> Ok()
     }
     [] ->
@@ -276,17 +225,13 @@ pub fn route(
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
-      try identifier_id = load_session(request, config.client_origin)
+      try identifier_id = web.identify_client(request, config)
       try conversation = start_conversation.execute(topic, identifier_id)
       try _ = case map.get(params, "participant") {
         Error(Nil) -> Ok(Nil)
         Ok(email_address) -> {
           try participation =
-            load_participation(
-              int.to_string(conversation.id),
-              request,
-              config.client_origin,
-            )
+            load_participation(int.to_string(conversation.id), request, config)
           let params =
             dynamic.from(map.from_list([tuple("email_address", email_address)]))
           try params = add_participant.params(params)
@@ -294,7 +239,7 @@ pub fn route(
           Ok(Nil)
         }
       }
-      redirect(string.append(
+      web.redirect(string.append(
         string.append(config.client_origin, "/c/"),
         int.to_string(conversation.id),
       ))
@@ -302,7 +247,7 @@ pub fn route(
     }
     // This will need participation for cursor
     ["c", id] -> {
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try participants =
         discuss.load_participants(participation.conversation.id)
       try messages = discuss.load_messages(participation.conversation.id)
@@ -384,7 +329,7 @@ pub fn route(
     ["c", id, "participant"] -> {
       try params = acl.parse_json(request)
       try params = add_participant.params(params)
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try _ = add_participant.execute(participation, params)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
@@ -393,7 +338,7 @@ pub fn route(
     ["c", id, "notify"] -> {
       try params = acl.parse_json(request)
       try params = set_notification.params(params)
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try _ = set_notification.execute(participation, params)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
@@ -404,7 +349,7 @@ pub fn route(
     ["c", id, "message"] -> {
       try params = acl.parse_json(request)
       try params = write_message.params(params)
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try _ = write_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -413,7 +358,7 @@ pub fn route(
     ["c", id, "read"] -> {
       try params = acl.parse_json(request)
       try params = read_message.params(params)
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try _ = read_message.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -422,7 +367,7 @@ pub fn route(
     ["c", id, "pin"] -> {
       try params = acl.parse_json(request)
       try params = add_pin.params(params)
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try pin_id = add_pin.execute(participation, params)
       let data = json.object([tuple("id", json.int(pin_id))])
       http.response(200)
@@ -432,7 +377,7 @@ pub fn route(
     ["c", id, "delete_pin"] -> {
       try params = acl.parse_json(request)
       try params = delete_pin.params(params)
-      try participation = load_participation(id, request, config.client_origin)
+      try participation = load_participation(id, request, config)
       try _ = delete_pin.execute(participation, params)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))

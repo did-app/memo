@@ -41,6 +41,7 @@ services:
       DATABASE_URL: postgres://eEj8ar4O:OTnrE1n7D392DnbovK@localhost:6543/plum_mail
       DATABASE_SSL: "FALSE"
       POSTMARK_API_TOKEN: POSTMARK_DUMMY_TOKEN
+      SECRET: DEV_SECRET
     depends_on:
       - db
   db:

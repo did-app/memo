@@ -17,7 +17,7 @@ import plum_mail/web/helpers as web
 import plum_mail/support
 import gleam/should
 
-fn add_pin(user_session, conversation_id, counter, content) {
+fn add_pin(identifier_id, conversation_id, counter, content) {
   let request =
     http.default_req()
     |> http.set_method(http.Post)
@@ -25,10 +25,11 @@ fn add_pin(user_session, conversation_id, counter, content) {
       ["/c/", int.to_string(conversation_id), "/pin"],
       "",
     ))
-    |> http.prepend_req_header(
-      "cookie",
-      string.append("session=", user_session),
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(identifier_id, "ua-test", support.test_config().secret),
     )
+    |> http.prepend_req_header("user-agent", "ua-test")
     |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> web.set_req_json(json.object([
       tuple("counter", json.int(counter)),
@@ -40,9 +41,6 @@ fn add_pin(user_session, conversation_id, counter, content) {
 
 pub fn pin_content_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
@@ -54,7 +52,7 @@ pub fn pin_content_test() {
       participation,
       write_message.Params("My Message", False),
     )
-  let response = add_pin(session_token, conversation.id, 1, "Some sub content")
+  let response = add_pin(identifier.id, conversation.id, 1, "Some sub content")
 
   response.status
   |> should.equal(200)
@@ -80,10 +78,7 @@ pub fn pin_content_test() {
 
   // Other user can't write pin
   assert Ok(identifier) = support.generate_identifier("other.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
-  let response = add_pin(session_token, conversation.id, 1, "Some sub content")
+  let response = add_pin(identifier.id, conversation.id, 1, "Some sub content")
   response.status
   |> should.equal(403)
 }

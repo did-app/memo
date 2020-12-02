@@ -4,12 +4,8 @@ export default async function authenticate() {
   let fragment = window.location.hash.substring(1);
   let params = new URLSearchParams(fragment);
   let code = params.get("code");
-  let resp = await Client.authenticate(code);
   if (code) {
+    let resp = await Client.authenticate(code);
     window.location.hash = "#";
   }
-
-  return resp.map(function ({identifier}) {
-    return {id: identifier.id, emailAddress: identifier.email_address}
-  })
 }

@@ -9,14 +9,13 @@ import gleam/json
 import plum_mail/authentication
 import plum_mail/discuss/discuss.{Topic}
 import plum_mail/web/router.{handle}
+import plum_mail/web/helpers as web
 import plum_mail/support
 import gleam/should
 
 pub fn create_conversation_test() {
+  let config = support.test_config()
   assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   let topic = "Test topic"
 
@@ -28,11 +27,15 @@ pub fn create_conversation_test() {
     http.default_req()
     |> http.set_method(http.Post)
     |> http.set_path("/c/create")
-    |> http.set_req_cookie("session", session_token)
-    |> http.prepend_req_header("origin", support.test_config().client_origin)
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(identifier.id, "ua-test", config.secret),
+    )
+    |> http.prepend_req_header("user-agent", "ua-test")
+    |> http.prepend_req_header("origin", config.client_origin)
     |> http.set_req_body(body)
 
-  let response = handle(request, support.test_config())
+  let response = handle(request, config)
 
   should.equal(response.status, 303)
   assert Ok(location) = http.get_resp_header(response, "location")
@@ -49,10 +52,8 @@ pub fn create_conversation_test() {
 }
 
 pub fn create_conversation_with_participant_test() {
+  let config = support.test_config()
   assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   let topic = "Test topic"
   assert Ok(other) = support.generate_identifier("example.test")
@@ -67,11 +68,15 @@ pub fn create_conversation_with_participant_test() {
     http.default_req()
     |> http.set_method(http.Post)
     |> http.set_path("/c/create")
-    |> http.set_req_cookie("session", session_token)
-    |> http.prepend_req_header("origin", support.test_config().client_origin)
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(identifier.id, "ua-test", config.secret),
+    )
+    |> http.prepend_req_header("user-agent", "ua-test")
+    |> http.prepend_req_header("origin", config.client_origin)
     |> http.set_req_body(body)
 
-  let response = handle(request, support.test_config())
+  let response = handle(request, config)
 
   should.equal(response.status, 303)
   assert Ok(location) = http.get_resp_header(response, "location")

@@ -10,21 +10,7 @@ export default async function() {
 
   const page = new Page({ target: document.body });
 
-  let identifier
-  let authenticationRequired
-  (await authenticate()).match({
-    ok: function(i) {
-      identifier = i
-    },
-    fail: function(e) {
-      authenticationRequired = true;
-    }
-  })
-  if (!identifier) {
-    page.$set({authenticationRequired})
-    return
-  }
-  // const identifier = await authenticate()
+  await authenticate()
 
   let response = await Client.fetchConversation(conversationId);
   let {
@@ -36,6 +22,7 @@ export default async function() {
   } = response.match({ok: function (x) {
     return x
   }, fail: function (_) {
+    page.$set({authenticationRequired: true})
     throw "Could not find conversation";
   }});
 
@@ -66,7 +53,7 @@ export default async function() {
     // It's possible there are empty messges
     const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
 
-    asked = extractQuestions(doc, author == identifier.emailAddress, asked)
+    asked = extractQuestions(doc, author == emailAddress, asked)
     // beautifyWherebyLinks(doc)
 
     let $answerElements = doc.querySelectorAll('answer')
@@ -106,7 +93,7 @@ export default async function() {
 
       $answer.parentElement.replaceChild($answerContainer, $answer)
 
-      const mine = author == identifier.emailAddress
+      const mine = author == emailAddress
       if (mine) {
         question.awaiting = false
       }

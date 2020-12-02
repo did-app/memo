@@ -151,6 +151,7 @@ fn send(config, message: Message) {
   let Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
+    ..,
   ) = config
   let conversation_link =
     authenticated_link(client_origin, message.id.0, message.to.id)

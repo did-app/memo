@@ -10,12 +10,13 @@ import plum_mail/discuss/discuss
 import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/dispatch_email
-import plum_mail/web/helpers
+import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
 import plum_mail/support
 import gleam/should
 
-fn write_message(user_session, conversation_id, content, conclusion) {
+fn write_message(identifier_id, conversation_id, content, conclusion) {
+  let config = support.test_config()
   let request =
     http.default_req()
     |> http.set_method(http.Post)
@@ -23,12 +24,13 @@ fn write_message(user_session, conversation_id, content, conclusion) {
       ["/c/", int.to_string(conversation_id), "/message"],
       "",
     ))
-    |> http.prepend_req_header(
-      "cookie",
-      string.append("session=", user_session),
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(identifier_id, "ua-test", config.secret),
     )
-    |> http.prepend_req_header("origin", support.test_config().client_origin)
-    |> helpers.set_req_json(json.object([
+    |> http.prepend_req_header("user-agent", "ua-test")
+    |> http.prepend_req_header("origin", config.client_origin)
+    |> web.set_req_json(json.object([
       tuple("content", json.string(content)),
       tuple("conclusion", json.bool(conclusion)),
     ]))
@@ -38,9 +40,6 @@ fn write_message(user_session, conversation_id, content, conclusion) {
 
 pub fn write_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
@@ -52,14 +51,9 @@ pub fn write_test() {
     invited_email_address
     |> add_participant.Params
     |> add_participant.execute(participation, _)
-  // assert Ok(tuple(_, other_session)) =
-  //   authentication.generate_client_tokens(invited.0, "ua", None)
-  assert Ok(link_token) = authentication.generate_link_token(invited.0)
-  assert Ok(tuple(_, _, other_session)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   let response =
-    write_message(session_token, conversation.id, "My first message", False)
+    write_message(identifier.id, conversation.id, "My first message", False)
   should.equal(response.status, 201)
 
   assert Ok([message]) = discuss.load_messages(conversation.id)
@@ -112,12 +106,13 @@ pub fn write_test() {
       ["/c/", int.to_string(conversation.id), "/read"],
       "",
     ))
-    |> http.prepend_req_header(
-      "cookie",
-      string.append("session=", other_session),
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(invited.0, "ua-test", support.test_config().secret),
     )
     |> http.prepend_req_header("origin", support.test_config().client_origin)
-    |> helpers.set_req_json(json.object([tuple("counter", json.int(1))]))
+    |> http.prepend_req_header("user-agent", "ua-test")
+    |> web.set_req_json(json.object([tuple("counter", json.int(1))]))
 
   let response = handle(request, support.test_config())
   should.equal(response.status, 201)
