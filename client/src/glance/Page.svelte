@@ -6,7 +6,7 @@
 </script>
 
 <div class="bg-gray-100 rounded border-l-4 border-gray-300">
-  <div class="flex px-2 pt-2">
+  <div class="flex px-2 pt-2 overflow-hidden">
     <img style="max-width:35%" class="object-cover" src="{image}" alt="">
     <div class="ml-2">
       <h5 style="margin:0.5rem 0;">{title}</h5>
