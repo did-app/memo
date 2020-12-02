@@ -30,4 +30,6 @@
 {:else}
 Unknown item type
 {/if}
+{:catch e}
+<a href="{href}">{href}</a>
 {/await}
