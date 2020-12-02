@@ -16,7 +16,7 @@ import plum_mail/web/router.{handle}
 import plum_mail/support
 import gleam/should
 
-fn set_notification(session, conversation: Conversation, preference) {
+fn set_notification(identifier_id, conversation: Conversation, preference) {
   let request =
     http.default_req()
     |> http.set_method(http.Post)
@@ -24,7 +24,11 @@ fn set_notification(session, conversation: Conversation, preference) {
       ["/c/", int.to_string(conversation.id), "/notify"],
       "",
     ))
-    |> http.prepend_req_header("cookie", string.append("session=", session))
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(identifier_id, "ua-test", support.test_config().secret),
+    )
+    |> http.prepend_req_header("user-agent", "ua-test")
     |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> web.set_req_json(json.object([tuple("notify", json.string(preference))]))
 
@@ -33,13 +37,10 @@ fn set_notification(session, conversation: Conversation, preference) {
 
 pub fn successfully_set_notification_preference_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
-  let response = set_notification(session_token, conversation, "concluded")
+  let response = set_notification(identifier.id, conversation, "concluded")
 
   should.equal(response.status, 200)
   let Ok(participant) =

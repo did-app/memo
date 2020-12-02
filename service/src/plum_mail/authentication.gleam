@@ -76,105 +76,36 @@ pub fn generate_link_token(identifier_id) {
   |> Ok()
 }
 
-fn from_refresh_token(refresh_token, user_agent) {
-  let Token(selector, secret) = refresh_token
+pub fn validate_link_token(token_string) {
+  try Token(selector, secret) = parse_token(token_string)
   let sql =
     "
-  SELECT refresh_tokens.validator, refresh_tokens.link_token_selector
-  FROM refresh_tokens
-  JOIN link_tokens ON link_tokens.selector = refresh_tokens.link_token_selector
-  WHERE refresh_tokens.selector = $1
-  AND refresh_tokens.user_agent = $2
-  AND refresh_tokens.inserted_at > NOW() - INTERVAL '2 DAYS'
-  AND link_tokens.inserted_at > NOW() - INTERVAL '30 DAYS'
-  "
-  let args = [pgo.text(selector), pgo.text(user_agent)]
-  let mapper = fn(row) {
-    assert Ok(validator) = dynamic.element(row, 0)
-    assert Ok(validator) = dynamic.string(validator)
-    assert Ok(link_token_selector) = dynamic.element(row, 1)
-    assert Ok(link_token_selector) = dynamic.string(link_token_selector)
-    tuple(validator, link_token_selector)
-  }
-  try refresh_tokens = run_sql.execute(sql, args, mapper)
-  case refresh_tokens {
-    [] -> Error(Nil)
-    [tuple(validator, link_token_selector)] -> {
-      try _ = validate(secret, validator)
-      Ok(link_token_selector)
-    }
-  }
-}
-
-fn from_link_token(token) {
-  let Token(selector, secret) = token
-  let sql =
-    "
-      SELECT validator, selector, inserted_at > NOW() - INTERVAL '7 DAYS'
-      FROM link_tokens
+      SELECT i.id, i.email_address, validator, selector, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
+      FROM link_tokens AS lt
+      JOIN identifiers AS i ON i.id = lt.identifier_id
       WHERE selector = $1
       "
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
-    assert Ok(validator) = dynamic.element(row, 0)
+    let identifier = row_to_identifier(row)
+    assert Ok(validator) = dynamic.element(row, 2)
     assert Ok(validator) = dynamic.string(validator)
-    assert Ok(link_token_selector) = dynamic.element(row, 1)
+    assert Ok(link_token_selector) = dynamic.element(row, 3)
     assert Ok(link_token_selector) = dynamic.string(link_token_selector)
-    assert Ok(current) = dynamic.element(row, 2)
+    assert Ok(current) = dynamic.element(row, 4)
     assert Ok(current) = dynamic.bool(current)
-    tuple(validator, link_token_selector, current)
+    tuple(identifier, validator, link_token_selector, current)
   }
   try challenge_tokens = run_sql.execute(sql, args, mapper)
   case challenge_tokens {
     [] -> todo
-    [tuple(validator, link_token_selector, current)] -> {
+    [tuple(identifier, validator, link_token_selector, current)] -> {
       try _ = validate(secret, validator)
       case current {
-        True -> Ok(link_token_selector)
+        True -> Ok(identifier)
         False -> Error(Nil)
       }
     }
-  }
-}
-
-pub fn load_session(token_string) {
-  try Token(selector, secret) = parse_token(token_string)
-  let sql =
-    "SELECT session_tokens.validator, link_tokens.identifier_id
-    FROM session_tokens
-    JOIN refresh_tokens ON refresh_tokens.selector = session_tokens.refresh_token_selector
-    JOIN link_tokens ON link_tokens.selector = refresh_tokens.link_token_selector
-    WHERE session_tokens.selector = $1
-    AND session_tokens.inserted_at > NOW() - INTERVAL '1 DAYS'"
-  let args = [pgo.text(selector)]
-  let mapper = fn(row) {
-    assert Ok(validator) = dynamic.element(row, 0)
-    assert Ok(validator) = dynamic.string(validator)
-    assert Ok(identifier_id) = dynamic.element(row, 1)
-    assert Ok(identifier_id) = dynamic.int(identifier_id)
-    tuple(validator, identifier_id)
-  }
-  try session_tokens = run_sql.execute(sql, args, mapper)
-  case session_tokens {
-    [] -> Error(Nil)
-    [tuple(validator, identifier_id)] -> {
-      try _ = validate(secret, validator)
-      Ok(identifier_id)
-    }
-  }
-}
-
-fn maybe_from_link_token(link_token) {
-  case link_token {
-    Some(link_token) -> from_link_token(link_token)
-    None -> Error(Nil)
-  }
-}
-
-fn maybe_from_refresh_token(link_token, user_agent) {
-  case link_token {
-    Some(link_token) -> from_refresh_token(link_token, user_agent)
-    None -> Error(Nil)
   }
 }
 
@@ -194,90 +125,6 @@ pub fn validate_email(email_address) {
 
 pub type Identifier {
   Identifier(id: Int, email_address: EmailAddress)
-}
-
-pub fn generate_client_tokens(
-  link_token_selector,
-  user_agent,
-  old_refresh_token_selector,
-) {
-  let refresh_token = generate_token()
-  let session_token = generate_token()
-
-  let sql =
-    "
-      WITH new_refresh AS (
-          INSERT INTO refresh_tokens (selector, validator, user_agent, link_token_selector)
-          VALUES ($1, $2, $3, $4)
-      ), new_session AS (
-          INSERT INTO session_tokens (selector, validator, refresh_token_selector)
-          VALUES ($5, $6, $1)
-      ), old_refresh AS (
-          DELETE FROM refresh_tokens
-          WHERE selector = $7
-      )
-      SELECT i.id, i.email_address FROM link_tokens
-      JOIN identifiers AS i ON i.id = link_tokens.identifier_id
-      WHERE selector = $4
-      "
-  let args = [
-    pgo.text(refresh_token.selector),
-    pgo.text(hash_string(refresh_token.secret)),
-    pgo.text(user_agent),
-    pgo.text(link_token_selector),
-    pgo.text(session_token.selector),
-    pgo.text(hash_string(session_token.secret)),
-    pgo.nullable(old_refresh_token_selector, pgo.text),
-  ]
-  // TODO use row to identifier
-  let mapper = fn(row) {
-    assert Ok(id) = dynamic.element(row, 0)
-    assert Ok(id) = dynamic.int(id)
-    assert Ok(email_address) = dynamic.element(row, 1)
-    assert Ok(email_address) = dynamic.string(email_address)
-    assert Ok(email_address) = validate_email(email_address)
-    Identifier(id, email_address)
-  }
-  // It's possible this makes more sense on the maybe from refresh token step
-  try [identifier] = run_sql.execute(sql, args, mapper)
-
-  Ok(tuple(
-    identifier,
-    serialize_token(refresh_token),
-    serialize_token(session_token),
-  ))
-}
-
-// So it's all very circular and needs a flow diagram
-pub fn authenticate(link_token, refresh_token, user_agent) {
-  try link_token = case link_token {
-    Some(link_token) ->
-      case parse_token(link_token) {
-        Ok(link_token) -> Ok(Some(link_token))
-      }
-    None -> Ok(None)
-  }
-  try refresh_token = case refresh_token {
-    Some(refresh_token) ->
-      case parse_token(refresh_token) {
-        Ok(refresh_token) -> Ok(Some(refresh_token))
-      }
-    None -> Ok(None)
-  }
-  io.debug(refresh_token)
-  try link_token_selector = case maybe_from_link_token(link_token) {
-    Ok(link_token_selector) -> Ok(link_token_selector)
-    Error(_) -> maybe_from_refresh_token(refresh_token, user_agent)
-  }
-
-  let old_refresh_token_selector =
-    option.map(refresh_token, fn(t: Token) { t.selector })
-
-  generate_client_tokens(
-    link_token_selector,
-    user_agent,
-    old_refresh_token_selector,
-  )
 }
 
 fn row_to_identifier(row) {

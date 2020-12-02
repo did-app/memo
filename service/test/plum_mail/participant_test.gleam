@@ -17,7 +17,7 @@ import plum_mail/support
 import gleam/should
 
 fn add_participant(
-  user_session,
+  identifier_id,
   conversation: Conversation,
   email_address: EmailAddress,
 ) {
@@ -28,10 +28,11 @@ fn add_participant(
       ["/c/", int.to_string(conversation.id), "/participant"],
       "",
     ))
-    |> http.prepend_req_header(
-      "cookie",
-      string.append("session=", user_session),
+    |> http.set_req_cookie(
+      "token",
+      web.auth_token(identifier_id, "ua-test", support.test_config().secret),
     )
+    |> http.prepend_req_header("user-agent", "ua-test")
     |> http.prepend_req_header("origin", support.test_config().client_origin)
     |> web.set_req_json(json.object([
       tuple("email_address", json.string(email_address.value)),
@@ -43,16 +44,13 @@ fn add_participant(
 // TODO test referred_by
 pub fn successfully_add_new_participant_test() {
   assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
-  assert Ok(tuple(_, _, session_token)) =
-    authentication.authenticate(Some(link_token), None, "ua")
 
   assert Ok(topic) = discuss.validate_topic("Test topic")
   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
 
   let invited_email_address = support.generate_email_address("other.test")
   let response =
-    add_participant(session_token, conversation, invited_email_address)
+    add_participant(identifier.id, conversation, invited_email_address)
 
   should.equal(response.status, 200)
   assert Ok(participants) = discuss.load_participants(conversation.id)
@@ -63,7 +61,7 @@ pub fn successfully_add_new_participant_test() {
 
   // It is idempotent
   let response =
-    add_participant(session_token, conversation, invited_email_address)
+    add_participant(identifier.id, conversation, invited_email_address)
 
   should.equal(response.status, 200)
   assert Ok(participants) = discuss.load_participants(conversation.id)

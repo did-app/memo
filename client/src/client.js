@@ -89,6 +89,10 @@ async function myFetch(path, options) {
       let error = (await parseJSON(response)).unwrapOr({detail: "Bad response from server"})
       error.status = 422
       return Fail(error)
+    } else if (status === 403) {
+      let error = (await parseJSON(response)).unwrapOr({detail: "Forbidden reponse from server"})
+      error.status = 403
+      return Fail(error)
     } else {
       // TODO this should alert
       return Fail({ detail: "Bad response from server", meta: { url, status } });
