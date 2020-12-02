@@ -6,16 +6,6 @@ export default async function authenticate() {
   let code = params.get("code");
   if (code) {
     let resp = await Client.authenticate(code);
-    console.log(resp, "RSP");
     window.location.hash = "#";
-    // Bring this back but store in localhost
-    // return resp.map(function({ identifier }) {
-    //   return {
-    //     id: identifier.id,
-    //     emailAddress: identifier.email_address,
-    //     hasAccount: identifier.has_account
-    //   };
-    // });
   }
-
 }
