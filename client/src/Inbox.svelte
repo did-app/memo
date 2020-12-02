@@ -64,19 +64,14 @@
   })();
 
   (async function () {
-    const identifier = (await authenticate()).match({
-      ok: function(identifier) {
-        hasAccount = identifier.hasAccount;
-        emailAddress = identifier.emailAddress;
-        return identifier
-      },
-      fail: function(e) {
-        authenticationRequired = true;
-      }
-    })
+    // try authenticate if code present
+    await authenticate()
 
     let response = await Client.fetchInbox();
-    conversations = response.match({ok: function ({conversations}) {
+    conversations = response.match({ok: function ({conversations, identifier}) {
+      hasAccount = identifier.has_account;
+      emailAddress = identifier.email_address;
+
       conversations = conversations.map(function (c) {
         let participants = c.participants.map(function (p) {
           return p.email_address
@@ -89,8 +84,12 @@
       }).slice().reverse()
       conversationSearch.addAll(conversations.slice().reverse())
       return conversations
-    }, fail: function (_) {
-      throw "Could not load inbox"
+    }, fail: function (e) {
+      if (e.code == "forbidden") {
+        authenticationRequired = true;
+      } else {
+        throw "Could not load inbox"
+      }
     }});
   })()
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event

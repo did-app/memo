@@ -50,6 +50,19 @@ fn token_cookie_settings(request) {
   http.CookieAttributes(..defaults, max_age: Some(604800))
 }
 
+fn identifier_data(identifier: Identifier) {
+  let has_account = case identifier.email_address.value {
+    "peter@plummail.co" | "richard@plummail.co" -> True
+    _ -> False
+  }
+
+  json.object([
+    tuple("id", json.int(identifier.id)),
+    tuple("email_address", json.string(identifier.email_address.value)),
+    tuple("has_account", json.bool(has_account)),
+  ])
+}
+
 pub fn route(
   request,
   config: config.Config,
@@ -83,24 +96,7 @@ pub fn route(
         authentication.validate_link_token(link_token)
         |> result.map_error(fn(_: Nil) { error.Forbidden })
       // TODO add to the database
-      let has_account = case identifier.email_address.value {
-        "peter@plummail.co" | "richard@plummail.co" -> True
-        _ -> False
-      }
-      let data =
-        json.object([
-          tuple(
-            "identifier",
-            json.object([
-              tuple("id", json.int(identifier.id)),
-              tuple(
-                "email_address",
-                json.string(identifier.email_address.value),
-              ),
-              tuple("has_account", json.bool(has_account)),
-            ]),
-          ),
-        ])
+      let data = json.object([tuple("identifier", identifier_data(identifier))])
       assert Ok(user_agent) = http.get_req_header(request, "user-agent")
       let token = web.auth_token(identifier.id, user_agent, config.secret)
       http.response(200)
@@ -123,11 +119,16 @@ pub fn route(
     ["inbox"] -> {
       try identifier_id = web.identify_client(request, config)
       try conversations = show_inbox.execute(identifier_id)
-      // |> result.map_error(fn(x) { todo("mapping show inbox") })
+      // can only show conversations if there is an identifier
+      assert Ok(Some(identifier)) =
+        authentication.fetch_identifier(identifier_id)
       // If this conversations is the same as the top level conversation object for a page,
       // it can be the start value when switching pages
       http.response(200)
-      |> web.set_resp_json(json.object([tuple("conversations", conversations)]))
+      |> web.set_resp_json(json.object([
+        tuple("conversations", conversations),
+        tuple("identifier", identifier_data(identifier)),
+      ]))
       |> Ok()
     }
     [] ->
