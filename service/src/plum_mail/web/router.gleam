@@ -135,8 +135,8 @@ pub fn route(
       let cookie_defaults = http.cookie_defaults(request.scheme)
       // TODO add to the database
       let has_account = case identifier.email_address.value {
-          "peter@plummail.co" | "richard@plummail.co" -> True
-          _ -> False
+        "peter@plummail.co" | "richard@plummail.co" -> True
+        _ -> False
       }
       let data =
         json.object([
@@ -148,10 +148,7 @@ pub fn route(
                 "email_address",
                 json.string(identifier.email_address.value),
               ),
-              tuple(
-                "has_account",
-                json.bool(has_account),
-              ),
+              tuple("has_account", json.bool(has_account)),
             ]),
           ),
         ])

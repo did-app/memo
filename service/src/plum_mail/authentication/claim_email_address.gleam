@@ -28,6 +28,7 @@ pub fn execute(params, config) {
   let config.Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
+    ..,
   ) = config
 
   assert Ok(from) = authentication.validate_email("updates@plummail.co")
