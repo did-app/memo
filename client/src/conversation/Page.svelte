@@ -207,7 +207,7 @@ function setAnswer(id, value) {
         <span class="truncate">{emailAddress}</span>
       </section>
       <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
-        <label class="font-bold flex py-1 justify-start items-start">
+        <label class="font-bold flex py-1 justify-start items-start hidden">
           <span class="text-gray-700 pr-2">Conclude</span>
           <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
             <input type="checkbox" class="opacity-0 absolute" name="resolve">
