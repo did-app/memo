@@ -52,7 +52,8 @@ fn token_cookie_settings(request) {
 
 fn identifier_data(identifier: Identifier) {
   let has_account = case identifier.email_address.value {
-    "peter@plummail.co" | "richard@plummail.co" -> True
+    "peter@plummail.co" | "richard@plummail.co" | "peterhsaxton@gmail.com" ->
+      True
     _ -> False
   }
 
