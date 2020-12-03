@@ -207,14 +207,14 @@ function setAnswer(id, value) {
         <span class="truncate">{emailAddress}</span>
       </section>
       <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
-        <label class="font-bold flex py-1 justify-start items-start">
+        <!-- <label class="font-bold flex py-1 justify-start items-start">
           <span class="text-gray-700 pr-2">Conclude</span>
           <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
             <input type="checkbox" class="opacity-0 absolute" name="resolve">
             <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
               <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
           </div>
-        </label>
+        </label> -->
         <div class="ml-auto">
           <label for="preview-tab" class="">
             <span class="my-1 py-1 px-2 rounded border cursor-pointer border-indigo-900 focus:border-indigo-700 hover:border-indigo-700 text-indigo-800 font-bold">Preview</span>
