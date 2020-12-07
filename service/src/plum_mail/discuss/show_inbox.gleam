@@ -21,7 +21,7 @@ pub fn execute(identifier_id) {
             me.notify,
             COALESCE(m.inserted_at, c.inserted_at) as inserted_at,
             m.counter,
-            m.authored_by <> me.identifier_id AND m.counter > me.done as to_reply
+            COALESCE(m.authored_by <> me.identifier_id AND m.counter > me.done, FALSE) as to_reply
         FROM conversations AS c
         JOIN participants AS me ON me.conversation_id = c.id
         JOIN participant_lists AS pl ON pl.conversation_id = c.id
