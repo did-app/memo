@@ -70,9 +70,9 @@ pub fn unread_messages_in_conversation_test() {
   |> should.equal(Ok(dynamic.from(False)))
   dynamic.field(r1, "unread")
   |> should.equal(Ok(dynamic.from(True)))
+  dynamic.field(r1, "to_reply")
+  |> should.equal(Ok(dynamic.from(True)))
 
-  // dynamic.field(r1, "to_reply")
-  // |> should.equal(Ok(dynamic.from(True)))
   dynamic.field(r2, "id")
   |> should.equal(Ok(dynamic.from(c1.id)))
   dynamic.field(r2, "topic")
@@ -81,10 +81,10 @@ pub fn unread_messages_in_conversation_test() {
   |> should.equal(Ok(dynamic.from(False)))
   dynamic.field(r2, "unread")
   |> should.equal(Ok(dynamic.from(False)))
-  // dynamic.field(r1, "to_reply")
-  // |> should.equal(Ok(dynamic.from(False)))
-  //
-  // todo("mark c2 as concluded")
+  dynamic.field(r2, "to_reply")
+  |> should.equal(Ok(dynamic.from(False)))
+
+  todo("mark c2 as concluded")
 }
 // pub fn unread_messages_in_concluded_conversation_test() {
 //   todo
