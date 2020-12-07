@@ -6,9 +6,25 @@ import { formValues } from "../dom";
 import {extractQuestions, beautifyWherebyLinks} from '../content.js'
 
 export default async function() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        // Registration was successful
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        // registration failed :(
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
   const conversationId = parseInt(window.location.pathname.substr(3));
 
   const page = new Page({ target: document.body });
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+
+    page.$set({installPrompt: e})
+  });
 
   await authenticate()
 
