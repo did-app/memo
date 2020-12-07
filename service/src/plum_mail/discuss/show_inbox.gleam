@@ -21,7 +21,7 @@ pub fn execute(identifier_id) {
             me.notify,
             COALESCE(m.inserted_at, c.inserted_at) as inserted_at,
             m.counter,
-            COALESCE(m.conclusion, FALSE)
+            m.authored_by <> me.identifier_id AND m.counter > me.done as to_reply
         FROM conversations AS c
         JOIN participants AS me ON me.conversation_id = c.id
         JOIN participant_lists AS pl ON pl.conversation_id = c.id
@@ -67,8 +67,9 @@ pub fn execute(identifier_id) {
         assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
         assert Ok(latest) = dynamic.element(row, 7)
         assert Ok(latest) = run_sql.dynamic_option(latest, dynamic.int)
-        assert Ok(conclusion) = dynamic.element(row, 8)
-        assert Ok(conclusion) = dynamic.bool(conclusion)
+        assert Ok(to_reply) = dynamic.element(row, 8)
+        assert Ok(to_reply) = dynamic.bool(to_reply)
+
         json.object([
           tuple("id", json.int(id)),
           tuple("topic", json.string(topic)),
@@ -79,11 +80,12 @@ pub fn execute(identifier_id) {
             "unread",
             json.bool(
               option.unwrap(latest, 0) > cursor && {
-                notify == discuss.All || notify == discuss.Concluded && conclusion
+                notify == discuss.All || notify == discuss.Concluded && closed
               },
             ),
           ),
           tuple("next", json.int(int.min(cursor + 1, option.unwrap(latest, 0)))),
+          tuple("to_reply", json.bool(to_reply)),
         ])
       },
     )

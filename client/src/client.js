@@ -27,12 +27,13 @@ export async function writeMessage(id, content, conclusion) {
   return {};
 }
 export async function readMessage(id, counter) {
-  const response = await fetch("__API_ORIGIN__/c/" + id + "/read", {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify({ counter })
-  });
-  return response;
+  const path = "/c/" + id + "/read"
+  return await post(path, { counter });
+}
+
+export async function markAsDone(id, counter) {
+  const path = "/c/" + id + "/mark_done"
+  return await post(path, { counter });
 }
 
 export async function addPin(id, counter, content) {
@@ -84,6 +85,8 @@ async function myFetch(path, options) {
     if (status === 200) {
       return await parseJSON(response)
       // 400 is an error client shouldn't see
+    } else if (status === 201) {
+      return OK({})
     } else if (status === 422) {
       // TODO need to create a client error type with all the same fields
       let error = (await parseJSON(response)).unwrapOr({detail: "Bad response from server"})

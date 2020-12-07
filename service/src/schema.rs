@@ -59,6 +59,7 @@ table! {
         notify -> Varchar,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
+        done -> Int4,
     }
 }
 

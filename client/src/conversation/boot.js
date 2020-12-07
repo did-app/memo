@@ -32,6 +32,7 @@ export default async function() {
   let topic = conversation.topic;
   let closed = conversation.closed;
   let notify = participation.notify;
+  let done = participation.done;
 
   participants = participants.map(function({ email_address: emailAddress }) {
     const [name] = emailAddress.split("@");
@@ -123,6 +124,7 @@ export default async function() {
     displayName,
     topic,
     notify,
+    done,
     closed,
     participants,
     messages,
@@ -212,6 +214,20 @@ ${value}
           page.$set({ failure: "Failed to delete pin" });
         }
       });
+    } else if (action === "markAsDone") {
+      const counter = messages.length
+      const response = await Client.markAsDone(conversationId, counter);
+      response.match({
+        ok: function(_) {
+          page.$set({ done: counter });
+        },
+        fail: function(_) {
+          page.$set({ failure: "Failed to mark as done" });
+        }
+      });
+
+    } else {
+      throw "Unknown action " + action
     }
   });
 

@@ -16,6 +16,7 @@
   export let topic;
   export let closed = false;
   export let notify;
+  export let done;
   export let participants = [];
   export let messages = [];
   export let pins = [];
@@ -168,7 +169,7 @@ function setAnswer(id, value) {
       This conversation has been closed, <br> No further messages can be sent.
     </h2>
 
-    <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-8 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
+    <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-2 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
       <input id="preview-tab" class="hidden" type="checkbox">
       <div class="">
         {#each questions as {query, awaiting, id, answer, dismissed}}
@@ -223,6 +224,17 @@ function setAnswer(id, value) {
         </div>
       </footer>
     </form>
+    <form class="w-full mb-8 p-2 md:py-6 md:px-20" data-action="markAsDone">
+      {#if messages.length > done}
+      <div class="flex">
+        <label class="ml-auto font-bold flex py-1 justify-start items-center">
+          <p class="mr-2">No further action required?</p>
+          <button class="my-1 py-1 px-2 rounded bg-gray-900 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold" type="submit" title="Select to no longer see as outsanding">Mark as done</button>
+        </label>
+      </div>
+      {/if}
+    </form>
+
   </main>
   <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
     <div class="sticky top-0">

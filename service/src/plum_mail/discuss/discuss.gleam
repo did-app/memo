@@ -179,6 +179,7 @@ pub type Participation {
     owner: Bool,
     invited_by: Option(Int),
     identifier: Identifier,
+    done: Int,
   )
 }
 
@@ -193,7 +194,7 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
         SELECT * FROM messages
         WHERE conclusion = TRUE
     )
-    SELECT c.id, c.topic, COALESCE(m.conclusion, FALSE) as closed, p.cursor, p.notify, p.invited_by, i.id, i.email_address, c.started_by = i.id
+    SELECT c.id, c.topic, COALESCE(m.conclusion, FALSE) as closed, p.cursor, p.notify, p.invited_by, i.id, i.email_address, c.started_by = i.id, p.done
     FROM conversations AS c
     JOIN participants AS p ON p.conversation_id = c.id
     JOIN identifiers AS i ON i.id = p.identifier_id
@@ -228,6 +229,8 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(email_address) = authentication.validate_email(email_address)
     assert Ok(owner) = dynamic.element(row, 8)
     assert Ok(owner) = dynamic.bool(owner)
+    assert Ok(done) = dynamic.element(row, 9)
+    assert Ok(done) = dynamic.int(done)
 
     let identifier = Identifier(id, email_address)
 
@@ -239,6 +242,7 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
       owner: owner,
       invited_by: invited_by,
       identifier: identifier,
+      done: done,
     )
   }
 

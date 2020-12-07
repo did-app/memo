@@ -32,8 +32,8 @@ pub fn execute(participation, params) {
         UNION ALL
         SELECT id FROM identifiers WHERE email_address = $1
     ), new_participant AS (
-        INSERT INTO participants (conversation_id, identifier_id, invited_by, cursor, notify)
-        VALUES ($3, (SELECT id FROM invited), $2, 0, 'all')
+        INSERT INTO participants (conversation_id, identifier_id, invited_by, cursor, notify, done)
+        VALUES ($3, (SELECT id FROM invited), $2, 0, 'all', 0)
         ON CONFLICT (identifier_id, conversation_id) DO NOTHING
         RETURNING *
     )
