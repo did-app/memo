@@ -81,6 +81,12 @@ pub fn route(
             authentication.validate_email("peter@plummail.co")
           Ok(email_address)
         }
+        "richard" -> {
+          let True = password == "sprout"
+          assert Ok(email_address) =
+            authentication.validate_email("richard@plummail.co")
+          Ok(email_address)
+        }
       }
       assert Ok(identifier) = authentication.lookup_identifier(email_address)
       assert Ok(user_agent) = http.get_req_header(request, "user-agent")
