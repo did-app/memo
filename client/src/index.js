@@ -4,6 +4,14 @@ import Introduction from "./Introduction.svelte";
 
 // pane, panel, console, controls
 
+let params = new URLSearchParams(location.search);
+let text = params.get("text")
+let url = params.get("url")
+let title = params.get("title")
+if (url) {
+  alert(url + text + title)
+}
+
 function route(path) {
   if (path === "/") {
     const target = document.body;
