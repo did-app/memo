@@ -7,6 +7,7 @@ import plum_mail/discuss/start_conversation
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/write_message
 import plum_mail/discuss/show_inbox
+import plum_mail/discuss/mark_done
 import plum_mail/support
 import gleam/should
 
@@ -84,8 +85,15 @@ pub fn unread_messages_in_conversation_test() {
   dynamic.field(r2, "to_reply")
   |> should.equal(Ok(dynamic.from(False)))
 
-  todo("mark c2 as concluded")
+  assert Ok(participation) = discuss.load_participation(c2.id, me.id)
+  // Two messages in conversation 2
+  let params = mark_done.Params(counter: 2)
+  assert Ok(_) = mark_done.execute(participation, params)
+
+  assert Ok(inbox) = show_inbox.execute(me.id)
+  assert Ok([r1, _]) = dynamic.list(dynamic.from(inbox))
+  dynamic.field(r1, "id")
+  |> should.equal(Ok(dynamic.from(c2.id)))
+  dynamic.field(r1, "to_reply")
+  |> should.equal(Ok(dynamic.from(False)))
 }
-// pub fn unread_messages_in_concluded_conversation_test() {
-//   todo
-// }
