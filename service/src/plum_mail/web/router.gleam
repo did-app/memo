@@ -320,6 +320,7 @@ pub fn route(
                 json.string(discuss.notify_to_string(participation.notify)),
               ),
               tuple("cursor", json.int(participation.cursor)),
+              tuple("done", json.int(participation.done)),
             ]),
           ),
         ])

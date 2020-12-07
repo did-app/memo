@@ -80,7 +80,7 @@
       })
 
       unread = conversations.filter(function (c) {
-        return c.unread
+        return c.to_reply
       }).slice().reverse()
       conversationSearch.addAll(conversations.slice().reverse())
       return conversations
@@ -138,7 +138,7 @@
     </a>
     <p class="py-2 sm:py-0 ml-0 sm:ml-8 block sm:inline text-center sm:text-left text-xs text-gray-700">
       {#if unread.length}
-      <a class="px-1 border-b-2 border-white {panel === UNREAD ? 'text-indigo-800' : ''}" href="#unread">Unread</a>
+      <a class="px-1 border-b-2 border-white {panel === UNREAD ? 'text-indigo-800' : ''}" href="#unread">Outstanding</a>
       {/if}
       <a class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800 {panel === SEARCH ? 'text-indigo-800' : ''}" href="#">Search</a>
       <a class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800 {panel === ARCHIVE ? 'text-indigo-800' : ''}" href="#archive">Archive</a>
