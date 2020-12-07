@@ -36,7 +36,7 @@
       </g>
     </svg>
     <!-- style added because markdown a taking precidence -->
-    <a style="color:#553c9a" class="truncate text-purple-800 flex-1 text-sm" href="{url}">
+    <a style="color:#553c9a" class="truncate text-purple-800 flex-1 text-sm" href="{url}" target="_blank">
       {url}
     </a>
   </div>
