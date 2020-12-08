@@ -3,7 +3,7 @@ import Page from "./Page.svelte";
 import authenticate from "../authenticate.js"
 import * as Client from "../client.js";
 import { formValues } from "../dom";
-import {extractQuestions, beautifyWherebyLinks} from '../content.js'
+import {extractQuestions} from '../content.js'
 
 export default async function() {
   if ('serviceWorker' in navigator) {
@@ -71,7 +71,6 @@ export default async function() {
     const intro = firstElement ? DOMPurify.sanitize(firstElement.innerHTML) : "";
 
     asked = extractQuestions(doc, author == emailAddress, asked)
-    // beautifyWherebyLinks(doc)
 
     let $answerElements = doc.querySelectorAll('answer')
     $answerElements.forEach(function ($answer) {

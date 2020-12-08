@@ -23,7 +23,6 @@ export async function writeMessage(id, content, conclusion) {
     credentials: "include",
     body: JSON.stringify({ content, conclusion })
   });
-  console.log(response);
   return {};
 }
 export async function readMessage(id, counter) {

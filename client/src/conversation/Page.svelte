@@ -6,7 +6,7 @@
   import Message from "./Message.svelte"
 
   import DOMPurify from 'dompurify';
-  import {extractQuestions, beautifyWherebyLinks} from '../content.js'
+  import {extractQuestions} from '../content.js'
 
   export let failure;
   export let authenticationRequired;
@@ -34,7 +34,6 @@
 
     // Maybe this should be questions already
     extractQuestions(doc, true, [])
-    beautifyWherebyLinks(doc)
     return DOMPurify.sanitize(doc.body.innerHTML)
   }
 

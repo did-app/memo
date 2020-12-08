@@ -1,19 +1,7 @@
 import Glance from './Glance.svelte'
 
-export function beautifyWherebyLinks(doc) {
-  const $links = doc.querySelectorAll('a:only-child')
-  $links.forEach(function ($link) {
-    // https://github.com/sveltejs/svelte/issues/537
-    const frag = document.createDocumentFragment();
-    console.log($link);
-    const preview = new Glance({ target: frag, props: {href: $link.href, text: $link.innerText} });
-    $link.replaceWith( frag );
-  })
-}
-
 export function extractQuestions(doc, authoredByMe, asked) {
   const $questionLinks = doc.querySelectorAll('a[href="#?"]')
-  console.log(asked);
 
   return Array.from($questionLinks).reduce(function (asked, $link) {
     const query = $link.innerHTML
