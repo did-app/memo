@@ -28,8 +28,9 @@
 {:else if item === 'plain'}
 <a href="{href}">{text}</a>
 {:else}
-Unknown item type
+<!-- Note that Glance returns the promise even if non 200 response -->
+<a href="{href}">{text}</a>
 {/if}
 {:catch e}
-<a href="{href}">{href}</a>
+<a href="{href}">{text}</a>
 {/await}
