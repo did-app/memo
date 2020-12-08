@@ -50,6 +50,11 @@ pub fn delete_inactive() {
       SELECT DISTINCT conversation_id
       FROM messages
       WHERE messages.counter > 1
+  ), n AS (
+      DELETE FROM message_notifications
+      WHERE conversation_id NOT IN (SELECT conversation_id FROM ids)
+      AND conversation_id < 800
+      RETURNING *
   ), m AS (
       DELETE FROM messages
       WHERE conversation_id NOT IN (SELECT conversation_id FROM ids)
