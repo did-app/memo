@@ -1,13 +1,15 @@
 <script type="typescript">
   const placeholders = {
     peter: "I respond faster to emails that are short. Two-liners are best. You can write Markdown in this box",
-    team: "I'm looking forward to trying plum mail because ..."
+    team: "I'm looking forward to trying plum mail because ...",
+    richard: ""
   }
   export let identifier;
-  let placeholder = placeholders[identifier] || ""
+  let placeholder = placeholders[identifier]
 </script>
 
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2 my-4">
+  {#if placeholder != undefined}
   <h1 class="flex-grow text-xl md:text-2xl text-center">Make an introduction</h1>
   <article class="my-2 border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
     <div class="markdown-body py-6 px-2 md:px-20">
@@ -92,4 +94,7 @@
       <button class="ml-auto my-1 py-1 px-2 rounded bg-indigo-900 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">Send</button>
     </div>
   </form>
+  {:else}
+  Could not find email address
+  {/if}
 </main>

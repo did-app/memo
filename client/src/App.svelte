@@ -13,6 +13,7 @@
   let page, params
   router('/', (context) => {params = context.params; page = Search})
   router('/begin', (context) => {params = context.params; page = Begin})
+  router('/archive', (context) => {params = context.params; page = Archive})
   router('/:identifier', (context) => {params = context.params; page = Introduction})
   // TODO share page
 
