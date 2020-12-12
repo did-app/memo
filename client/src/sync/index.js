@@ -16,10 +16,29 @@ export function handleAuthCode() {
       window.location.hash = "#";
       let resp = Client.authenticate(code);
       // TODO handle the response
+    } else {
+      (async function () {
+        let response = await Client.fetchInbox();
+        response.match({ok: function ({conversations, identifier}) {
+          identifier = {hasAccount: identifier.has_account, emailAddress: identifier.email_address}
+
+          conversations = conversations.map(function (c) {
+            let participants = c.participants.map(function (p) {
+              return p.email_address
+            }).join(", ")
+            return Object.assign({}, c, {participants})
+          })
+          resolve({conversations, identifier})
+        },
+        fail: function (e) {
+          if (e.code == "forbidden") {
+            reject({reason: "unauthenticated"})
+          } else {
+            reject({reason: "unknown"})
+          }
+        }})
+      })();
     }
 
-    setTimeout(function () {
-      reject({reason: "unauthenticated"})
-    }, 1000);
   });
 }

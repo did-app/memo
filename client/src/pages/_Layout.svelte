@@ -3,12 +3,17 @@
   export let nav;
   import {loading} from "../sync";
 
+  function unread(conversations) {
+    return conversations.filter(function (c) {
+      return c.to_reply
+    }).slice().reverse()
+  }
 </script>
 
-<!-- TODO only show header is user has account -->
 {#await loading}
 TODO grey component blocks
-{:then {user, conversations}}
+{:then {identifier, conversations}}
+{#if identifier && identifier.hasAccount}
 <header class="z-20 md:h-16 h-auto fixed w-full bg-white text-left border-b-2">
   <nav class="ml-auto md:p-4 p-0 px-2 py-1">
     <a class="block md:inline text-center md:text-left" href="/">
@@ -24,7 +29,7 @@ TODO grey component blocks
       </svg>Compose
     </a>
     <p class="py-2 sm:py-0 ml-0 sm:ml-8 block sm:inline text-center sm:text-left text-xs text-gray-700">
-      {#if unread.length}
+      {#if unread(conversations).length}
       <a class="px-1 border-b-2 border-white {nav === "unread" ? 'text-indigo-800' : ''}" href="/unread">Outstanding</a>
       {/if}
       <a class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800 {nav === "search" ? 'text-indigo-800' : ''}" href="/">Search</a>
@@ -33,6 +38,7 @@ TODO grey component blocks
     </p>
   </nav>
 </header>
+{/if}
 <main class="w-full max-w-2xl m-auto p-6">
   <h1 class="flex-grow font-serif text-indigo-800 text-6xl text-center">plum mail</h1>
   <slot {conversations}></slot>
@@ -40,5 +46,7 @@ TODO grey component blocks
 {:catch {reason}}
 {#if reason === 'unauthenticated'}
 <SignIn/>
+{:else}
+Unknown failure
 {/if}
 {/await}
