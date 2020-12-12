@@ -1,13 +1,20 @@
 <script>
-  import Home from "./pages/Home.svelte";
-  import Introduction from "./pages/Introduction.svelte"
-  // import Archive from "./pages/Archive.svelte"
+  import Search from "./pages/Search.svelte";
+  import Begin from "./pages/Begin.svelte";
+  import Archive from "./pages/Archive.svelte";
+  import Introduction from "./pages/Introduction.svelte";
 
   import router from "page";
 
+  // could be done in main.js
+  import {handleAuthCode} from "./sync/index.js";
+  handleAuthCode()
+
   let page, params
-  router('/', (context) => {params = context.params; page = Home})
+  router('/', (context) => {params = context.params; page = Search})
+  router('/begin', (context) => {params = context.params; page = Begin})
   router('/:identifier', (context) => {params = context.params; page = Introduction})
+  // TODO share page
 
   router.start()
 </script>
