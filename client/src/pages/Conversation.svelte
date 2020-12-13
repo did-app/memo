@@ -19,7 +19,7 @@
       conversation = data.conversation
 
       let emailAddress = data.participation.email_address
-      participation = {emailAddress}
+      participation = {emailAddress, done: data.participation.done}
 
       participants = data.participants.map(function({ email_address: emailAddress }) {
         const [name] = emailAddress.split("@");
@@ -196,6 +196,7 @@
   }
 
   // TODO handle answers
+  // TODO flash message and direct to home screen
   async function writeMessage() {
     console.log(draft);
     let response = await Client.writeMessage(
@@ -203,6 +204,20 @@
       draft,
       false
     );
+  }
+
+  async function markAsDone() {
+    const counter = messages.length
+    participation.done = counter
+    const response = await Client.markAsDone(conversationId, counter);
+    response.match({
+      ok: function(_) {
+        true
+      },
+      fail: function(_) {
+        let failure = "Failed to mark as done";
+      }
+    });
   }
 </script>
 
@@ -278,6 +293,16 @@ Let's not have any pins
           <button class="my-1 py-1 px-2 rounded bg-indigo-900 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">Send</button>
         </div>
       </footer>
+    </form>
+    <form class="w-full md:px-20" on:submit|preventDefault={markAsDone}>
+      {#if messages.length > participation.done}
+      <div class="flex">
+        <label class="ml-auto font-bold flex py-1 justify-start items-center">
+          <p class="mr-2">No further action required?</p>
+          <button class="my-1 py-1 px-2 rounded bg-gray-900 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold" type="submit" title="Select to no longer see as outsanding">Mark as done</button>
+        </label>
+      </div>
+      {/if}
     </form>
   </main>
   <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">

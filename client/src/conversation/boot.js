@@ -26,21 +26,6 @@ ${value}
         resolve
       );
       window.location.reload();
-    } else if (action === "markAsDone") {
-      const counter = messages.length
-      const response = await Client.markAsDone(conversationId, counter);
-      response.match({
-        ok: function(_) {
-          page.$set({ done: counter });
-        },
-        fail: function(_) {
-          page.$set({ failure: "Failed to mark as done" });
-        }
-      });
-
-    } else {
-      throw "Unknown action " + action
-    }
   });
 
 
