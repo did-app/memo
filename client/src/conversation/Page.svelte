@@ -84,16 +84,7 @@ function doInstall() {
 </script>
 
 
-    <form class="w-full md:px-20" data-action="markAsDone">
-      {#if messages.length > done}
-      <div class="flex">
-        <label class="ml-auto font-bold flex py-1 justify-start items-center">
-          <p class="mr-2">No further action required?</p>
-          <button class="my-1 py-1 px-2 rounded bg-gray-900 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold" type="submit" title="Select to no longer see as outsanding">Mark as done</button>
-        </label>
-      </div>
-      {/if}
-    </form>
+
     <form class="w-full mb-8 md:px-20" on:submit|preventDefault={doInstall}>
       {#if installPrompt}
       <div class="flex">

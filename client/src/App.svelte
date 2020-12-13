@@ -1,5 +1,6 @@
 <script>
   import Search from "./pages/Search.svelte";
+  import Outstanding from "./pages/Outstanding.svelte";
   import Begin from "./pages/Begin.svelte";
   import Archive from "./pages/Archive.svelte";
   import Conversation from "./pages/Conversation.svelte";
@@ -13,6 +14,7 @@
 
   let page, params
   router('/', (context) => {params = context.params; page = Search})
+  router('/unread', (context) => {params = context.params; page = Outstanding})
   router('/begin', (context) => {params = context.params; page = Begin})
   router('/archive', (context) => {params = context.params; page = Archive})
   router('/c/:conversationId', (context) => {params = context.params; page = Conversation})
