@@ -9,7 +9,11 @@
   // fetchConversation probably belongs here to ensure authentication has been done.
   // import {fetchConversation} from "../sync/index"
   export let conversationId;
+  // TODO nice Flash setup
   let failure;
+  function clearFailure() {
+    failure = undefined;
+  }
 
   let participation, conversation, messages, participants, questions;
   // Don't want to silently refresh,
@@ -119,6 +123,38 @@
     }});
   }
 
+
+  // could be details + summary in future https://stackoverflow.com/questions/37033406/automatically-open-details-element-on-id-call
+  function openMessage(id) {
+    messages[id - 1].checked = false
+    messages = messages
+  }
+
+  window.onhashchange = function (event) {
+    let $target = document.getElementById(window.location.hash.slice(1))
+    if ($target) {
+      let $article = $target.closest('article')
+      if ($article) {
+        let id = parseInt($article.id)
+        openMessage(id)
+      }
+    }
+  }
+
+  function dismiss(id) {
+    const index = questions.findIndex(function (q) {
+      return q.id === id
+    })
+    questions[index].dismissed = true
+    questions[index].answer = "Dismissed"
+  }
+  function setAnswer(id, value) {
+    const index = questions.findIndex(function (q) {
+      return q.id === id
+    })
+    questions[index].answer = value
+  }
+
   let newParticipant;
   async function addParticipant(){
     console.log(newParticipant);
@@ -155,7 +191,20 @@
     window.scroll(x, y)
   }
 
-  let draft, makeQuestion;
+  let draft;
+  function process(content) {
+    if (!content) return "No preview yet."
+    const html = marked(content)
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    // Maybe this should be questions already
+    extractQuestions(doc, true, [])
+    return DOMPurify.sanitize(doc.body.innerHTML)
+  }
+
+  let makeQuestion;
   function watchQuestions(event) {
     const $area = event.target
     if (document.activeElement !== $area) return
@@ -267,7 +316,7 @@ Let's not have any pins
       {/if}
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:8rem;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize} on:input={watchQuestions} on:keypress={tryMakeQuestion}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:8rem;">
-        {@html preview}
+        {@html process(draft)}
       </div>
 
       {#if makeQuestion}

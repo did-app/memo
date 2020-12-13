@@ -2,8 +2,6 @@ import DOMPurify from "dompurify";
 import Page from "./Page.svelte";
 import authenticate from "../authenticate.js"
 import * as Client from "../client.js";
-import { formValues } from "../dom";
-import {extractQuestions} from '../content.js'
 
 export default async function() {
     } else if (action == "writeMessage") {

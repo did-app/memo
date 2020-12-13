@@ -1,81 +1,10 @@
 <script>
-  import {
-    Circle2
-  } from 'svelte-loading-spinners'
-  import SignIn from "../SignIn.svelte"
-  import Message from "./Message.svelte"
-
-  import DOMPurify from 'dompurify';
-  import {extractQuestions} from '../content.js'
-
-  export let failure;
-  export let authenticationRequired;
-  export let conversationId;
-  export let emailAddress;
-  export let topic;
-  export let closed = false;
-  export let notify;
-  export let done;
-  export let participants = [];
-  export let messages = [];
-  export let pins = [];
-  export let left;
-  export let bottom;
-  export let questions = [];
-  export let installPrompt;
-
-  function process(content) {
-    if (!content) return "No preview yet."
-    const html = marked(content)
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-
-    // Maybe this should be questions already
-    extractQuestions(doc, true, [])
-    return DOMPurify.sanitize(doc.body.innerHTML)
-  }
-
-  let draft;
-  $: preview = process(draft)
 
 
-  function clearFailure() {
-    failure = undefined;
-  }
 
-  // could be details + summary in future https://stackoverflow.com/questions/37033406/automatically-open-details-element-on-id-call
-  function openMessage(id) {
-    messages[id - 1].checked = false
-    messages = messages
-  }
-
-  window.onhashchange = function (event) {
-    let $target = document.getElementById(window.location.hash.slice(1))
-    if ($target) {
-      let $article = $target.closest('article')
-      if ($article) {
-        let id = parseInt($article.id)
-        openMessage(id)
-      }
-    }
-  }
 
   let makeQuestion;
 
-function dismiss(id) {
-  const index = questions.findIndex(function (q) {
-    return q.id === id
-  })
-  questions[index].dismissed = true
-  questions[index].answer = "Dismissed"
-}
-function setAnswer(id, value) {
-  const index = questions.findIndex(function (q) {
-    return q.id === id
-  })
-  questions[index].answer = value
-}
 
 function doInstall() {
   installPrompt.prompt()
