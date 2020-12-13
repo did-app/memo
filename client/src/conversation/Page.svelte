@@ -141,64 +141,6 @@ function doInstall() {
 </script>
 
 
-
-    <h2 class:hidden="{!closed}" class="text-lg text-center font-bold text-gray-700 mb-14">
-      This conversation has been closed, <br> No further messages can be sent.
-    </h2>
-
-    <form id="reply-form" class:hidden="{closed}" class="relative w-full mt-2 mb-2 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
-      <input id="preview-tab" class="hidden" type="checkbox">
-      <div class="">
-        {#each questions as {query, awaiting, id, answer, dismissed}}
-        {#if awaiting}
-        <div class:hidden={dismissed}>
-          <blockquote class="flex px-4 my-2 border-l-4 border-indigo-800" >
-            <a class="flex-1  hover:underline" href="#Q:{id}">
-              {@html query}
-            </a>
-            <nav>
-              <button class="bg-gray-200 p-1 rounded" type="button" on:click={(e) => setAnswer(id, e.target.innerText)}>👍</button>
-              <button class="bg-gray-200 p-1 rounded" type="button" on:click={(e) => setAnswer(id, e.target.innerText)}>👎</button>
-              <button class="bg-gray-200 p-1 rounded" type="button" on:click={() => dismiss(id)}>&#x274C;</button>
-            </nav>
-          </blockquote>
-          <textarea class="w-full bg-white outline-none" name="Q:{id}" rows="1" style="min-height:0em;max-height:60vh;" placeholder="Answer" on:input={resize}>{answer}</textarea>
-        </div>
-        {/if}
-        {/each}
-      </div>
-      {#if questions.length}
-      <hr class="mt-4">
-      {/if}
-      <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize} on:input={watchQuestions} on:keypress={tryMakeQuestion}></textarea>
-      <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
-        {@html preview}
-      </div>
-
-      {#if makeQuestion}
-      <button class="bg-indigo-100 p-1 my-1 rounded shadow w-full" on:click="{makeQuestion}" type="button">Make question (press Enter)</button>
-      {/if}
-      <section class="pb-1 whitespace-no-wrap overflow-hidden">
-        <span class="font-bold text-gray-700">From:</span>
-        <span class="truncate">{emailAddress}</span>
-      </section>
-      <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
-        <label class="font-bold flex py-1 justify-start items-start hidden">
-          <span class="text-gray-700 pr-2">Conclude</span>
-          <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-            <input type="checkbox" class="opacity-0 absolute" name="resolve">
-            <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-              <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-          </div>
-        </label>
-        <div class="ml-auto">
-          <label for="preview-tab" class="">
-            <span class="my-1 py-1 px-2 rounded border cursor-pointer border-indigo-900 focus:border-indigo-700 hover:border-indigo-700 text-indigo-800 font-bold">Preview</span>
-          </label>
-          <button class="my-1 py-1 px-2 rounded bg-indigo-900 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">Send</button>
-        </div>
-      </footer>
-    </form>
     <form class="w-full md:px-20" data-action="markAsDone">
       {#if messages.length > done}
       <div class="flex">
