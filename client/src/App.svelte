@@ -8,7 +8,7 @@
 
   import router from "page";
 
-  // could be done in main.js
+  // could be done in main.js but makes sense here because this is where we handle the url
   import {handleAuthCode} from "./sync/index.js";
   handleAuthCode()
 
@@ -19,7 +19,6 @@
   router('/archive', (context) => {params = context.params; page = Archive})
   router('/c/:conversationId', (context) => {params = context.params; page = Conversation})
   router('/:identifier', (context) => {params = context.params; page = Introduction})
-  // TODO share page
 
   router.start()
 </script>
