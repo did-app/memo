@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
 export let installPrompt = new Promise(function(resolve, reject) {
   window.addEventListener('beforeinstallprompt', (e) => {
     console.log("installPrompt");
-    return e
+    resolve(e);
   });
 });
 

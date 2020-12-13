@@ -4,6 +4,7 @@
   import Message from "../components/Message.svelte"
   import * as Client from "../client.js";
   import {extractQuestions} from '../content.js'
+  import * as Sync from "../sync"
 
 
   // fetchConversation probably belongs here to ensure authentication has been done.
@@ -244,15 +245,51 @@
     }
   }
 
+  export function formValues($form) {
+  // https://codepen.io/ntpumartin/pen/MWYmypq
+  var obj = {};
+  var elements = $form.querySelectorAll("input, select, textarea");
+  for (var i = 0; i < elements.length; ++i) {
+    var element = elements[i];
+    var name = element.name;
+    var value = element.value;
+    var type = element.type;
+
+    if (type === "checkbox") {
+      obj[name] = element.checked
+    } else {
+      if (name) {
+        obj[name] = value;
+      }
+
+    }
+
+  }
+  return obj;
+}
+
   // TODO handle answers
   // TODO flash message and direct to home screen
-  async function writeMessage() {
+  async function writeMessage(event) {
     console.log(draft);
+    console.log();
+    let buffer = ""
+    for (const [key, value] of Object.entries(formValues(event.target))) {
+      if (key.slice(0, 2) === "Q:" && value.trim().length) {
+        buffer += `<answer data-question="${key.slice(2)}">
+
+${value}
+</answer>
+
+`
+      }
+    }
     let response = await Client.writeMessage(
       conversationId,
-      draft,
+      buffer + draft,
       false
     );
+    window.location.reload();
   }
 
   async function markAsDone() {
@@ -268,6 +305,16 @@
       }
     });
   }
+
+  let installPrompt = (async function () {
+    let event = await Sync.installPrompt
+    return function () {
+      event.prompt()
+      installPrompt = new Promise(function(resolve, reject) {
+
+      });
+    }
+  }())
 </script>
 
 {#await fetchConversation(conversationId)}
@@ -353,6 +400,17 @@ Let's not have any pins
       </div>
       {/if}
     </form>
+    {#await installPrompt}
+    {:then doInstall}
+    <form class="w-full mb-8 md:px-20" on:submit|preventDefault={doInstall}>
+      <div class="flex">
+        <label class="ml-auto font-bold flex py-1 justify-start items-center">
+          <p class="mr-2">Find this conversation quicker?</p>
+          <button class="my-1 py-1 px-2 rounded bg-gray-900 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold" type="submit" title="Select to no longer see as outsanding">Install</button>
+        </label>
+      </div>
+    </form>
+    {/await}
   </main>
   <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
     <div class="sticky top-0">
