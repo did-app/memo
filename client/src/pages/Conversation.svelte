@@ -11,15 +11,16 @@
   export let conversationId;
   let failure;
 
+  let conversation, messages, participants
   // Don't want to silently refresh,
   async function fetchConversation(conversationId) {
     let response = await Client.fetchConversation(conversationId);
     return response.match({ok: function (data) {
-      let {participation, messages, participants, ...rest} = data
-      let emailAddress = participation.email_address
+      conversation = data.conversation
 
+      let emailAddress = data.participation.email_address
 
-      participants = participants.map(function({ email_address: emailAddress }) {
+      participants = data.participants.map(function({ email_address: emailAddress }) {
         const [name] = emailAddress.split("@");
         return { name, emailAddress };
       });
@@ -27,7 +28,7 @@
       var highest;
       let asked = []
       // If we follow the numerical id's all the way, just do it might be problems
-      messages = messages.map(function({ counter, content, author, inserted_at }) {
+      messages = data.messages.map(function({ counter, content, author, inserted_at }) {
         // marked doesn't like an html bumping up against markdown content
         content = content.replaceAll("</answer>", "\r\n</answer>\r\n")
         const html = marked(content)
@@ -84,7 +85,7 @@
         })
 
         // checked = closed
-        const checked = !(participation.cursor < counter);
+        const checked = !(data.participation.cursor < counter);
         highest = counter;
         return { counter, checked, author, date: inserted_at, intro, doc };
       }).map(function ({ counter, checked, author, date, intro, doc }) {
@@ -102,12 +103,11 @@
       }
 
       // TODO cleanup
-      document.title = rest.conversation.topic;
+      document.title = conversation.topic;
       // TODO have a scroll into view thing
       Client.readMessage(conversationId, highest);
 
-      console.log(rest);
-      return {participation, messages, participants, ...rest}
+      return true
     }, fail: function (e) {
       if (e.code == "forbidden") {
         throw {reason: "unauthenticated"}
@@ -116,12 +116,41 @@
       }
     }});
   }
+
+  let newParticipant;
+  async function addParticipant(){
+    console.log(newParticipant);
+    if (participants.find(p => p.emailAddress === newParticipant)) {
+      newParticipant = "";
+    } else {
+      let response = await Client.addParticipant(
+        conversationId,
+        newParticipant
+      );
+      response.match({
+        ok: function(_) {
+          const [name] = newParticipant.split("@");
+          const participant = { name, emailAddress: newParticipant };
+          participants = participants.concat(participant);
+          newParticipant = "";
+        },
+        fail: function({ status }) {
+          if (status === 422) {
+            let failure = "Unable to add participant because email is invalid";
+          } else {
+             let failure = "Failed to add participant";
+          }
+        }
+      });
+    }
+  }
+
 </script>
 
 {#await fetchConversation(conversationId)}
 shared header ideallyy
 Let's not have any pins
-{:then {conversation, messages, participants}}
+{:then _}
 <header class="w-full max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
   <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
   <h1 id="topic" class="flex-grow text-xl md:text-2xl">{conversation.topic}</h1>
@@ -147,8 +176,8 @@ Let's not have any pins
         <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
         {/each}
       </ul>
-      <form class="" data-action="addParticipant" method="post">
-        <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="email" required name="emailAddress" value="" placeholder="email address">
+      <form on:submit|preventDefault={addParticipant}>
+        <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="email" required bind:value={newParticipant} placeholder="email address">
         <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
       </form>
     </div>
