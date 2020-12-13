@@ -1,6 +1,5 @@
-import Glance from './Glance.svelte'
-
 export function extractQuestions(doc, authoredByMe, asked) {
+  console.log("extractQuestions");
   const $questionLinks = doc.querySelectorAll('a[href="#?"]')
 
   return Array.from($questionLinks).reduce(function (asked, $link) {

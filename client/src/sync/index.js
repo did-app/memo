@@ -2,8 +2,24 @@
 import * as Client from "../client.js";
 
 console.log("sync")
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
 
-export const user = 5;
+export let installPrompt = new Promise(function(resolve, reject) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log("installPrompt");
+    return e
+  });
+});
 
 async function loadState(resolve, reject) {
   let response = await Client.fetchInbox();

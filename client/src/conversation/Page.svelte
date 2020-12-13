@@ -11,7 +11,6 @@
   export let failure;
   export let authenticationRequired;
   export let conversationId;
-  export let displayName;
   export let emailAddress;
   export let topic;
   export let closed = false;
@@ -141,35 +140,8 @@ function doInstall() {
 }
 </script>
 
-<style media="screen">
 
-</style>
 
-{#if !topic && !authenticationRequired}
-<div class="flex min-h-screen flex-col">
-  <div class="m-auto">
-    <Circle2 size="25" colorOuter="#3c366b" colorCenter="#3c366b" colorInner="#3c366b" unit="vw"></Circle2>
-  </div>
-</div>
-{:else if authenticationRequired}
-<SignIn/>
-{:else}
-{#if failure}
-<div class="bg-indigo-100 font-bold mb-3 p-4 text-center cursor-pointer" on:click={clearFailure}>
-  {failure}
-</div>
-{/if}
-<header class="w-full max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
-  <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
-  <h1 id="topic" class="flex-grow text-xl md:text-2xl">{topic}</h1>
-</header>
-<div class="sm:flex w-full max-w-5xl mx-auto">
-  <main class="sm:w-2/3 max-w-md mx-auto md:mr-0 md:max-w-3xl px-1 md:px-2 md:mb-16">
-    <div id="messages" class="">
-      {#each messages as message}
-      <Message {...message} />
-      {/each}
-    </div>
     <h2 class:hidden="{!closed}" class="text-lg text-center font-bold text-gray-700 mb-14">
       This conversation has been closed, <br> No further messages can be sent.
     </h2>
@@ -198,7 +170,6 @@ function doInstall() {
       {#if questions.length}
       <hr class="mt-4">
       {/if}
-      <!-- <p>Write any more content here</p> -->
       <textarea class="w-full bg-white outline-none" name="content" style="min-height:25vh;max-height:60vh;" placeholder="Write message ..." bind:value={draft} on:input={resize} on:input={watchQuestions} on:keypress={tryMakeQuestion}></textarea>
       <div id="preview" class="markdown-body p-2" style="min-height:25vh;">
         {@html preview}
@@ -209,7 +180,6 @@ function doInstall() {
       {/if}
       <section class="pb-1 whitespace-no-wrap overflow-hidden">
         <span class="font-bold text-gray-700">From:</span>
-        <!-- <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="from" placeholder="{displayName}" value=""> -->
         <span class="truncate">{emailAddress}</span>
       </section>
       <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
@@ -251,70 +221,7 @@ function doInstall() {
     </form>
 
   </main>
-  <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
-    <div class="sticky top-0">
-      <h3 class="font-bold">Pins</h3>
-      <style media="screen">
-        .last-only {
-          display: none;
-        }
 
-        .last-only:last-child {
-          display: block;
-        }
-      </style>
-      <ul id="pins">
-        <li class="last-only">Select message text to add first pin.</li>
-        {#each pins as {counter, content, id}}
-        <li class="bg-white border-indigo-700 border-l-4 m-1 p-1 shadow-lg text-lg">
-          <form class="inline-block" data-action="deletePin" method="post">
-            <input type="hidden" name="id" value={id}>
-            <button>
-              <img class="inline-block w-6 hover:opacity-50 transition duration-100" src="/005-delete.svg" alt="">
-            </button>
-          </form>
-          <a class="hover:text-indigo-700" href="#{counter}" on:click={openMessage(counter)}>{content}</a>
-        </li>
-        {/each}
-      </ul>
-      <h3 class="font-bold mt-8">Participants</h3>
-      <ul id="participants">
-        {#each participants as {name, emailAddress}}
-        <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
-        {/each}
-      </ul>
-      <form class="" data-action="addParticipant" method="post">
-        <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="email" required name="emailAddress" value="" placeholder="email address">
-        <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
-      </form>
-      <h3 class="font-bold mt-4">Notifications</h3>
-      <p>Send me notifications for</p>
-      <label class="flex px-2 py-1 justify-start items-start">
-        <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-          <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'all'}>
-          <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-            <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-          </div>
-          <span class="text-gray-700 pr-2">All messages</span>
-        </label>
-        <label class="flex px-2 py-1 justify-start items-start">
-          <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-            <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'concluded'}>
-            <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-              <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-            </div>
-            <span class="text-gray-700 pr-2">Conversation concluded</span>
-          </label>
-          <label class="flex px-2 py-1 justify-start items-start">
-            <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-              <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'none'}>
-              <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-                <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
-              </div>
-              <span class="text-gray-700 pr-2">Never</span>
-            </label>
-    </div>
-  </aside>
 </div>
 {/if }
 <div class="texttip texttip--theme-default" class:texttip--show="{!!left}" data-textip-iconformat="font" data-texttip-id="1" role="tooltip" aria-hidden="true" style="left:{left}px;bottom:{bottom}px">
