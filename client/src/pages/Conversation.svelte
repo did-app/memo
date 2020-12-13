@@ -12,7 +12,6 @@
   let failure;
 
   // Don't want to silently refresh,
-  let notify, previousNofity;
   async function fetchConversation(conversationId) {
     let response = await Client.fetchConversation(conversationId);
     return response.match({ok: function (data) {
@@ -104,8 +103,6 @@
 
       // TODO cleanup
       document.title = rest.conversation.topic;
-      // TODO has to be implicit here because of promises
-      notify = participation.notify
       // TODO have a scroll into view thing
       Client.readMessage(conversationId, highest);
 
@@ -119,28 +116,12 @@
       }
     }});
   }
-
-  $: (async function(){
-    if (previousNofity && previousNofity != notify) {
-      const response = await Client.setNotification(conversationId, notify);
-      response.match({
-        ok: function(_) {
-          undefined;
-        },
-        fail: function(_) {
-          failure = "Failed to save notification preferences";
-        }
-      });
-
-    }
-    previousNofity = notify
-  }())
 </script>
 
 {#await fetchConversation(conversationId)}
 shared header ideallyy
 Let's not have any pins
-{:then {conversation, messages, pins, participants}}
+{:then {conversation, messages, participants}}
 <header class="w-full max-w-5xl mx-auto flex text-center p-2 md:pt-6 md:pb-4 items-center">
   <a class="border border-indigo-800 rounded py-1 px-2" href="/">↶ Inbox</a>
   <h1 id="topic" class="flex-grow text-xl md:text-2xl">{conversation.topic}</h1>
@@ -160,31 +141,7 @@ Let's not have any pins
   </main>
   <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
     <div class="sticky top-0">
-      <h3 class="font-bold">Pins</h3>
-      <style media="screen">
-        .last-only {
-          display: none;
-        }
-
-        .last-only:last-child {
-          display: block;
-        }
-      </style>
-      <ul id="pins">
-        <li class="last-only">Select message text to add first pin.</li>
-        {#each pins as {counter, content, id}}
-        <li class="bg-white border-indigo-700 border-l-4 m-1 p-1 shadow-lg text-lg">
-          <form class="inline-block" data-action="deletePin" method="post">
-            <input type="hidden" name="id" value={id}>
-            <button>
-              <img class="inline-block w-6 hover:opacity-50 transition duration-100" src="/005-delete.svg" alt="">
-            </button>
-          </form>
-          <a class="hover:text-indigo-700" href="#{counter}" on:click={openMessage(counter)}>{content}</a>
-        </li>
-        {/each}
-      </ul>
-      <h3 class="font-bold mt-8">Participants</h3>
+      <h3 class="font-bold">Participants</h3>
       <ul id="participants">
         {#each participants as {name, emailAddress}}
         <li class="m-1 whitespace-no-wrap truncate">{name} <small>&lt;{emailAddress}&gt;</small></li>
@@ -194,35 +151,6 @@ Let's not have any pins
         <input class="duration-200 mt-2 px-4 py-1 rounded transition-colors bg-white" id="invite" type="email" required name="emailAddress" value="" placeholder="email address">
         <button class="px-4 py-1 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Invite</button>
       </form>
-      <h3 class="font-bold mt-4">Notifications</h3>
-      <p>Send me notifications for</p>
-      <label class="flex px-2 py-1 justify-start items-start">
-        <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-          <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'all'}>
-          <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-            <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
-          </svg>
-        </div>
-        <span class="text-gray-700 pr-2">All messages</span>
-      </label>
-      <label class="flex px-2 py-1 justify-start items-start">
-        <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-          <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'concluded'}>
-          <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-            <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
-          </svg>
-        </div>
-        <span class="text-gray-700 pr-2">Conversation concluded</span>
-      </label>
-      <label class="flex px-2 py-1 justify-start items-start">
-        <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-          <input type="radio" class="opacity-0 absolute" name="notify" bind:group={notify} value={'none'}>
-          <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
-            <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
-          </svg>
-        </div>
-        <span class="text-gray-700 pr-2">Never</span>
-      </label>
     </div>
   </aside>
 </div>

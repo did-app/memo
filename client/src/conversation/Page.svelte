@@ -224,15 +224,3 @@ function doInstall() {
 
 </div>
 {/if }
-<div class="texttip texttip--theme-default" class:texttip--show="{!!left}" data-textip-iconformat="font" data-texttip-id="1" role="tooltip" aria-hidden="true" style="left:{left}px;bottom:{bottom}px">
-  <div class="texttip__inner">
-    <div class="texttip__btn" role="button" data-action="quoteInReply" data-texttip-btn-index="0" style="transition-delay: 40ms;">
-      <i class="fa fa-quote-right" title="Quote" aria-hidden="true"></i>
-      <span class="sr-only">Quote</span>
-    </div>
-    <div class="texttip__btn" role="button" data-action="pinSelection" data-texttip-btn-index="1" style="transition-delay: 80ms;">
-      <i class="fa fa-map-pin" title="Pin" aria-hidden="true"></i>
-      <span class="sr-only">Pin</span>
-    </div>
-  </div>
-</div>
