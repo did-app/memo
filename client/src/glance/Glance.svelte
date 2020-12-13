@@ -1,6 +1,6 @@
 <script type="text/javascript">
-  import Page from "./glance/Page.svelte"
-  import ImageReel from "./glance/ImageReel.svelte"
+  import Page from "./Page.svelte"
+  import ImageReel from "./ImageReel.svelte"
   export let href;
   export let text;
   let url = new URL(href, window.location.origin);

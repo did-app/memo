@@ -1,5 +1,5 @@
 <script type="text/javascript">
-  import * as Client from "./client.js";
+  import * as Client from "../client.js";
 
   let error;
   let emailAddress;

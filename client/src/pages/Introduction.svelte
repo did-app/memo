@@ -1,17 +1,19 @@
 <script type="typescript">
   const placeholders = {
     peter: "I respond faster to emails that are short. Two-liners are best. You can write Markdown in this box",
-    team: "I'm looking forward to trying plum mail because ..."
+    team: "I'm looking forward to trying plum mail because ...",
+    richard: ""
   }
-  export let label;
-  let placeholder = placeholders[label] || ""
+  export let identifier;
+  let placeholder = placeholders[identifier]
 </script>
 
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2 my-4">
+  {#if placeholder != undefined}
   <h1 class="flex-grow text-xl md:text-2xl text-center">Make an introduction</h1>
   <article class="my-2 border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white">
     <div class="markdown-body py-6 px-2 md:px-20">
-      {#if label === 'peter'}
+      {#if identifier === 'peter'}
       <p>Hello</p>
       <p>
         Thanks for reaching out.
@@ -33,7 +35,7 @@
       <p>
         <strong>Cheers, Peter</strong>
       </p>
-      {:else if label === 'richard'}
+      {:else if identifier === 'richard'}
       <p>Hi,</p>
 
       <p>
@@ -56,7 +58,7 @@
       <p>
         Richard
       </p>
-      {:else if label === 'team'}
+      {:else if identifier === 'team'}
       <p>
         Greetings,
       </p>
@@ -72,7 +74,7 @@
       {/if}
     </div>
   </article>
-  <form class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white py-4" action="__API_ORIGIN__/introduction/{label}" method="post">
+  <form class="relative border-l border-t border-r rounded-lg md:rounded-2xl my-shadow bg-white py-4" action="__API_ORIGIN__/introduction/{identifier}" method="post">
     <section class="py-2 px-2 md:px-20 flex">
       <span class="font-bold text-gray-700 mr-1">Subject:</span>
       <input class="border-b bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" type="text" name="subject" placeholder="Please be specific" required>
@@ -92,4 +94,7 @@
       <button class="ml-auto my-1 py-1 px-2 rounded bg-indigo-900 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">Send</button>
     </div>
   </form>
+  {:else}
+  Could not find email address
+  {/if}
 </main>

@@ -1,5 +1,5 @@
 <script type="text/javascript">
-  import Glance from '../Glance.svelte'
+  import Glance from '../glance/Glance.svelte'
   import { tick } from 'svelte';
   export let counter;
   export let checked;

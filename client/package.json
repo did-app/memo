@@ -17,6 +17,7 @@
   "dependencies": {
     "dompurify": "^2.0.15",
     "marked": "^1.1.1",
+    "page": "^1.11.6",
     "svelte-loading-spinners": "^0.1.1"
   }
 }
