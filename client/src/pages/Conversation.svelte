@@ -194,6 +194,16 @@
       watchQuestions(event)
     }
   }
+
+  // TODO handle answers
+  async function writeMessage() {
+    console.log(draft);
+    let response = await Client.writeMessage(
+      conversationId,
+      draft,
+      false
+    );
+  }
 </script>
 
 {#await fetchConversation(conversationId)}
@@ -216,7 +226,7 @@ Let's not have any pins
       <Message {...message} />
       {/each}
     </div>
-    <form id="reply-form"  class="relative w-full mt-2 mb-2 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " data-action="writeMessage">
+    <form id="reply-form"  class="relative w-full mt-2 mb-2 p-2 md:py-6 md:px-20 rounded-lg md:rounded-2xl my-shadow bg-white " on:submit|preventDefault={writeMessage}>
       <input id="preview-tab" class="hidden" type="checkbox">
       <div class="">
         {#each questions as {query, awaiting, id, answer, dismissed}}

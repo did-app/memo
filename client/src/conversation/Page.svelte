@@ -39,25 +39,6 @@
   let draft;
   $: preview = process(draft)
 
-  // https://svelte.dev/repl/ead0f1fcd2d4402bbbd64eca1d665341?version=3.14.1
-  function resize(event) {
-    // // Reset field height
-    // field.style.height = 'inherit';
-    // // Get the computed styles for the element
-    // var computed = window.getComputedStyle(field);
-    // // Calculate the height
-    // var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
-    //              + parseInt(computed.getPropertyValue('padding-top'), 10)
-    //              + field.scrollHeight
-    //              + parseInt(computed.getPropertyValue('padding-bottom'), 10)
-    //              + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-
-    event.target.style.height = "1px";
-    event.target.style.height = (+event.target.scrollHeight)+"px";
-    const $composeMenu = document.getElementById('compose-menu');
-    // TODO reinstate but Breaks on iOS
-    // $composeMenu.scrollIntoView();
-  }
 
   function clearFailure() {
     failure = undefined;
@@ -81,45 +62,7 @@
   }
 
   let makeQuestion;
-  function watchQuestions(event) {
-    const $area = event.target
-    if (document.activeElement !== $area) return
-    // let selection = document.getSelection()
-    // let range = selection.getRangeAt(0)
-    const cursor = $area.selectionStart;
-    const textValue = $area.value
-    const leftChar = textValue.slice(cursor - 1, cursor)
 
-    if (leftChar !== "?") {
-      makeQuestion = undefined
-      return
-    }
-
-    let pre = textValue.slice(0, cursor -1)
-    let post = textValue.slice(cursor)
-    let lineBreak = pre.lastIndexOf("\n")
-    let question = pre.slice(lineBreak + 1)
-    pre = pre.slice(0, lineBreak + 1)
-
-    if (question[0] === "[") return
-    if (question.trim() === "") return
-    makeQuestion = function () {
-
-     // Only replace up to first two new lines for the newlines added
-     draft = pre + "[" + question + "?](#?)\n\n" + post.trimStart();
-
-     $area.setSelectionRange(cursor + 8, cursor + 8)
-     makeQuestion = undefined
-   }
-  }
-  function tryMakeQuestion(event) {
-  if (event.key === "Enter" && makeQuestion) {
-    event.preventDefault()
-    makeQuestion()
-  } else {
-    watchQuestions(event)
-  }
-}
 function dismiss(id) {
   const index = questions.findIndex(function (q) {
     return q.id === id
