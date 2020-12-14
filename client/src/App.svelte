@@ -1,5 +1,6 @@
 <script>
   import Search from "./pages/Search.svelte";
+  import Composer from "./pages/Composer.svelte";
   import Outstanding from "./pages/Outstanding.svelte";
   import Begin from "./pages/Begin.svelte";
   import Archive from "./pages/Archive.svelte";
@@ -14,6 +15,7 @@
 
   let page, params
   router('/', (context) => {params = context.params; page = Search})
+  router('/composer', (context) => {params = context.params; page = Composer})
   router('/unread', (context) => {params = context.params; page = Outstanding})
   router('/begin', (context) => {params = context.params; page = Begin})
   router('/archive', (context) => {params = context.params; page = Archive})
