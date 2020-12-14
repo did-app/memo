@@ -1,4 +1,5 @@
 <script>
+  import {onMount} from "svelte"
   import Glance from "../glance/Glance.svelte"
   const PARAGRAPH = "paragraph";
   const TEXT = "text";
@@ -9,12 +10,11 @@
 
   let messages = []
 
-  let qid = 0
   function parseLine(line, offset) {
     // Can't end with |(.+\?) because question capture will catch all middle links
     // Questionmark in the body of a link causes confusion, not good if people are making their own questions
     // const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
-    const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
+    const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))/gm
     const output = []
     let cursor = 0;
     let token
@@ -31,9 +31,6 @@
         output.push({type: LINK, url: token[3], start})
       } else if (token[2] !== undefined) {
         output.push({type: LINK, url: token[2], title: token[1], start})
-      } else if (token[4] !== undefined) {
-        output.push({type: LINK, url: "#?", title: token[4], start, id: qid})
-        qid = qid + 1
       } else  {
         throw "should be handled"
       }
@@ -46,7 +43,6 @@
   }
 
   function parse(draft) {
-    qid = 0;
     const {doc, node} = draft.split(/\n/).reduce(function ({doc, node, offset}, line) {
       if (line.trim() == "") {
         // close node
@@ -73,7 +69,7 @@
     return doc
   }
 
-  let answers = [{raw: ""}]
+  let answers = []
   $: memo = answers.map(function ({raw}) {
     return {blocks: parse(raw), type: ANSWER}
   }).concat(parse(draft))
@@ -94,11 +90,64 @@
   })
   function send() {
     messages = messages.concat({memo: memo.concat([])})
-    answers = [{raw: ""}]
+    answers = []
     draft = ""
     preferences = [{}, {}]
 
   }
+  onMount(() => {
+    document.addEventListener('selectionchange', handleSelectionChange)
+    return () => document.removeEventListener('selectionchange', handleSelectionChange)
+  })
+  function getSelection() {
+    const domSelection = window.getSelection()
+    if (domSelection === null) {
+      throw "Why would there be no selection"
+    } else {
+      return domSelection
+    }
+  }
+  const domSelection = getSelection();
+  let memos = []
+  function handleSelectionChange() {
+    const domRange = domSelection.getRangeAt(0);
+    const {startContainer, startOffset, endContainer, endOffset} = domRange;
+
+    let start = memos.findIndex((element) => { return element.contains(startContainer) })
+    let end = memos.findIndex((element) => { return element.contains(endContainer) })
+
+    if (start === end) {
+      const startElement = startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentElement
+      const endElement = endContainer.nodeType === Node.ELEMENT_NODE ? endContainer : endContainer.parentElement
+      console.log(start, end);
+      console.log(pathFromTarget(startElement, memos[start]));
+
+    }
+  }
+
+  export function pathFromTarget(element, root) {
+    const path = []
+    while (element) {
+      // Would need or {} if not for first text node
+      let {noteIndex} = element.dataset || {}
+      if (noteIndex) {
+        path.unshift(parseInt(noteIndex))
+      }
+      if (element == root) {
+        break
+      }
+      let parent = element.parentElement
+      if (parent === null) {
+        throw "We should always get to root first"
+      }
+      element = parent
+    }
+    return path
+  }
+
+  // get from memo with typescript
+  // selection needs to produce link
+  // suggestions come last
 </script>
 
 <style media="screen">
@@ -110,15 +159,14 @@
 
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
-
-    {#each messages.concat({memo}) as {memo}}
-    <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
-      {#each memo as element}
+    {#each messages.concat({memo}) as {memo}, idx}
+    <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md" bind:this={memos[idx]}>
+      {#each memo as element, index}
       {#if element.type === PARAGRAPH}
-      <p class="my-2">
-        {#each element.lines.flat() as span}
+      <p class="my-2" data-note-index="{index}">
+        {#each element.lines.flat() as span, index}
         {#if span.type === TEXT}
-          <span class="inline-block mr-1">{span.text}</span>
+          <span class="inline-block mx-1" data-note-index="{index}">{span.text}</span>
         {:else if span.type === LINK && span.url === "#?"}
           <details>
             <!-- create Elements that allow this to be rusued in quote blocks etc -->
@@ -137,11 +185,11 @@
       {:else if element.type === ANSWER}
       <div class="border-l-4 border-purple-500 px-2 my-2">
         <a class="block" href="#">Question 1</a>
-        {#each element.blocks as element}
-        <p class="my-2">
-          {#each element.lines.flat() as span}
+        {#each element.blocks as element, index}
+        <p class="my-2" data-note-index="{index}">
+          {#each element.lines.flat() as span, index}
           {#if span.type === TEXT}
-            <span class="inline-block mr-1">{span.text}</span>
+            <span class="inline-block mx-1" data-note-index="{index}">{span.text}</span>
             {:else if span.type === LINK && span.url === "#?"}
             <details>
               <summary>{span.title} {JSON.stringify(preferences[span.id].urgency)}</summary>
@@ -165,10 +213,6 @@
     </article>
     {/each}
     <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
-      <div class="border-l-4 border-purple-500 px-2 my-2">
-        <a href="#">Question 1</a>
-        <textarea class="w-full outline-none" bind:value={answers[0].raw} placeholder="Your answer ..."></textarea>
-      </div>
       <textarea class="message w-full outline-none" bind:value={draft} placeholder="Your message ..."></textarea>
       {#each questions as {id}}
       Question {id}
