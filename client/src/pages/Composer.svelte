@@ -6,10 +6,6 @@
   const TEXT = "text";
   const LINK = "link";
   const ANSWER = "answer";
-  let textarea;
-  let draft = "";
-
-  let messages = []
 
   function parseLine(line, offset) {
     // Can't end with |(.+\?) because question capture will catch all middle links
@@ -71,36 +67,11 @@
     return doc
   }
 
-  let answers = []
-  $: memo = answers.map(function ({raw}) {
-    return {blocks: parse(raw), type: ANSWER}
-  }).concat(parse(draft))
-
-  let preferences = [{}, {}]
-  $: questions = memo.flatMap(function ({blocks, spans}) {
-    if (blocks !== undefined) {
-      spans = blocks.flatMap(function ({spans}) {
-        return spans
-      })
-    }
-    return spans.flat()
-  }).filter(function ({type, url}) {
-    return type === LINK && url === "#?"
-  }).map(function (q, index) {
-    let pref = preferences[index] || {}
-    return {...q, ...pref}
-  })
-  function send() {
-    messages = messages.concat({memo: memo.concat([])})
-    answers = []
-    draft = ""
-    preferences = [{}, {}]
-
-  }
   onMount(() => {
     document.addEventListener('selectionchange', handleSelectionChange)
     return () => document.removeEventListener('selectionchange', handleSelectionChange)
   })
+
   function getSelection() {
     const domSelection = window.getSelection()
     if (domSelection === null) {
@@ -109,16 +80,23 @@
       return domSelection
     }
   }
+
   const domSelection = getSelection();
   let domRange
-  let memos = []
   function handleSelectionChange() {
     domRange = domSelection.getRangeAt(0);
   }
 
-  // get from memo with typescript
-  // selection needs to produce link
-  // suggestions come last
+  let draft = "";
+  let previous = []
+  let notes
+  $: notes = previous.concat({elements: parse(draft)})
+
+  function send() {
+    previous = previous.concat({elements: parse(draft)})
+    draft = ""
+  }
+
 </script>
 
 <style media="screen">
@@ -130,21 +108,11 @@
 
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
-    {#each messages.concat({memo}) as {memo}, idx}
-    <Note elements={memo} {domRange}/>
-
+    {#each notes as {elements}, index}
+    <Note {elements} {domRange}/>
     {/each}
     <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
       <textarea class="message w-full outline-none" bind:value={draft} placeholder="Your message ..."></textarea>
-      {#each questions as {id}}
-      Question {id}
-      <select bind:value={preferences[id].urgency}>
-        <option value="asap">ASAP</option>
-        <option value="tomorrow">Tomorrow</option>
-        <option value="next week">Next week</option>
-        <option value="no hurry">No hurry</option>
-      </select>
-      {/each}
       <div class="mt-2 flex">
         <button class="ml-auto py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit" on:click={send}>
           <svg class="fill-current inline w-4 mr-2" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24">
@@ -157,8 +125,7 @@
     </article>
 
     <pre>
-      {JSON.stringify(memo, null, 2)}
-      {JSON.stringify(questions, null, 2)}
+      {JSON.stringify(notes, null, 2)}
     </pre>
   </main>
 </div>
