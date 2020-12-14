@@ -3,8 +3,11 @@
   const PARAGRAPH = "paragraph";
   const TEXT = "text";
   const LINK = "link";
+  const ANSWER = "answer";
   let textarea;
   let draft = "";
+
+  let messages = []
 
   let qid = 0
   function parseLine(line, offset) {
@@ -72,7 +75,7 @@
 
   let answers = [{raw: ""}]
   $: memo = answers.map(function ({raw}) {
-    return {blocks: parse(raw)}
+    return {blocks: parse(raw), type: ANSWER}
   }).concat(parse(draft))
 
   let preferences = [{}, {}]
@@ -89,6 +92,13 @@
     let pref = preferences[index] || {}
     return {...q, ...pref}
   })
+  function send() {
+    messages = messages.concat({memo: memo.concat([])})
+    answers = [{raw: ""}]
+    draft = ""
+    preferences = [{}, {}]
+
+  }
 </script>
 
 <style media="screen">
@@ -100,24 +110,10 @@
 
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
+
+    {#each messages.concat({memo}) as {memo}}
     <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
-      <div class="border-l-4 border-purple-500 px-2 my-2">
-        <a href="#">Question 1</a>
-        <textarea class="w-full outline-none" bind:value={answers[0].raw} placeholder="Your answer ..."></textarea>
-      </div>
-      <textarea class="message w-full outline-none" bind:value={draft} placeholder="Your message ..."></textarea>
-      <div class="mt-2 flex">
-        <button class="ml-auto py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit">
-          <svg class="fill-current inline w-4 mr-2" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24">
-            <path d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z"></path>
-            <path d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z"></path>
-          </svg>
-          Send
-        </button>
-      </div>
-    </article>
-    <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
-      {#each parse(draft) as element}
+      {#each memo as element}
       {#if element.type === PARAGRAPH}
       <p class="my-2">
         {#each element.lines.flat() as span}
@@ -125,7 +121,8 @@
           <span class="inline-block mr-1">{span.text}</span>
         {:else if span.type === LINK && span.url === "#?"}
           <details>
-            <summary>{span.title}</summary>
+            <!-- create Elements that allow this to be rusued in quote blocks etc -->
+            <summary>{span.title} {JSON.stringify(preferences[span.id].urgency)}</summary>
             <div class="fallback border-l-4 border-gray-400 px-2 pt-1 mb-2">
               There are no answers to this question yet
             </div>
@@ -137,18 +134,64 @@
         {/if}
         {/each}
       </p>
+      {:else if element.type === ANSWER}
+      <div class="border-l-4 border-purple-500 px-2 my-2">
+        <a class="block" href="#">Question 1</a>
+        {#each element.blocks as element}
+        <p class="my-2">
+          {#each element.lines.flat() as span}
+          {#if span.type === TEXT}
+            <span class="inline-block mr-1">{span.text}</span>
+            {:else if span.type === LINK && span.url === "#?"}
+            <details>
+              <summary>{span.title} {JSON.stringify(preferences[span.id].urgency)}</summary>
+              <div class="fallback border-l-4 border-gray-400 px-2 pt-1 mb-2">
+                There are no answers to this question yet
+              </div>
+            </details>
+          {:else if span.type === LINK}
+            <Glance href={span.url} text={span.title}/>
+          {:else}
+          {JSON.stringify(span)}
+          {/if}
+          {/each}
+        </p>
+        {/each}
+      </div>
       {:else}
       bad
       {/if}
       {/each}
+    </article>
+    {/each}
+    <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
+      <div class="border-l-4 border-purple-500 px-2 my-2">
+        <a href="#">Question 1</a>
+        <textarea class="w-full outline-none" bind:value={answers[0].raw} placeholder="Your answer ..."></textarea>
+      </div>
+      <textarea class="message w-full outline-none" bind:value={draft} placeholder="Your message ..."></textarea>
       {#each questions as {id}}
       Question {id}
-      <input type="text" name="" bind:value={preferences[id].foo}>
+      <select bind:value={preferences[id].urgency}>
+        <option value="asap">ASAP</option>
+        <option value="tomorrow">Tomorrow</option>
+        <option value="next week">Next week</option>
+        <option value="no hurry">No hurry</option>
+      </select>
       {/each}
+      <div class="mt-2 flex">
+        <button class="ml-auto py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit" on:click={send}>
+          <svg class="fill-current inline w-4 mr-2" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24">
+            <path d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z"></path>
+            <path d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z"></path>
+          </svg>
+          Send
+        </button>
+      </div>
     </article>
 
     <pre>
-      <!-- {JSON.stringify(memo, null, 2)} -->
+      {JSON.stringify(memo, null, 2)}
       {JSON.stringify(questions, null, 2)}
     </pre>
   </main>
