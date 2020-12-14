@@ -1,6 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import Glance from "../glance/Glance.svelte"
+  import Note from "../components/Note.svelte"
   const PARAGRAPH = "paragraph";
   const TEXT = "text";
   const LINK = "link";
@@ -14,7 +15,7 @@
     // Can't end with |(.+\?) because question capture will catch all middle links
     // Questionmark in the body of a link causes confusion, not good if people are making their own questions
     // const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
-    const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))/gm
+    const tokeniser = /(?:\[([^\[]*)\]\(([^\(]+)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))/gm
     const output = []
     let cursor = 0;
     let token
@@ -55,8 +56,9 @@
 
       } else {
         // append line
-        node = node || {type: PARAGRAPH, lines: []}
-        node.lines.push(parseLine(line, offset))
+        node = node || {type: PARAGRAPH, spans: []}
+        // TODO merge same text
+        node.spans = node.spans.concat(...parseLine(line, offset))
       }
       // plus one for the newline
       offset = offset + line.length + 1
@@ -75,13 +77,13 @@
   }).concat(parse(draft))
 
   let preferences = [{}, {}]
-  $: questions = memo.flatMap(function ({blocks, lines}) {
+  $: questions = memo.flatMap(function ({blocks, spans}) {
     if (blocks !== undefined) {
-      lines = blocks.flatMap(function ({lines}) {
-        return lines
+      spans = blocks.flatMap(function ({spans}) {
+        return spans
       })
     }
-    return lines.flat()
+    return spans.flat()
   }).filter(function ({type, url}) {
     return type === LINK && url === "#?"
   }).map(function (q, index) {
@@ -108,41 +110,10 @@
     }
   }
   const domSelection = getSelection();
+  let domRange
   let memos = []
   function handleSelectionChange() {
-    const domRange = domSelection.getRangeAt(0);
-    const {startContainer, startOffset, endContainer, endOffset} = domRange;
-
-    let start = memos.findIndex((element) => { return element.contains(startContainer) })
-    let end = memos.findIndex((element) => { return element.contains(endContainer) })
-
-    if (start === end) {
-      const startElement = startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentElement
-      const endElement = endContainer.nodeType === Node.ELEMENT_NODE ? endContainer : endContainer.parentElement
-      console.log(start, end);
-      console.log(pathFromTarget(startElement, memos[start]));
-
-    }
-  }
-
-  export function pathFromTarget(element, root) {
-    const path = []
-    while (element) {
-      // Would need or {} if not for first text node
-      let {noteIndex} = element.dataset || {}
-      if (noteIndex) {
-        path.unshift(parseInt(noteIndex))
-      }
-      if (element == root) {
-        break
-      }
-      let parent = element.parentElement
-      if (parent === null) {
-        throw "We should always get to root first"
-      }
-      element = parent
-    }
-    return path
+    domRange = domSelection.getRangeAt(0);
   }
 
   // get from memo with typescript
@@ -160,57 +131,8 @@
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
     {#each messages.concat({memo}) as {memo}, idx}
-    <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md" bind:this={memos[idx]}>
-      {#each memo as element, index}
-      {#if element.type === PARAGRAPH}
-      <p class="my-2" data-note-index="{index}">
-        {#each element.lines.flat() as span, index}
-        {#if span.type === TEXT}
-          <span class="inline-block mx-1" data-note-index="{index}">{span.text}</span>
-        {:else if span.type === LINK && span.url === "#?"}
-          <details>
-            <!-- create Elements that allow this to be rusued in quote blocks etc -->
-            <summary>{span.title} {JSON.stringify(preferences[span.id].urgency)}</summary>
-            <div class="fallback border-l-4 border-gray-400 px-2 pt-1 mb-2">
-              There are no answers to this question yet
-            </div>
-          </details>
-        {:else if span.type === LINK}
-          <Glance href={span.url} text={span.title}/>
-        {:else}
-        {JSON.stringify(span)}
-        {/if}
-        {/each}
-      </p>
-      {:else if element.type === ANSWER}
-      <div class="border-l-4 border-purple-500 px-2 my-2">
-        <a class="block" href="#">Question 1</a>
-        {#each element.blocks as element, index}
-        <p class="my-2" data-note-index="{index}">
-          {#each element.lines.flat() as span, index}
-          {#if span.type === TEXT}
-            <span class="inline-block mx-1" data-note-index="{index}">{span.text}</span>
-            {:else if span.type === LINK && span.url === "#?"}
-            <details>
-              <summary>{span.title} {JSON.stringify(preferences[span.id].urgency)}</summary>
-              <div class="fallback border-l-4 border-gray-400 px-2 pt-1 mb-2">
-                There are no answers to this question yet
-              </div>
-            </details>
-          {:else if span.type === LINK}
-            <Glance href={span.url} text={span.title}/>
-          {:else}
-          {JSON.stringify(span)}
-          {/if}
-          {/each}
-        </p>
-        {/each}
-      </div>
-      {:else}
-      bad
-      {/if}
-      {/each}
-    </article>
+    <Note elements={memo} {domRange}/>
+
     {/each}
     <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
       <textarea class="message w-full outline-none" bind:value={draft} placeholder="Your message ..."></textarea>
