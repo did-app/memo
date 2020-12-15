@@ -1,78 +1,10 @@
 <script>
   import {onMount} from "svelte"
-  import Glance from "../glance/Glance.svelte"
+  import * as Thread from "../thread"
+  import {parse} from "../note"
+  import {PARAGRAPH, TEXT, ANNOTATION} from "../note/elements"
   import Note from "../components/Note.svelte"
   import Block from "../components/Block.svelte"
-  const PARAGRAPH = "paragraph";
-  const TEXT = "text";
-  const LINK = "link";
-  const ANSWER = "answer";
-
-  function parseLine(line, offset) {
-    // Can't end with |(.+\?) because question capture will catch all middle links
-    // Questionmark in the body of a link causes confusion, not good if people are making their own questions
-    // const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
-    const tokeniser = /(?:\[([^\[]*)\]\(([^\(]+)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))/gm
-    const output = []
-    let cursor = 0;
-    let token
-    while (token = tokeniser.exec(line)) {
-      const unmatched = line.substring(cursor, token.index).trim()
-      cursor = tokeniser.lastIndex
-      const start = offset + token.index
-      let range = document.createRange()
-
-      if (unmatched) {
-        output.push({type: TEXT, text: unmatched, start})
-      }
-      if (token[3] !== undefined) {
-        output.push({type: LINK, url: token[3], start})
-      } else if (token[2] !== undefined) {
-        output.push({type: LINK, url: token[2], title: token[1], start})
-      } else  {
-        throw "should be handled"
-      }
-    }
-    const unmatched = line.substring(cursor).trim()
-    if (unmatched) {
-      output.push({type: TEXT, text: unmatched})
-    }
-    return output
-  }
-
-  function parse(draft) {
-    const {doc, node} = draft.split(/\n/).reduce(function ({doc, node, offset}, line) {
-      if (line.trim() == "") {
-        // close node
-        if (node.type === PARAGRAPH) {
-          doc.push(node)
-          node = false
-        } else {
-          // do nothing no node
-        }
-
-      } else {
-        // append line
-        node = node || {type: PARAGRAPH, spans: []}
-        // TODO merge same text
-        // Called softbreak from markdown even thought rendered with br
-        node.spans = node.spans.concat(...parseLine(line, offset), {type: "softbreak"})
-      }
-      // plus one for the newline
-      offset = offset + line.length + 1
-      return {doc, node, offset}
-    }, {doc: [], node: false, offset: 0})
-    // close node
-    if (node.type === PARAGRAPH) {
-      doc.push(node)
-    }
-    return doc
-  }
-
-  onMount(() => {
-    document.addEventListener('selectionchange', handleSelectionChange)
-    return () => document.removeEventListener('selectionchange', handleSelectionChange)
-  })
 
   function getSelection() {
     const domSelection = window.getSelection()
@@ -85,12 +17,39 @@
 
   const domSelection = getSelection();
   let domRange
+
   function handleSelectionChange() {
     domRange = domSelection.getRangeAt(0);
   }
 
-  let annotations = [
-  ]
+  onMount(() => {
+    document.addEventListener('selectionchange', handleSelectionChange)
+    return () => document.removeEventListener('selectionchange', handleSelectionChange)
+  })
+
+  function suggestedActions(notes) {
+    console.log("Sugg");
+    const output = []
+    notes.forEach(function (note, noteId) {
+      note.elements.forEach(function (block, blockId) {
+        if (block.type === PARAGRAPH && block.spans.length > 0) {
+          // always ends with softbreak
+          const lastSpan = block.spans[block.spans.length - 2]
+          if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
+            const reference = {note: noteId, path: [blockId]}
+            output.push({reference, raw: ""})
+          }
+        }
+      })
+    })
+    return output
+  }
+
+  let previous = [];
+  let draft = "";
+  let annotations
+  annotations = suggestedActions(previous);
+
   function mapAnnotation({reference, raw}) {
     return {
       type: "annotation",
@@ -101,10 +60,8 @@
 
   // DOESNT WORK ON ACTIVE message
   function addAnnotation(note, path) {
-    console.log(note, path);
-    const reference = {note, path}
-    const raw = ""
-    annotations = [...annotations, {reference, raw}]
+    const annotation = {type: ANNOTATION, raw: "", reference: {note, path}}
+    annotations = annotations.concat(annotation)
   }
 
   function clearAnnotation(index) {
@@ -112,42 +69,14 @@
     annotations = annotations
   }
 
-
-  let draft = "";
-  let previous = [
-      // tasks annotation suggestion
-      // choose your dinner
-      // pay the bill
-      // make a comment
-      // answer the question
-      // denomalise fn
-  ]
   let notes
   $: notes = previous.concat({elements: [...(annotations.map(mapAnnotation)), ...parse(draft)]})
 
-
-
   function send() {
     previous = notes;
-    annotations = [];
+    annotations = suggestedActions(previous);
     draft = "";
   }
-
-
-  // TODO deduplicae
-  function displayReference(reference, notes) {
-    let note = notes[reference.note]
-    let [top, ...rest] = reference.path
-    if (rest.length != 0) {
-      throw "doesn't support deep path yet"
-    }
-    let element = note.elements[top]
-    return [element]
-  }
-  window.loadState = function functionName(x) {
-    previous = x
-  }
-
 </script>
 
 <style media="screen">
@@ -171,7 +100,7 @@
         <div class="w-full">
           <blockquote class="border-purple-500 border-l-4 px-2">
             <div class="opacity-50">
-              {#each displayReference(reference, notes) as {type, ...data}, index}
+              {#each Thread.followReference(reference, notes) as {type, ...data}, index}
               <Block {type} {data} {index}/>
               {/each}
             </div>
@@ -193,10 +122,11 @@
         </button>
       </div>
     </article>
-
-    <!-- <input class="w-full" value="window.loadState('{JSON.stringify(previous)}')"> -->
-    <input class="w-full" value="{JSON.stringify(previous)}" on:change={(event) => {previous = JSON.parse(event.target.value)}}>
-
+    <h2 class="my-2 font-bold text-gray-400 text-2xl">Debug</h2>
+    <input class="w-full" value="{JSON.stringify(previous)}" on:change={(event) => {
+      previous = JSON.parse(event.target.value);
+      annotations = suggestedActions(previous);
+    }}>
     <pre>
       <!-- {JSON.stringify(notes, null, 2)} -->
     </pre>
