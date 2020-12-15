@@ -115,15 +115,12 @@
 
   let draft = "";
   let previous = [
-    {
-      elements: [{type: "paragraph", spans: [{type: "text", text: "Hello world"}]}]
       // tasks annotation suggestion
       // choose your dinner
       // pay the bill
       // make a comment
       // answer the question
       // denomalise fn
-    }
   ]
   let notes
   $: notes = previous.concat({elements: [...(annotations.map(mapAnnotation)), ...parse(draft)]})
@@ -146,6 +143,9 @@
     }
     let element = note.elements[top]
     return [element]
+  }
+  window.loadState = function functionName(x) {
+    previous = x
   }
 
 </script>
@@ -194,8 +194,9 @@
       </div>
     </article>
 
+    <input class="w-full" value="window.loadState('{JSON.stringify(previous)}')">
     <pre>
-      {JSON.stringify(notes, null, 2)}
+      <!-- {JSON.stringify(notes, null, 2)} -->
     </pre>
   </main>
 </div>
