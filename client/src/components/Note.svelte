@@ -49,14 +49,13 @@
   }
 </script>
 
-<article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md" bind:this={root}>
+<article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md" bind:this={root}>
   {#each elements as {type, ...data}, index}
-  <Block {type} {data} {index} {notes}/>
+  <Block {type} {data} {index} {notes} topLevel={true} on:annotate/>
   {/each}
-  {JSON.stringify({anchor, focus}, null, 2)}
+  <!-- {JSON.stringify({anchor, focus}, null, 2)}
   <br>
-  <!-- NOTE issues with breaking apart list to path or offset -->
   {#if anchor}
   #a={[...anchor.path, anchor.offset].join(",")}f={[...focus.path, focus.offset].join(",")}
-  {/if}
+  {/if} -->
 </article>

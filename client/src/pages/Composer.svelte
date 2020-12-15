@@ -89,14 +89,8 @@
   }
 
   let annotations = [
-    {
-      reference: {note: 0, path: [0]},
-      raw: "",
-      blocks: []
-    }
   ]
   function mapAnnotation({reference, raw}) {
-    console.log(reference, raw);
     return {
       type: "annotation",
       reference,
@@ -104,12 +98,19 @@
     }
   }
 
+  // DOESNT WORK ON ACTIVE message
+  function addAnnotation(note, path) {
+    console.log(note, path);
+    const reference = {note, path}
+    const raw = ""
+    annotations = [{reference, raw}, ...annotations]
+  }
+
 
   let draft = "";
   let previous = [{elements: [{type: "paragraph", spans: [{type: "text", text: "Hello world"}]}]}]
   let notes
   $: notes = previous.concat({elements: [...(annotations.map(mapAnnotation)), ...parse(draft)]})
-  $: console.log(notes);
 
   function send() {
     previous = notes
@@ -124,9 +125,7 @@
     if (rest.length != 0) {
       throw "doesn't support deep path yet"
     }
-    console.log(note);
     let element = note.elements[top]
-    console.log(element);
     return [element]
   }
 
@@ -142,7 +141,7 @@
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
     {#each notes as {elements}, index}
-    <Note {elements} {domRange} {notes}/>
+    <Note {elements} {domRange} {notes} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
     {/each}
     <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
       {#each annotations as {reference}, index}
