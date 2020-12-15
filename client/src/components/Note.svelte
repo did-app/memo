@@ -5,6 +5,7 @@
   export let domRange;
   export let elements = [];
   export let notes;
+  export let index;
   let root, anchor, focus;
 
   $: domRangeToRange(domRange, root);
@@ -47,11 +48,32 @@
     }
     return path
   }
+
+  function annotationsForNote(notes, index) {
+    return notes
+    .map(function ({elements}) { return elements })
+    .flat()
+    .filter(function ({type, reference}) {
+      return type === "annotation" && reference.note === index
+    })
+    .reduce(function (state, {reference, blocks}) {
+      let [index, ...rest] = reference.path
+      if (rest.length !== 0) {
+        throw "We haven't fixed this for deep elements"
+      }
+      // TODO needs author
+      state[index] = [...(state[index] || []), {blocks}]
+      console.log(state);
+      return state
+    }, {})
+  }
+  let annotations;
+  $: annotations = annotationsForNote(notes, index);
 </script>
 
 <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md" bind:this={root}>
   {#each elements as {type, ...data}, index}
-  <Block {type} {data} {index} {notes} topLevel={true} on:annotate/>
+  <Block {type} {data} {index} {notes} topLevel={true} annotations={annotations[index]} on:annotate/>
   {/each}
   <!-- {JSON.stringify({anchor, focus}, null, 2)}
   <br>

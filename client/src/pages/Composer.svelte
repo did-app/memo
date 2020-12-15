@@ -113,9 +113,21 @@
 
 
   let draft = "";
-  let previous = [{elements: [{type: "paragraph", spans: [{type: "text", text: "Hello world"}]}]}]
+  let previous = [
+    {
+      elements: [{type: "paragraph", spans: [{type: "text", text: "Hello world"}]}]
+      // tasks annotation suggestion
+      // choose your dinner
+      // pay the bill
+      // make a comment
+      // answer the question
+      // denomalise fn
+    }
+  ]
   let notes
   $: notes = previous.concat({elements: [...(annotations.map(mapAnnotation)), ...parse(draft)]})
+
+
 
   function send() {
     previous = notes;
@@ -147,7 +159,7 @@
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
     {#each notes as {elements}, index}
-    <Note {elements} {domRange} {notes} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
+    <Note {elements} {domRange} {notes} {index} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
     {/each}
     <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
       {#each annotations as {reference}, index}

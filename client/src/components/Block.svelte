@@ -6,6 +6,7 @@
   export let index;
   export let notes;
   export let topLevel;
+  export let annotations;
 
   const PARAGRAPH = "paragraph";
   const TEXT = "text";
@@ -13,7 +14,7 @@
 </script>
 
 {#if type === PARAGRAPH}
-<Paragraph {...data} {index} {topLevel} on:annotate/>
+<Paragraph {...data} {index} {topLevel} {annotations} on:annotate/>
 {:else if type === "annotation"}
 <Annotation {...data} {index} {notes} on:annotate/>
 {:else}
