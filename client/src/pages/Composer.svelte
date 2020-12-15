@@ -87,11 +87,44 @@
     annotations = annotations
   }
 
-  let notes
-  $: notes = previous.concat({
+  let current
+  $: current = {
     elements: [...(annotations.map(mapAnnotation)), ...parse(draft)],
     author: emailAddress
-  })
+  }
+  let notes
+  $: notes = previous.concat(current)
+
+  let suggestions
+  $: suggestions = makeSuggestions(current)
+  $: console.log(suggestions);
+
+  let choices = {};
+  // Can't put suggestions on node as always rebuilt
+  // can merge with node
+  // iterate note in preview, what if people don't click preivew need message at the bottom.
+  // unfurl link
+  // could go through preview then send.
+  // which is where we make the comments
+  // WORK out how we store the summaries on the backend,
+  // Just calculate them in JavaScript that and stick the block on the backend
+  // gives the updates for who needs to do what live as you work through.
+  function makeSuggestions(note) {
+    const output = []
+    note.elements.forEach(function (block, blockId) {
+      if (block.type === PARAGRAPH && block.spans.length > 0) {
+        // always ends with softbreak
+        const lastSpan = block.spans[block.spans.length - 2]
+        if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
+          const reference = {note: previous.length, path: [blockId]}
+          let choice = choices[blockId] || {dismissed: false, ask: "everyone"}
+          choices[blockId] = choice
+          output.push({reference, ...choice})
+        }
+      }
+    })
+    return output
+  }
 
   let emailAddress
   function send() {
@@ -134,6 +167,15 @@
       </div>
       {/each}
       <textarea class="message w-full outline-none pl-12" bind:value={draft} placeholder="Your message ..."></textarea>
+      {#each suggestions as {dismissed, ask}, index}
+      <div class="pl-12 my-1">
+        Ask question to <select bind:value={choices[index].ask}>
+          <option value="everyone">Everyone</option>
+          <option value="tim">tim</option>
+          <option value="bill">Bill</option>
+        </select>
+      </div>
+      {/each}
       <div class="mt-2 pl-12 flex items-center">
         <div class="flex flex-1">
           <span class="font-bold text-gray-700 mr-1">From:</span>
@@ -155,6 +197,7 @@
     }}>
     <pre>
       <!-- {JSON.stringify(notes, null, 2)} -->
+      {JSON.stringify(choices, null, 2)}
     </pre>
   </main>
 </div>
