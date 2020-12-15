@@ -3,4 +3,4 @@
   export let index;
 </script>
 
-<span data-note-index={index}>{text}</span>
+<span class="break-all" data-note-index={index}>{text}</span>
