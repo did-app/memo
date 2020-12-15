@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import Glance from "../glance/Glance.svelte"
   import Note from "../components/Note.svelte"
+  import Block from "../components/Block.svelte"
   const PARAGRAPH = "paragraph";
   const TEXT = "text";
   const LINK = "link";
@@ -87,14 +88,46 @@
     domRange = domSelection.getRangeAt(0);
   }
 
+  let annotations = [
+    {
+      reference: {note: 0, path: [0]},
+      raw: "",
+      blocks: []
+    }
+  ]
+  function mapAnnotation({reference, raw}) {
+    console.log(reference, raw);
+    return {
+      type: "annotation",
+      reference,
+      blocks: parse(raw)
+    }
+  }
+
+
   let draft = "";
-  let previous = []
+  let previous = [{elements: [{type: "paragraph", spans: [{type: "text", text: "Hello world"}]}]}]
   let notes
-  $: notes = previous.concat({elements: parse(draft)})
+  $: notes = previous.concat({elements: [...(annotations.map(mapAnnotation)), ...parse(draft)]})
+  $: console.log(notes);
 
   function send() {
-    previous = previous.concat({elements: parse(draft)})
+    previous = notes
     draft = ""
+  }
+
+
+  // TODO deduplicae
+  function displayReference(reference, notes) {
+    let note = notes[reference.note]
+    let [top, ...rest] = reference.path
+    if (rest.length != 0) {
+      throw "doesn't support deep path yet"
+    }
+    console.log(note);
+    let element = note.elements[top]
+    console.log(element);
+    return [element]
   }
 
 </script>
@@ -109,9 +142,23 @@
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
     {#each notes as {elements}, index}
-    <Note {elements} {domRange}/>
+    <Note {elements} {domRange} {notes}/>
     {/each}
     <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md ">
+      {#each annotations as {reference}, index}
+      <div class="">
+        <blockquote class="border-purple-500 border-l-4 px-2">
+          <div class="opacity-50">
+            {#each displayReference(reference, notes) as {type, ...data}, index}
+            <Block {type} {data} {index}/>
+            {/each}
+          </div>
+        </blockquote>
+        <div class="pl-4">
+          <textarea class="w-full outline-none" bind:value={annotations[index].raw} placeholder="Your comment ..."></textarea>
+        </div>
+      </div>
+      {/each}
       <textarea class="message w-full outline-none" bind:value={draft} placeholder="Your message ..."></textarea>
       <div class="mt-2 flex">
         <button class="ml-auto py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit" on:click={send}>

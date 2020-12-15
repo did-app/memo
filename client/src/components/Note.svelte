@@ -4,6 +4,7 @@
 
   export let domRange;
   export let elements = [];
+  export let notes;
   let root, anchor, focus;
 
   $: domRangeToRange(domRange, root);
@@ -50,7 +51,7 @@
 
 <article class="my-4 py-6 px-12 bg-white rounded-lg shadow-md" bind:this={root}>
   {#each elements as {type, ...data}, index}
-  <Block {type} {data} {index}/>
+  <Block {type} {data} {index} {notes}/>
   {/each}
   {JSON.stringify({anchor, focus}, null, 2)}
   <br>
