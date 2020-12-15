@@ -4,6 +4,7 @@
 
   export let domRange;
   export let elements = [];
+  export let author;
   export let notes;
   export let index;
   let root, anchor, focus;
@@ -72,6 +73,10 @@
 </script>
 
 <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md" bind:this={root}>
+  <header class="ml-12 mb-6 flex text-gray-600">
+    <span class="font-bold">{author}</span>
+    <span class="ml-auto">{index + 1} December</span>
+  </header>
   {#each elements as {type, ...data}, index}
   <Block {type} {data} {index} {notes} topLevel={true} annotations={annotations[index] || []} on:annotate/>
   {/each}

@@ -27,6 +27,24 @@
     return () => document.removeEventListener('selectionchange', handleSelectionChange)
   })
 
+  // iterate through would be nice to not pass noted down
+  // however we want lazy loading of comments on notes in other conversations
+  // can return a promise that we map in.
+  // Need to see comments that have been replied to
+  // suggestions NOT made from notes they are deliberate
+
+  // compose with to/subject looking like a message
+  // makes those the options of who to write as
+  // iterate through notes, pick up all tasks with author audience etc
+  // Quote/Annotate a Slice
+  // Down at the bottom for actions like slice pin
+
+
+  // iterate up find all annotations
+  // for each block see if it has a later annotation
+  // could act on the tree to push content into the quote block
+  // for each block can add all the annotations
+  //
   function suggestedActions(notes) {
     console.log("Sugg");
     const output = []
@@ -70,8 +88,12 @@
   }
 
   let notes
-  $: notes = previous.concat({elements: [...(annotations.map(mapAnnotation)), ...parse(draft)]})
+  $: notes = previous.concat({
+    elements: [...(annotations.map(mapAnnotation)), ...parse(draft)],
+    author: emailAddress
+  })
 
+  let emailAddress
   function send() {
     previous = notes;
     annotations = suggestedActions(previous);
@@ -88,8 +110,8 @@
 
 <div class="min-h-screen bg-gray-200">
   <main class="mx-auto max-w-3xl">
-    {#each notes as {elements}, index}
-    <Note {elements} {domRange} {notes} {index} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
+    {#each notes as data, index}
+    <Note {...data} {domRange} {notes} {index} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
     {/each}
     <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
       {#each annotations as {reference}, index}
@@ -112,8 +134,12 @@
       </div>
       {/each}
       <textarea class="message w-full outline-none pl-12" bind:value={draft} placeholder="Your message ..."></textarea>
-      <div class="mt-2 pl-12 flex">
-        <button class="ml-auto py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit" on:click={send}>
+      <div class="mt-2 pl-12 flex items-center">
+        <div class="flex flex-1">
+          <span class="font-bold text-gray-700 mr-1">From:</span>
+          <input class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" bind:value={emailAddress} type="email" placeholder="Your email address" required>
+        </div>
+        <button class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold" type="submit" on:click={send}>
           <svg class="fill-current inline w-4 mr-2" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24">
             <path d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z"></path>
             <path d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z"></path>
