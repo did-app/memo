@@ -194,7 +194,9 @@
       </div>
     </article>
 
-    <input class="w-full" value="window.loadState('{JSON.stringify(previous)}')">
+    <!-- <input class="w-full" value="window.loadState('{JSON.stringify(previous)}')"> -->
+    <input class="w-full" value="{JSON.stringify(previous)}" on:change={(event) => {previous = JSON.parse(event.target.value)}}>
+
     <pre>
       <!-- {JSON.stringify(notes, null, 2)} -->
     </pre>
