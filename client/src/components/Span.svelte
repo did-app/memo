@@ -9,10 +9,8 @@
 {#if type === "text"}
   <Text {...data} {index} />
 {:else if type === "link"}
-  <!-- Doesn't need to be a link, can be a reference -->
-  {#if data.url.startsWith("#M0")}
   <!-- TODO Need to wrap to get an index -->
-  {:else}
   <Glance href={data.url} text={data.title}/>
-  {/if}
+{:else if type === "softbreak"}
+  <br>
 {/if}
