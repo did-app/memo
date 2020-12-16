@@ -46,7 +46,7 @@ function pathFromNode(node) {
 
     let parent = element.parentElement
     if (parent === null) {
-      throw "We should always get to root first!"
+      return undefined
     }
     element = parent
   }

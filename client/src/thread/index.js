@@ -1,3 +1,4 @@
+import * as Tree from "../note/tree"
 // discussion/conversation has contributions
 // thread has many messages/posts/notes/memo/entry/contribution
 
@@ -5,10 +6,14 @@
 // A note has many blocks and spans in a tree
 export function followReference(reference, notes) {
   let note = notes[reference.note]
-  let [top, ...rest] = reference.path
-  if (rest.length != 0) {
-    throw "doesn't support deep path yet"
+  if (reference.path !== undefined) {
+    let [top, ...rest] = reference.path
+    if (rest.length != 0) {
+      throw "doesn't support deep path yet"
+    }
+    let element = note.blocks[top]
+    return [element]
+  } else {
+    return Tree.extractBlocks(note.blocks, reference.range)[1]
   }
-  let element = note.blocks[top]
-  return [element]
 }

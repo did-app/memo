@@ -8,11 +8,12 @@
   export let notes;
   export let topLevel;
   export let annotations;
+  export let action;
 
 </script>
 
 {#if type === PARAGRAPH}
-<Paragraph {...data} {index} {topLevel} {annotations} on:annotate/>
+<Paragraph {...data} {index} {action} {topLevel} {annotations} on:annotate/>
 {:else if type === ANNOTATION}
 <Annotation {...data} {index} {notes} on:annotate/>
 {:else}

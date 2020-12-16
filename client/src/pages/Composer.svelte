@@ -4,6 +4,7 @@
   import {parse} from "../note"
   import {PARAGRAPH, TEXT, LINK, ANNOTATION} from "../note/elements"
   import {getSelected} from "../thread/view"
+  import * as Range from "../note/range";
   import Note from "../components/Note.svelte"
   import Block from "../components/Block.svelte"
   import Paragraph from "../components/Paragraph.svelte"
@@ -11,17 +12,20 @@
 
 
   let root, selected;
+  let noteSelection = {};
   function handleSelectionChange() {
     selected = getSelected(root);
     if (selected.anchor && selected.focus) {
       let {noteIndex: anchorIndex, ...anchor} = selected.anchor;
       let {noteIndex: focusIndex, ...focus} = selected.focus;
       if (anchorIndex === focusIndex) {
-        console.log(anchor, focus);
-        console.log(notes[anchorIndex]);
+        noteSelection = Object.fromEntries([[anchorIndex, {anchor, focus}]])
+      } else {
+        noteSelection = {};
       }
+    } else {
+      noteSelection = {};
     }
-
   }
 
   onMount(() => {
@@ -49,18 +53,19 @@
   //
   function suggestedActions(notes) {
     const output = []
-    notes.forEach(function (note, noteId) {
-      note.blocks.forEach(function (block, blockId) {
-        if (block.type === PARAGRAPH && block.spans.length > 0) {
-          // always ends with softbreak
-          const lastSpan = block.spans[block.spans.length - 2]
-          if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
-            const reference = {note: noteId, path: [blockId]}
-            output.push({reference, raw: ""})
-          }
-        }
-      })
-    })
+    // TODO move this to working with the makeSuggestions result
+    // notes.forEach(function (note, noteId) {
+    //   note.blocks.forEach(function (block, blockId) {
+    //     if (block.type === PARAGRAPH && block.spans.length > 0) {
+    //       // always ends with softbreak
+    //       const lastSpan = block.spans[block.spans.length - 2]
+    //       if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
+    //         const reference = {note: noteId, path: [blockId]}
+    //         output.push({reference, raw: ""})
+    //       }
+    //     }
+    //   })
+    // })
     return output
   }
 
@@ -78,9 +83,16 @@
   }
 
   // DOESNT WORK ON ACTIVE message
-  function addAnnotation(note, path) {
-    const annotation = {type: ANNOTATION, raw: "", reference: {note, path}}
-    annotations = annotations.concat(annotation)
+  function addAnnotation({detail}) {
+    const {noteIndex, selection} = detail;
+    console.log(detail, "add", );
+    if (Range.isCollapsed(selection)) {
+      const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
+      annotations = annotations.concat(annotation)
+    } else {
+      const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, range: selection}}
+      annotations = annotations.concat(annotation)
+    }
   }
 
   function clearAnnotation(index) {
@@ -173,7 +185,7 @@
   <main class="px-2 w-full max-w-2xl">
     <div class="" bind:this={root}>
       {#each notes as data, index}
-      <Note {...data} {notes} {index} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
+      <Note {...data} {notes} {index} selection={noteSelection[index]} on:annotate={addAnnotation}/>
         {/each}
     </div>
     <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">

@@ -53,7 +53,6 @@ export function parse(draft) {
       } else {
         node.spans = node.spans.concat({type: "softbreak"}, ...parseLine(line, offset))
       }
-      console.log(node);
     }
     // plus one for the newline
     offset = offset + line.length + 1
