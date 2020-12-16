@@ -9,6 +9,6 @@ export function followReference(reference, notes) {
   if (rest.length != 0) {
     throw "doesn't support deep path yet"
   }
-  let element = note.elements[top]
+  let element = note.blocks[top]
   return [element]
 }

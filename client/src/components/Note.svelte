@@ -2,7 +2,7 @@
   import Glance from "../glance/Glance.svelte"
   import Block from "./Block.svelte"
 
-  export let elements = [];
+  export let blocks = [];
   export let author;
   export let notes;
   export let index;
@@ -10,8 +10,8 @@
   function annotationsForNote(notes, index) {
     // TODO this needs to do author
     return notes
-    .map(function ({elements, author}, noteId) {
-      return elements
+    .map(function ({blocks, author}, noteId) {
+      return blocks
       .filter(function ({type, reference}) {
         return type === "annotation" && reference.note === index
       })
@@ -23,7 +23,7 @@
     .reduce(function (state, {reference, ...data}) {
       let [index, ...rest] = reference.path
       if (rest.length !== 0) {
-        throw "We haven't fixed this for deep elements"
+        throw "We haven't fixed this for deep blocks"
       }
       // TODO needs author
       state[index] = [...(state[index] || []), data]
@@ -41,7 +41,7 @@
     <span class="font-bold">{author}</span>
     <span class="ml-auto">{index + 1} December</span>
   </header>
-  {#each elements as {type, ...data}, index}
+  {#each blocks as {type, ...data}, index}
   <Block {type} {data} {index} {notes} topLevel={true} annotations={annotations[index] || []} on:annotate/>
   {/each}
 </article>

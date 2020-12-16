@@ -9,12 +9,19 @@
   import Paragraph from "../components/Paragraph.svelte"
 
 
-  let root;
-  let selected;
+  let root, selected;
   function handleSelectionChange() {
     selected = getSelected(root);
+    if (selected.anchor && selected.focus) {
+      let {noteIndex: anchorIndex, ...anchor} = selected.anchor;
+      let {noteIndex: focusIndex, ...focus} = selected.focus;
+      if (anchorIndex === focusIndex) {
+        console.log(anchor, focus);
+        console.log(notes[anchorIndex]);
+      }
+    }
+
   }
-  $: console.log(selected, "--------------------------");
 
   onMount(() => {
     document.addEventListener('selectionchange', handleSelectionChange)
@@ -40,10 +47,9 @@
   // for each block can add all the annotations
   //
   function suggestedActions(notes) {
-    console.log("Sugg");
     const output = []
     notes.forEach(function (note, noteId) {
-      note.elements.forEach(function (block, blockId) {
+      note.blocks.forEach(function (block, blockId) {
         if (block.type === PARAGRAPH && block.spans.length > 0) {
           // always ends with softbreak
           const lastSpan = block.spans[block.spans.length - 2]
@@ -83,7 +89,7 @@
 
   let current
   $: current = {
-    elements: [...(annotations.map(mapAnnotation)), ...parse(draft)],
+    blocks: [...(annotations.map(mapAnnotation)), ...parse(draft)],
     author: emailAddress
   }
   let notes
@@ -91,7 +97,6 @@
 
   let suggestions
   $: suggestions = makeSuggestions(current)
-  $: console.log(suggestions);
 
   let choices = {};
   // Can't put suggestions on node as always rebuilt
@@ -105,7 +110,7 @@
   // gives the updates for who needs to do what live as you work through.
   function makeSuggestions(note) {
     const output = []
-    note.elements.forEach(function (block, blockId) {
+    note.blocks.forEach(function (block, blockId) {
       if (block.type === PARAGRAPH && block.spans.length > 0) {
         // always ends with softbreak
         const lastSpan = block.spans[block.spans.length - 2]
@@ -121,9 +126,8 @@
   }
 
   function findPins(notes) {
-    console.log("Pins", notes);
     return notes.map(function (note, noteId) {
-      return note.elements.map(function ({spans}) {
+      return note.blocks.map(function ({spans}) {
         return (spans || []).filter(function (span, blockId) {
           return span.type === LINK
         })
