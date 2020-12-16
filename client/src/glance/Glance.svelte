@@ -51,6 +51,8 @@
 <ImageReel {...preview} />
 {:else if preview.item === 'plain'}
 <a href="{href}">{text}</a>
+{:else if preview.item === 'image'}
+<img src="{href}" alt="">
 {:else}
 <!-- Note that Glance returns the promise even if non 200 response -->
 <a href="{href}">{text}</a>
