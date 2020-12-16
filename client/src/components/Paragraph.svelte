@@ -24,6 +24,7 @@
 </script>
 
 
+<!-- TODO this becomes a section wrapper for top level or, part of block -->
 <div on:mouseenter={handleMouseEnter} on:mouseleave={handleMouseLeave}>
   <div class="flex">
     {#if topLevel}
@@ -37,11 +38,12 @@
       {/each}
     </p>
   </div>
-  {#each annotations as {blocks}}
+  {#each annotations as {blocks, author, note}}
   <blockquote class="my-1 ml-12 border-gray-600 border-l-4 opacity-50 px-2">
     {#each blocks as {type, ...data}, index}
     <Block {type} {data} {index}/>
     {/each}
+    <a class="text-purple-800" href="#{note}"><small>{author}</small></a>
   </blockquote>
   {/each}
 </div>

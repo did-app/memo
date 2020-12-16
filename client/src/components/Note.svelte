@@ -51,28 +51,35 @@
   }
 
   function annotationsForNote(notes, index) {
+    // TODO this needs to do author
     return notes
-    .map(function ({elements}) { return elements })
-    .flat()
-    .filter(function ({type, reference}) {
-      return type === "annotation" && reference.note === index
+    .map(function ({elements, author}, noteId) {
+      return elements
+      .filter(function ({type, reference}) {
+        return type === "annotation" && reference.note === index
+      })
+      .map(function ({reference, blocks}) {
+        return {reference, blocks, author, note: noteId};
+      })
     })
-    .reduce(function (state, {reference, blocks}) {
+    .flat()
+    .reduce(function (state, {reference, ...data}) {
       let [index, ...rest] = reference.path
       if (rest.length !== 0) {
         throw "We haven't fixed this for deep elements"
       }
       // TODO needs author
-      state[index] = [...(state[index] || []), {blocks}]
-      console.log(state);
+      state[index] = [...(state[index] || []), data]
+      console.log(state, "state");
       return state
     }, {})
+    // This group by needs to happen after flat
   }
   let annotations;
   $: annotations = annotationsForNote(notes, index);
 </script>
 
-<article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md" bind:this={root}>
+<article id={index} class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md" bind:this={root}>
   <header class="ml-12 mb-6 flex text-gray-600">
     <span class="font-bold">{author}</span>
     <span class="ml-auto">{index + 1} December</span>

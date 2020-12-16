@@ -159,6 +159,7 @@
               <Block {type} {data} {index}/>
               {/each}
             </div>
+            <a class="text-purple-800" href="#{reference.note}"><small>{notes[reference.note].author}</small></a>
           </blockquote>
           <div class="pl-4">
             <textarea class="w-full outline-none" bind:value={annotations[index].raw} placeholder="Your comment ..."></textarea>
