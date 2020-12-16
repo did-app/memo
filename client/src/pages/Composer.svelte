@@ -3,16 +3,18 @@
   import * as Thread from "../thread"
   import {parse} from "../note"
   import {PARAGRAPH, TEXT, LINK, ANNOTATION} from "../note/elements"
-  import {getSelectedRange} from "../thread/view"
+  import {getSelected} from "../thread/view"
   import Note from "../components/Note.svelte"
   import Block from "../components/Block.svelte"
   import Paragraph from "../components/Paragraph.svelte"
 
 
-  let domRange;
+  let root;
+  let selected;
   function handleSelectionChange() {
-    domRange = getSelectedRange();
+    selected = getSelected(root);
   }
+  $: console.log(selected, "--------------------------");
 
   onMount(() => {
     document.addEventListener('selectionchange', handleSelectionChange)
@@ -164,9 +166,11 @@
   <div class="">
   </div>
   <main class="px-2 w-full max-w-2xl">
-    {#each notes as data, index}
-    <Note {...data} {domRange} {notes} {index} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
-    {/each}
+    <div class="" bind:this={root}>
+      {#each notes as data, index}
+      <Note {...data} {notes} {index} on:annotate={({detail}) => { addAnnotation(index, detail.path) }}/>
+        {/each}
+    </div>
     <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
       {#each annotations as {reference}, index}
       <div class="flex">
