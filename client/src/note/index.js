@@ -4,7 +4,7 @@ function parseLine(line, offset) {
   // Can't end with |(.+\?) because question capture will catch all middle links
   // Questionmark in the body of a link causes confusion, not good if people are making their own questions
   // const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
-  const tokeniser = /(?:\[([^\[]*)\]\(([^\(]+)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))/gm
+  const tokeniser = /(?:\[([^\[]*)\]\(([^\(]+)\))|(?:(?:\s|^)(https?:\/\/[\w\d-./?=#]+))/gm
   const output = []
   let cursor = 0;
   let token
