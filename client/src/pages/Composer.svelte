@@ -114,7 +114,7 @@
     note.blocks.forEach(function (block, blockId) {
       if (block.type === PARAGRAPH && block.spans.length > 0) {
         // always ends with softbreak
-        const lastSpan = block.spans[block.spans.length - 2]
+        const lastSpan = block.spans[block.spans.length - 1]
         if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
           const reference = {note: previous.length, path: [blockId]}
           let choice = choices[blockId] || {dismissed: false, ask: "everyone"}
@@ -227,15 +227,15 @@
       annotations = suggestedActions(previous);
     }}>
     <pre>
-      <!-- {JSON.stringify(notes, null, 2)} -->
+      {JSON.stringify(notes, null, 2)}
       {JSON.stringify(choices, null, 2)}
     </pre>
   </main>
   <div>
     <ul class="sticky my-4 px-2 top-0 max-w-sm">
-      {#each pins as data}
-      <li class="my-1 bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
-        <Link {...data}/>
+      {#each pins as {url, title}}
+      <li class="my-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
+        <Link {url} {title}/>
       </li>
       {/each}
     </ul>

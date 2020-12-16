@@ -48,7 +48,12 @@ export function parse(draft) {
       node = node || {type: PARAGRAPH, spans: []}
       // TODO merge same text
       // Called softbreak from markdown even thought rendered with br
-      node.spans = node.spans.concat(...parseLine(line, offset), {type: "softbreak"})
+      if (node.spans.length === 0) {
+        node.spans = node.spans.concat(...parseLine(line, offset))
+      } else {
+        node.spans = node.spans.concat({type: "softbreak"}, ...parseLine(line, offset))
+      }
+      console.log(node);
     }
     // plus one for the newline
     offset = offset + line.length + 1

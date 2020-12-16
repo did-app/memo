@@ -3,4 +3,4 @@
   export let index;
 </script>
 
-<span class="break-all" data-span-index={index}>{text}</span>
+<span class="" data-span-index={index}>{text}</span>

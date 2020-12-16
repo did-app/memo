@@ -35,7 +35,7 @@
     {/if}
     <p class="my-2 w-full" data-block-index="{index}">
       {#each spans as {type, ...data}, index}
-      <Span {type} {data} {index}/>
+      <Span {type} {data} {index} unfurled={spans.length === 1}/>
       {/each}
     </p>
   </div>
