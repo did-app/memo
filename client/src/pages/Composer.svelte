@@ -246,7 +246,7 @@
           <!-- Fallback -->
           <!-- https://stackoverflow.com/questions/980855/inputting-a-default-image-in-case-the-src-attribute-of-an-html-img-is-not-vali -->
           <img class="w-5 m-1" src={(new URL(url)).origin + '/favicon.ico'} alt="">
-          <p class="">
+          <p class="break-all">
             <!-- TODO glance needs to get description -->
             {title || url}
           </p>
