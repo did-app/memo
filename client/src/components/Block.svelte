@@ -16,4 +16,5 @@
 {:else if type === ANNOTATION}
 <Annotation {...data} {index} {notes} on:annotate/>
 {:else}
+unknown block
 {/if}

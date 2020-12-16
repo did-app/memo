@@ -6,7 +6,7 @@
 
 <Layout {nav}>
   <form action="__API_ORIGIN__/c/create" method="post">
-    <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Conversation topic" name="topic" required pattern="[^@]*" minlength="2" maxlength="100" autofocus autocomplete="off"/>
+    <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Conversation topic" name="topic" required pattern="[^@]*" minlength="2" maxlength="100"/>
     <div class="warning">
       Conversation topics must not contain '@'.
     </div>

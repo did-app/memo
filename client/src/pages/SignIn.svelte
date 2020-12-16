@@ -43,7 +43,7 @@
     </div>
     {:else}
     <form on:submit|preventDefault={requestEmailAuthentication} class="max-w-sm block mx-auto ">
-      <input type="email" required bind:value={emailAddress} class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Email Address" autofocus/>
+      <input type="email" required bind:value={emailAddress} class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Email Address"/>
       <button class="w-full px-4 py-2 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Sign in</button>
     </form>
     {/if}

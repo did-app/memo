@@ -3,24 +3,15 @@
   import * as Thread from "../thread"
   import {parse} from "../note"
   import {PARAGRAPH, TEXT, LINK, ANNOTATION} from "../note/elements"
+  import {getSelectedRange} from "../thread/view"
   import Note from "../components/Note.svelte"
   import Block from "../components/Block.svelte"
   import Paragraph from "../components/Paragraph.svelte"
 
-  function getSelection() {
-    const domSelection = window.getSelection()
-    if (domSelection === null) {
-      throw "Why would there be no selection"
-    } else {
-      return domSelection
-    }
-  }
 
-  const domSelection = getSelection();
-  let domRange
-
+  let domRange;
   function handleSelectionChange() {
-    domRange = domSelection.getRangeAt(0);
+    domRange = getSelectedRange();
   }
 
   onMount(() => {

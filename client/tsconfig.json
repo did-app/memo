@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "importsNotUsedAsValues": "error",
+    "strictNullChecks": true
+  }
+}

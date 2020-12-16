@@ -209,7 +209,6 @@
   function watchQuestions(event) {
     const $area = event.target
     if (document.activeElement !== $area) return
-    // let selection = document.getSelection()
     // let range = selection.getRangeAt(0)
     const cursor = $area.selectionStart;
     const textValue = $area.value
@@ -401,6 +400,7 @@ Let's not have any pins
       {/if}
     </form>
     {#await installPrompt}
+    <span></span>
     {:then doInstall}
     <form class="w-full mb-8 md:px-20" on:submit|preventDefault={doInstall}>
       <div class="flex">

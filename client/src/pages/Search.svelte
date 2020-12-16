@@ -58,7 +58,7 @@
 
 <Layout {nav} let:conversations={conversations}>
   <div on:keydown={handleKeyDown}>
-    <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Search by name, email, topic or content, also start conversation" id="search" autofocus autocomplete="off" bind:value={searchTerm}/>
+    <input class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Search by name, email, topic or content, also start conversation" id="search" autocomplete="off" bind:value={searchTerm}/>
     <nav id="results">
       {#each searchAll(conversations, searchTerm) as {id, updated_at, next, topic, participants, closed}}
       <a class="block my-2 py-1 px-2 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl" href="/c/{id}#{next}">
