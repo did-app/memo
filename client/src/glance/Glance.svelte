@@ -53,6 +53,18 @@
 <a href="{href}">{text}</a>
 {:else if preview.item === 'image'}
 <img src="{href}" alt="">
+{:else if preview.item === 'embeded_video'}
+<!-- Styling copied from loom -->
+<div class="w-full relative" style="padding-bottom:56.25%;">
+  <iframe
+    src="{preview.iframe}"
+    frameborder="0"
+    webkitallowfullscreen
+    mozallowfullscreen
+    allowfullscreen
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+  ></iframe>
+</div>
 {:else}
 <!-- Note that Glance returns the promise even if non 200 response -->
 <a href="{href}">{text}</a>
