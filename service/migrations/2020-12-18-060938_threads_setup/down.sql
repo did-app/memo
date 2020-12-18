@@ -1,1 +1,4 @@
--- This file should undo anything in `up.sql`
+DROP TABLE note_notifications;
+DROP TABLE notes;
+DROP TABLE pairs;
+DROP TABLE threads;

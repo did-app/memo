@@ -58,4 +58,8 @@
     {/each}
   </div>
   <!-- {JSON.stringify(selection)} -->
+  <!-- Put editable bit in slot, better than lots more names, same possible for composer -->
+  <!-- Although we do need named slots for the top -->
+  <!-- Slots would make collapsing to summary easier -->
+  <slot></slot>
 </article>

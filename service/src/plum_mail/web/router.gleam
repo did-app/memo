@@ -154,10 +154,12 @@ pub fn route(
         })
       try relationship =
         lookup_relationship.execute(identifier_id, email_address)
+        io.debug(relationship)
       let data =
         json.object([
           // don't need identifier id, do need profile/welcome information
           tuple("thread_id", json.nullable(relationship.thread_id, json.int)),
+          tuple("introduction", json.nullable(relationship.introduction, json.string)),
         ])
       http.response(200)
       |> web.set_resp_json(data)

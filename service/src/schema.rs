@@ -51,6 +51,35 @@ table! {
 }
 
 table! {
+    note_notifications (id) {
+        id -> Int4,
+        thread_id -> Int4,
+        counter -> Int4,
+        identifier_id -> Int4,
+        inserted_at -> Timestamp,
+    }
+}
+
+table! {
+    notes (thread_id, counter) {
+        thread_id -> Int4,
+        counter -> Int4,
+        blocks -> Jsonb,
+        authored_by -> Int4,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    pairs (lower_identifier_id, upper_identifier_id) {
+        lower_identifier_id -> Int4,
+        upper_identifier_id -> Int4,
+        thread_id -> Int4,
+    }
+}
+
+table! {
     participants (identifier_id, conversation_id) {
         identifier_id -> Int4,
         conversation_id -> Int4,
@@ -94,11 +123,23 @@ table! {
     }
 }
 
+table! {
+    threads (id) {
+        id -> Int4,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
 joinable!(conversations -> identifiers (started_by));
 joinable!(link_tokens -> identifiers (identifier_id));
 joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (authored_by));
+joinable!(note_notifications -> identifiers (identifier_id));
+joinable!(notes -> identifiers (authored_by));
+joinable!(notes -> threads (thread_id));
+joinable!(pairs -> threads (thread_id));
 joinable!(participants -> conversations (conversation_id));
 joinable!(pins -> identifiers (authored_by));
 joinable!(refresh_tokens -> link_tokens (link_token_selector));
@@ -110,8 +151,12 @@ allow_tables_to_appear_in_same_query!(
     link_tokens,
     message_notifications,
     messages,
+    note_notifications,
+    notes,
+    pairs,
     participants,
     pins,
     refresh_tokens,
     session_tokens,
+    threads,
 );
