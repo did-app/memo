@@ -7,8 +7,8 @@
   export let notes;
 </script>
 
-<div class="my-2 ml-12" data-block-index="{index}">
-  <blockquote class="border-gray-600 border-l-4 opacity-50 px-2">
+<div class="my-2 ml-12 border-gray-600 border-l-4" data-block-index="{index}">
+  <blockquote class=" opacity-50 px-2">
     {#each Thread.followReference(reference, notes) as {type, ...data}, index}
     <div class="">
       <Block {type} {data} {index}/>

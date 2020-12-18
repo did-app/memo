@@ -1,7 +1,11 @@
 <script type="typescript">
+  import {onMount} from "svelte"
   // TODO extract the conversation layout page
   import {fetchContact} from "../sync";
   import {parse} from "../note"
+  import {getSelected} from "../thread/view"
+  import * as Range from "../note/range";
+  import {PARAGRAPH, TEXT, LINK, ANNOTATION} from "../note/elements"
   import Composer from "../components/Composer.svelte"
   import Note from "../components/Note.svelte"
   // Need to look up welcome message don't want all of those in client
@@ -12,21 +16,78 @@
   }
 
   let contact;
-  $: fetchContact(emailAddressFor(identifier)).then(function ({data}) {
-    setTimeout(function () {
-      contact = data
-
-    }, 1000);
+  let previous
+  fetchContact(emailAddressFor(identifier)).then(function ({data}) {
+    contact = data
+    if (contact.introduction) {
+      previous = [{blocks: parse(contact.introduction), author: contact.emailAddress}];
+    } else {
+      previous = [];
+    }
   })
 
   let draft = "";
-  let blocks = [];
   let preview = false;
-  $: blocks = parse(draft);
 
   // fetch intro data
   function send() {
     console.log(blocks);
+  }
+
+  // TODO deduplicate in fragment
+  let root, selected;
+  let noteSelection = {};
+  function handleSelectionChange() {
+    selected = getSelected(root);
+    if (selected.anchor && selected.focus) {
+      let {noteIndex: anchorIndex, ...anchor} = selected.anchor;
+      let {noteIndex: focusIndex, ...focus} = selected.focus;
+      if (anchorIndex === focusIndex) {
+        noteSelection = Object.fromEntries([[anchorIndex, {anchor, focus}]])
+      } else {
+        noteSelection = {};
+      }
+    } else {
+      noteSelection = {};
+    }
+  }
+
+  onMount(() => {
+    document.addEventListener('selectionchange', handleSelectionChange)
+    return () => document.removeEventListener('selectionchange', handleSelectionChange)
+  })
+
+  let annotations = [];
+
+  function mapAnnotation({reference, raw}) {
+    return {
+      type: "annotation",
+      reference,
+      blocks: parse(raw)
+    }
+  }
+
+  // DOESNT WORK ON ACTIVE message
+  function addAnnotation({detail}) {
+    const {noteIndex, selection} = detail;
+    if (Range.isCollapsed(selection)) {
+      const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
+      annotations = annotations.concat(annotation)
+    } else {
+      const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, range: selection}}
+      annotations = annotations.concat(annotation)
+    }
+  }
+
+  function clearAnnotation(index) {
+    annotations.splice(index, 1)
+    annotations = annotations
+  }
+
+  let current
+  $: current = {
+    blocks: [...(annotations.map(mapAnnotation)), ...parse(draft)],
+    author: "emailAddressTODO"
   }
 </script>
 
@@ -35,14 +96,26 @@
   <!-- maybe composer doesn't need to have the from field -->
   <!-- TODO a thread component -->
 
+  {#if contact.introduction}
+  <!-- TODO pass this message as the notes to the composer -->
+  <!-- This goes to a fragment that binds on block -->
+  <div class="" bind:this={root}>
+    {#each previous as {blocks}}
+    <Note {blocks} notes={[]} index={0} author={contact.emailAddress} selection={noteSelection[0]} on:annotate={addAnnotation}/>
+    {/each}
+  </div>
+
+  {:else}
   <h1 class="text-center text-2xl my-4 text-gray-700">
     Contact <span class="font-bold">{contact.emailAddress}</span>
   </h1>
+  {/if}
   <!-- If we put preview outside! -->
   <!-- extract rounding article a a thing -->
   {#if preview}
   <!-- TODO make sure can't always add annotation, or make it work with self -->
-  <Note blocks={blocks} notes={[]} index={0} author={"me"}>
+  {JSON.stringify(current)}
+  <Note blocks={current.blocks} notes={previous} index={previous.length} author={"me"}>
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -70,7 +143,8 @@
   {:else}
   <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
     <!-- Could do an on submit and catch whats inside -->
-    <Composer bind:draft/>
+    <!-- TODO name previous inside composer -->
+    <Composer bind:annotations notes={previous} bind:draft/>
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->

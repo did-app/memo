@@ -74,6 +74,10 @@ export async function fetchContact(identifier){
   console.log(response)
   if (response.status === 200) {
     let raw = await response.json();
-    return {data: {threadId: raw.thread_id, emailAddress: identifier}}
+    return {data: {
+      threadId: raw.thread_id,
+      emailAddress: identifier,
+      introduction: raw.introduction
+    }}
   }
 }

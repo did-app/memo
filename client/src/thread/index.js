@@ -5,6 +5,7 @@ import * as Tree from "../note/tree"
 // thread has many notes
 // A note has many blocks and spans in a tree
 export function followReference(reference, notes) {
+  console.log(notes, reference);
   let note = notes[reference.note]
   if (reference.path !== undefined) {
     let [top, ...rest] = reference.path

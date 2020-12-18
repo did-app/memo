@@ -65,7 +65,9 @@ Please may I ask you consider the following in your message
 - If I don't know you, share a link to your website, bio or twitter
 - Recruiters, I'm very happy building [Plum Mail](https://plummail.co) and not looking for new opportunities.
 
-**Cheers, Peter**",
+Cheers, Peter",
+      // TODO change to blocs
+      // TODO remove the assumption that you got bounced via an email.
       )
     "richard@plummail.co" ->
       Some("Hi,

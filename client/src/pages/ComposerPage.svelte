@@ -86,7 +86,6 @@
   // DOESNT WORK ON ACTIVE message
   function addAnnotation({detail}) {
     const {noteIndex, selection} = detail;
-    console.log(detail, "add", );
     if (Range.isCollapsed(selection)) {
       const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
       annotations = annotations.concat(annotation)
