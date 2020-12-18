@@ -38,7 +38,7 @@
         You need an invitation to access Plum Mail.
       </p>
       <p class="my-2">
-        Email us at <a class="focus:underline hover:underline outline-none text-indigo-600 font-bold" href=" mailto:yesplease@plummail.co?subject=Count%20me%20in&amp;body=I'm%20looking%20forward%20to%20trying%20plummail.co%20because%20... ">yesplease@plummail.co</a> to join the waitlist.
+        <a class="focus:underline hover:underline outline-none text-indigo-600 font-bold" href="https://app.plummail.co/team">Contact us</a> to join the waitlist.
       </p>
     </div>
     {:else}
