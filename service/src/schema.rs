@@ -64,7 +64,7 @@ table! {
     notes (thread_id, counter) {
         thread_id -> Int4,
         counter -> Int4,
-        blocks -> Jsonb,
+        content -> Jsonb,
         authored_by -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,

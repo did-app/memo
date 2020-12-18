@@ -150,7 +150,11 @@ pub fn route(
       try params = start_relationship.params(params)
       try user_id = web.identify_client(request, config)
       try thread_id = start_relationship.execute(params, user_id)
-      todo("router")
+      http.response(200)
+      |> web.set_resp_json(json.object([
+          tuple("thread_id", json.int(thread_id)),
+          ]))
+          |> Ok()
     }
     // TODO don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim

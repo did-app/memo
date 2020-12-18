@@ -4,6 +4,7 @@ import gleam/io
 import gleam/list
 import gleam/map
 import gleam/order
+import gleam/json
 import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
@@ -19,7 +20,6 @@ pub type Params {
 }
 
 pub fn params(raw: Dynamic) {
-  io.debug(raw)
   try counter = acl.required(raw, "counter", acl.as_int)
   try contact_id = acl.required(raw, "contact_id", acl.as_int)
   assert Ok(content) = dynamic.field(raw, dynamic.from("content"))
@@ -33,10 +33,10 @@ pub fn execute(params, user_id) {
   let notes = case counter {
     0 -> [tuple(0, user_id, content)]
     // TODO message content
-    1 -> [tuple(0, contact_id, dynamic.from([])), tuple(1, user_id, content)]
+    1 -> [tuple(0, contact_id, dynamic.from(map.from_list([tuple("blocks", [])]))), tuple(1, user_id, content)]
   }
   let sql =
-  "
+    "
   WITH new_thread AS (
       INSERT INTO threads
       DEFAULT VALUES
@@ -47,26 +47,25 @@ pub fn execute(params, user_id) {
   RETURNING thread_id
   "
   let [lower, upper] = case int.compare(user_id, contact_id) {
-      order.Lt -> [user_id, contact_id]
-      order.Gt -> [contact_id, user_id]
+    order.Lt -> [user_id, contact_id]
+    order.Gt -> [contact_id, user_id]
   }
   let args = [pgo.int(lower), pgo.int(upper)]
   // rename db.run
   try [thread_id] =
-  run_sql.execute(
+    run_sql.execute(
       sql,
       args,
       fn(row) {
-          assert Ok(thread_id) = dynamic.element(row, 0)
-          assert Ok(thread_id) = dynamic.int(thread_id)
-          thread_id
+        assert Ok(thread_id) = dynamic.element(row, 0)
+        assert Ok(thread_id) = dynamic.int(thread_id)
+        thread_id
       },
-  )
-  let thread_id = 1
+    )
 
   let sql =
     "
-  INSERT INTO notes (thread_id, counter, blocks, authored_by)
+  INSERT INTO notes (thread_id, counter, authored_by, content)
   VALUES ($1, $2, $3, $4)
   RETURNING *
   "
@@ -78,8 +77,8 @@ pub fn execute(params, user_id) {
       let args = [
         pgo.int(thread_id),
         pgo.int(counter),
-        dynamic.unsafe_coerce(content),
         pgo.int(author_id),
+        dynamic.unsafe_coerce(content),
       ]
       assert Ok(_) = run_sql.execute(sql, args, fn(x) { x })
       Nil

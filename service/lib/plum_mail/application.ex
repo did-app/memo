@@ -11,6 +11,7 @@ defmodule PlumMail.Application do
   end
 
   def start(_type, _args) do
+    :ok = Application.put_env(:pg_types, :json_config, {:jsone, [], [{:keys, :binary}]})
     port = port()
     {:ok, db_config} = :gleam@pgo.url_config(System.get_env("DATABASE_URL"))
     db_ssl = System.get_env("DATABASE_SSL") != "FALSE"

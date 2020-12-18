@@ -22,7 +22,7 @@
     // TODO remove put asyn on function above
     setTimeout(async function () {
       console.log(data, "-----------------");
-      if (data.threadId !== undefined) {
+      if (data.threadId !== null) {
         const url = "__API_ORIGIN__/threads/" + data.threadId;
         const response = await fetch(url, {
           credentials: "include",
