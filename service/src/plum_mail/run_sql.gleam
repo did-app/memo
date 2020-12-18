@@ -58,6 +58,7 @@ pub fn execute(sql, args, mapper) {
 }
 
 // TODO return error with a not found type that can use try
+// TODO replace with list.head
 pub fn single(rows) {
   case rows {
     [] -> None

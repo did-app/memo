@@ -33,6 +33,7 @@ import plum_mail/discuss/delete_pin
 import plum_mail/discuss/mark_done
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
+import plum_mail/relationships/lookup_relationship
 import plum_mail/email/inbound/postmark
 
 fn load_participation(conversation_id, request, config) {
@@ -142,6 +143,27 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+    // TODO don't bother with tim as short for tim@plummail.co
+    // tim32@plummail.co might also want name tim
+    ["relationship", contact] -> {
+      try identifier_id = web.identify_client(request, config)
+      try email_address =
+        authentication.validate_email(contact)
+        |> result.map_error(fn(e: Nil) {
+          todo("proper error for email validation")
+        })
+      try relationship =
+        lookup_relationship.execute(identifier_id, email_address)
+      let data =
+        json.object([
+          // don't need identifier id, do need profile/welcome information
+          tuple("thread_id", json.nullable(relationship.thread_id, json.int)),
+        ])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok
+    }
+    // TODO delete below
     ["contact", label] -> {
       try profile = profile.lookup(label)
       let data = json.object([tuple("greeting", json.string(profile.greeting))])
@@ -187,7 +209,7 @@ pub fn route(
       |> Ok
     }
     // This might not be a good name as we want a to introduce b
-    // this might be reach out or something.
+    // this might be reach out or something. connect(verb) contact(verb noun the same word)
     ["introduction", label] -> {
       try params = acl.parse_form(request)
       assert Ok(topic) = map.get(params, "subject")

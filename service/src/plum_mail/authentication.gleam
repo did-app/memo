@@ -127,7 +127,7 @@ pub type Identifier {
   Identifier(id: Int, email_address: EmailAddress)
 }
 
-fn row_to_identifier(row) {
+pub fn row_to_identifier(row) {
   assert Ok(id) = dynamic.element(row, 0)
   assert Ok(id) = dynamic.int(id)
   assert Ok(email_address) = dynamic.element(row, 1)
