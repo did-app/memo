@@ -1,4 +1,5 @@
 import gleam/dynamic
+import gleam/io
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/pgo
@@ -11,7 +12,7 @@ pub type Contact {
 }
 
 pub fn execute(identifier_id, email_address: EmailAddress) {
-  let sql = "SELECT id, email_address FROM identifiers WHERE id = $1"
+  let sql = "SELECT id, email_address FROM identifiers WHERE email_address = $1"
   let args = [pgo.text(email_address.value)]
 
   try db_result = run_sql.execute(sql, args, authentication.row_to_identifier)

@@ -28,10 +28,6 @@ input:not(:placeholder-shown):not(:focus):invalid + div.warning {
   display: initial;
 }
 
-body, .bg-body {
-  background: #f6f6f6cc;
-}
-
 .my-shadow {
   box-shadow: 0 0 50px -12px rgba(0, 0, 0, .25);
 }

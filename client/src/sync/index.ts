@@ -43,7 +43,8 @@ async function loadState(resolve, reject) {
   }})
 }
 
-export let loading = undefined;
+// TODO remove any
+export let loading: any = undefined;
 // this is essentially init
 export function handleAuthCode() {
   let fragment = window.location.hash.substring(1);
@@ -60,4 +61,19 @@ export function handleAuthCode() {
     }
 
   });
+}
+
+// Pull from state or lookup
+export async function fetchContact(identifier){
+  // TODO extract client code, if TS good enough dont use Result
+  const url = "__API_ORIGIN__/relationship/" + identifier;
+  const response = await fetch(url, {
+    credentials: "include",
+    headers: {accept: "application/json"}
+  })
+  console.log(response)
+  if (response.status === 200) {
+    let raw = await response.json();
+    return {data: {threadId: raw.thread_id, emailAddress: identifier}}
+  }
 }
