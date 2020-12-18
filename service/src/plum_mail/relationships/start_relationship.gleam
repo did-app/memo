@@ -8,6 +8,7 @@ import gleam/json
 import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
+import plum_mail/threads/thread
 
 pub type Params {
   // contact_id is just the identifier id
@@ -63,24 +64,14 @@ pub fn execute(params, user_id) {
       },
     )
 
-  let sql =
-    "
-  INSERT INTO notes (thread_id, counter, authored_by, content)
-  VALUES ($1, $2, $3, $4)
-  RETURNING *
-  "
+
   list.each(
     notes,
     fn(note) {
       let tuple(counter, author_id, content) = note
       // TODO it's just a map you pass in
-      let args = [
-        pgo.int(thread_id),
-        pgo.int(counter),
-        pgo.int(author_id),
-        dynamic.unsafe_coerce(content),
-      ]
-      assert Ok(_) = run_sql.execute(sql, args, fn(x) { x })
+
+      assert Ok(_) = thread.write_note(thread_id, counter, author_id, content)
       Nil
     },
   )

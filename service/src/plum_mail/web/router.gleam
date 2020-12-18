@@ -181,13 +181,26 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
+    // TODO authenticate
     ["threads", thread_id] -> {
       assert Ok(thread_id) = int.parse(thread_id)
       try user_id = web.identify_client(request, config)
       // TODO a participation thing again
-      io.debug("-------------------")
       try notes = thread.load_notes(thread_id)
       let data = json.object([tuple("notes", json.list(notes))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok
+    }
+    ["threads", thread_id, "post"] -> {
+      assert Ok(thread_id) = int.parse(thread_id)
+      try raw = acl.parse_json(request)
+      try counter = acl.required(raw, "counter", acl.as_int)
+      assert Ok(content) = dynamic.field(raw, dynamic.from("content"))
+      try author_id = web.identify_client(request, config)
+      // TODO a participation thing again
+      try notes = thread.write_note(thread_id, counter, author_id, content)
+      let data = json.object([])
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok

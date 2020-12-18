@@ -5,22 +5,23 @@ import gleam/json
 import datetime
 import plum_mail/run_sql
 
-// identificatation - discovery
-//
-// // client/identifier
-// // if authed
-// // if not its look up profile as well.
-// web/pair/identifier
-//     lookup_pair
-//
-// // if not authed profile and if doesn't exist default profile
-//
-// api/identifier
-//  finds pair if exists and returns thread id
+pub fn write_note(thread_id, counter, author_id, content) {
+    let sql =
+      "
+    INSERT INTO notes (thread_id, counter, authored_by, content)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *
+    "
+    let args = [
+      pgo.int(thread_id),
+      pgo.int(counter),
+      pgo.int(author_id),
+      dynamic.unsafe_coerce(content),
+    ]
+    run_sql.execute(sql, args, fn(x) { x })
+}
+
 pub fn load_notes(thread_id) {
-  io.debug(thread_id)
-  run_sql.execute("SELECT * FROM notes", [], io.debug)
-  |> io.debug()
   let sql =
     "
     SELECT n.counter, n.content, a.email_address, n.inserted_at
