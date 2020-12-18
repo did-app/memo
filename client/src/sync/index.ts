@@ -77,7 +77,8 @@ export async function fetchContact(identifier){
     return {data: {
       threadId: raw.thread_id,
       emailAddress: identifier,
-      introduction: raw.introduction
+      introduction: raw.introduction,
+      contactId: raw.contact_id
     }}
   }
 }

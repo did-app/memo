@@ -24,6 +24,7 @@ CREATE TABLE notes (
   thread_id INT REFERENCES threads(id) NOT NULL,
   counter INT NOT NULL,
   PRIMARY KEY (thread_id, counter),
+  -- TODO rename content
   blocks JSONB NOT NULL,
   authored_by INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),

@@ -9,9 +9,10 @@ import plum_mail/run_sql
 // contact is one end of a relationship
 pub type Contact {
   Contact(
-      thread_id: Option(Int),
-      // what do we call the gatekeeper message
-      introduction: Option(String)
+    contact_id: Option(Int),
+    thread_id: Option(Int),
+    // what do we call the gatekeeper message
+    introduction: Option(String),
   )
 }
 
@@ -24,7 +25,7 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
   let introduction = lookup_introduction(email_address)
 
   case list.head(db_result) {
-    Error(Nil) -> Ok(Contact(None, None))
+    Error(Nil) -> Ok(Contact(None, None, None))
     Ok(contact) -> {
       let sql =
         "
@@ -44,8 +45,9 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
           },
         )
       case list.head(db_result) {
-        Error(Nil) -> Ok(Contact(None, introduction))
-        Ok(thread_id) -> Ok(Contact(Some(thread_id), introduction))
+        Error(Nil) -> Ok(Contact(Some(contact.id), None, introduction))
+        Ok(thread_id) ->
+          Ok(Contact(Some(contact.id), Some(thread_id), introduction))
       }
     }
   }
@@ -54,7 +56,8 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
 pub fn lookup_introduction(email_address) {
   case email_address.value {
     "peter@plummail.co" ->
-      Some("Hello
+      Some(
+        "Hello
 
 Thanks for reaching out
 
@@ -66,11 +69,12 @@ Please may I ask you consider the following in your message
 - Recruiters, I'm very happy building [Plum Mail](https://plummail.co) and not looking for new opportunities.
 
 Cheers, Peter",
-      // TODO change to blocs
-      // TODO remove the assumption that you got bounced via an email.
       )
+    // TODO change to blocs
+    // TODO remove the assumption that you got bounced via an email.
     "richard@plummail.co" ->
-      Some("Hi,
+      Some(
+        "Hi,
 
 Thanks for emailing me. Have we met?
 
@@ -86,6 +90,6 @@ Speak soon and thank you,
 
 Richard",
       )
-      _ -> None
+    _ -> None
   }
 }

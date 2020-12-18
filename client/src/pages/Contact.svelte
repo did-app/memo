@@ -18,13 +18,31 @@
   let contact;
   let previous
   fetchContact(emailAddressFor(identifier)).then(function ({data}) {
-    // TODO remove
-    setTimeout(function () {
-      contact = data
-      if (contact.introduction) {
-        previous = [{blocks: parse(contact.introduction), author: contact.emailAddress}];
+
+    // TODO remove put asyn on function above
+    setTimeout(async function () {
+      console.log(data, "-----------------");
+      if (data.threadId !== undefined) {
+        const url = "__API_ORIGIN__/threads/" + data.threadId;
+        const response = await fetch(url, {
+          credentials: "include",
+          headers: {accept: "application/json"}
+        })
+        console.log(response);
+        if (response.status === 200) {
+          let raw = await response.json();
+          console.log(raw);
+          contact = data
+          previous = raw.notes
+        }
       } else {
-        previous = [];
+        contact = data
+
+        if (contact.introduction) {
+          previous = [{blocks: parse(contact.introduction), author: contact.emailAddress}];
+        } else {
+          previous = [];
+        }
       }
     }, 1000);
   })
@@ -33,8 +51,29 @@
   let preview = false;
 
   // fetch intro data
-  function send() {
-    console.log(blocks);
+  async function send() {
+    const url = "__API_ORIGIN__/relationship/start";
+    const params = {
+      contact_id: contact.contactId,
+      counter: previous.length,
+      content: {blocks: current.blocks}
+    }
+    console.log(params);
+    const response = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(params)
+    })
+    if (response.status === 200) {
+      let raw = await response.json();
+      console.log(raw);
+    }
+    console.log(contact);
+    console.log(current);
   }
 
   // TODO deduplicate in fragment

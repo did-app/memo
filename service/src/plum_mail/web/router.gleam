@@ -33,7 +33,9 @@ import plum_mail/discuss/delete_pin
 import plum_mail/discuss/mark_done
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
+import plum_mail/threads/thread
 import plum_mail/relationships/lookup_relationship
+import plum_mail/relationships/start_relationship
 import plum_mail/email/inbound/postmark
 
 fn load_participation(conversation_id, request, config) {
@@ -143,6 +145,13 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+    ["relationship", "start"] -> {
+      try params = acl.parse_json(request)
+      try params = start_relationship.params(params)
+      try user_id = web.identify_client(request, config)
+      try thread_id = start_relationship.execute(params, user_id)
+      todo("router")
+    }
     // TODO don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim
     ["relationship", contact] -> {
@@ -154,17 +163,32 @@ pub fn route(
         })
       try relationship =
         lookup_relationship.execute(identifier_id, email_address)
-        io.debug(relationship)
       let data =
         json.object([
           // don't need identifier id, do need profile/welcome information
           tuple("thread_id", json.nullable(relationship.thread_id, json.int)),
-          tuple("introduction", json.nullable(relationship.introduction, json.string)),
+          tuple("contact_id", json.nullable(relationship.contact_id, json.int)),
+          tuple(
+            "introduction",
+            json.nullable(relationship.introduction, json.string),
+          ),
         ])
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok
     }
+    ["threads", thread_id] -> {
+      assert Ok(thread_id) = int.parse(thread_id)
+      try user_id = web.identify_client(request, config)
+      // TODO a participation thing again
+      io.debug("-------------------")
+      try notes = thread.load_notes(thread_id)
+      let data = json.object([tuple("notes", json.list(notes))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok
+    }
+
     // TODO delete below
     ["contact", label] -> {
       try profile = profile.lookup(label)

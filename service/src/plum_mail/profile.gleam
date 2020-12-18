@@ -2,8 +2,8 @@
 // something like yesplease is not an identity, is it a contact.
 // maybe more contact information than "a contact"
 import gleam/string
-// TODO delete
 
+// TODO delete
 pub type Profile {
   Profile(greeting: String)
 }

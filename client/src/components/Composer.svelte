@@ -3,6 +3,7 @@
   import * as Thread from "../thread"
   import Block from "../components/Block.svelte"
 
+  // TODO custom validation on length of blocks not being 1
   export let annotations = [];
   export let notes = [];
   export let suggestions = [];
