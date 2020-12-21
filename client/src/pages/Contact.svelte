@@ -1,7 +1,7 @@
 <script type="typescript">
   import {onMount} from "svelte"
   // TODO extract the conversation layout page
-  import {fetchContact} from "../sync";
+  import * as Sync from "../sync";
   import {parse} from "../note"
   import {getSelected} from "../thread/view"
   import * as Range from "../note/range";
@@ -17,21 +17,14 @@
 
   let contact;
   let previous
-  fetchContact(emailAddressFor(identifier)).then(function ({data}) {
+  Sync.fetchContact(emailAddressFor(identifier)).then(function ({data}) {
 
     // TODO remove put asyn on function above
     setTimeout(async function () {
       if (data.threadId !== null) {
-        const url = "__API_ORIGIN__/threads/" + data.threadId;
-        const response = await fetch(url, {
-          credentials: "include",
-          headers: {accept: "application/json"}
-        })
-        if (response.status === 200) {
-          let raw = await response.json();
-          contact = data
-          previous = raw.notes
-        }
+
+        contact = data
+        previous = raw.notes
       } else {
         contact = data
 
@@ -52,24 +45,8 @@
   // TODO load up the messages after sending
   async function send() {
     if (contact.threadId) {
-      const url = "__API_ORIGIN__/threads/" + contact.threadId + "/post";
-      const params = {
-        counter: previous.length,
-        content: {blocks: current.blocks}
-      }
-      const response = await fetch(url, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          accept: "application/json",
-          "content-type": "application/json"
-        },
-        body: JSON.stringify(params)
-      })
-      if (response.status === 200) {
-        let raw = await response.json();
-        console.log(raw);
-      }
+      const {data, error} = Sync.writeNote(contact.threadId, previous.length, current.blocks)
+      console.log(data, error);
     } else {
       const url = "__API_ORIGIN__/relationship/start";
       const params = {
