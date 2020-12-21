@@ -144,13 +144,18 @@ pub fn fetch_identifier(id) {
     FROM identifiers
     WHERE id = $1"
   let args = [pgo.int(id)]
-  try db_result = run_sql.execute(sql, args, fn(row) {
-      let identifier = row_to_identifier(row)
-      assert Ok(greeting) = dynamic.element(row, 2)
-      // TODO remove unsafe_coerce
-      assert greeting = dynamic.unsafe_coerce(greeting)
-      tuple(identifier, greeting)
-  })
+  try db_result =
+    run_sql.execute(
+      sql,
+      args,
+      fn(row) {
+        let identifier = row_to_identifier(row)
+        assert Ok(greeting) = dynamic.element(row, 2)
+        // TODO remove unsafe_coerce
+        assert greeting = dynamic.unsafe_coerce(greeting)
+        tuple(identifier, greeting)
+      },
+    )
   run_sql.single(db_result)
   |> Ok
 }

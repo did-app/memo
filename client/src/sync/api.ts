@@ -1,13 +1,13 @@
 import type {Block} from "../note/elements"
 import {get, post} from "./client"
 
-export type Failure = {error: {detail: string}}
+export type Failure = {error: {status?: number, detail: string}}
 export type Call<T> = Promise<T | Failure>
 const Call = Promise
 // https://github.com/microsoft/TypeScript/issues/32574
 export type Response<T> = T | Failure
 
-export type Identifier = {id: number, emailAddress: string, hasAccount: boolean}
+export type Identifier = {id: number, emailAddress: string, hasAccount: boolean, greeting: Block[]}
 // typescript type for anything, so it needs checking
 // unknown is the type we need
 
@@ -40,6 +40,16 @@ export type Contact = {
   emailAddress: string,
   introduction: Block[],
   threadId: number | null
+}
+
+export async function fetchProfile(id): Call<{greeting: Block[]}> {
+  const path = "/identifiers/" + id;
+  const response = await get(path)
+  return mapData(response, function(raw) {
+    return {
+      greeting: raw.greeting
+    }
+  })
 }
 
 export async function fetchContact(identifier): Call<Contact> {

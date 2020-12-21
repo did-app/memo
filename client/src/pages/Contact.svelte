@@ -24,23 +24,33 @@
   let previous: {blocks: Block[]}[];
 
   async function run() {
-    let response = await authenticationProcess;
-    if ("error" in response) {
-      throw "error"
-    }
-    me = response
-
     let contactEmailAddress = emailAddressFor(handle);
-    if (me.emailAddress === contactEmailAddress) {
-      page.redirect("/profile")
-    } else {
-      let response = await API.fetchContact(contactEmailAddress)
+    let response = await authenticationProcess;
+    if ("error" in response && response.error.status === 403) {
+      // TODO needs to return fallback, not 404 if not found
+      let response = await API.fetchProfile(contactEmailAddress)
       if ("error" in response) {
         throw "error"
       }
-      contact = response
-      // TODO extract previous
-      previous = []
+      contact = {emailAddress: contactEmailAddress}
+      previous = [{blocks: response.greeting}]
+    } else if ("error" in response && response.error.status !== 403) {
+      throw "error fetching self"
+    } else {
+      // TODO remove as
+      me = response as Identifier
+
+      if (me.emailAddress === contactEmailAddress) {
+        page.redirect("/profile")
+      } else {
+        let response = await API.fetchContact(contactEmailAddress)
+        if ("error" in response) {
+          throw "error"
+        }
+        contact = response
+        // TODO extract previous
+        previous = []
+      }
     }
   }
   run()
@@ -61,7 +71,6 @@
     } else {
       response = await API.startRelationship(contact.id, previous.length, current.blocks)
     }
-    console.log(response);
     return null
   }
 
@@ -101,7 +110,6 @@
 
   // DOESNT WORK ON ACTIVE message
   function addAnnotation({detail}) {
-    console.log(detail);
     // const {noteIndex, selection} = detail;
     // if (Range.isCollapsed(selection)) {
     //   const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
@@ -129,7 +137,7 @@
   <!-- maybe composer doesn't need to have the from field -->
   <!-- TODO a thread component -->
 
-  {#if contact.introduction}
+  {#if previous.length !== 0}
   <!-- TODO pass this message as the notes to the composer -->
   <!-- This goes to a fragment that binds on block -->
   <div class="" bind:this={root}>

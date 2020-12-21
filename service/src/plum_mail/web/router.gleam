@@ -23,7 +23,6 @@ import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 import plum_mail/authentication/claim_email_address
-import plum_mail/profile
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss.{Message, Pin}
 import plum_mail/discuss/start_conversation
@@ -67,8 +66,8 @@ fn identifier_data(identifier: Identifier) {
     tuple("id", json.int(identifier.id)),
     tuple("email_address", json.string(identifier.email_address.value)),
     tuple("has_account", json.bool(has_account)),
-    // tuple("greeting", identifier.greeting),
   ])
+  // tuple("greeting", identifier.greeting),
 }
 
 pub fn route(
@@ -120,8 +119,7 @@ pub fn route(
     }
     // TODO rename above as "code"
     ["authenticate", "session"] -> {
-      try identifier_id =
-        web.identify_client(request, config)
+      try identifier_id = web.identify_client(request, config)
       try identifier = authentication.fetch_identifier(identifier_id)
       assert Some(tuple(identifier, greeting)) = identifier
       http.response(200)
@@ -162,6 +160,19 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+    ["identifiers", email_address] -> {
+      let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
+      let args = [pgo.text(email_address)]
+      let mapper = fn(row) {
+        assert Ok(greeting) = dynamic.element(row, 0)
+        dynamic.unsafe_coerce(greeting)
+      }
+      try [greeting] = run_sql.execute(sql, args, mapper)
+      let data = json.object([tuple("greeting", json.string(greeting))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
     ["identifiers", id, "greeting"] -> {
       try user_id = web.identify_client(request, config)
       assert Ok(id) = int.parse(id)
@@ -234,14 +245,6 @@ pub fn route(
       |> Ok
     }
 
-    // TODO delete below
-    ["contact", label] -> {
-      try profile = profile.lookup(label)
-      let data = json.object([tuple("greeting", json.string(profile.greeting))])
-      http.response(200)
-      |> web.set_resp_json(data)
-      |> Ok()
-    }
     ["welcome"] -> {
       io.debug(request)
       try params = acl.parse_form(request)

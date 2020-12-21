@@ -29,6 +29,8 @@ async function doFetch(path, options) {
     const response = await fetch(url, options);
     if (response.status === 200) {
       return parseJSON(response)
+    } else if (response.status === 403) {
+      return {error: {status: 403}}
     } else {
       throw "handle other responses" + response.status
     }

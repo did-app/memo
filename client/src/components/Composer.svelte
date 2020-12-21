@@ -49,12 +49,12 @@
       <a class="text-purple-800" href="#{reference.note}"><small>{notes[reference.note].author}</small></a>
     </blockquote>
     <div class="px-2">
-      <textarea class="comment w-full outline-none" bind:value={annotations[index].raw} on:input={resize} rows="1" placeholder="Your comment ..."></textarea>
+      <textarea class="comment w-full bg-white outline-none" bind:value={annotations[index].raw} on:input={resize} rows="1" placeholder="Your comment ..."></textarea>
     </div>
   </div>
 </div>
 {/each}
-<textarea class="message w-full outline-none pl-12" bind:value={draft} on:input={resize} placeholder="Your message ..."></textarea>
+<textarea class="message w-full bg-white outline-none pl-12" bind:value={draft} on:input={resize} placeholder="Your message ..."></textarea>
 <!-- TODO remove for now -->
 {#each suggestions as _suggestion, index}
 <div class="pl-12 my-1">
