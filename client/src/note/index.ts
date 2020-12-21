@@ -1,11 +1,38 @@
 import {PARAGRAPH, TEXT, LINK} from "./elements"
+type Paragraph = {
+  type: PARAGRAPH,
+  spans: Span[],
+  // TODO remove start
+  start: number
+}
+type Text = {
+  type: TEXT,
+  text: string,
+  // TODO remove start
+  start?: number
+}
+type Link = {
+  type: LINK,
+  title?: string,
+  url: string,
+  // TODO remove start
+  start: number
+}
+
+export type Span = Text | Link
+export type Block = Paragraph
+
+export type Note = {
+  author: string,
+  blocks: Block[]
+}
 
 function parseLine(line, offset) {
   // Can't end with |(.+\?) because question capture will catch all middle links
   // Questionmark in the body of a link causes confusion, not good if people are making their own questions
   // const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
   const tokeniser = /(?:\[([^\[]*)\]\(([^\(]+)\))|(?:(?:\s|^)(https?:\/\/[\w\d-./?=#]+))/gm
-  const output = []
+  const output: Span[] = []
   let cursor = 0;
   let token
   while (token = tokeniser.exec(line)) {

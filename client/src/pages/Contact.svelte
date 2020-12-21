@@ -4,84 +4,64 @@
   import {parse} from "../note"
   import {getSelected} from "../thread/view"
   // import type {Range} from "../note/range";
+  import {authenticationProcess} from "../sync"
+  import type {Identifier, Contact} from "../sync/api"
+  import * as API from "../sync/api"
+  import type {Failure} from "../sync/api"
   // import {ANNOTATION} from "../note/elements"
+  import type {Block} from "../note"
   import Composer from "../components/Composer.svelte"
   import Note from "../components/Note.svelte"
   // Need to look up welcome message don't want all of those in client
 
-  export let identifier: string;
-  console.log(identifier);
-  // import {authenticationProcess} from "../sync"
+  export let handle: string;
 
+  let me: Identifier;
+  let contact: Contact;
+  // Note library as is stands doesn't deal with author, needs to be paper or similai
+  // Or message is note + author
+  let previous: {blocks: Block[]}[];
 
-  // function emailAddressFor(identifier: string) {
-  //   return (identifier.indexOf("@") === -1) ? identifier + "@plummail.co" : identifier
-  // }
+  async function run() {
+    let response = await authenticationProcess;
+    if ("error" in response) {
+      throw "error"
+    }
+    me = response
 
-  // async function s() {
-  //   let response = await authenticationProcess
-  //   response.foo
-  // }
+    let contactEmailAddress = emailAddressFor(handle)
+    if (me.emailAddress === contactEmailAddress) {
 
+    } else {
+      let response = await API.fetchContact(contactEmailAddress)
+      if ("error" in response) {
+        throw "error"
+      }
+      contact = response
+      // TODO extract previous
+      previous = []
+    }
+  }
+  run()
 
-  // want to be able to show self information immediatly after visiting page second time
-  let contact: any;
-  let previous: any;
-  // Sync.fetchContact(emailAddressFor(identifier)).then(function ({data}) {
-  //
-  //   // TODO remove put asyn on function above
-  //   setTimeout(async function () {
-  //     if (data.threadId !== null) {
-  //
-  //       contact = data
-  //       console.log(data, "-------------------");
-  //       previous = data.notes
-  //     } else {
-  //       contact = data
-  //
-  //       if (contact.introduction) {
-  //         previous = [{blocks: parse(contact.introduction), author: contact.emailAddress}];
-  //       } else {
-  //         previous = [];
-  //       }
-  //     }
-  //   }, 1000);
-  // })
+  function emailAddressFor(handle: string) {
+    return (handle.indexOf("@") === -1) ? handle + "@plummail.co" : handle
+  }
 
   let draft = "";
   let preview = false;
 
-  // fetch intro data
-  // TODO move into typescript
   // TODO load up the messages after sending
-  async function send() {
-    // if (contact.threadId) {
-    //   const {data, error} = Sync.writeNote(contact.threadId, previous.length, current.blocks)
-    //   console.log(data, error);
-    // } else {
-    //   const url = "__API_ORIGIN__/relationship/start";
-    //   const params = {
-    //     contact_id: contact.contactId,
-    //     counter: previous.length,
-    //     content: {blocks: current.blocks}
-    //   }
-    //   console.log(params);
-    //   const response = await fetch(url, {
-    //     method: "POST",
-    //     credentials: "include",
-    //     headers: {
-    //       accept: "application/json",
-    //       "content-type": "application/json"
-    //     },
-    //     body: JSON.stringify(params)
-    //   })
-    //   if (response.status === 200) {
-    //     let raw = await response.json();
-    //     console.log(raw);
-    //   }
-    //   console.log(contact);
-    //   console.log(current);
-    // }
+  async function send(): Promise<null> {
+    // safe as there is no thread 0
+    let response: null | Failure
+    if (contact.threadId) {
+      response = await API.writeNote(contact.threadId, previous.length, current.blocks)
+    } else {
+      response = await API.startRelationship(contact.id, previous.length, current.blocks)
+    }
+    console.log(response);
+    return null
   }
 
   // TODO deduplicate in fragment

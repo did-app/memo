@@ -1,7 +1,7 @@
 import * as API from "./api"
-import type {Call} from "./api"
+import type {Call, Identifier} from "./api"
 
-export function startSync(): Call<string> {
+export function startSync(): Call<Identifier> {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js').then(function(registration) {
@@ -25,7 +25,7 @@ export function startSync(): Call<string> {
   const params = new URLSearchParams(fragment);
   const code = params.get("code");
   let authenticationProcess;
-  if (code !== undefined) {
+  if (code !== null) {
     window.location.hash = "#";
     authenticationProcess = API.authenticateWithCode(code)
   } else {
@@ -36,7 +36,7 @@ export function startSync(): Call<string> {
   return authenticationProcess
 }
 
-export const authenticationProcess = startSync()
+export const authenticationProcess = startSync();
 
 async function loadState(resolve, reject) {
   // let response = await Client.fetchInbox();
@@ -77,25 +77,7 @@ export function handleAuthCode() {
 }
 
 // Pull from state or lookup
-export async function fetchContact(identifier){
-  // TODO extract client code, if TS good enough dont use Result
-  const url = "__API_ORIGIN__/relationship/" + identifier;
-  const response = await fetch(url, {
-    credentials: "include",
-    headers: {accept: "application/json"}
-  })
-  console.log(response)
-  if (response.status === 200) {
-    let raw = await response.json();
-    return {data: {
-      threadId: raw.thread_id,
-      emailAddress: identifier,
-      introduction: raw.introduction,
-      contactId: raw.contact_id,
-      notes: []
-    }}
-  }
-}
+
 type block = {type: "paragraph"}
 type note = {counter: number, author: string, blocks: block[]};
 
@@ -114,8 +96,3 @@ type note = {counter: number, author: string, blocks: block[]};
 //   }
 // }
 //
-// export async function writeNote(threadId, counter, blocks) {
-//   const path = "/threads/" + threadId + "/write"
-//   const params = {counter, blocks}
-//   return post(path, params)
-// }

@@ -20,7 +20,7 @@
   router('/begin', (context) => {params = context.params; page = Begin})
   router('/archive', (context) => {params = context.params; page = Archive})
   router('/c/:conversationId', (context) => {params = context.params; page = Conversation})
-  router('/:identifier', (context) => {params = context.params; page = Contact})
+  router('/:handle', (context) => {params = context.params; page = Contact})
 
   router.start()
 </script>

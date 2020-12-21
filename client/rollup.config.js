@@ -14,6 +14,6 @@ export default {
     replace({ __API_ORIGIN__: API_ORIGIN, __GLANCE_ORIGIN__: GLANCE_ORIGIN }),
     svelte({ dev: true, preprocess: sveltePreprocess(), }),
     resolve(),
-    typescript()
+    typescript({sourceMap: true})
   ]
 };
