@@ -115,6 +115,21 @@ pub fn route(
       |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
     }
+    // TODO rename above as "code"
+    ["authenticate", "session"] -> {
+        io.debug(request)
+        try identifier_id = web.identify_client(request, config)
+        |> io.debug()
+        io.debug(identifier_id)
+        try identifier = authentication.fetch_identifier(identifier_id)
+        io.debug(identifier)
+        assert Some(identifier) = identifier
+        http.response(200)
+        |> web.set_resp_json(json.object([
+            tuple("identifier", identifier_data(identifier))
+            ]))
+        |> Ok
+    }
     ["authenticate", "email"] -> {
       try params = acl.parse_json(request)
       try params = claim_email_address.params(params)
@@ -138,6 +153,7 @@ pub fn route(
       http.response(200)
       |> web.set_resp_json(json.object([
         tuple("conversations", conversations),
+        // TODO remove
         tuple("identifier", identifier_data(identifier)),
       ]))
       |> Ok()

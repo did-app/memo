@@ -4,7 +4,6 @@
   import Message from "../components/Message.svelte"
   import * as Client from "../client.js";
   import {extractQuestions} from '../content.js'
-  import * as Sync from "../sync"
 
 
   // fetchConversation probably belongs here to ensure authentication has been done.
@@ -131,7 +130,7 @@
     messages = messages
   }
 
-  window.onhashchange = function (event) {
+  window.onhashchange = function (_event) {
     let $target = document.getElementById(window.location.hash.slice(1))
     if ($target) {
       let $article = $target.closest('article')
@@ -175,9 +174,9 @@
         },
         fail: function({ status }) {
           if (status === 422) {
-            let failure = "Unable to add participant because email is invalid";
+            failure = "Unable to add participant because email is invalid";
           } else {
-             let failure = "Failed to add participant";
+             failure = "Failed to add participant";
           }
         }
       });
@@ -283,7 +282,7 @@ ${value}
 `
       }
     }
-    let response = await Client.writeMessage(
+    await Client.writeMessage(
       conversationId,
       buffer + draft,
       false
@@ -300,20 +299,11 @@ ${value}
         true
       },
       fail: function(_) {
-        let failure = "Failed to mark as done";
+        failure = "Failed to mark as done";
       }
     });
   }
 
-  let installPrompt = (async function () {
-    let event = await Sync.installPrompt
-    return function () {
-      event.prompt()
-      installPrompt = new Promise(function(resolve, reject) {
-
-      });
-    }
-  }())
 </script>
 
 {#await fetchConversation(conversationId)}
@@ -373,14 +363,14 @@ Let's not have any pins
         <span class="truncate">{participation.emailAddress}</span>
       </section>
       <footer id="compose-menu" class="flex flex-wrap items-baseline border-t">
-        <label class="font-bold flex py-1 justify-start items-start hidden">
+        <div class="font-bold flex py-1 justify-start items-start hidden">
           <span class="text-gray-700 pr-2">Conclude</span>
           <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
             <input type="checkbox" class="opacity-0 absolute" name="resolve">
             <svg class="fill-current hidden w-4 h-4 text-indigo-800 pointer-events-none" viewBox="0 0 20 20">
               <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" /></svg>
           </div>
-        </label>
+        </div>
         <div class="ml-auto">
           <label for="preview-tab" class="">
             <span class="my-1 py-1 px-2 rounded border cursor-pointer border-indigo-900 focus:border-indigo-700 hover:border-indigo-700 text-indigo-800 font-bold">Preview</span>
@@ -399,18 +389,6 @@ Let's not have any pins
       </div>
       {/if}
     </form>
-    {#await installPrompt}
-    <span></span>
-    {:then doInstall}
-    <form class="w-full mb-8 md:px-20" on:submit|preventDefault={doInstall}>
-      <div class="flex">
-        <label class="ml-auto font-bold flex py-1 justify-start items-center">
-          <p class="mr-2">Find this conversation quicker?</p>
-          <button class="my-1 py-1 px-2 rounded bg-gray-900 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold" type="submit" title="Select to no longer see as outsanding">Install</button>
-        </label>
-      </div>
-    </form>
-    {/await}
   </main>
   <aside class="sm:w-1/3 max-w-sm mx-auto md:ml-0 flex flex-col p-2 text-gray-700">
     <div class="sticky top-0">

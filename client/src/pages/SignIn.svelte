@@ -5,7 +5,7 @@
   let emailAddress;
   let emailSent = false;
   let accountRequired = false;
-  async function requestEmailAuthentication(event) {
+  async function requestEmailAuthentication() {
     let response = await Client.requestEmailAuthentication(emailAddress)
     response.match({
       ok: function(_) {

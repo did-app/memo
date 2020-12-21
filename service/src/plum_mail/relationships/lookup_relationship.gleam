@@ -3,7 +3,7 @@ import gleam/io
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/pgo
-import plum_mail/authentication.{EmailAddress}
+import plum_mail/authentication.{EmailAddress, Identifier}
 import plum_mail/run_sql
 
 // contact is one end of a relationship
@@ -26,6 +26,7 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
 
   case list.head(db_result) {
     Error(Nil) -> Ok(Contact(None, None, None))
+    Ok(Identifier(id: id, ..)) if id == identifier_id -> todo("talking about self")
     Ok(contact) -> {
       let sql =
         "

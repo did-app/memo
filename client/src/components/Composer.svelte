@@ -56,7 +56,7 @@
 {/each}
 <textarea class="message w-full outline-none pl-12" bind:value={draft} on:input={resize} placeholder="Your message ..."></textarea>
 <!-- TODO remove for now -->
-{#each suggestions as {dismissed, ask}, index}
+{#each suggestions as _suggestion, index}
 <div class="pl-12 my-1">
   Ask question to <select bind:value={choices[index].ask}>
     <option value="everyone">Everyone</option>

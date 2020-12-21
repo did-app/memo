@@ -6,14 +6,6 @@
   export let topLevel = false;
   export let annotations = [];
   export let action;
-  let hidden = true;
-
-  function handleMouseEnter() {
-    hidden = false;
-  }
-  function handleMouseLeave() {
-    hidden = true;
-  }
 
   import { createEventDispatcher } from 'svelte';
 

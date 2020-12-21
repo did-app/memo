@@ -1,6 +1,4 @@
 <script>
-  import * as Tree from "../note/tree.ts";
-  import * as Range from "../note/range.ts";
   import Block from "./Block.svelte";
 
   export let blocks = [];

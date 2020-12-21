@@ -7,7 +7,7 @@
     const searchIndex = new MiniSearch({
       fields: ['topic', 'participants', 'slug'], // fields to index for full-text search
       storeFields: ['topic', 'next', 'participants', 'slug', 'updated_at', 'closed'], // fields to return with search results
-      tokenize: (string, fieldName) => {
+      tokenize: (string, _fieldName) => {
        return string.split(/[\s,@]+/)
       },
       searchOptions: {
@@ -29,7 +29,7 @@
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
-  function handleKeyDown(e) {
+  function handleKeyDown(event) {
     if (event.isComposing || event.keyCode === 229) {
       return;
     }

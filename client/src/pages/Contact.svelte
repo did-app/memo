@@ -1,41 +1,52 @@
-<script type="typescript">
+<script lang="ts">
   import {onMount} from "svelte"
   // TODO extract the conversation layout page
-  import * as Sync from "../sync";
   import {parse} from "../note"
   import {getSelected} from "../thread/view"
-  import * as Range from "../note/range";
-  import {PARAGRAPH, TEXT, LINK, ANNOTATION} from "../note/elements"
+  // import type {Range} from "../note/range";
+  // import {ANNOTATION} from "../note/elements"
   import Composer from "../components/Composer.svelte"
   import Note from "../components/Note.svelte"
   // Need to look up welcome message don't want all of those in client
 
-  export let identifier;
-  function emailAddressFor(identifier) {
-    return (identifier.indexOf("@") === -1) ? identifier + "@plummail.co" : identifier
-  }
+  export let identifier: string;
+  console.log(identifier);
+  // import {authenticationProcess} from "../sync"
 
-  let contact;
-  let previous
-  Sync.fetchContact(emailAddressFor(identifier)).then(function ({data}) {
 
-    // TODO remove put asyn on function above
-    setTimeout(async function () {
-      if (data.threadId !== null) {
+  // function emailAddressFor(identifier: string) {
+  //   return (identifier.indexOf("@") === -1) ? identifier + "@plummail.co" : identifier
+  // }
 
-        contact = data
-        previous = raw.notes
-      } else {
-        contact = data
+  // async function s() {
+  //   let response = await authenticationProcess
+  //   response.foo
+  // }
 
-        if (contact.introduction) {
-          previous = [{blocks: parse(contact.introduction), author: contact.emailAddress}];
-        } else {
-          previous = [];
-        }
-      }
-    }, 1000);
-  })
+
+  // want to be able to show self information immediatly after visiting page second time
+  let contact: any;
+  let previous: any;
+  // Sync.fetchContact(emailAddressFor(identifier)).then(function ({data}) {
+  //
+  //   // TODO remove put asyn on function above
+  //   setTimeout(async function () {
+  //     if (data.threadId !== null) {
+  //
+  //       contact = data
+  //       console.log(data, "-------------------");
+  //       previous = data.notes
+  //     } else {
+  //       contact = data
+  //
+  //       if (contact.introduction) {
+  //         previous = [{blocks: parse(contact.introduction), author: contact.emailAddress}];
+  //       } else {
+  //         previous = [];
+  //       }
+  //     }
+  //   }, 1000);
+  // })
 
   let draft = "";
   let preview = false;
@@ -44,37 +55,38 @@
   // TODO move into typescript
   // TODO load up the messages after sending
   async function send() {
-    if (contact.threadId) {
-      const {data, error} = Sync.writeNote(contact.threadId, previous.length, current.blocks)
-      console.log(data, error);
-    } else {
-      const url = "__API_ORIGIN__/relationship/start";
-      const params = {
-        contact_id: contact.contactId,
-        counter: previous.length,
-        content: {blocks: current.blocks}
-      }
-      console.log(params);
-      const response = await fetch(url, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          accept: "application/json",
-          "content-type": "application/json"
-        },
-        body: JSON.stringify(params)
-      })
-      if (response.status === 200) {
-        let raw = await response.json();
-        console.log(raw);
-      }
-      console.log(contact);
-      console.log(current);
-    }
+    // if (contact.threadId) {
+    //   const {data, error} = Sync.writeNote(contact.threadId, previous.length, current.blocks)
+    //   console.log(data, error);
+    // } else {
+    //   const url = "__API_ORIGIN__/relationship/start";
+    //   const params = {
+    //     contact_id: contact.contactId,
+    //     counter: previous.length,
+    //     content: {blocks: current.blocks}
+    //   }
+    //   console.log(params);
+    //   const response = await fetch(url, {
+    //     method: "POST",
+    //     credentials: "include",
+    //     headers: {
+    //       accept: "application/json",
+    //       "content-type": "application/json"
+    //     },
+    //     body: JSON.stringify(params)
+    //   })
+    //   if (response.status === 200) {
+    //     let raw = await response.json();
+    //     console.log(raw);
+    //   }
+    //   console.log(contact);
+    //   console.log(current);
+    // }
   }
 
   // TODO deduplicate in fragment
-  let root, selected;
+  // TODO remove any on selected
+  let root: Element, selected: any;
   let noteSelection = {};
   function handleSelectionChange() {
     selected = getSelected(root);
@@ -108,22 +120,23 @@
 
   // DOESNT WORK ON ACTIVE message
   function addAnnotation({detail}) {
-    const {noteIndex, selection} = detail;
-    if (Range.isCollapsed(selection)) {
-      const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
-      annotations = annotations.concat(annotation)
-    } else {
-      const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, range: selection}}
-      annotations = annotations.concat(annotation)
-    }
+    console.log(detail);
+    // const {noteIndex, selection} = detail;
+    // if (Range.isCollapsed(selection)) {
+    //   const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
+    //   annotations = annotations.concat(annotation)
+    // } else {
+    //   const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, range: selection}}
+    //   annotations = annotations.concat(annotation)
+    // }
   }
 
-  function clearAnnotation(index) {
-    annotations.splice(index, 1)
+  function clearAnnotation(event: {detail: number}) {
+    annotations.splice(event.detail, 1)
     annotations = annotations
   }
 
-  let current
+  let current: {blocks: any[], author: string}
   $: current = {
     blocks: [...(annotations.map(mapAnnotation)), ...parse(draft)],
     author: "emailAddressTODO"

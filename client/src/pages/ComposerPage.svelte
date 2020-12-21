@@ -1,13 +1,10 @@
 <script>
   import {onMount} from "svelte"
-  import * as Thread from "../thread"
   import {parse} from "../note"
   import {PARAGRAPH, TEXT, LINK, ANNOTATION} from "../note/elements"
   import {getSelected} from "../thread/view"
   import * as Range from "../note/range";
   import Note from "../components/Note.svelte"
-  import Block from "../components/Block.svelte"
-  import Paragraph from "../components/Paragraph.svelte"
   import Link from "../components/Link.svelte"
   import Composer from "../components/Composer.svelte"
 
@@ -52,7 +49,7 @@
   // could act on the tree to push content into the quote block
   // for each block can add all the annotations
   //
-  function suggestedActions(notes) {
+  function suggestedActions(_notes) {
     const output = []
     // TODO move this to working with the makeSuggestions result
     // notes.forEach(function (note, noteId) {
@@ -95,10 +92,10 @@
     }
   }
 
-  function clearAnnotation(index) {
-    annotations.splice(index, 1)
-    annotations = annotations
-  }
+  // function clearAnnotation(index) {
+  //   annotations.splice(index, 1)
+  //   annotations = annotations
+  // }
 
   let current
   $: current = {
@@ -139,9 +136,9 @@
   }
 
   function findPins(notes) {
-    return notes.map(function (note, noteId) {
+    return notes.map(function (note, _noteId) {
       return note.blocks.map(function ({spans}) {
-        return (spans || []).filter(function (span, blockId) {
+        return (spans || []).filter(function (span, _blockId) {
           return span.type === LINK
         })
       })
@@ -162,10 +159,6 @@
 </script>
 
 <style media="screen">
-  textarea.message {
-    min-height:8rem;
-    max-height:60vh;
-  }
   .grid {
     display: grid;
     /* grid-template-columns: 0 42rem 1fr */

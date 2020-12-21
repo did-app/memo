@@ -15,7 +15,7 @@
     $links.forEach(function ($link) {
       // https://github.com/sveltejs/svelte/issues/537
       const frag = document.createDocumentFragment();
-      const preview = new Glance({ target: frag, props: {href: $link.href, text: $link.innerText} });
+      new Glance({ target: frag, props: {href: $link.href, text: $link.innerText} });
       $link.replaceWith( frag );
     })
   })

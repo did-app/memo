@@ -10,8 +10,8 @@
   import router from "page";
 
   // could be done in main.js but makes sense here because this is where we handle the url
-  import {handleAuthCode} from "./sync/index.js";
-  handleAuthCode()
+  import {startSync} from "./sync";
+  const sync = startSync()
 
   let page, params
   router('/', (context) => {params = context.params; page = Search})
@@ -25,4 +25,4 @@
   router.start()
 </script>
 
-<svelte:component this={page} {...params} />
+<svelte:component this={page} {...params} {sync} />
