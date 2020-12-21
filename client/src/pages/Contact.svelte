@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import page from "page"
   // TODO extract the conversation layout page
   import {parse} from "../note"
   import {getSelected} from "../thread/view"
@@ -29,9 +30,9 @@
     }
     me = response
 
-    let contactEmailAddress = emailAddressFor(handle)
+    let contactEmailAddress = emailAddressFor(handle);
     if (me.emailAddress === contactEmailAddress) {
-
+      page.redirect("/profile")
     } else {
       let response = await API.fetchContact(contactEmailAddress)
       if ("error" in response) {

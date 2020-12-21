@@ -42,4 +42,6 @@ CREATE TABLE note_notifications (
   FOREIGN KEY (thread_id, counter) REFERENCES notes(thread_id, counter),
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
-)
+);
+
+ALTER TABLE identifiers ADD COLUMN greeting jsonb;

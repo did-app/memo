@@ -3,7 +3,7 @@
 // maybe more contact information than "a contact"
 import gleam/string
 
-// TODO delete
+// TODO delete all
 pub type Profile {
   Profile(greeting: String)
 }

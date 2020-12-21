@@ -1,4 +1,4 @@
-import {PARAGRAPH, TEXT, LINK} from "./elements"
+import {PARAGRAPH, TEXT, LINK, SOFTBREAK} from "./elements"
 type Paragraph = {
   type: PARAGRAPH,
   spans: Span[],
@@ -90,4 +90,26 @@ export function parse(draft) {
     doc.push(node)
   }
   return doc
+}
+
+export function toString(blocks: Block[]): string {
+  return blocks.map(function(block) {
+    if (block.type === PARAGRAPH) {
+      return block.spans.map(function(span) {
+        if (span.type === TEXT && "text" in span) {
+          return span.text
+        } else if (span.type === LINK && "title" in span) {
+          return ` [${span.title}](${span.url}) `
+        } else if (span.type === LINK && "url" in span) {
+          return " " + span.url + " "
+        } else if (span.type === SOFTBREAK) {
+          return "\n"
+        } else {
+          throw "what an unexpected span type" + span.type
+        }
+      }).join("").trim() + "\n"
+    } else {
+      throw "what an unexpected block type" + block.type
+    }
+  }).join("\n")
 }

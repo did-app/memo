@@ -34,7 +34,10 @@ pub fn execute(params, user_id) {
   let notes = case counter {
     0 -> [tuple(0, user_id, content)]
     // TODO message content
-    1 -> [tuple(0, contact_id, dynamic.from(map.from_list([tuple("blocks", [])]))), tuple(1, user_id, content)]
+    1 -> [
+      tuple(0, contact_id, dynamic.from(map.from_list([tuple("blocks", [])]))),
+      tuple(1, user_id, content),
+    ]
   }
   let sql =
     "
@@ -64,13 +67,12 @@ pub fn execute(params, user_id) {
       },
     )
 
-
   list.each(
     notes,
     fn(note) {
       let tuple(counter, author_id, content) = note
-      // TODO it's just a map you pass in
 
+      // TODO it's just a map you pass in
       assert Ok(_) = thread.write_note(thread_id, counter, author_id, content)
       Nil
     },

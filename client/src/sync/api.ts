@@ -1,3 +1,4 @@
+import type {Block} from "../note/elements"
 import {get, post} from "./client"
 
 export type Failure = {error: {detail: string}}
@@ -10,21 +11,22 @@ export type Identifier = {id: number, emailAddress: string, hasAccount: boolean}
 // typescript type for anything, so it needs checking
 // unknown is the type we need
 
-function toIdentifier({identifier: raw}) {
+function toIdentifier({identifier: raw, greeting}) {
   const identifier = {
     id: raw.id,
     emailAddress: raw.email_address,
-    hasAccount: raw.has_account
+    hasAccount: raw.has_account,
+    greeting
   }
   return identifier
 }
-export async function authenticateWithSession(): Call<Identifier>{
+export async function authenticateWithSession(): Call<Identifier> {
   const path = "/authenticate/session"
   const response = await get(path)
   return mapData(response, toIdentifier)
 }
 
-export async function authenticateWithCode(code){
+export async function authenticateWithCode(code): Call<Identifier> {
   const path = "/authenticate/code"
   const params = {code}
   const response = await post(path, params)
@@ -48,11 +50,23 @@ export async function fetchContact(identifier): Call<Contact> {
       id: raw.contact_id,
       emailAddress: raw.email_address,
       // introduction: raw.introduction,
-      introduction: []
+      introduction: [],
       // above might be an identifier and below a thread
       threadId: raw.thread_id
       // notes: []
     }
+  })
+}
+
+export type OK = {ok: true}
+function ok(): OK { return {ok: true} }
+
+export async function saveGreeting(identifier_id: number, blocks: Block[]): Call<OK> {
+  const path = "/identifiers/" + identifier_id + "/greeting"
+  const params = {blocks}
+  const response = await post(path, params)
+  return mapData(response, function(_) {
+    return ok();
   })
 }
 

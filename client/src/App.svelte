@@ -5,6 +5,7 @@
   import Begin from "./pages/Begin.svelte";
   import Archive from "./pages/Archive.svelte";
   import Conversation from "./pages/Conversation.svelte";
+  import Profile from "./pages/Profile.svelte";
   import Contact from "./pages/Contact.svelte";
 
   import router from "page";
@@ -20,6 +21,7 @@
   router('/begin', (context) => {params = context.params; page = Begin})
   router('/archive', (context) => {params = context.params; page = Archive})
   router('/c/:conversationId', (context) => {params = context.params; page = Conversation})
+  router('/profile', (context) => {params = context.params; page = Profile})
   router('/:handle', (context) => {params = context.params; page = Contact})
 
   router.start()

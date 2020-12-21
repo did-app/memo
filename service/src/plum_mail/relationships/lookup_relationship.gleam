@@ -26,7 +26,8 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
 
   case list.head(db_result) {
     Error(Nil) -> Ok(Contact(None, None, None))
-    Ok(Identifier(id: id, ..)) if id == identifier_id -> todo("talking about self")
+    Ok(Identifier(id: id, ..)) if id == identifier_id ->
+      todo("talking about self")
     Ok(contact) -> {
       let sql =
         "

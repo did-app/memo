@@ -13,12 +13,14 @@ import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/httpc
 import gleam/json
+import gleam/pgo
 // Web/utils let session = utils.extractsession
 import datetime
 import plum_mail
 import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
+import plum_mail/run_sql
 import plum_mail/authentication.{Identifier}
 import plum_mail/authentication/claim_email_address
 import plum_mail/profile
@@ -65,6 +67,7 @@ fn identifier_data(identifier: Identifier) {
     tuple("id", json.int(identifier.id)),
     tuple("email_address", json.string(identifier.email_address.value)),
     tuple("has_account", json.bool(has_account)),
+    // tuple("greeting", identifier.greeting),
   ])
 }
 
@@ -117,18 +120,16 @@ pub fn route(
     }
     // TODO rename above as "code"
     ["authenticate", "session"] -> {
-        io.debug(request)
-        try identifier_id = web.identify_client(request, config)
-        |> io.debug()
-        io.debug(identifier_id)
-        try identifier = authentication.fetch_identifier(identifier_id)
-        io.debug(identifier)
-        assert Some(identifier) = identifier
-        http.response(200)
-        |> web.set_resp_json(json.object([
-            tuple("identifier", identifier_data(identifier))
-            ]))
-        |> Ok
+      try identifier_id =
+        web.identify_client(request, config)
+      try identifier = authentication.fetch_identifier(identifier_id)
+      assert Some(tuple(identifier, greeting)) = identifier
+      http.response(200)
+      |> web.set_resp_json(json.object([
+        tuple("identifier", identifier_data(identifier)),
+        tuple("greeting", greeting),
+      ]))
+      |> Ok
     }
     ["authenticate", "email"] -> {
       try params = acl.parse_json(request)
@@ -146,7 +147,7 @@ pub fn route(
       try identifier_id = web.identify_client(request, config)
       try conversations = show_inbox.execute(identifier_id)
       // can only show conversations if there is an identifier
-      assert Ok(Some(identifier)) =
+      assert Ok(Some(tuple(identifier, _greeting))) =
         authentication.fetch_identifier(identifier_id)
       // If this conversations is the same as the top level conversation object for a page,
       // it can be the start value when switching pages
@@ -161,16 +162,27 @@ pub fn route(
     [] ->
       // Ok(http.set_resp_body(http.response(200), <<>>))
       todo("index")
+    ["identifiers", id, "greeting"] -> {
+      try user_id = web.identify_client(request, config)
+      assert Ok(id) = int.parse(id)
+      assert true = user_id == id
+      try raw = acl.parse_json(request)
+      assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
+      let sql = "UPDATE identifiers SET greeting = $2 WHERE id = $1"
+      let args = [pgo.int(user_id), dynamic.unsafe_coerce(blocks)]
+      try [] = run_sql.execute(sql, args, fn(x) { x })
+      http.response(200)
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+      |> Ok
+    }
     ["relationship", "start"] -> {
       try params = acl.parse_json(request)
       try params = start_relationship.params(params)
       try user_id = web.identify_client(request, config)
       try thread_id = start_relationship.execute(params, user_id)
       http.response(200)
-      |> web.set_resp_json(json.object([
-          tuple("thread_id", json.int(thread_id)),
-          ]))
-          |> Ok()
+      |> web.set_resp_json(json.object([tuple("thread_id", json.int(thread_id))]))
+      |> Ok()
     }
     // TODO don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim

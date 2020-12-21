@@ -15,6 +15,7 @@ table! {
         referred_by -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
+        greeting -> Nullable<Jsonb>,
     }
 }
 

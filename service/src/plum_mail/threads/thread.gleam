@@ -6,19 +6,19 @@ import datetime
 import plum_mail/run_sql
 
 pub fn write_note(thread_id, counter, author_id, content) {
-    let sql =
-      "
+  let sql =
+    "
     INSERT INTO notes (thread_id, counter, authored_by, content)
     VALUES ($1, $2, $3, $4)
     RETURNING *
     "
-    let args = [
-      pgo.int(thread_id),
-      pgo.int(counter),
-      pgo.int(author_id),
-      dynamic.unsafe_coerce(content),
-    ]
-    run_sql.execute(sql, args, fn(x) { x })
+  let args = [
+    pgo.int(thread_id),
+    pgo.int(counter),
+    pgo.int(author_id),
+    dynamic.unsafe_coerce(content),
+  ]
+  run_sql.execute(sql, args, fn(x) { x })
 }
 
 pub fn load_notes(thread_id) {

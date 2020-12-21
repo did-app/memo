@@ -6,6 +6,7 @@ import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import gleam/crypto
+import gleam/json
 import gleam/pgo
 import plum_mail/run_sql
 import plum_mail/error
@@ -139,11 +140,17 @@ pub fn row_to_identifier(row) {
 pub fn fetch_identifier(id) {
   let sql =
     "
-    SELECT id, email_address
+    SELECT id, email_address, greeting
     FROM identifiers
     WHERE id = $1"
   let args = [pgo.int(id)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier)
+  try db_result = run_sql.execute(sql, args, fn(row) {
+      let identifier = row_to_identifier(row)
+      assert Ok(greeting) = dynamic.element(row, 2)
+      // TODO remove unsafe_coerce
+      assert greeting = dynamic.unsafe_coerce(greeting)
+      tuple(identifier, greeting)
+  })
   run_sql.single(db_result)
   |> Ok
 }
