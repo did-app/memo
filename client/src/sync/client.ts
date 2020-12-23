@@ -1,4 +1,4 @@
-export async function get(path) {
+export async function get(path): Promise<unknown> {
   let options = {
     credentials: "include",
     headers: {
@@ -8,7 +8,7 @@ export async function get(path) {
   return doFetch(path, options)
 }
 
-export async function post(path, params) {
+export async function post(path, params): Promise<unknown> {
   let options = {
     method: "POST",
     credentials: "include",

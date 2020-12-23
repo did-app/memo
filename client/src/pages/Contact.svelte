@@ -27,7 +27,9 @@
     let contactEmailAddress = emailAddressFor(handle);
     let response = await authenticationProcess;
     if ("error" in response && response.error.status === 403) {
+      // returning to the same value, i.e. let from let requiresValidation
       // TODO needs to return fallback, not 404 if not found
+      // Could return thread messages, but we don't need to
       let response = await API.fetchProfile(contactEmailAddress)
       if ("error" in response) {
         throw "error"
