@@ -1,26 +1,5 @@
 import { PARAGRAPH, TEXT, LINK, SOFTBREAK } from "./elements"
-type Paragraph = {
-  type: typeof PARAGRAPH,
-  spans: Span[],
-  // TODO remove start
-  start: number
-}
-type Text = {
-  type: typeof TEXT,
-  text: string,
-  // TODO remove start
-  start?: number
-}
-type Link = {
-  type: typeof LINK,
-  title?: string,
-  url: string,
-  // TODO remove start
-  start: number
-}
-
-export type Span = Text | Link
-export type Block = Paragraph
+import type { Block, Span, Paragraph } from "./elements"
 
 export type Note = {
   author: string,
@@ -60,7 +39,8 @@ function parseLine(line: string, offset: number) {
 }
 
 export function parse(draft: string) {
-  const { doc, node } = draft.split(/\n/).reduce(function ({ doc, node, offset }, line) {
+  // TODO remove any
+  const { doc, node } = draft.split(/\n/).reduce(function ({ doc, node, offset }: any, line) {
     if (line.trim() == "") {
       // close node
       if (node.type === PARAGRAPH) {
@@ -78,13 +58,13 @@ export function parse(draft: string) {
       if (node.spans.length === 0) {
         node.spans = node.spans.concat(...parseLine(line, offset))
       } else {
-        node.spans = node.spans.concat({ type: "softbreak" }, ...parseLine(line, offset))
+        node.spans = node.spans.concat({ type: SOFTBREAK }, ...parseLine(line, offset))
       }
     }
     // plus one for the newline
     offset = offset + line.length + 1
     return { doc, node, offset }
-  }, { doc: [], node: false, offset: 0 })
+  }, { doc: [], node: { type: PARAGRAPH, spans: [] }, offset: 0 })
   // close node
   if (node.type === PARAGRAPH) {
     doc.push(node)
@@ -95,7 +75,7 @@ export function parse(draft: string) {
 export function toString(blocks: Block[]): string {
   return blocks.map(function (block) {
     if (block.type === PARAGRAPH) {
-      return block.spans.map(function (span) {
+      return block.spans.map(function (span: Span) {
         if (span.type === TEXT && "text" in span) {
           return span.text
         } else if (span.type === LINK && "title" in span) {
@@ -104,8 +84,6 @@ export function toString(blocks: Block[]): string {
           return " " + span.url + " "
         } else if (span.type === SOFTBREAK) {
           return "\n"
-        } else {
-          throw "what an unexpected span type" + span.type
         }
       }).join("").trim() + "\n"
     } else {
