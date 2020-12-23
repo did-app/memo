@@ -1,17 +1,13 @@
-import type {Block} from "../note/elements"
-import {get, post} from "./client"
+import type { Block } from "../note/elements"
+import { get, post } from "./client"
 
-export type Failure = {error: {status?: number, detail: string}}
-export type Call<T> = Promise<T | Failure>
-const Call = Promise
-// https://github.com/microsoft/TypeScript/issues/32574
-export type Response<T> = T | Failure
 
-export type Identifier = {id: number, emailAddress: string, hasAccount: boolean, greeting: Block[]}
+
+export type Identifier = { id: number, emailAddress: string, hasAccount: boolean, greeting: Block[] }
 // typescript type for anything, so it needs checking
 // unknown is the type we need
 
-function toIdentifier({identifier: raw, greeting}) {
+function toIdentifier({ identifier: raw, greeting }) {
   const identifier = {
     id: raw.id,
     emailAddress: raw.email_address,
@@ -28,12 +24,12 @@ export async function authenticateWithSession(): Call<Identifier> {
 
 export async function authenticateWithCode(code): Call<Identifier> {
   const path = "/authenticate/code"
-  const params = {code}
+  const params = { code }
   const response = await post(path, params)
   return mapData(response, toIdentifier)
 }
 
-export type Block = {type: "paragraph"}
+export type Block = { type: "paragraph" }
 
 export type Contact = {
   id: number,
@@ -42,10 +38,10 @@ export type Contact = {
   threadId: number | null
 }
 
-export async function fetchProfile(id): Call<{greeting: Block[]}> {
+export async function fetchProfile(id): Call<{ greeting: Block[] }> {
   const path = "/identifiers/" + id;
   const response = await get(path)
-  return mapData(response, function(raw) {
+  return mapData(response, function (raw) {
     return {
       greeting: raw.greeting
     }
@@ -55,7 +51,7 @@ export async function fetchProfile(id): Call<{greeting: Block[]}> {
 export async function fetchContact(identifier): Call<Contact> {
   const path = "/relationship/" + identifier;
   const response = await get(path)
-  return mapData(response, function(raw) {
+  return mapData(response, function (raw) {
     return {
       id: raw.contact_id,
       emailAddress: raw.email_address,
@@ -68,32 +64,32 @@ export async function fetchContact(identifier): Call<Contact> {
   })
 }
 
-export type OK = {ok: true}
-function ok(): OK { return {ok: true} }
+export type OK = { ok: true }
+function ok(): OK { return { ok: true } }
 
 export async function saveGreeting(identifier_id: number, blocks: Block[]): Call<OK> {
   const path = "/identifiers/" + identifier_id + "/greeting"
-  const params = {blocks}
+  const params = { blocks }
   const response = await post(path, params)
-  return mapData(response, function(_) {
+  return mapData(response, function (_) {
     return ok();
   })
 }
 
 export async function startRelationship(id: number, counter: number, blocks: Block[]) {
   const path = "/relationships/start"
-  const params = {id, counter, blocks}
+  const params = { id, counter, blocks }
   const response = await post(path, params)
-  return mapData(response, function(_) {
+  return mapData(response, function (_) {
     return null
   })
 }
 
 export async function writeNote(threadId: number, counter: number, blocks: Block[]): Call<null> {
   const path = "/threads/" + threadId + "/write"
-  const params = {counter, blocks}
+  const params = { counter, blocks }
   const response = await post(path, params)
-  return mapData(response, function(_) {
+  return mapData(response, function (_) {
     return null
   })
 }

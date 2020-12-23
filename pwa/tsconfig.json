@@ -1,5 +1,8 @@
 {
-  "include": ["src", "types"],
+  "include": [
+    "src",
+    "types"
+  ],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
@@ -17,6 +20,7 @@
     "resolveJsonModule": true,
     "useDefineForClassFields": true,
     "allowSyntheticDefaultImports": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "strictNullChecks": true
   }
 }

@@ -1,18 +1,18 @@
-import {PARAGRAPH, TEXT, LINK, SOFTBREAK} from "./elements"
+import { PARAGRAPH, TEXT, LINK, SOFTBREAK } from "./elements"
 type Paragraph = {
-  type: PARAGRAPH,
+  type: typeof PARAGRAPH,
   spans: Span[],
   // TODO remove start
   start: number
 }
 type Text = {
-  type: TEXT,
+  type: typeof TEXT,
   text: string,
   // TODO remove start
   start?: number
 }
 type Link = {
-  type: LINK,
+  type: typeof LINK,
   title?: string,
   url: string,
   // TODO remove start
@@ -27,7 +27,7 @@ export type Note = {
   blocks: Block[]
 }
 
-function parseLine(line, offset) {
+function parseLine(line: string, offset: number) {
   // Can't end with |(.+\?) because question capture will catch all middle links
   // Questionmark in the body of a link causes confusion, not good if people are making their own questions
   // const tokeniser = /(?:\[([^\[]+)\]\(([^\(]*)\))|(?:(?:\s|^)(https?:\/\/[\w\d./?=#]+))|(^.+\?)/gm
@@ -42,25 +42,25 @@ function parseLine(line, offset) {
     let range = document.createRange()
 
     if (unmatched) {
-      output.push({type: TEXT, text: unmatched, start})
+      output.push({ type: TEXT, text: unmatched, start })
     }
     if (token[3] !== undefined) {
-      output.push({type: LINK, url: token[3], start})
+      output.push({ type: LINK, url: token[3], start })
     } else if (token[2] !== undefined) {
-      output.push({type: LINK, url: token[2], title: token[1], start})
-    } else  {
+      output.push({ type: LINK, url: token[2], title: token[1], start })
+    } else {
       throw "should be handled"
     }
   }
   const unmatched = line.substring(cursor).trim()
   if (unmatched) {
-    output.push({type: TEXT, text: unmatched})
+    output.push({ type: TEXT, text: unmatched })
   }
   return output
 }
 
-export function parse(draft) {
-  const {doc, node} = draft.split(/\n/).reduce(function ({doc, node, offset}, line) {
+export function parse(draft: string) {
+  const { doc, node } = draft.split(/\n/).reduce(function ({ doc, node, offset }, line) {
     if (line.trim() == "") {
       // close node
       if (node.type === PARAGRAPH) {
@@ -72,19 +72,19 @@ export function parse(draft) {
 
     } else {
       // append line
-      node = node || {type: PARAGRAPH, spans: []}
+      node = node || { type: PARAGRAPH, spans: [] }
       // TODO merge same text
       // Called softbreak from markdown even thought rendered with br
       if (node.spans.length === 0) {
         node.spans = node.spans.concat(...parseLine(line, offset))
       } else {
-        node.spans = node.spans.concat({type: "softbreak"}, ...parseLine(line, offset))
+        node.spans = node.spans.concat({ type: "softbreak" }, ...parseLine(line, offset))
       }
     }
     // plus one for the newline
     offset = offset + line.length + 1
-    return {doc, node, offset}
-  }, {doc: [], node: false, offset: 0})
+    return { doc, node, offset }
+  }, { doc: [], node: false, offset: 0 })
   // close node
   if (node.type === PARAGRAPH) {
     doc.push(node)
@@ -93,9 +93,9 @@ export function parse(draft) {
 }
 
 export function toString(blocks: Block[]): string {
-  return blocks.map(function(block) {
+  return blocks.map(function (block) {
     if (block.type === PARAGRAPH) {
-      return block.spans.map(function(span) {
+      return block.spans.map(function (span) {
         if (span.type === TEXT && "text" in span) {
           return span.text
         } else if (span.type === LINK && "title" in span) {

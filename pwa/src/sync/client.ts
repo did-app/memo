@@ -1,4 +1,13 @@
-export async function get(path): Promise<unknown> {
+export type Failure = {
+  code: "forbidden" | "network failure" | "bad response",
+  detail: string
+}
+export type Call<T> = Promise<T | { error: Failure }>
+const Call = Promise
+// https://github.com/microsoft/TypeScript/issues/32574
+export type Response<T> = T | Failure
+
+export async function get(path: string): Call<{ data: any }> {
   let options = {
     credentials: "include",
     headers: {
@@ -8,7 +17,7 @@ export async function get(path): Promise<unknown> {
   return doFetch(path, options)
 }
 
-export async function post(path, params): Promise<unknown> {
+export async function post(path: string, params: any): Call<{ data: any }> {
   let options = {
     method: "POST",
     credentials: "include",
@@ -21,37 +30,34 @@ export async function post(path, params): Promise<unknown> {
   return doFetch(path, options)
 }
 
-async function doFetch(path, options) {
+// use any because not a public function
+async function doFetch(path: string, options: any): Call<{ data: any }> {
   const url = "__API_ORIGIN__" + path;
-  let {method} = options
-  console.log(`${method} ${url}`);
   try {
     const response = await fetch(url, options);
     if (response.status === 200) {
       return parseJSON(response)
     } else if (response.status === 403) {
-      return {error: {status: 403}}
+      return { error: { code: "forbidden", detail: "Action was forbidden" } }
     } else {
       throw "handle other responses" + response.status
     }
   } catch (e) {
     if (e instanceof TypeError) {
-      const error = {detail: "Network Failure"}
-      return {error}
+      return { error: { code: "network failure", detail: "Network Failure" } }
     } else {
       throw e;
     }
   }
 }
 
-async function parseJSON(response) {
+async function parseJSON(response: Response<any>): Call<{ data: any }> {
   try {
     const data = await response.json();
-    return {data};
+    return { data };
   } catch (e) {
     if (e instanceof SyntaxError) {
-      const error = {detail: "JSON SyntaxError"}
-      return {error}
+      return { error: { code: "bad response", detail: "Invalid JSON response" } }
     } else {
       throw e;
     }
