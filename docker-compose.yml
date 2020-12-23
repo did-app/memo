@@ -2,6 +2,7 @@ version: "3"
 
 volumes:
   client_node_modules:
+  pwa_node_modules:
   _build:
   deps:
   gen:
@@ -9,6 +10,17 @@ volumes:
   deps_glance:
   gen_glance:
 services:
+  pwa:
+    image: node:14.8.0
+    working_dir: "/opt/app"
+    # network_mode doesn't work as expected on windows
+    # network_mode: host
+    ports:
+      - 5000:5000
+    volumes:
+      - ./pwa:/opt/app
+      - pwa_node_modules:/opt/app/node_modules
+    command: bash -c "npm i && npm run start:dev"
   client:
     image: node:14.8.0
     working_dir: "/opt/app"
