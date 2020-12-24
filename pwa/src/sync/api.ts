@@ -3,9 +3,11 @@ import type { Call } from "./client"
 import type { Block } from "../note/elements"
 
 export type Identifier = {
-  id: number,
-  email_address: string,
-  greeting: Block[]
+  greeting: Block[],
+  identifier: {
+    id: number,
+    email_address: string,
+  }
 }
 
 export function authenticateWithCode(code: string): Call<{ data: Identifier }> {
