@@ -6,7 +6,7 @@
   import type { Reference } from "../thread";
   import Composer from "../components/Composer.svelte";
   // TODO rename fragment
-  import NoteComponent from "../components/Note.svelte";
+  import Fragment from "../components/Fragment.svelte";
 
   export let thread: Note[];
   export let contactEmailAddress: string;
@@ -77,6 +77,8 @@
 
   // DOESNT WORK ON ACTIVE message
   function addAnnotation({ detail }: { detail: string }) {
+    console.log(detail);
+
     // const {noteIndex, selection} = detail;
     // if (Range.isCollapsed(selection)) {
     //   const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
@@ -103,14 +105,21 @@
   <!-- TODO pass this message as the notes to the composer -->
   <!-- This goes to a fragment that binds on block -->
   <div class="" bind:this={root}>
-    {#each thread as { blocks }}
-      <NoteComponent
-        {blocks}
-        notes={[]}
-        index={0}
-        author={contactEmailAddress}
-        selection={noteSelection[0]}
-        on:annotate={addAnnotation} />
+    {#each thread as { blocks, author, date }, index}
+      <article
+        id={index.toString()}
+        data-note-index={index}
+        class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+        <header class="ml-12 mb-6 flex text-gray-600">
+          <span class="font-bold">{author}</span>
+          <span class="ml-auto">{date}</span>
+        </header>
+        <Fragment
+          {blocks}
+          notes={[]}
+          selection={noteSelection[0]}
+          on:annotate={addAnnotation} />
+      </article>
     {/each}
   </div>
 {:else}
@@ -123,12 +132,12 @@
 <!-- extract rounding article a a thing -->
 {#if preview}
   <!-- TODO make sure can't always add annotation, or make it work with self -->
-  <NoteComponent
-    blocks={current.blocks}
-    notes={thread}
-    index={thread.length}
-    author={myEmailAddress}
-    selection={undefined}>
+  <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+    <header class="ml-12 mb-6 flex text-gray-600">
+      <span class="font-bold" />
+      <span class="ml-auto">Draft</span>
+    </header>
+    <Fragment blocks={current.blocks} notes={thread} selection={undefined} />
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -171,21 +180,21 @@
         Send
       </button>
     </div>
-  </NoteComponent>
+  </article>
 {:else}
   <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
     <!-- Could do an on submit and catch whats inside -->
     <!-- TODO name previous inside composer -->
-    <Composer
-      bind:annotations
-      notes={thread}
-      bind:draft
-      on:clearAnnotation={clearAnnotation} />
+    <Composer notes={thread} bind:draft on:clearAnnotation={clearAnnotation} />
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
-        <!-- TODO this needs to show your email address, or if in header nothing at all -->
-        <!-- <span class="font-bold text-gray-700 mr-1">From:</span>
-        <input class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" bind:value={contact} type="email" placeholder="Your email address" required> -->
+        <span class="font-bold text-gray-700 mr-1">From:</span>
+        <input
+          class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700"
+          bind:value={myEmailAddress}
+          type="email"
+          placeholder="Your email address"
+          required />
       </div>
       <button
         class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"

@@ -1,6 +1,5 @@
 <script lang="ts">
   import page from "page";
-  import type { Block } from "../note/elements";
   import type { Note } from "../note";
   import { authenticationProcess } from "../sync";
   import * as API from "../sync/api";
@@ -27,21 +26,33 @@
       let myEmailAddress = "";
       let greeting = profileResponse.data.greeting;
       let thread = greeting
-        ? [{ blocks: greeting, author: contactEmailAddress }]
+        ? [{ blocks: greeting, author: contactEmailAddress, date: new Date() }]
         : [];
       return { thread, contactEmailAddress, myEmailAddress };
     } else if ("error" in authResponse) {
       throw "error fetching self";
     } else {
-      if (authResponse.identifier.email_address === contactEmailAddress) {
+      const myEmailAddress = authResponse.identifier.email_address;
+      if (myEmailAddress === contactEmailAddress) {
         page.redirect("/profile");
         throw "redirected";
       } else {
-        let response = await API.fetchContact(contactEmailAddress);
-        if ("error" in response) {
+        let contactResponse = await API.fetchContact(contactEmailAddress);
+        if ("error" in contactResponse) {
           throw "error";
         }
-        throw "todo";
+        let greeting = contactResponse.data.greeting;
+
+        let thread = greeting
+          ? [
+              {
+                blocks: greeting,
+                author: contactEmailAddress,
+                date: new Date(),
+              },
+            ]
+          : [];
+        return { thread, contactEmailAddress, myEmailAddress };
       }
     }
   }

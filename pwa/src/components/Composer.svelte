@@ -2,16 +2,17 @@
   import { createEventDispatcher } from "svelte";
   import * as Thread from "../thread";
   import type { Reference } from "../thread";
-  import type { Block } from "../note/elements";
+  import type { Note } from "../note";
   import BlockComponent from "../components/Block.svelte";
 
   // TODO custom validation on length of blocks not being 1
   export let annotations: { reference: Reference; raw: string }[] = [];
-  export let notes: { blocks: Block[]; author: string }[];
+  export let notes: Note[];
   // export let suggestions = [];
   export let draft = "";
 
   let choices = {};
+  console.log(choices);
 
   function resize(event: Event) {
     const { scrollX, scrollY } = window;
