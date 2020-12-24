@@ -16,7 +16,7 @@
     myEmailAddress: string;
   };
   async function load(handle: string): Promise<Data | Failure> {
-    let contactEmailAddress = emailAddressFor(handle);
+    let contactEmailAddress = handle;
     let authResponse = await authenticationProcess;
     if ("error" in authResponse && authResponse.error.code === "forbidden") {
       // There is no 404 as will always try sending
@@ -44,10 +44,6 @@
         throw "todo";
       }
     }
-  }
-
-  function emailAddressFor(handle: string) {
-    return handle.indexOf("@") === -1 ? handle + "@plummail.co" : handle;
   }
 </script>
 

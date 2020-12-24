@@ -8,8 +8,15 @@
     route = ["profile"];
   });
   router("/:handle", (context) => {
-    route = ["contact", { handle: context.params.handle }];
+    route = ["contact", { handle: context.params.handle + "@plummail.co" }];
   });
+  router("/:domain/:username", (context) => {
+    route = [
+      "contact",
+      { handle: context.params.username + "@" + context.params.domain },
+    ];
+  });
+
   router.start();
 </script>
 
