@@ -31,7 +31,7 @@
   </p>
 </article>
 <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
-  <Composer bind:draft />
+  <Composer notes={[]} bind:draft annotations={[]} />
   <div class="mt-2 pl-12 flex items-center">
     <div class="flex flex-1" />
     <button

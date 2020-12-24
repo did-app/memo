@@ -14,12 +14,7 @@
   <blockquote class=" opacity-50 px-2">
     {#each Thread.followReference(reference, notes) as block, index}
       <div class="">
-        <BlockComponent
-          {block}
-          {index}
-          topLevel={false}
-          {notes}
-          annotations={[]} />
+        <BlockComponent {block} {index} />
       </div>
     {/each}
     <a
@@ -28,12 +23,7 @@
   </blockquote>
   <div class="pl-4">
     {#each blocks as block, index}
-      <BlockComponent
-        {block}
-        {index}
-        topLevel={false}
-        {notes}
-        annotations={[]} />
+      <BlockComponent {block} {index} />
     {/each}
   </div>
 </div>

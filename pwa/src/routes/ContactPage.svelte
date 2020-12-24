@@ -2,6 +2,10 @@
   import { onMount } from "svelte";
   import { parse } from "../note";
   import type { Note } from "../note";
+  import { ANNOTATION } from "../note/elements";
+  import * as Tree from "../note/tree";
+  import { isCollapsed } from "../note/range";
+  import type { Range } from "../note/range";
   import { getSelected } from "../thread/view";
   import type { Reference } from "../thread";
   import Composer from "../components/Composer.svelte";
@@ -35,16 +39,37 @@
     return null;
   }
 
-  // TODO remove any on selected
-  let root: HTMLElement, selected: any;
-  let noteSelection: Record<number, any> = {};
+  let root: HTMLElement;
+  // map to navigate note id and section within that note
+  let noteSelection: Record<
+    number,
+    Record<number, undefined | (() => void)>
+  > = {};
   function handleSelectionChange() {
-    selected = getSelected(root);
-    if (selected.anchor && selected.focus) {
+    const selected = getSelected(root);
+    if (selected && selected.anchor && selected.focus) {
       let { noteIndex: anchorIndex, ...anchor } = selected.anchor;
       let { noteIndex: focusIndex, ...focus } = selected.focus;
       if (anchorIndex === focusIndex) {
-        noteSelection = Object.fromEntries([[anchorIndex, { anchor, focus }]]);
+        noteSelection = Object.fromEntries([
+          [
+            anchorIndex,
+            Object.fromEntries([
+              [
+                anchor.path[0],
+                function () {
+                  // console.log(
+                  //   Tree.extractBlocks(thread[anchorIndex].blocks, {
+                  //     anchor,
+                  //     focus,
+                  //   })[1]
+                  // );
+                  addAnnotation(anchorIndex, { anchor, focus });
+                },
+              ],
+            ]),
+          ],
+        ]);
       } else {
         noteSelection = {};
       }
@@ -76,20 +101,29 @@
   }
 
   // DOESNT WORK ON ACTIVE message
-  function addAnnotation({ detail }: { detail: string }) {
-    console.log(detail);
-
-    // const {noteIndex, selection} = detail;
-    // if (Range.isCollapsed(selection)) {
-    //   const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, path: [selection.anchor.path[0]]}}
-    //   annotations = annotations.concat(annotation)
-    // } else {
-    //   const annotation = {type: ANNOTATION, raw: "", reference: {note: noteIndex, range: selection}}
-    //   annotations = annotations.concat(annotation)
-    // }
+  function addAnnotation(noteIndex: number, range: Range) {
+    if (isCollapsed(range)) {
+      const annotation = {
+        type: ANNOTATION,
+        raw: "",
+        reference: { note: noteIndex, path: [range.anchor.path[0]] },
+      };
+      annotations = annotations.concat(annotation);
+    } else {
+      const annotation = {
+        type: ANNOTATION,
+        raw: "",
+        reference: { note: noteIndex, range: range },
+      };
+      annotations = annotations.concat(annotation);
+    }
   }
 
+  $: console.log(annotations);
+
   function clearAnnotation(event: { detail: number }) {
+    console.log(annotations, "vlearing");
+
     annotations.splice(event.detail, 1);
     annotations = annotations;
   }
@@ -101,33 +135,28 @@
   };
 </script>
 
-{#if thread.length !== 0}
-  <!-- TODO pass this message as the notes to the composer -->
-  <!-- This goes to a fragment that binds on block -->
-  <div class="" bind:this={root}>
-    {#each thread as { blocks, author, date }, index}
-      <article
-        id={index.toString()}
-        data-note-index={index}
-        class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
-        <header class="ml-12 mb-6 flex text-gray-600">
-          <span class="font-bold">{author}</span>
-          <span class="ml-auto">{date}</span>
-        </header>
-        <Fragment
-          {blocks}
-          notes={[]}
-          selection={noteSelection[0]}
-          on:annotate={addAnnotation} />
-      </article>
-    {/each}
-  </div>
-{:else}
-  <h1 class="text-center text-2xl my-4 text-gray-700">
-    Contact
-    <span class="font-bold">{contactEmailAddress}</span>
-  </h1>
-{/if}
+<!-- TODO pass this message as the notes to the composer -->
+<!-- This goes to a fragment that binds on block -->
+<div class="" bind:this={root}>
+  {#each thread as { blocks, author, date }, index}
+    <article
+      id={index.toString()}
+      data-note-index={index}
+      class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+      <header class="ml-12 mb-6 flex text-gray-600">
+        <span class="font-bold">{author}</span>
+        <span class="ml-auto">{date}</span>
+      </header>
+      <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
+      <Fragment {blocks} active={noteSelection[index] || {}} />
+    </article>
+  {:else}
+    <h1 class="text-center text-2xl my-4 text-gray-700">
+      Contact
+      <span class="font-bold">{contactEmailAddress}</span>
+    </h1>
+  {/each}
+</div>
 <!-- If we put preview outside! -->
 <!-- extract rounding article a a thing -->
 {#if preview}
@@ -137,7 +166,7 @@
       <span class="font-bold" />
       <span class="ml-auto">Draft</span>
     </header>
-    <Fragment blocks={current.blocks} notes={thread} selection={undefined} />
+    <Fragment blocks={current.blocks} />
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -185,7 +214,11 @@
   <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
     <!-- Could do an on submit and catch whats inside -->
     <!-- TODO name previous inside composer -->
-    <Composer notes={thread} bind:draft on:clearAnnotation={clearAnnotation} />
+    <Composer
+      notes={thread}
+      bind:draft
+      {annotations}
+      on:clearAnnotation={clearAnnotation} />
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <span class="font-bold text-gray-700 mr-1">From:</span>

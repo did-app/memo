@@ -6,7 +6,7 @@
   import BlockComponent from "../components/Block.svelte";
 
   // TODO custom validation on length of blocks not being 1
-  export let annotations: { reference: Reference; raw: string }[] = [];
+  export let annotations: { reference: Reference; raw: string }[];
   export let notes: Note[];
   // export let suggestions = [];
   export let draft = "";
@@ -41,6 +41,7 @@
   }
 </style>
 
+<!-- TODO add else clause with instruction to add annotations -->
 {#each annotations as { reference }, index}
   <div class="flex my-1">
     <div
@@ -62,12 +63,7 @@
       <blockquote class=" px-2">
         <div class="opacity-50">
           {#each Thread.followReference(reference, notes) as block, index}
-            <BlockComponent
-              {block}
-              {index}
-              topLevel={false}
-              annotations={[]}
-              {notes} />
+            <BlockComponent {block} {index} />
           {/each}
         </div>
         <a
