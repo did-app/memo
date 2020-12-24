@@ -4,7 +4,7 @@
   function emailAddressFor(handle: string) {
     return handle.indexOf("@") === -1 ? handle + "@plummail.co" : handle;
   }
-  console.log(handle);
+  console.log(emailAddressFor(handle));
 </script>
 
 <div>

@@ -1,17 +1,18 @@
 <script type="typescript">
   import { createEventDispatcher } from "svelte";
   import * as Thread from "../thread";
-  import Block from "../components/Block.svelte";
+  import type { Block } from "../note/elements";
+  import BlockComponent from "../components/Block.svelte";
 
   // TODO custom validation on length of blocks not being 1
   export let annotations = [];
-  export let notes = [];
-  export let suggestions = [];
+  export let notes: { blocks: Block[] };
+  // export let suggestions = [];
   export let draft = "";
 
   let choices = {};
 
-  function resize(event) {
+  function resize(event: Event) {
     const { scrollX, scrollY } = window;
     event.target.style.height = "1px";
     event.target.style.height = +event.target.scrollHeight + "px";
@@ -19,7 +20,7 @@
   }
 
   const dispatch = createEventDispatcher();
-  function clearAnnotation(index) {
+  function clearAnnotation(index: number) {
     dispatch("clearAnnotation", index);
   }
 </script>
@@ -54,8 +55,8 @@
     <div class="w-full border-purple-500 border-l-4">
       <blockquote class=" px-2">
         <div class="opacity-50">
-          {#each Thread.followReference(reference, notes) as { type, ...data }, index}
-            <Block {type} {data} {index} />
+          {#each Thread.followReference(reference, notes) as block, index}
+            <BlockComponent {block} {index} />
           {/each}
         </div>
         <a
@@ -79,7 +80,7 @@
   on:input={resize}
   placeholder="Your message ..." />
 <!-- TODO remove for now -->
-{#each suggestions as _suggestion, index}
+<!-- {#each suggestions as _suggestion, index}
   <div class="pl-12 my-1">
     Ask question to
     <select bind:value={choices[index].ask}>
@@ -88,4 +89,4 @@
       <option value="bill">Bill</option>
     </select>
   </div>
-{/each}
+{/each} -->

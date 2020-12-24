@@ -1,23 +1,24 @@
 <script lang="typescript">
-  import { TEXT, LINK } from "../note/elements";
+  import { TEXT, LINK, SOFTBREAK } from "../note/elements";
+  import type { Span } from "../note/elements";
   import Text from "./Text.svelte";
   import Link from "./Link.svelte";
   import Glance from "../glance/Glance.svelte";
-  export let type;
-  export let data;
-  export let index: string;
+
+  export let span: Span;
+  export let index: number;
   export let unfurled: boolean;
 </script>
 
-{#if type === TEXT}
-  <Text {...data} {index} />
-{:else if type === LINK}
+{#if span.type === TEXT}
+  <Text text={span.text} {index} />
+{:else if span.type === LINK}
   <!-- TODO Need to wrap to get an index -->
   {#if unfurled}
-    <Glance href={data.url} text={data.title} />
+    <Glance href={span.url} text={span.title} />
   {:else}
     <span class="border-b hover:border-purple-700 mx-1 whitespace-no-wrap">
-      <Link {...data} {index} />
+      <Link url={span.url} title={span.title} {index} />
     </span>
   {/if}
-{:else if type === 'softbreak'}<br />{/if}
+{:else if span.type === SOFTBREAK}<br />{/if}

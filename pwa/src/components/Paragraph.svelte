@@ -1,19 +1,20 @@
 <script lang="typescript">
-  import Span from "./Span.svelte";
-  import Block from "./Block.svelte";
-  export let spans;
-  export let index;
+  import type { Span } from "../note/elements";
+  import SpanComponent from "./Span.svelte";
+  // import BlockComponent from "./Block.svelte";
+  export let spans: Span[];
+  export let index: number;
   export let topLevel = false;
-  export let annotations = [];
-  export let action;
+  // export let annotations = [];
+  // export let action;
 
-  import { createEventDispatcher } from "svelte";
+  // import { createEventDispatcher } from "svelte";
 
-  const dispatch = createEventDispatcher();
+  // const dispatch = createEventDispatcher();
 
-  function handleMouseDown() {
-    dispatch("annotate", action);
-  }
+  // function handleMouseDown() {
+  //   dispatch("annotate", action);
+  // }
 </script>
 
 <!-- TODO this becomes a section wrapper for top level or, part of block -->
@@ -21,11 +22,12 @@
 <div>
   <div class="flex">
     {#if topLevel}
-      <div
-        class="w-8 m-2 cursor-pointer flex-none"
-        on:mousedown={handleMouseDown}>
+      <div class="w-8 m-2 cursor-pointer flex-none">
+        <!-- on:mousedown={handleMouseDown} -->
+        <!-- annotations.length === 0 && action === undefined -->
+        <!-- for opacity zero -->
         <svg
-          class:opacity-0={annotations.length === 0 && action === undefined}
+          class:opacity-0={true}
           class="w-full p-1 fill-current text-gray-700"
           enable-background="new 0 0 512 512"
           viewBox="0 0 512 512"
@@ -42,17 +44,17 @@
       </div>
     {/if}
     <p class="my-2 w-full" data-block-index={index}>
-      {#each spans as { type, ...data }, index}
-        <Span {type} {data} {index} unfurled={spans.length === 1} />
+      {#each spans as span, index}
+        <SpanComponent {span} {index} unfurled={spans.length === 1} />
       {/each}
     </p>
   </div>
-  {#each annotations as { blocks, author, note }}
+  <!-- {#each annotations as { blocks, author, note }}
     <blockquote class="my-1 ml-12 border-gray-600 border-l-4 opacity-50 px-2">
-      {#each blocks as { type, ...data }, index}
-        <Block {type} {data} {index} />
+      {#each blocks as span, index}
+        <Block {span} {index} />
       {/each}
       <a class="text-purple-800" href="#{note}"><small>{author}</small></a>
     </blockquote>
-  {/each}
+  {/each} -->
 </div>

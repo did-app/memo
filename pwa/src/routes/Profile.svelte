@@ -1,14 +1,15 @@
 <script lang="ts">
   import { authenticationProcess } from "../sync";
   import { parse, toString } from "../note";
+  import type { Block } from "../note/elements";
   import * as API from "../sync/api";
-  import type { Identifier } from "../sync/api";
   import Composer from "../components/Composer.svelte";
 
   // blocks to string
   let draft = "";
-  let blocks = [];
-  let me: Identifier;
+  let blocks: Block[] = [];
+  let id: number;
+  let emailAddress: string;
 
   // TODO signin and Error
   (async function run() {
@@ -16,15 +17,16 @@
     if ("error" in response) {
       throw "Profile not found";
     }
-    me = response;
-    draft = toString(me.greeting);
+    id = response.id;
+    emailAddress = response.email_address;
+    draft = toString(response.greeting);
   })();
   $: (function () {
     blocks = parse(draft);
   })();
 
   async function saveGreeting(): Promise<null> {
-    let response = await API.saveGreeting(me.id, blocks);
+    let response = await API.saveGreeting(id, blocks);
     if ("error" in response) {
       throw "failed to save greeting";
     }
@@ -35,8 +37,8 @@
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
   <article
     class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
-    {#if me}
-      <h1 class="text-2xl">Hi {me.emailAddress}</h1>
+    {#if emailAddress}
+      <h1 class="text-2xl">Hi {emailAddress}</h1>
     {:else}
       <h1 class="text-2xl">Loading profile</h1>
     {/if}

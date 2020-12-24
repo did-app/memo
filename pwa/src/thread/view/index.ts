@@ -10,38 +10,40 @@ function getSelection(): Selection {
 const domSelection = getSelection();
 
 // TODO could check with root element
-export function getSelected(root) {
+export function getSelected(root: HTMLElement) {
   const domRange = domSelection.getRangeAt(0)
   if (!domRange) {
     return undefined
   }
 
-  const {startContainer, startOffset, endContainer, endOffset} = domRange;
+  const { startContainer, startOffset, endContainer, endOffset } = domRange;
   const startPath = root.contains(startContainer) ? pathFromNode(startContainer) : undefined;
   const endPath = root.contains(endContainer) ? pathFromNode(endContainer) : undefined;
 
-  const anchor = startPath ? {...startPath, offset: startOffset} : undefined
-  const focus = endPath ? {...endPath, offset: endOffset} : undefined
-  return {anchor, focus}
+  const anchor = startPath ? { ...startPath, offset: startOffset } : undefined
+  const focus = endPath ? { ...endPath, offset: endOffset } : undefined
+  return { anchor, focus }
 }
 
-function leafElement(node) {
-  return node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement
+function leafElement(node: Node): HTMLElement {
+  // FIXME, is this bad
+  let temp: any = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement
+  return temp
 }
 
-function pathFromNode(node) {
+function pathFromNode(node: Node) {
   const path: number[] = []
 
   let element = leafElement(node)
   while (element) {
-    const {spanIndex, blockIndex, noteIndex} = element.dataset
+    const { spanIndex, blockIndex, noteIndex } = element.dataset
 
     if (spanIndex !== undefined) {
       path.unshift(parseInt(spanIndex))
     } else if (blockIndex !== undefined) {
       path.unshift(parseInt(blockIndex))
     } else if (noteIndex !== undefined) {
-      return {noteIndex: parseInt(noteIndex), path}
+      return { noteIndex: parseInt(noteIndex), path }
     }
 
     let parent = element.parentElement
