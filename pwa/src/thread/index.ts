@@ -4,7 +4,7 @@ import * as Tree from "../note/tree"
 // discussion/conversation has contributions
 // thread has many messages/posts/notes/memo/entry/contribution
 
-type Reference = { note: number, range: Range } | { note: number, path: number[] }
+export type Reference = { note: number, range: Range } | { note: number, path: number[] }
 
 // thread has many notes
 // A note has many blocks and spans in a tree

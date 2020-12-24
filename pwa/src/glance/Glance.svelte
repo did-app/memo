@@ -2,7 +2,7 @@
   import Page from "./Page.svelte";
   import ImageReel from "./ImageReel.svelte";
   export let href: string;
-  export let text: string;
+  export let text: string | undefined;
 
   async function fetchPreview(href: string) {
     let url = new URL(href, window.location.origin);

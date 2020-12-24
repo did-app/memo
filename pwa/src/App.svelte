@@ -4,6 +4,9 @@
   import router from "page";
 
   let route: any;
+  router("/profile", (_) => {
+    route = ["profile"];
+  });
   router("/:handle", (context) => {
     route = ["contact", { handle: context.params.handle }];
   });

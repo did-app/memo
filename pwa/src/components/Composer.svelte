@@ -1,12 +1,13 @@
 <script type="typescript">
   import { createEventDispatcher } from "svelte";
   import * as Thread from "../thread";
+  import type { Reference } from "../thread";
   import type { Block } from "../note/elements";
   import BlockComponent from "../components/Block.svelte";
 
   // TODO custom validation on length of blocks not being 1
-  export let annotations = [];
-  export let notes: { blocks: Block[] };
+  export let annotations: { reference: Reference; raw: string }[] = [];
+  export let notes: { blocks: Block[]; author: string }[];
   // export let suggestions = [];
   export let draft = "";
 
@@ -14,8 +15,12 @@
 
   function resize(event: Event) {
     const { scrollX, scrollY } = window;
-    event.target.style.height = "1px";
-    event.target.style.height = +event.target.scrollHeight + "px";
+    let target = event.target as HTMLElement;
+    if (!target) {
+      throw "There should always be a target";
+    }
+    target.style.height = "1px";
+    target.style.height = +target.scrollHeight + "px";
     window.scroll(scrollX, scrollY);
   }
 
@@ -56,7 +61,7 @@
       <blockquote class=" px-2">
         <div class="opacity-50">
           {#each Thread.followReference(reference, notes) as block, index}
-            <BlockComponent {block} {index} />
+            <BlockComponent {block} {index} topLevel={false} annotations={[]} />
           {/each}
         </div>
         <a

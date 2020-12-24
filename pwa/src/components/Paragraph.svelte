@@ -1,11 +1,15 @@
 <script lang="typescript">
   import type { Span } from "../note/elements";
+  import type { Reference } from "../thread";
   import SpanComponent from "./Span.svelte";
   // import BlockComponent from "./Block.svelte";
   export let spans: Span[];
   export let index: number;
   export let topLevel = false;
-  // export let annotations = [];
+  // TODO this should be a read annotation
+  export let annotations: { reference: Reference; raw: string }[] = [];
+  console.log(annotations);
+
   // export let action;
 
   // import { createEventDispatcher } from "svelte";
