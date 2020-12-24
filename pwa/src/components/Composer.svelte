@@ -63,7 +63,7 @@
       <blockquote class=" px-2">
         <div class="opacity-50">
           {#each Thread.followReference(reference, notes) as block, index}
-            <BlockComponent {block} {index} />
+            <BlockComponent {block} {index} thread={notes} />
           {/each}
         </div>
         <a

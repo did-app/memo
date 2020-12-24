@@ -2,11 +2,12 @@
   import BlockComponent from "./Block.svelte";
   // import { ANNOTATION } from "../note/elements";
   import type { Block } from "../note/elements";
+  import type { Note } from "../note";
   // import type { Reference } from "../thread";
 
   export let blocks: Block[] = [];
   export let active: Record<number, undefined | (() => void)> = {};
-  // export let notes: Note[];
+  export let thread: Note[];
 
   // function annotationsForNote(notes: Note[], index: number) {
   //   // TODO this needs to do author
@@ -70,7 +71,7 @@
         </g></svg>
     </div>
 
-    <BlockComponent {block} {index} />
+    <BlockComponent {block} {index} {thread} />
   </div>
   <!-- </div> -->
   <!-- {#each annotations as { blocks, author, note }}

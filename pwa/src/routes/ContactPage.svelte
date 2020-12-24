@@ -148,7 +148,7 @@
         <span class="ml-auto">{date}</span>
       </header>
       <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
-      <Fragment {blocks} active={noteSelection[index] || {}} />
+      <Fragment {blocks} active={noteSelection[index] || {}} {thread} />
     </article>
   {:else}
     <h1 class="text-center text-2xl my-4 text-gray-700">
@@ -166,7 +166,7 @@
       <span class="font-bold" />
       <span class="ml-auto">Draft</span>
     </header>
-    <Fragment blocks={current.blocks} />
+    <Fragment blocks={current.blocks} {thread} />
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->
