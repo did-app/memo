@@ -14,7 +14,7 @@ export async function fetchConversation(id) {
 
 export async function addParticipant(id, emailAddress) {
   const path = "/c/" + id + "/participant"
-  return await post(path, {email_address: emailAddress});
+  return await post(path, { email_address: emailAddress });
 }
 
 export async function writeMessage(id, content, conclusion) {
@@ -45,12 +45,10 @@ export async function setNotification(id, notify) {
   return await post(path, { notify });
 }
 
-export async function requestEmailAuthentication(emailAddress) {
-  return await post("/authenticate/email", {email_address: emailAddress});
-}
+
 
 export async function deletePin(conversationId, pinId) {
-  return await post("/c/" + conversationId + "/delete_pin", {pin_id: pinId});
+  return await post("/c/" + conversationId + "/delete_pin", { pin_id: pinId });
 }
 
 async function get(path) {
@@ -79,7 +77,7 @@ async function post(path, params) {
 async function myFetch(path, options) {
   let url = "__API_ORIGIN__" + path;
   let r = await doFetch(url, options);
-  return r.asyncFlatMap(async function(response) {
+  return r.asyncFlatMap(async function (response) {
     let status = response.status;
     if (status === 200) {
       return await parseJSON(response)
@@ -88,11 +86,11 @@ async function myFetch(path, options) {
       return OK({})
     } else if (status === 422) {
       // TODO need to create a client error type with all the same fields
-      let error = (await parseJSON(response)).unwrapOr({detail: "Bad response from server"})
+      let error = (await parseJSON(response)).unwrapOr({ detail: "Bad response from server" })
       error.status = 422
       return Fail(error)
     } else if (status === 403) {
-      let error = (await parseJSON(response)).unwrapOr({detail: "Forbidden reponse from server"})
+      let error = (await parseJSON(response)).unwrapOr({ detail: "Forbidden reponse from server" })
       error.status = 403
       return Fail(error)
     } else {
@@ -103,7 +101,7 @@ async function myFetch(path, options) {
 }
 
 async function doFetch(url, options) {
-  let {method} = options
+  let { method } = options
   console.log(`${method} ${url}`);
   try {
     const response = await fetch(url, options);

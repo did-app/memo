@@ -19,6 +19,11 @@ export function authenticateWithSession(): Call<{ data: Identifier }> {
   const path = "/authenticate/session"
   return get(path)
 }
+export function authenticateWithEmail(emailAddress: string) {
+  const path = "/authenticate/email"
+  const params = { email_address: emailAddress }
+  return post(path, params);
+}
 
 export function saveGreeting(identifier_id: number, blocks: Block[]): Call<{ data: unknown }> {
   const path = "/identifiers/" + identifier_id + "/greeting"

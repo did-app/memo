@@ -3,7 +3,7 @@
   import Profile from "./routes/Profile.svelte";
   import router from "page";
 
-  let route: any;
+  let route: any = [];
   router("/profile", (_) => {
     route = ["profile"];
   });
@@ -17,6 +17,6 @@
   <Contact {...route[1]} />
 {:else if route[0] === 'profile'}
   <Profile />
-
-  <p>no route</p>
+{:else}
+  <p>no route {JSON.stringify(route)}</p>
 {/if}

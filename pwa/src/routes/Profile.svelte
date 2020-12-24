@@ -4,38 +4,54 @@
   import type { Block } from "../note/elements";
   import * as API from "../sync/api";
   import Composer from "../components/Composer.svelte";
+  import SignIn from "../components/SignIn.svelte";
+  import ProfilePage from "./ProfilePage.svelte";
 
-  // blocks to string
-  let draft = "";
-  let blocks: Block[] = [];
-  let id: number;
-  let emailAddress: string;
+  // // blocks to string
+  // let draft = "";
+  // let blocks: Block[] = [];
+  // let id: number;
+  // let emailAddress: string;
 
   // TODO signin and Error
-  (async function run() {
-    let response = await authenticationProcess;
-    if ("error" in response) {
-      throw "Profile not found";
-    }
-    id = response.id;
-    emailAddress = response.email_address;
-    draft = toString(response.greeting);
-  })();
-  $: (function () {
-    blocks = parse(draft);
-  })();
+  // Don't use {#async } because it's not easy to do retries in HTML blocks
+  // (async function run() {
+  //   let response = await authenticationProcess;
+  //   if ("error" in response) {
+  //     throw "Profile not found";
+  //   }
+  //   id = response.id;
+  //   emailAddress = response.email_address;
+  //   draft = toString(response.greeting);
+  // })();
+  // $: (function () {
+  //   blocks = parse(draft);
+  // })();
 
-  async function saveGreeting(): Promise<null> {
-    let response = await API.saveGreeting(id, blocks);
-    if ("error" in response) {
-      throw "failed to save greeting";
-    }
-    return null;
-  }
+  // async function saveGreeting(): Promise<null> {
+  //   let response = await API.saveGreeting(id, blocks);
+  //   if ("error" in response) {
+  //     throw "failed to save greeting";
+  //   }
+  //   return null;
+  // }
 </script>
 
+<!-- Put the sign in over the loading screen TODO -->
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-  <article
+  {#await authenticationProcess}
+    loading
+  {:then response}
+    {#if 'error' in response && response.error.code === 'forbidden'}
+      <SignIn />
+    {:else if 'error' in response}
+      unknown error
+      {JSON.stringify(response.error)}
+    {:else}
+      <ProfilePage id={response.id} />
+    {/if}
+  {/await}
+  <!-- <article
     class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
     {#if emailAddress}
       <h1 class="text-2xl">Hi {emailAddress}</h1>
@@ -50,11 +66,7 @@
   <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
     <Composer annotations={[]} notes={[]} bind:draft />
     <div class="mt-2 pl-12 flex items-center">
-      <div class="flex flex-1">
-        <!-- TODO this needs to show your email address, or if in header nothing at all -->
-        <!-- <span class="font-bold text-gray-700 mr-1">From:</span>
-        <input class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" bind:value={contact} type="email" placeholder="Your email address" required> -->
-      </div>
+      <div class="flex flex-1" />
       <button
         class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
         on:click={saveGreeting}>
@@ -71,6 +83,5 @@
         Save
       </button>
     </div>
-  </article>
-  {JSON.stringify(blocks)}
+  </article> -->
 </main>
