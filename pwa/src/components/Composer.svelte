@@ -61,7 +61,12 @@
       <blockquote class=" px-2">
         <div class="opacity-50">
           {#each Thread.followReference(reference, notes) as block, index}
-            <BlockComponent {block} {index} topLevel={false} annotations={[]} />
+            <BlockComponent
+              {block}
+              {index}
+              topLevel={false}
+              annotations={[]}
+              {notes} />
           {/each}
         </div>
         <a

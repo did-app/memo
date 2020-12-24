@@ -1,3 +1,5 @@
+import type { Reference } from "../thread"
+
 export const PARAGRAPH = "paragraph";
 export const TEXT = "text";
 export const LINK = "link";
@@ -24,9 +26,15 @@ export type Link = {
   start: number
 }
 
+export type Annotation = {
+  type: typeof ANNOTATION,
+  reference: Reference,
+  blocks: Block[]
+}
+
 export type Softbreak = {
   type: typeof SOFTBREAK
 }
 
 export type Span = Text | Link | Softbreak
-export type Block = Paragraph
+export type Block = Paragraph | Annotation

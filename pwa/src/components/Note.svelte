@@ -1,13 +1,16 @@
 <script lang="typescript">
   import BlockComponent from "./Block.svelte";
+  import { ANNOTATION } from "../note/elements";
   import type { Block } from "../note/elements";
   import type { Range } from "../note/range";
+  import type { Note } from "../note";
+  import type { Reference } from "../thread";
 
   export let blocks: Block[] = [];
   export let author: string;
-  export let notes: { blocks: Block[] };
+  export let notes: Note[];
   export let index: number;
-  export let selection: Range;
+  export let selection: Range | undefined;
 
   let selectRange = {};
   $: if (selection) {
@@ -19,16 +22,16 @@
   }
   console.log(selectRange);
 
-  // function annotationsForNote(notes, index) {
+  // function annotationsForNote(notes: Note[], index: number) {
   //   // TODO this needs to do author
   //   return notes
   //     .map(function ({ blocks, author }, noteId) {
   //       return blocks
-  //         .filter(function ({ type, reference }) {
+  //         .filter(function (block) {
   //           return (
-  //             type === "annotation" &&
-  //             reference.note === index &&
-  //             reference.path !== undefined
+  //             block.type === ANNOTATION &&
+  //             block.reference.note === index &&
+  //             "path" in block.reference
   //           );
   //         })
   //         .map(function ({ reference, blocks }) {
@@ -47,7 +50,7 @@
   //     }, {});
   //   // This group by needs to happen after flat
   // }
-  // let annotations;
+  // let annotations: { reference: Reference; raw: string }[];
   // $: annotations = annotationsForNote(notes, index);
 </script>
 
@@ -60,7 +63,13 @@
   </header>
   <div data-note-index={index}>
     {#each blocks as block, index}
-      <BlockComponent {block} {index} {notes} topLevel={true} on:annotate />
+      <BlockComponent
+        {block}
+        {index}
+        {notes}
+        annotations={[]}
+        topLevel={true}
+        on:annotate />
     {/each}
     <!-- action={selectRange[index]} -->
     <!-- annotations={annotations[index] || []} -->
