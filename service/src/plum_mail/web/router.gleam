@@ -167,8 +167,13 @@ pub fn route(
         assert Ok(greeting) = dynamic.element(row, 0)
         dynamic.unsafe_coerce(greeting)
       }
-      try [greeting] = run_sql.execute(sql, args, mapper)
-      let data = json.object([tuple("greeting", json.string(greeting))])
+      try db_response = run_sql.execute(sql, args, mapper)
+      let greeting = 
+      case db_response {
+        [greeting] -> greeting
+        [] -> json.null()
+      }
+      let data = json.object([tuple("greeting", greeting)])
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok()

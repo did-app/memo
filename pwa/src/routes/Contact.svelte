@@ -25,9 +25,10 @@
         return { error: true };
       }
       let myEmailAddress = "";
-      let thread = [
-        { blocks: profileResponse.data.greeting, author: contactEmailAddress },
-      ];
+      let greeting = profileResponse.data.greeting;
+      let thread = greeting
+        ? [{ blocks: greeting, author: contactEmailAddress }]
+        : [];
       return { thread, contactEmailAddress, myEmailAddress };
     } else if ("error" in authResponse) {
       throw "error fetching self";

@@ -9,7 +9,9 @@
     if (url.origin === window.location.origin) {
       return { preview: "plain" };
     } else {
-      let r = await fetch("__GLANCE_ORIGIN__/?" + href);
+      let r = await fetch(
+        import.meta.env.SNOWPACK_PUBLIC_GLANCE_ORIGIN + "/?" + href
+      );
 
       const { preview } = await r.json();
       return preview;

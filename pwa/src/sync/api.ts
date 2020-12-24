@@ -39,12 +39,12 @@ export function saveGreeting(identifier_id: number, blocks: Block[]): Call<{ dat
 
 // identifier discovery
 
-export function fetchProfile(email_address: string): Call<{ data: { greeting: Block[] } }> {
+export function fetchProfile(email_address: string): Call<{ data: { greeting: Block[] | null } }> {
   const path = "/identifiers/" + email_address
   return get(path)
 }
 
-export function fetchContact(email_address: string): Call<{ data: { greeting: Block[] } }> {
+export function fetchContact(email_address: string): Call<{ data: { greeting: Block[] | null } }> {
   const path = "/relationship/" + email_address
   return get(path)
 }

@@ -3,7 +3,6 @@
   import { parse } from "../note";
   import type { Note } from "../note";
   import { getSelected } from "../thread/view";
-  // import type {Range} from "../note/range";
   import type { Reference } from "../thread";
   import Composer from "../components/Composer.svelte";
   // TODO rename fragment
@@ -36,7 +35,6 @@
     return null;
   }
 
-  // TODO deduplicate in fragment
   // TODO remove any on selected
   let root: HTMLElement, selected: any;
   let noteSelection: Record<number, any> = {};
