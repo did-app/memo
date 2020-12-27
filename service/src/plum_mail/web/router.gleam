@@ -214,11 +214,9 @@ pub fn route(
       let data =
         json.object([
           // don't need identifier id, do need profile/welcome information
-          tuple("thread_id", json.nullable(relationship.thread_id, json.int)),
-          tuple("contact_id", json.nullable(relationship.contact_id, json.int)),
           tuple(
-            "introduction",
-            json.nullable(relationship.introduction, json.string),
+            "greeting",
+            relationship.greeting
           ),
         ])
       http.response(200)

@@ -17,6 +17,7 @@
   async function load(handle: string): Promise<Data | Failure> {
     let contactEmailAddress = handle;
     let authResponse = await authenticationProcess;
+
     if ("error" in authResponse && authResponse.error.code === "forbidden") {
       // There is no 404 as will always try sending
       let profileResponse = await API.fetchProfile(contactEmailAddress);

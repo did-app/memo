@@ -3,7 +3,7 @@ import type { Call } from "./client"
 import type { Block } from "../note/elements"
 
 export type Identifier = {
-  greeting: Block[],
+  greeting: Block[] | null,
   identifier: {
     id: number,
     email_address: string,

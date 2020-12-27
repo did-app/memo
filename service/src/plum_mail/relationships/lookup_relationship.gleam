@@ -3,39 +3,48 @@ import gleam/io
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/pgo
+import gleam/json.{Json}
 import plum_mail/authentication.{EmailAddress, Identifier}
 import plum_mail/run_sql
 
 // contact is one end of a relationship
 pub type Contact {
   Contact(
-    contact_id: Option(Int),
-    thread_id: Option(Int),
+    // id: Option(Int),
+    // thread_id: Option(Int),
     // what do we call the gatekeeper message
-    introduction: Option(String),
+    // Note Json is nullable
+    greeting: Json,
   )
 }
 
 pub fn execute(identifier_id, email_address: EmailAddress) {
-  let sql = "SELECT id, email_address FROM identifiers WHERE email_address = $1"
+  let sql = "SELECT id, email_address, greeting FROM identifiers WHERE email_address = $1"
   let args = [pgo.text(email_address.value)]
 
-  try db_result = run_sql.execute(sql, args, authentication.row_to_identifier)
-
-  let introduction = lookup_introduction(email_address)
+  try db_result = run_sql.execute(sql, args, fn(row) {
+      assert Ok(id) = dynamic.element(row, 0)
+      assert Ok(id) = dynamic.int(id)
+      // assert Ok(email_address) = dynamic.element(row, 1)
+      // assert Ok(email_address) = dynamic.string(email_address)
+      // assert Ok(email_address) = validate_email(email_address)
+      assert Ok(greeting) = dynamic.element(row, 2)
+      let greeting: Json = dynamic.unsafe_coerce(greeting)
+      tuple(id, greeting)
+  })
 
   case list.head(db_result) {
-    Error(Nil) -> Ok(Contact(None, None, None))
-    Ok(Identifier(id: id, ..)) if id == identifier_id ->
+    Error(Nil) -> Ok(Contact(json.null()))
+    Ok(tuple(contact_id, _greeting)) if contact_id == identifier_id ->
       todo("talking about self")
-    Ok(contact) -> {
+    Ok(tuple(contact_id, greeting)) -> {
       let sql =
         "
           SELECT thread_id FROM pairs
           WHERE pairs.lower_identifier_id IN ($1, $2)
           AND pairs.upper_identifier_id IN ($1, $2)
           "
-      let args = [pgo.int(identifier_id), pgo.int(contact.id)]
+      let args = [pgo.int(identifier_id), pgo.int(contact_id)]
       try db_result =
         run_sql.execute(
           sql,
@@ -47,51 +56,11 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
           },
         )
       case list.head(db_result) {
-        Error(Nil) -> Ok(Contact(Some(contact.id), None, introduction))
+        Error(Nil) -> Ok(Contact(greeting))
         Ok(thread_id) ->
-          Ok(Contact(Some(contact.id), Some(thread_id), introduction))
+          Ok(Contact(greeting))
       }
     }
   }
 }
 
-pub fn lookup_introduction(email_address) {
-  case email_address.value {
-    "peter@plummail.co" ->
-      Some(
-        "Hello
-
-Thanks for reaching out
-
-I'm currently trying to take control of my communication.
-Please may I ask you consider the following in your message
-
-- Be explicit about if you need a reply, and how quickly.
-- If I don't know you, share a link to your website, bio or twitter
-- Recruiters, I'm very happy building [Plum Mail](https://plummail.co) and not looking for new opportunities.
-
-Cheers, Peter",
-      )
-    // TODO change to blocs
-    // TODO remove the assumption that you got bounced via an email.
-    "richard@plummail.co" ->
-      Some(
-        "Hi,
-
-Thanks for emailing me. Have we met?
-
-I don't yet have your email (or any idea you even sent one) because Plum Mail has it on ice until we establish who you are.
-Honestly this is just the best way to deal with spam.
-
-Please can you tell me something about you that we can relate over?
-I would also love to know where you found me.
-
-I'm pretty fussy about who gets into my inbox, don't hate me, it's just who I am.
-
-Speak soon and thank you,
-
-Richard",
-      )
-    _ -> None
-  }
-}

@@ -5,9 +5,9 @@
   import Composer from "../components/Composer.svelte";
   export let id: number;
   export let emailAddress: string;
-  export let greeting: Block[];
+  export let greeting: Block[] | null;
 
-  let draft = toString(greeting);
+  let draft = toString(greeting || []);
   let blocks: Block[] = [];
   type SaveStatus = "available" | "working" | "suceeded" | "failed";
   let saveStatus: SaveStatus = "available";
