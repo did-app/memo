@@ -17,7 +17,7 @@ export async function get(path: string): Call<{ data: any }> {
   return doFetch(path, options)
 }
 
-export async function post(path: string, params: any): Call<{ data: any }> {
+export async function post(path: string, params: object): Call<{ data: any }> {
   let options = {
     method: "POST",
     credentials: "include",

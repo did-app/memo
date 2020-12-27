@@ -18,6 +18,14 @@
     let contactEmailAddress = handle;
     let authResponse = await authenticationProcess;
 
+    // Contact Page
+    // API.fetchContact
+    // {identifier: {id, emailAddress, greeting}, {}}
+    // could redirect to thread page but we want to show thread plus contact information
+    // Why would we ever want to show direct thread without contact information?
+    // But linked threads will have a thread id
+    // but that could be nested under the original /contact/name/linked/1
+    // Greeting Page
     if ("error" in authResponse && authResponse.error.code === "forbidden") {
       // There is no 404 as will always try sending
       let profileResponse = await API.fetchProfile(contactEmailAddress);
@@ -68,6 +76,7 @@
     {:else}
       <ContactPage
         thread={response.thread}
+        threadId={undefined}
         contactEmailAddress={response.contactEmailAddress}
         myEmailAddress={response.myEmailAddress} />
     {/if}

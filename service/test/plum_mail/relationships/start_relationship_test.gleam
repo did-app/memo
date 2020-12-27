@@ -9,17 +9,17 @@ pub fn successfully_start_relationship_test() {
   assert Ok(user) = support.generate_identifier("example.test")
   assert Ok(other) = support.generate_identifier("example.test")
 
-  let json =
-    json.object([
-      tuple(
-        "blocks",
-        json.list([json.object([tuple("type", json.string("paragraph"))])]),
-      ),
-    ])
-  // assert Ok(params)
-  let params = start_relationship.Params(other.id, dynamic.from(json), 0)
-  assert Ok(thread_id) =
-    start_relationship.execute(params, user.id)
-    |> io.debug()
+  // let json =
+  //   json.object([
+  //     tuple(
+  //       "blocks",
+  //       json.list([json.object([tuple("type", json.string("paragraph"))])]),
+  //     ),
+  //   ])
+  // // assert Ok(params)
+  // let params = start_relationship.Params(other.id, dynamic.from(json), 0)
+  // assert Ok(thread_id) =
+  //   start_relationship.execute(params, user.id)
+  //   |> io.debug()
   todo
 }

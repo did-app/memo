@@ -168,8 +168,7 @@ pub fn route(
         dynamic.unsafe_coerce(greeting)
       }
       try db_response = run_sql.execute(sql, args, mapper)
-      let greeting = 
-      case db_response {
+      let greeting = case db_response {
         [greeting] -> greeting
         [] -> json.null()
       }
@@ -214,10 +213,7 @@ pub fn route(
       let data =
         json.object([
           // don't need identifier id, do need profile/welcome information
-          tuple(
-            "greeting",
-            relationship.greeting
-          ),
+          tuple("greeting", relationship.greeting),
         ])
       http.response(200)
       |> web.set_resp_json(data)
@@ -234,19 +230,19 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
-    ["threads", thread_id, "post"] -> {
-      assert Ok(thread_id) = int.parse(thread_id)
-      try raw = acl.parse_json(request)
-      try counter = acl.required(raw, "counter", acl.as_int)
-      assert Ok(content) = dynamic.field(raw, dynamic.from("content"))
-      try author_id = web.identify_client(request, config)
-      // TODO a participation thing again
-      try notes = thread.write_note(thread_id, counter, author_id, content)
-      let data = json.object([])
-      http.response(200)
-      |> web.set_resp_json(data)
-      |> Ok
-    }
+    ["threads", thread_id, "post"] ->
+      // assert Ok(thread_id) = int.parse(thread_id)
+      // try raw = acl.parse_json(request)
+      // try counter = acl.required(raw, "counter", acl.as_int)
+      // assert Ok(content) = dynamic.field(raw, dynamic.from("content"))
+      // try author_id = web.identify_client(request, config)
+      // // TODO a participation thing again
+      // try notes = thread.write_note(thread_id, counter, author_id, content)
+      // let data = json.object([])
+      // http.response(200)
+      // |> web.set_resp_json(data)
+      // |> Ok
+      todo
 
     ["welcome"] -> {
       io.debug(request)

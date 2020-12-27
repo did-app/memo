@@ -3,39 +3,50 @@
   import { parse } from "../note";
   import type { Note } from "../note";
   import { ANNOTATION } from "../note/elements";
-  import * as Tree from "../note/tree";
+  import type { Block } from "../note/elements";
   import { isCollapsed } from "../note/range";
   import type { Range } from "../note/range";
   import { getSelected } from "../thread/view";
   import type { Reference } from "../thread";
+  import * as API from "../sync/api";
   import Composer from "../components/Composer.svelte";
-  // TODO rename fragment
   import Fragment from "../components/Fragment.svelte";
 
   export let thread: Note[];
+  export let threadId: number | undefined;
   export let contactEmailAddress: string;
   export let myEmailAddress: string;
 
+  type SendStatus = "available" | "working" | "suceeded" | "failed";
+  let sendStatus: SendStatus = "available";
+
   let draft = "";
+  let blocks: Block[];
   let preview = false;
 
   // TODO load up the messages after sending
-  async function send(): Promise<null> {
+  async function sendMessage(): Promise<null> {
+    sendStatus = "working";
     // safe as there is no thread 0
     // let response: null | Failure;
-    // if (contact.threadId) {
-    //   response = await API.writeNote(
-    //     contact.threadId,
-    //     previous.length,
-    //     current.blocks
-    //   );
-    // } else {
-    //   response = await API.startRelationship(
-    //     contact.id,
-    //     previous.length,
-    //     current.blocks
-    //   );
-    // }
+    if (threadId) {
+      //   response = await API.writeNote(
+      //     contact.threadId,
+      //     previous.length,
+      //     current.blocks
+      //   );
+    } else {
+      // just start the relation ship with blocks and email address
+      // people talking to me and richard number one
+      // don't send previous.length Can ignore.
+      let response = await API.startRelationship(contactEmailAddress, blocks);
+      if ("error" in response) {
+        sendStatus = "failed";
+        throw "some more error needed";
+        return null;
+      }
+      sendStatus = "suceeded";
+    }
     return null;
   }
 
@@ -119,8 +130,6 @@
     }
   }
 
-  $: console.log(annotations);
-
   function clearAnnotation(event: { detail: number }) {
     console.log(annotations, "vlearing");
 
@@ -128,11 +137,7 @@
     annotations = annotations;
   }
 
-  let current: { blocks: any[]; author: string };
-  $: current = {
-    blocks: [...annotations.map(mapAnnotation), ...parse(draft)],
-    author: "emailAddressTODO",
-  };
+  $: blocks = [...annotations.map(mapAnnotation), ...parse(draft)];
 </script>
 
 <!-- TODO pass this message as the notes to the composer -->
@@ -166,7 +171,7 @@
       <span class="font-bold" />
       <span class="ml-auto">Draft</span>
     </header>
-    <Fragment blocks={current.blocks} {thread} />
+    <Fragment {blocks} {thread} />
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -192,22 +197,68 @@
         </svg>
         Back
       </button>
-      <button
-        class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-        type="submit"
-        on:click={send}>
-        <svg
-          class="fill-current inline w-4 mr-2"
-          xmlns="http://www.w3.org/2000/svg"
-          enable-background="new 0 0 24 24"
-          viewBox="0 0 24 24">
-          <path
-            d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-          <path
-            d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-        </svg>
-        Send
-      </button>
+      {#if sendStatus === 'available'}
+        <button
+          class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
+          on:click={sendMessage}>
+          <svg
+            class="fill-current inline w-4 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            enable-background="new 0 0 24 24"
+            viewBox="0 0 24 24">
+            <path
+              d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+            <path
+              d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+          </svg>
+          Send
+        </button>
+      {:else if sendStatus === 'working'}
+        <button
+          class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">
+          <svg
+            class="fill-current inline w-4 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            enable-background="new 0 0 24 24"
+            viewBox="0 0 24 24">
+            <path
+              d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+            <path
+              d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+          </svg>
+          Sending
+        </button>
+      {:else if sendStatus === 'suceeded'}
+        <button
+          class="flex-grow-0 py-2 px-6 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold">
+          <svg
+            class="fill-current inline w-4 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            enable-background="new 0 0 24 24"
+            viewBox="0 0 24 24">
+            <path
+              d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+            <path
+              d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+          </svg>
+          Sent
+        </button>
+      {:else if sendStatus === 'failed'}
+        <button
+          class="flex-grow-0 py-2 px-6 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold">
+          <svg
+            class="fill-current inline w-4 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            enable-background="new 0 0 24 24"
+            viewBox="0 0 24 24">
+            <path
+              d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+            <path
+              d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+          </svg>
+          Failed to send message
+        </button>
+      {/if}
     </div>
   </article>
 {:else}
@@ -227,6 +278,7 @@
           bind:value={myEmailAddress}
           type="email"
           placeholder="Your email address"
+          readonly
           required />
       </div>
       <button

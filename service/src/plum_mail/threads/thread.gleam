@@ -5,7 +5,7 @@ import gleam/json
 import datetime
 import plum_mail/run_sql
 
-pub fn write_note(thread_id, counter, author_id, content) {
+pub fn write_note(thread_id, counter, author_id, content: json.Json) {
   let sql =
     "
     INSERT INTO notes (thread_id, counter, authored_by, content)
@@ -16,7 +16,7 @@ pub fn write_note(thread_id, counter, author_id, content) {
     pgo.int(thread_id),
     pgo.int(counter),
     pgo.int(author_id),
-    dynamic.unsafe_coerce(content),
+    dynamic.unsafe_coerce(dynamic.from(content)),
   ]
   run_sql.execute(sql, args, fn(x) { x })
 }
