@@ -1,5 +1,5 @@
 <script type="typescript">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import * as Thread from "../thread";
   import type { Reference } from "../thread";
   import type { Note } from "../note";
@@ -10,20 +10,29 @@
   export let notes: Note[];
   // export let suggestions = [];
   export let draft = "";
+  let textarea: HTMLTextAreaElement;
 
   let choices = {};
   console.log(choices);
 
   function resize(event: Event) {
-    const { scrollX, scrollY } = window;
-    let target = event.target as HTMLElement;
+    let target = event.target as HTMLTextAreaElement;
     if (!target) {
       throw "There should always be a target";
     }
-    target.style.height = "1px";
-    target.style.height = +target.scrollHeight + "px";
+    resizeTextArea(target);
+  }
+
+  function resizeTextArea(textarea: HTMLTextAreaElement) {
+    const { scrollX, scrollY } = window;
+    textarea.style.height = "1px";
+    textarea.style.height = +textarea.scrollHeight + "px";
     window.scroll(scrollX, scrollY);
   }
+
+  onMount(function () {
+    resizeTextArea(textarea);
+  });
 
   const dispatch = createEventDispatcher();
   function clearAnnotation(index: number) {
@@ -41,7 +50,6 @@
   }
 </style>
 
-<!-- TODO add else clause with instruction to add annotations -->
 {#each annotations as { reference }, index}
   <div class="flex my-1">
     <div
@@ -83,6 +91,7 @@
 {/each}
 <textarea
   class="message w-full bg-white outline-none pl-12"
+  bind:this={textarea}
   bind:value={draft}
   on:input={resize}
   placeholder="Your message ..." />
