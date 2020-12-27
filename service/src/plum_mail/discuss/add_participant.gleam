@@ -3,16 +3,19 @@ import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
 import plum_mail/discuss/discuss.{Participation}
 
-// pub type Params {
-//   Params(email_address: EmailAddress)
-// }
-// pub fn params(raw: Dynamic) {
-//   try email_address = acl.required(raw, "email_address", acl.as_email)
-//   Params(email_address)
-//   |> Ok
-// }
+pub type Params {
+  Params(email_address: EmailAddress)
+}
+
+pub fn params(raw: Dynamic) {
+  try email_address = acl.required(raw, "email_address", acl.as_email)
+  Params(email_address)
+  |> Ok
+}
+
 pub fn execute(participation, params) {
   todo
   // let Params(email_address: email_address) = params

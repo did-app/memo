@@ -31,7 +31,7 @@ pub type Identifier {
   Identifier(id: Int, email_address: EmailAddress, greeting: Option(Json))
 }
 
-fn to_json(identifier: Identifier) {
+pub fn to_json(identifier: Identifier) {
   let Identifier(id, email_address, greeting) = identifier
   json.object([
     tuple("id", json.int(id)),
@@ -71,26 +71,27 @@ pub fn find_or_create(email_address: EmailAddress) {
   assert [identifier] = db_result
   Ok(identifier)
 }
-// pub fn fetch_identifier(id) {
-//   let sql =
-//     "
-//     SELECT id, email_address, greeting
-//     FROM identifiers
-//     WHERE id = $1"
-//   let args = [pgo.int(id)]
-//   try db_result =
-//     run_sql.execute(
-//       sql,
-//       args,
-//       fn(row) {
-//         let identifier = row_to_identifier(row)
-//         assert Ok(greeting) = dynamic.element(row, 2)
-//         // TODO remove unsafe_coerce
-//         assert greeting = dynamic.unsafe_coerce(greeting)
-//         tuple(identifier, greeting)
-//       },
-//     )
-//   run_sql.single(db_result)
-//   |> Ok
-// }
+
+pub fn find(email_address: EmailAddress) {
+  let sql =
+    "
+  SELECT id, email_address, greeting FROM identifiers WHERE email_address = $1
+  "
+  let args = [pgo.text(email_address.value)]
+  try db_result = run_sql.execute(sql, args, row_to_identifier)
+  run_sql.single(db_result)
+  |> Ok
+}
+
+pub fn fetch_by_id(id) {
+  let sql =
+    "
+    SELECT id, email_address, greeting
+    FROM identifiers
+    WHERE id = $1"
+  let args = [pgo.int(id)]
+  try db_result = run_sql.execute(sql, args, row_to_identifier)
+  run_sql.single(db_result)
+  |> Ok
+}
 // // https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com

@@ -35,17 +35,25 @@ pub fn load_notes(thread_id) {
     assert Ok(counter) = dynamic.element(row, 0)
     assert Ok(counter) = dynamic.int(counter)
     assert Ok(contents) = dynamic.element(row, 1)
-    assert Ok(blocks) = dynamic.field(contents, "blocks")
+    // assert Ok(blocks) = dynamic.field(contents, "blocks")
     assert Ok(author) = dynamic.element(row, 2)
     assert Ok(author) = dynamic.string(author)
     assert Ok(inserted_at) = dynamic.element(row, 3)
     assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
     json.object([
       tuple("counter", json.int(counter)),
-      tuple("blocks", dynamic.unsafe_coerce(blocks)),
+      tuple("blocks", dynamic.unsafe_coerce(contents)),
       tuple("author", json.string(author)),
       tuple("inserted_at", json.string(datetime.to_human(inserted_at))),
     ])
   }
   run_sql.execute(sql, args, mapper)
+}
+
+pub fn to_json(thread) {
+  let tuple(thread_id, notes) = thread
+  json.object([
+    tuple("id", json.int(thread_id)),
+    tuple("notes", json.list(notes)),
+  ])
 }

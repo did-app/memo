@@ -17,8 +17,8 @@
       {JSON.stringify(response.error)}
     {:else}
       <ProfilePage
-        id={response.identifier.id}
-        emailAddress={response.identifier.email_address}
+        id={response.id}
+        emailAddress={response.email_address}
         greeting={response.greeting} />
     {/if}
   {/await}

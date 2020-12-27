@@ -8,63 +8,45 @@ import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
 import plum_mail/run_sql
+import plum_mail/threads/thread
 
-// contact is one end of a relationship
-pub type Contact {
-  Contact(// id: Option(Int),
-    // thread_id: Option(Int),
-    // what do we call the gatekeeper message
-    // Note Json is nullable
-    greeting: Json)
-}
-
-pub fn execute(identifier_id, email_address: EmailAddress) {
+fn load_pairing(contact_id, identifier_id) {
   let sql =
-    "SELECT id, email_address, greeting FROM identifiers WHERE email_address = $1"
-  let args = [pgo.text(email_address.value)]
-
-  try db_result =
-    run_sql.execute(
-      sql,
-      args,
-      fn(row) {
-        assert Ok(id) = dynamic.element(row, 0)
-        assert Ok(id) = dynamic.int(id)
-        // assert Ok(email_address) = dynamic.element(row, 1)
-        // assert Ok(email_address) = dynamic.string(email_address)
-        // assert Ok(email_address) = validate_email(email_address)
-        assert Ok(greeting) = dynamic.element(row, 2)
-        let greeting: Json = dynamic.unsafe_coerce(greeting)
-        tuple(id, greeting)
-      },
-    )
-
-  case list.head(db_result) {
-    Error(Nil) -> Ok(Contact(json.null()))
-    Ok(tuple(contact_id, _greeting)) if contact_id == identifier_id ->
-      todo("talking about self")
-    Ok(tuple(contact_id, greeting)) -> {
-      let sql =
-        "
+    "
           SELECT thread_id FROM pairs
           WHERE pairs.lower_identifier_id IN ($1, $2)
           AND pairs.upper_identifier_id IN ($1, $2)
           "
-      let args = [pgo.int(identifier_id), pgo.int(contact_id)]
-      try db_result =
-        run_sql.execute(
-          sql,
-          args,
-          fn(row) {
-            assert Ok(thread_id) = dynamic.element(row, 0)
-            assert Ok(thread_id) = dynamic.int(thread_id)
-            thread_id
+  let args = [pgo.int(identifier_id), pgo.int(contact_id)]
+  let mapper = fn(row) {
+    assert Ok(thread_id) = dynamic.element(row, 0)
+    assert Ok(thread_id) = dynamic.int(thread_id)
+    thread_id
+  }
+
+  try db_result = run_sql.execute(sql, args, mapper)
+  run_sql.single(db_result)
+  |> Ok
+}
+
+pub fn execute(identifier_id, email_address: EmailAddress) {
+  try maybe_contact = identifier.find(email_address)
+
+  case maybe_contact {
+    None -> Ok(tuple(None, None))
+    Some(Identifier(id, ..)) if id == identifier_id ->
+      todo("talking about self")
+    Some(contact) -> {
+      assert Ok(maybe_thread) = load_pairing(contact.id, identifier_id)
+      let thread =
+        option.map(
+          maybe_thread,
+          fn(thread_id) {
+            assert Ok(notes) = thread.load_notes(thread_id)
+            tuple(thread_id, notes)
           },
         )
-      case list.head(db_result) {
-        Error(Nil) -> Ok(Contact(greeting))
-        Ok(thread_id) -> Ok(Contact(greeting))
-      }
+      Ok(tuple(Some(contact), thread))
     }
   }
 }

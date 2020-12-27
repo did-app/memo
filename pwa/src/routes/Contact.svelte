@@ -41,7 +41,7 @@
     } else if ("error" in authResponse) {
       throw "error fetching self";
     } else {
-      const myEmailAddress = authResponse.identifier.email_address;
+      const myEmailAddress = authResponse.email_address;
       if (myEmailAddress === contactEmailAddress) {
         page.redirect("/profile");
         throw "redirected";
@@ -50,18 +50,23 @@
         if ("error" in contactResponse) {
           throw "error";
         }
-        let greeting = contactResponse.data.greeting;
+        const { thread, identifier } = contactResponse.data;
+        if (thread) {
+          return { thread: thread.notes, contactEmailAddress, myEmailAddress };
+        } else {
+          let greeting = contactResponse.data.identifier.greeting;
 
-        let thread = greeting
-          ? [
-              {
-                blocks: greeting,
-                author: contactEmailAddress,
-                date: new Date(),
-              },
-            ]
-          : [];
-        return { thread, contactEmailAddress, myEmailAddress };
+          let thread = greeting
+            ? [
+                {
+                  blocks: greeting,
+                  author: contactEmailAddress,
+                  date: new Date(),
+                },
+              ]
+            : [];
+          return { thread, contactEmailAddress, myEmailAddress };
+        }
       }
     }
   }

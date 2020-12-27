@@ -6,30 +6,31 @@ import gleam/option.{None, Some}
 import gleam/string
 import gleam/crypto
 import gleam/pgo
-import plum_mail/authentication.{EmailAddress}
+import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
 import plum_mail/run_sql
 import plum_mail/support
 import gleam/should
 
 pub fn validate_email_test() {
-  authentication.validate_email("")
+  email_address.validate("")
   |> should.equal(Error(Nil))
 
-  authentication.validate_email("@")
+  email_address.validate("@")
   |> should.equal(Error(Nil))
 
-  authentication.validate_email("    @ ")
+  email_address.validate("    @ ")
   |> should.equal(Error(Nil))
 
-  authentication.validate_email("me@")
+  email_address.validate("me@")
   |> should.equal(Error(Nil))
 
-  authentication.validate_email("@nothing")
+  email_address.validate("@nothing")
   |> should.equal(Error(Nil))
 
-  authentication.validate_email("me@example.com")
+  email_address.validate("me@example.com")
   |> should.equal(Ok(EmailAddress("me@example.com")))
-  authentication.validate_email("   me@example.com ")
+  email_address.validate("   me@example.com ")
   |> should.equal(Ok(EmailAddress("me@example.com")))
 }
 

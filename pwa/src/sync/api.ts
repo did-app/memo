@@ -3,11 +3,9 @@ import type { Call } from "./client"
 import type { Block } from "../note/elements"
 
 export type Identifier = {
+  id: number,
+  email_address: string,
   greeting: Block[] | null,
-  identifier: {
-    id: number,
-    email_address: string,
-  }
 }
 
 // Authentication
@@ -39,12 +37,23 @@ export function saveGreeting(identifier_id: number, blocks: Block[]): Call<{ dat
 
 // identifier discovery
 
+// TODO memo is note plus author
+export type Note = {
+  author: string,
+  date: Date,
+  blocks: Block[]
+}
+export type Thread = {
+  id: number,
+  notes: Note[]
+}
+
 export function fetchProfile(emailAddress: string): Call<{ data: { greeting: Block[] | null } }> {
   const path = "/identifiers/" + emailAddress
   return get(path)
 }
 
-export function fetchContact(emailAddress: string): Call<{ data: { greeting: Block[] | null } }> {
+export function fetchContact(emailAddress: string): Call<{ data: { identifier: Identifier, thread: Thread | undefined } }> {
   const path = "/relationship/" + emailAddress
   return get(path)
 }
