@@ -9,7 +9,9 @@ import gleam/pgo
 import plum_mail/acl
 import plum_mail/error
 import plum_mail/run_sql
-import plum_mail/authentication.{Identifier}
+import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier.{Identifier}
 // Session is more than a web thing, anywhere you can be a session.
 // FIXME date_time or Datetime
 import datetime.{DateTime}
@@ -64,9 +66,10 @@ pub fn load_participants(conversation_id) {
       assert Ok(id) = dynamic.int(id)
       assert Ok(email_address) = dynamic.element(row, 1)
       assert Ok(email_address) = dynamic.string(email_address)
-      assert Ok(email_address) = authentication.validate_email(email_address)
+      assert Ok(email_address) = email_address.validate(email_address)
 
-      Identifier(id: id, email_address: email_address)
+      // Identifier(id: id, email_address: email_address)
+      todo("real identifier")
     },
   )
 }
@@ -105,10 +108,10 @@ pub fn load_messages(conversation_id) {
       assert Ok(author_email_address) = dynamic.element(row, 4)
       assert Ok(author_email_address) = dynamic.string(author_email_address)
       assert Ok(author_email_address) =
-        authentication.validate_email(author_email_address)
+        email_address.validate(author_email_address)
 
-      let author =
-        Identifier(id: authored_by, email_address: author_email_address)
+      let author = todo("real identifier")
+      // Identifier(id: authored_by, email_address: author_email_address)
       Message(counter, content, inserted_at, author)
     },
   )
@@ -226,14 +229,15 @@ pub fn load_participation(conversation_id: Int, identifier_id: Int) {
     assert Ok(id) = dynamic.int(id)
     assert Ok(email_address) = dynamic.element(row, 7)
     assert Ok(email_address) = dynamic.string(email_address)
-    assert Ok(email_address) = authentication.validate_email(email_address)
+    assert Ok(email_address) = email_address.validate(email_address)
     assert Ok(owner) = dynamic.element(row, 8)
     assert Ok(owner) = dynamic.bool(owner)
     assert Ok(done) = dynamic.element(row, 9)
     assert Ok(done) = dynamic.int(done)
 
-    let identifier = Identifier(id, email_address)
+    let identifier = todo("real identifier")
 
+    // Identifier(id, email_address)
     Participation(
       conversation: conversation,
       active: True,

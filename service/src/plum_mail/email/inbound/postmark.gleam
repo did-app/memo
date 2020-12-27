@@ -7,6 +7,7 @@ import postmark/client
 import plum_mail/acl
 import plum_mail/config.{Config}
 import plum_mail/authentication
+import plum_mail/identifier
 import plum_mail/discuss/discuss
 import plum_mail/discuss/write_message
 
@@ -45,8 +46,7 @@ pub fn handle(params, config) {
       assert Ok(conversation_id) = int.parse(conversation_id)
       try reply = acl.required(params, "StrippedTextReply", acl.as_string)
       let params = write_message.Params(reply, False)
-      assert Ok(identifier) =
-        authentication.lookup_identifier(from_email_address)
+      assert Ok(identifier) = identifier.find_or_create(from_email_address)
       assert Ok(participation) =
         discuss.load_participation(conversation_id, identifier.id)
       try _ = write_message.execute(participation, params)

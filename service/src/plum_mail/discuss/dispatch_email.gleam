@@ -12,7 +12,9 @@ import gleam/json
 import gleam/pgo
 import plum_mail/config.{Config}
 import plum_mail/run_sql
-import plum_mail/authentication.{Identifier}
+import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier.{Identifier}
 import plum_mail/discuss/discuss.{Topic}
 
 pub type Message {
@@ -98,17 +100,25 @@ pub fn load() {
     assert Ok(recipient_email_address) = dynamic.element(row, 8)
     assert Ok(recipient_email_address) = dynamic.string(recipient_email_address)
     assert Ok(recipient_email_address) =
-      authentication.validate_email(recipient_email_address)
+      email_address.validate(recipient_email_address)
     assert Ok(author_email_address) = dynamic.element(row, 9)
     assert Ok(author_email_address) = dynamic.string(author_email_address)
     assert Ok(author_email_address) =
-      authentication.validate_email(author_email_address)
+      email_address.validate(author_email_address)
 
     Message(
       id: tuple(conversation_id, counter),
       conversation: tuple(conversation_id, topic),
-      author: Identifier(id: authored_by, email_address: author_email_address),
-      to: Identifier(id: recipient_id, email_address: recipient_email_address),
+      author: Identifier(
+        id: authored_by,
+        email_address: author_email_address,
+        greeting: todo("greting"),
+      ),
+      to: Identifier(
+        id: recipient_id,
+        email_address: recipient_email_address,
+        greeting: todo("greting"),
+      ),
       content: content,
     )
   }

@@ -13,6 +13,7 @@ import gleam/http.{Request}
 import gleam/json
 import plum_mail/error
 import plum_mail/authentication
+import plum_mail/email_address
 import plum_mail/web/helpers as web
 
 fn check_method(request, methods) {
@@ -96,7 +97,7 @@ pub fn as_int(raw) {
 
 pub fn as_email(raw) {
   try raw = as_string(raw)
-  case authentication.validate_email(raw) {
+  case email_address.validate(raw) {
     Ok(value) -> Ok(value)
     Error(Nil) -> Error("not a valid email")
   }

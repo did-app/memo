@@ -21,7 +21,8 @@ import plum_mail/config
 import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/run_sql
-import plum_mail/authentication.{Identifier}
+import plum_mail/authentication
+import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/web/helpers as web
 import plum_mail/discuss/discuss.{Message, Pin}
@@ -55,45 +56,13 @@ fn token_cookie_settings(request) {
   http.CookieAttributes(..defaults, max_age: Some(604800))
 }
 
-fn identifier_data(identifier: Identifier) {
-  let has_account = case identifier.email_address.value {
-    "peter@plummail.co" | "richard@plummail.co" | "peterhsaxton@gmail.com" ->
-      True
-    _ -> False
-  }
-
-  json.object([
-    tuple("id", json.int(identifier.id)),
-    tuple("email_address", json.string(identifier.email_address.value)),
-    tuple("has_account", json.bool(has_account)),
-  ])
-  // tuple("greeting", identifier.greeting),
-}
-
 pub fn route(
   request,
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
-    // Hardcoded because we don't want password word field on db model yet.
-    // looking at alternative (OAuth) solutions
-    // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
-    ["authenticate", name, password] -> {
-      assert Ok(email_address) = case name {
-        "peter" -> {
-          let True = password == "onion"
-          assert Ok(email_address) =
-            authentication.validate_email("peter@plummail.co")
-          Ok(email_address)
-        }
-        "richard" -> {
-          let True = password == "sprout"
-          assert Ok(email_address) =
-            authentication.validate_email("richard@plummail.co")
-          Ok(email_address)
-        }
-      }
-      assert Ok(identifier) = authentication.lookup_identifier(email_address)
+    ["authenticate", username, password] -> {
+      assert Ok(identifier) = authenticate_by_password.run(username, password)
       assert Ok(user_agent) = http.get_req_header(request, "user-agent")
       let token = web.auth_token(identifier.id, user_agent, config.secret)
       web.redirect(string.append(config.client_origin, "/"))

@@ -4,7 +4,9 @@ import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/pgo
 import gleam/json.{Json}
-import plum_mail/authentication.{EmailAddress, Identifier}
+import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier.{Identifier}
 import plum_mail/run_sql
 
 // contact is one end of a relationship

@@ -7,7 +7,9 @@ import postmark/client as postmark
 import plum_mail/config
 import plum_mail/acl
 import plum_mail/run_sql
-import plum_mail/authentication.{EmailAddress}
+import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier
 
 pub type Params {
   Params(email_address: EmailAddress)
@@ -23,7 +25,7 @@ pub fn params(raw: Dynamic) {
 // some accounts have more than one authentication id
 pub fn execute(params, config) {
   let Params(email_address: email_address) = params
-  try identifier = authentication.lookup_identifier(email_address)
+  try identifier = identifier.find_or_create(email_address)
   assert Ok(token) = authentication.generate_link_token(identifier.id)
   let config.Config(
     postmark_api_token: postmark_api_token,
@@ -31,7 +33,7 @@ pub fn execute(params, config) {
     ..,
   ) = config
 
-  assert Ok(from) = authentication.validate_email("updates@plummail.co")
+  assert Ok(from) = email_address.validate("updates@plummail.co")
   let to = email_address
   let subject = "Welcome back to plum mail"
   let body =

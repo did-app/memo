@@ -10,62 +10,32 @@ import gleam/pgo
 import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/threads/thread
-import plum_mail/authentication.{validate_email}
+import plum_mail/authentication
+import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier.{Identifier}
 
 pub type Params {
   Params(
-    email_address: String,
+    email_address: EmailAddress,
     // message or memo
     blocks: json.Json,
   )
 }
 
 pub fn params(raw: Dynamic) {
-  try email_address = acl.required(raw, "email_address", acl.as_string)
+  try email_address = acl.required(raw, "email_address", acl.as_email)
   assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
   let blocks = dynamic.unsafe_coerce(blocks)
   Params(email_address, blocks)
   |> Ok()
 }
 
-// TODO collect in some grouping
-fn row_to_identifier(row) {
-  assert Ok(id) = dynamic.element(row, 0)
-  assert Ok(id) = dynamic.int(id)
-  assert Ok(email_address) = dynamic.element(row, 1)
-  assert Ok(email_address) = dynamic.string(email_address)
-  assert Ok(email_address) = validate_email(email_address)
-  assert Ok(greeting) = dynamic.element(row, 2)
-  assert Ok(greeting): Result(Option(Json), Nil) =
-    run_sql.dynamic_option(greeting, fn(x) { Ok(dynamic.unsafe_coerce(x)) })
-  tuple(id, email_address, greeting)
-}
-
-fn find_or_create_identifer(email_address) {
-  // TODO drop refered_by
-  let sql =
-    "
-  WITH new_identifier AS (
-    INSERT INTO identifiers (email_address, referred_by)
-    VALUES ($1, currval('identifiers_id_seq'))
-    ON CONFLICT (email_address) DO NOTHING
-    RETURNING id, email_address, greeting
-  )
-  SELECT id, email_address, greeting FROM new_identifier
-  UNION ALL
-  SELECT id, email_address, greeting FROM identifiers WHERE email_address = $1
-  "
-  let args = [pgo.text(email_address)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier)
-  assert [identifier] = db_result
-  Ok(identifier)
-}
-
 pub fn execute(params, user_id) {
   let Params(email_address, blocks) = params
-  try tuple(contact_id, _, greeting) = find_or_create_identifer(email_address)
+  try Identifier(contact_id, _, greeting) =
+    identifier.find_or_create(email_address)
 
-  let notes: List(tuple(Int, Int, Json)) = case greeting {
+  let notes = case greeting {
     None -> [tuple(0, user_id, blocks)]
     Some(greeting) -> [
       tuple(0, contact_id, greeting),

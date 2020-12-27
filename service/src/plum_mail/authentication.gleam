@@ -88,7 +88,8 @@ pub fn validate_link_token(token_string) {
       "
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
-    let identifier = row_to_identifier(row)
+    // TODO does this need more than the id
+    let identifier = todo("row_to_identifier(row)")
     assert Ok(validator) = dynamic.element(row, 2)
     assert Ok(validator) = dynamic.string(validator)
     assert Ok(link_token_selector) = dynamic.element(row, 3)
@@ -107,72 +108,5 @@ pub fn validate_link_token(token_string) {
         False -> Error(Nil)
       }
     }
-  }
-}
-
-pub type EmailAddress {
-  EmailAddress(value: String)
-}
-
-pub fn validate_email(email_address) {
-  let email_address = string.trim(email_address)
-  try parts = string.split_once(string.reverse(email_address), "@")
-  case parts {
-    tuple("", _) -> Error(Nil)
-    tuple(_, "") -> Error(Nil)
-    _ -> Ok(EmailAddress(email_address))
-  }
-}
-
-pub type Identifier {
-  Identifier(id: Int, email_address: EmailAddress)
-}
-
-pub fn row_to_identifier(row) {
-  assert Ok(id) = dynamic.element(row, 0)
-  assert Ok(id) = dynamic.int(id)
-  assert Ok(email_address) = dynamic.element(row, 1)
-  assert Ok(email_address) = dynamic.string(email_address)
-  assert Ok(email_address) = validate_email(email_address)
-  Identifier(id, email_address)
-}
-
-pub fn fetch_identifier(id) {
-  let sql =
-    "
-    SELECT id, email_address, greeting
-    FROM identifiers
-    WHERE id = $1"
-  let args = [pgo.int(id)]
-  try db_result =
-    run_sql.execute(
-      sql,
-      args,
-      fn(row) {
-        let identifier = row_to_identifier(row)
-        assert Ok(greeting) = dynamic.element(row, 2)
-        // TODO remove unsafe_coerce
-        assert greeting = dynamic.unsafe_coerce(greeting)
-        tuple(identifier, greeting)
-      },
-    )
-  run_sql.single(db_result)
-  |> Ok
-}
-
-// https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com
-// TODO remove, or send in the correct write message for attemted login, might result in special sign in action not general auth one
-pub fn lookup_identifier(email_address: EmailAddress) {
-  let sql =
-    "
-    SELECT id, email_address FROM identifiers WHERE email_address = $1
-    "
-  // Could return True of False field for new user
-  // Would enable Log or send email when new user is added
-  let args = [pgo.text(email_address.value)]
-  try rows = run_sql.execute(sql, args, row_to_identifier)
-  case rows {
-    [row] -> Ok(row)
-    [] -> Error(error.UnknownIdentifier(email_address.value))
   }
 }

@@ -2,7 +2,7 @@ import gleam/io
 import gleam/http
 import gleam/httpc
 import gleam/json
-import plum_mail/authentication.{EmailAddress}
+import plum_mail/email_address.{EmailAddress}
 
 // let's make all email bodies work with ,markdown
 // TODO content type that is always text but has HTML as optional
@@ -16,8 +16,8 @@ pub fn send_email(from, to, subject, text_body, api_token) {
       Ok(Nil)
     }
     _ -> {
-      let authentication.EmailAddress(from_string) = from
-      let authentication.EmailAddress(to_string) = to
+      let EmailAddress(from_string) = from
+      let EmailAddress(to_string) = to
       let data =
         json.object([
           tuple("From", json.string(from_string)),

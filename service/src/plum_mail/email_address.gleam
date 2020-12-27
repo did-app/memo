@@ -1,3 +1,4 @@
+import gleam/string
 
 // TODO regex match from mdn form validation
 // split into hash user and domain
@@ -7,3 +8,16 @@
 // display name <email address> is part of  RFC 822 sill called an email address
 // https://github.com/Porges/email-validate-hs
 // has domain part and local part
+pub type EmailAddress {
+  EmailAddress(value: String)
+}
+
+pub fn validate(email_address) {
+  let email_address = string.trim(email_address)
+  try parts = string.split_once(string.reverse(email_address), "@")
+  case parts {
+    tuple("", _) -> Error(Nil)
+    tuple(_, "") -> Error(Nil)
+    _ -> Ok(EmailAddress(email_address))
+  }
+}
