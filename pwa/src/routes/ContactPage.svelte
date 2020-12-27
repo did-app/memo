@@ -143,14 +143,14 @@
 <!-- TODO pass this message as the notes to the composer -->
 <!-- This goes to a fragment that binds on block -->
 <div class="" bind:this={root}>
-  {#each thread as { blocks, author, date }, index}
+  {#each thread as { blocks, author, inserted_at }, index}
     <article
       id={index.toString()}
       data-note-index={index}
       class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
       <header class="ml-12 mb-6 flex text-gray-600">
         <span class="font-bold">{author}</span>
-        <span class="ml-auto">{date}</span>
+        <span class="ml-auto">{inserted_at}</span>
       </header>
       <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
       <Fragment {blocks} active={noteSelection[index] || {}} {thread} />

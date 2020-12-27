@@ -4,7 +4,8 @@ import type { Block, Span, Paragraph } from "./elements"
 export type Note = {
   author: string,
   blocks: Block[],
-  date: Date
+  inserted_at: Date,
+  counter: number
 }
 
 function parseLine(line: string, offset: number) {

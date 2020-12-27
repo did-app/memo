@@ -10,7 +10,8 @@
 
   type Failure = { error: true };
   type Data = {
-    thread: Note[];
+    threadId: number | undefined;
+    notes: Note[];
     contactEmailAddress: string;
     myEmailAddress: string;
   };
@@ -33,11 +34,23 @@
         return { error: true };
       }
       let myEmailAddress = "";
-      let greeting = profileResponse.data.greeting;
-      let thread = greeting
-        ? [{ blocks: greeting, author: contactEmailAddress, date: new Date() }]
+      let greeting = profileResponse.data && profileResponse.data.greeting;
+      let notes = greeting
+        ? [
+            {
+              blocks: greeting,
+              author: contactEmailAddress,
+              inserted_at: new Date(),
+              counter: 0,
+            },
+          ]
         : [];
-      return { thread, contactEmailAddress, myEmailAddress };
+      return {
+        threadId: undefined,
+        notes,
+        contactEmailAddress,
+        myEmailAddress,
+      };
     } else if ("error" in authResponse) {
       throw "error fetching self";
     } else {
@@ -50,22 +63,45 @@
         if ("error" in contactResponse) {
           throw "error";
         }
-        const { thread, identifier } = contactResponse.data;
+        let { thread, identifier } = contactResponse.data;
+        let notes: Note[] = [];
+        let threadId: number | undefined;
         if (thread) {
-          return { thread: thread.notes, contactEmailAddress, myEmailAddress };
+          threadId = thread.id;
+          notes = thread.notes.map(function ({
+            inserted_at: iso8601,
+            ...rest
+          }) {
+            let inserted_at = new Date(iso8601);
+            return { inserted_at, ...rest };
+          });
+        }
+        if (thread) {
+          return {
+            threadId: 1,
+            notes: notes,
+            contactEmailAddress,
+            myEmailAddress,
+          };
         } else {
           let greeting = contactResponse.data.identifier.greeting;
 
-          let thread = greeting
+          let notes = greeting
             ? [
                 {
                   blocks: greeting,
                   author: contactEmailAddress,
-                  date: new Date(),
+                  inserted_at: new Date(),
+                  counter: 0,
                 },
               ]
             : [];
-          return { thread, contactEmailAddress, myEmailAddress };
+          return {
+            threadId: undefined,
+            notes,
+            contactEmailAddress,
+            myEmailAddress,
+          };
         }
       }
     }
@@ -80,8 +116,8 @@
       unknown error
     {:else}
       <ContactPage
-        thread={response.thread}
-        threadId={undefined}
+        thread={response.notes}
+        threadId={response.threadId}
         contactEmailAddress={response.contactEmailAddress}
         myEmailAddress={response.myEmailAddress} />
     {/if}

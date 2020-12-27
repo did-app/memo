@@ -44,7 +44,7 @@ pub fn load_notes(thread_id) {
       tuple("counter", json.int(counter)),
       tuple("blocks", dynamic.unsafe_coerce(contents)),
       tuple("author", json.string(author)),
-      tuple("inserted_at", json.string(datetime.to_human(inserted_at))),
+      tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
     ])
   }
   run_sql.execute(sql, args, mapper)

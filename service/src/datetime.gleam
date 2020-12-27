@@ -21,6 +21,8 @@ pub fn from_erl(erl) {
   Ok(dt)
 }
 
+pub external fn to_iso8601(DateTime) -> String = "Elixir.DateTime" "to_iso8601"
+
 pub fn to_human(dt) {
   let dt = dynamic.from(dt)
   assert Ok(day) = dynamic.field(dt, atom.create_from_string("day"))

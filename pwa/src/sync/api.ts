@@ -40,15 +40,17 @@ export function saveGreeting(identifier_id: number, blocks: Block[]): Call<{ dat
 // TODO memo is note plus author
 export type Note = {
   author: string,
-  date: Date,
   blocks: Block[]
+  // NOTE string is human string
+  inserted_at: string,
+  counter: number,
 }
 export type Thread = {
   id: number,
   notes: Note[]
 }
 
-export function fetchProfile(emailAddress: string): Call<{ data: { greeting: Block[] | null } }> {
+export function fetchProfile(emailAddress: string): Call<{ data: Identifier | null }> {
   const path = "/identifiers/" + emailAddress
   return get(path)
 }
