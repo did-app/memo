@@ -2,16 +2,21 @@
   import { onMount } from "svelte";
   import { parse } from "../note";
   import type { Note } from "../note";
-  import { ANNOTATION } from "../note/elements";
+  import { ANNOTATION, LINK } from "../note/elements";
   import type { Block } from "../note/elements";
   import { isCollapsed } from "../note/range";
   import type { Range } from "../note/range";
   import { getSelected } from "../thread/view";
+  import * as Thread from "../thread";
   import type { Reference } from "../thread";
   import * as API from "../sync/api";
   import type { Failure } from "../sync/client";
   import Composer from "../components/Composer.svelte";
   import Fragment from "../components/Fragment.svelte";
+  import BlockComponent from "../components/Block.svelte";
+  import LinkComponent from "../components/Link.svelte";
+  import SpanComponent from "../components/Span.svelte";
+  import AttachmentIcon from "../icons/attachment.svelte";
 
   export let thread: Note[];
   export let threadId: number | undefined;
@@ -30,7 +35,6 @@
     sendStatus = "working";
     let response: { data: null } | { error: Failure };
     // safe as there is no thread 0
-    console.log("thread", threadId);
     if (threadId) {
       response = await API.writeNote(threadId, thread.length, blocks);
     } else {
@@ -127,14 +131,55 @@
   }
 
   function clearAnnotation(event: { detail: number }) {
-    console.log(annotations, "vlearing");
-
     annotations.splice(event.detail, 1);
     annotations = annotations;
   }
+  import { PARAGRAPH, TEXT } from "../note/elements";
 
-  $: blocks = [...annotations.map(mapAnnotation), ...parse(draft)];
+  function makeSuggestions(blocks: Block[]) {
+    const output: Block[] = [];
+    blocks.forEach(function (block, blockId) {
+      if (block.type === PARAGRAPH && block.spans.length > 0) {
+        // always ends with softbreak
+        const lastSpan = block.spans[block.spans.length - 1];
+        if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
+          // TODO remove start
+          let suggestion: Block = {
+            type: PARAGRAPH,
+            spans: [lastSpan],
+            start: 0,
+          };
+          output.push(suggestion);
+        }
+      }
+    });
+    return output;
+  }
+
+  let choices: { ask: string; when: string }[];
+  let suggestions: Block[] = [];
+  $: blocks = (function (): Block[] {
+    let b = [...annotations.map(mapAnnotation), ...parse(draft)];
+    suggestions = makeSuggestions(b);
+    console.log("choice maping");
+
+    choices = suggestions.map(function () {
+      return { ask: "everyone", when: "no hurry" };
+    });
+    return b;
+  })();
 </script>
+
+<style>
+  .left-of-thread {
+    margin-left: 28rem;
+  }
+  @media (min-width: 768px) {
+    .left-of-thread {
+      margin-left: 48rem;
+    }
+  }
+</style>
 
 <!-- TODO pass this message as the notes to the composer -->
 <!-- This goes to a fragment that binds on block -->
@@ -158,16 +203,39 @@
     </h1>
   {/each}
 </div>
-<!-- If we put preview outside! -->
-<!-- extract rounding article a a thing -->
-{#if preview}
-  <!-- TODO make sure can't always add annotation, or make it work with self -->
-  <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+<ul class="fixed my-4 px-2 top-0 max-w-sm left-of-thread">
+  {#each Thread.findPinnable(thread) as pin}
+    <li
+      class="my-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
+      {#if pin.type === LINK}
+        <LinkComponent url={pin.item.url} title={pin.item.title} index={0} />
+      {:else if pin.type === ANNOTATION}
+        <!-- TODO remove dummy index -->
+
+        <span class="w-5 inline-block">
+          <AttachmentIcon />
+        </span>
+        <!-- {#each [Thread.followReference(pin.item.reference, thread)[0]] as block, index}
+          <BlockComponent {block} {index} {thread} truncate={true} />
+        {/each} -->
+        <!-- TODO summary spans function -->
+        {#each Thread.followReference(pin.item.reference, thread)[0].spans || [] as span, index}
+          <SpanComponent {span} {index} unfurled={false} />
+        {/each}
+      {/if}
+    </li>
+  {/each}
+</ul>
+<article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+  {#if preview}
+    <!-- TODO make sure can't always add annotation, or make it work with self -->
+    <!-- TODO make sure spans paragraphs notes can't be empty -->
     <header class="ml-12 mb-6 flex text-gray-600">
-      <span class="font-bold" />
-      <span class="ml-auto">Draft</span>
+      <span class="font-bold">{myEmailAddress}</span>
+      <span class="ml-auto">{new Date()}</span>
     </header>
     <Fragment {blocks} {thread} />
+
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
         <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -256,9 +324,7 @@
         </button>
       {/if}
     </div>
-  </article>
-{:else}
-  <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
+  {:else}
     <!-- Could do an on submit and catch whats inside -->
     <!-- TODO name previous inside composer -->
     <Composer
@@ -296,5 +362,30 @@
         Preview
       </button>
     </div>
-  </article>
-{/if}
+  {/if}
+  <h1 class="ml-12 font-bold">suggestions</h1>
+  <!-- <Fragment blocks={suggestions} {thread} /> -->
+  {#each suggestions as block, index}
+    Suggestion
+    {index + blocks.length}
+
+    <BlockComponent {block} {thread} index={index + blocks.length} />
+    <div class="pl-12 my-1 flex">
+      <div>
+        Ask
+        <select bind:value={choices[index].ask}>
+          <option value="everyone">Everyone</option>
+          <option value="tim">tim</option>
+          <option value="bill">Bill</option>
+        </select>
+      </div>
+      <div>
+        For
+        <select bind:value={choices[index].when}>
+          <option value="today">Today</option>
+          <option value="no hurry">no hurry</option>
+        </select>
+      </div>
+    </div>
+  {/each}
+</article>

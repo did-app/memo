@@ -95,14 +95,3 @@
   bind:value={draft}
   on:input={resize}
   placeholder="Your message ..." />
-<!-- TODO remove for now -->
-<!-- {#each suggestions as _suggestion, index}
-  <div class="pl-12 my-1">
-    Ask question to
-    <select bind:value={choices[index].ask}>
-      <option value="everyone">Everyone</option>
-      <option value="tim">tim</option>
-      <option value="bill">Bill</option>
-    </select>
-  </div>
-{/each} -->

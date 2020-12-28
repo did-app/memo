@@ -8,10 +8,11 @@
   export let block: Block;
   export let index: number;
   export let thread: Note[];
+  export let truncate: boolean = false;
 </script>
 
 {#if block.type === PARAGRAPH}
-  <Paragraph spans={block.spans} {index} />
+  <Paragraph spans={block.spans} {index} {truncate} />
 {:else if block.type === ANNOTATION}
   <Annotation
     blocks={block.blocks}

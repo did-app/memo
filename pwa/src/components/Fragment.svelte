@@ -5,7 +5,7 @@
   import type { Note } from "../note";
   // import type { Reference } from "../thread";
 
-  export let blocks: Block[] = [];
+  export let blocks: Block[];
   export let active: Record<number, undefined | (() => void)> = {};
   export let thread: Note[];
 
