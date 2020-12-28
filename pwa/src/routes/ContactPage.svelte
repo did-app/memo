@@ -95,7 +95,13 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  let annotations: { reference: Reference; raw: string }[] = [];
+  let prompts = Thread.gatherPrompts(thread, myEmailAddress);
+
+  let annotations: { reference: Reference; raw: string }[] = prompts.map(
+    function (prompt) {
+      return { reference: prompt.reference, raw: "" };
+    }
+  );
 
   function mapAnnotation({
     reference,
@@ -117,7 +123,7 @@
       const annotation = {
         type: ANNOTATION,
         raw: "",
-        reference: { note: noteIndex, path: [range.anchor.path[0]] },
+        reference: { note: noteIndex, blockIndex: range.anchor.path[0] },
       };
       annotations = annotations.concat(annotation);
     } else {
@@ -134,33 +140,12 @@
     annotations.splice(event.detail, 1);
     annotations = annotations;
   }
-  import { PARAGRAPH, TEXT } from "../note/elements";
-
-  function makeSuggestions(blocks: Block[]) {
-    const output: Block[] = [];
-    blocks.forEach(function (block, blockId) {
-      if (block.type === PARAGRAPH && block.spans.length > 0) {
-        // always ends with softbreak
-        const lastSpan = block.spans[block.spans.length - 1];
-        if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
-          // TODO remove start
-          let suggestion: Block = {
-            type: PARAGRAPH,
-            spans: [lastSpan],
-            start: 0,
-          };
-          output.push(suggestion);
-        }
-      }
-    });
-    return output;
-  }
 
   let choices: { ask: string; when: string }[];
   let suggestions: Block[] = [];
   $: blocks = (function (): Block[] {
     let b = [...annotations.map(mapAnnotation), ...parse(draft)];
-    suggestions = makeSuggestions(b);
+    // suggestions = Thread.makeSuggestions(b);
     console.log("choice maping");
 
     choices = suggestions.map(function () {
@@ -219,7 +204,7 @@
           <BlockComponent {block} {index} {thread} truncate={true} />
         {/each} -->
         <!-- TODO summary spans function -->
-        {#each Thread.followReference(pin.item.reference, thread)[0].spans || [] as span, index}
+        {#each Thread.summary(Thread.followReference(pin.item.reference, thread)) as span, index}
           <SpanComponent {span} {index} unfurled={false} />
         {/each}
       {/if}
@@ -235,6 +220,29 @@
       <span class="ml-auto">{new Date()}</span>
     </header>
     <Fragment {blocks} {thread} />
+    {#each suggestions as block, index}
+      Suggestion
+      {index + blocks.length}
+
+      <BlockComponent {block} {thread} index={index + blocks.length} />
+      <div class="pl-12 my-1 flex">
+        <div>
+          Ask
+          <select bind:value={choices[index].ask}>
+            <option value="everyone">Everyone</option>
+            <option value="tim">tim</option>
+            <option value="bill">Bill</option>
+          </select>
+        </div>
+        <div>
+          For
+          <select bind:value={choices[index].when}>
+            <option value="today">Today</option>
+            <option value="no hurry">no hurry</option>
+          </select>
+        </div>
+      </div>
+    {/each}
 
     <div class="mt-2 pl-12 flex items-center">
       <div class="flex flex-1">
@@ -364,28 +372,4 @@
     </div>
   {/if}
   <h1 class="ml-12 font-bold">suggestions</h1>
-  <!-- <Fragment blocks={suggestions} {thread} /> -->
-  {#each suggestions as block, index}
-    Suggestion
-    {index + blocks.length}
-
-    <BlockComponent {block} {thread} index={index + blocks.length} />
-    <div class="pl-12 my-1 flex">
-      <div>
-        Ask
-        <select bind:value={choices[index].ask}>
-          <option value="everyone">Everyone</option>
-          <option value="tim">tim</option>
-          <option value="bill">Bill</option>
-        </select>
-      </div>
-      <div>
-        For
-        <select bind:value={choices[index].when}>
-          <option value="today">Today</option>
-          <option value="no hurry">no hurry</option>
-        </select>
-      </div>
-    </div>
-  {/each}
 </article>

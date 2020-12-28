@@ -1,10 +1,11 @@
-import type { Reference } from "../thread"
+import type { Reference, SectionReference } from "../thread"
 
 export const PARAGRAPH = "paragraph";
 export const TEXT = "text";
 export const LINK = "link";
 export const ANNOTATION = "annotation";
 export const SOFTBREAK = "softbreak";
+export const PROMPT = "prompt"
 
 export type Paragraph = {
   type: typeof PARAGRAPH,
@@ -32,9 +33,14 @@ export type Annotation = {
   blocks: Block[]
 }
 
+export type Prompt = {
+  type: typeof PROMPT,
+  reference: SectionReference
+}
+
 export type Softbreak = {
   type: typeof SOFTBREAK
 }
 
 export type Span = Text | Link | Softbreak
-export type Block = Paragraph | Annotation
+export type Block = Paragraph | Annotation | Prompt

@@ -1,6 +1,9 @@
 <script lang="ts">
   import page from "page";
+  import * as Thread from "../thread";
   import type { Note } from "../note";
+  import { PROMPT } from "../note/elements";
+  import type { Prompt } from "../note/elements";
   import { authenticationProcess } from "../sync";
   import * as API from "../sync/api";
   import type { Failure } from "../sync/client";
@@ -112,6 +115,20 @@
       }
     }
   }
+
+  // TODO remove this for real prompts
+  function mapSuggestions(note: Note, noteIndex: number) {
+    let suggestions = Thread.makeSuggestions(note.blocks);
+    console.log(suggestions, "suggestions", noteIndex);
+    let prompts = suggestions.map(function (suggestion): Prompt {
+      return {
+        type: PROMPT,
+        reference: { note: noteIndex, blockIndex: suggestion.blockIndex },
+      };
+    });
+
+    return { ...note, blocks: [...note.blocks, ...prompts] };
+  }
 </script>
 
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
@@ -122,7 +139,7 @@
       unknown error
     {:else}
       <ContactPage
-        thread={response.notes}
+        thread={response.notes.map(mapSuggestions)}
         threadId={response.threadId}
         contactEmailAddress={response.contactEmailAddress}
         myEmailAddress={response.myEmailAddress} />

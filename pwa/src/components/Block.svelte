@@ -1,5 +1,5 @@
 <script lang="typescript">
-  import { PARAGRAPH, ANNOTATION } from "../note/elements";
+  import { PARAGRAPH, ANNOTATION, PROMPT } from "../note/elements";
   import type { Block } from "../note/elements";
   import type { Note } from "../note";
   import Paragraph from "./Paragraph.svelte";
@@ -19,6 +19,8 @@
     reference={block.reference}
     {index}
     {thread} />
+{:else if block.type === PROMPT}
+  <div class="hidden" />
 {:else}
   <p>unknown block {JSON.stringify(block)}</p>
 {/if}
