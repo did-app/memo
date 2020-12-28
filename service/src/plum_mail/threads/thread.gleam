@@ -48,6 +48,7 @@ pub fn load_notes(thread_id) {
     ])
   }
   run_sql.execute(sql, args, mapper)
+  |> io.debug()
 }
 
 pub fn to_json(thread) {

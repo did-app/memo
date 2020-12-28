@@ -64,27 +64,24 @@
           throw "error";
         }
         let { thread, identifier } = contactResponse.data;
-        let notes: Note[] = [];
-        let threadId: number | undefined;
+
         if (thread) {
-          threadId = thread.id;
-          notes = thread.notes.map(function ({
+          let threadId = thread.id;
+          let notes = thread.notes.map(function ({
             inserted_at: iso8601,
             ...rest
           }) {
             let inserted_at = new Date(iso8601);
             return { inserted_at, ...rest };
           });
-        }
-        if (thread) {
           return {
-            threadId: 1,
+            threadId,
             notes: notes,
             contactEmailAddress,
             myEmailAddress,
           };
         } else {
-          let greeting = contactResponse.data.identifier.greeting;
+          let greeting = identifier.greeting;
 
           let notes = greeting
             ? [

@@ -65,3 +65,11 @@ export function startRelationship(emailAddress: string, blocks: Block[]) {
   const params = { email_address: emailAddress, blocks }
   return post(path, params)
 }
+
+// TODO postMemo
+// memo has contents and an index
+export function writeNote(threadId: number, counter: number, blocks: Block[]): Call<{ data: null }> {
+  const path = "/threads/" + threadId + "/post"
+  const params = { counter, blocks }
+  return post(path, params)
+}

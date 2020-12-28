@@ -169,6 +169,10 @@ pub fn route(
     // TODO don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim
     ["relationship", contact] -> {
+      let sql = "SELECT * FROM notes WHERE thread_id = 6"
+      io.debug("-------------------")
+      run_sql.execute(sql, [], io.debug)
+      io.debug("-------------------")
       try identifier_id = web.identify_client(request, config)
       try email_address =
         email_address.validate(contact)
@@ -186,30 +190,19 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
-    // TODO authenticate
-    ["threads", thread_id] -> {
+    ["threads", thread_id, "post"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
-      try user_id = web.identify_client(request, config)
-      // TODO a participation thing again
-      try notes = thread.load_notes(thread_id)
-      let data = json.object([tuple("notes", json.list(notes))])
+      try raw = acl.parse_json(request)
+      try counter = acl.required(raw, "counter", acl.as_int)
+      assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
+      let blocks: json.Json = dynamic.unsafe_coerce(blocks)
+      try author_id = web.identify_client(request, config)
+      // // TODO a participation thing again
+      try notes = thread.write_note(thread_id, counter, author_id, blocks)
       http.response(200)
-      |> web.set_resp_json(data)
+      |> web.set_resp_json(json.null())
       |> Ok
     }
-    ["threads", thread_id, "post"] ->
-      // assert Ok(thread_id) = int.parse(thread_id)
-      // try raw = acl.parse_json(request)
-      // try counter = acl.required(raw, "counter", acl.as_int)
-      // assert Ok(content) = dynamic.field(raw, dynamic.from("content"))
-      // try author_id = web.identify_client(request, config)
-      // // TODO a participation thing again
-      // try notes = thread.write_note(thread_id, counter, author_id, content)
-      // let data = json.object([])
-      // http.response(200)
-      // |> web.set_resp_json(data)
-      // |> Ok
-      todo
 
     // ["welcome"] -> {
     //   io.debug(request)

@@ -9,6 +9,7 @@
   import { getSelected } from "../thread/view";
   import type { Reference } from "../thread";
   import * as API from "../sync/api";
+  import type { Failure } from "../sync/client";
   import Composer from "../components/Composer.svelte";
   import Fragment from "../components/Fragment.svelte";
 
@@ -27,26 +28,21 @@
   // TODO load up the messages after sending
   async function sendMessage(): Promise<null> {
     sendStatus = "working";
+    let response: { data: null } | { error: Failure };
     // safe as there is no thread 0
-    // let response: null | Failure;
+    console.log("thread", threadId);
     if (threadId) {
-      //   response = await API.writeNote(
-      //     contact.threadId,
-      //     previous.length,
-      //     current.blocks
-      //   );
+      response = await API.writeNote(threadId, thread.length, blocks);
     } else {
-      // just start the relation ship with blocks and email address
-      // people talking to me and richard number one
       // don't send previous.length Can ignore.
-      let response = await API.startRelationship(contactEmailAddress, blocks);
-      if ("error" in response) {
-        sendStatus = "failed";
-        throw "some more error needed";
-        return null;
-      }
-      sendStatus = "suceeded";
+      response = await API.startRelationship(contactEmailAddress, blocks);
     }
+    if ("error" in response) {
+      sendStatus = "failed";
+      throw "some more error needed";
+      return null;
+    }
+    sendStatus = "suceeded";
     return null;
   }
 
