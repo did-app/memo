@@ -3,19 +3,20 @@
   import type { Note } from "../note";
   import { authenticationProcess } from "../sync";
   import * as API from "../sync/api";
+  import type { Failure } from "../sync/client";
+
   import Loading from "../components/Loading.svelte";
   import ContactPage from "./ContactPage.svelte";
 
   export let handle: string;
 
-  type Failure = { error: true };
   type Data = {
     threadId: number | undefined;
     notes: Note[];
     contactEmailAddress: string;
     myEmailAddress: string;
   };
-  async function load(handle: string): Promise<Data | Failure> {
+  async function load(handle: string): Promise<Data | { error: Failure }> {
     let contactEmailAddress = handle;
     let authResponse = await authenticationProcess;
 
@@ -31,7 +32,7 @@
       // There is no 404 as will always try sending
       let profileResponse = await API.fetchProfile(contactEmailAddress);
       if ("error" in profileResponse) {
-        return { error: true };
+        throw "todo error";
       }
       let myEmailAddress = "";
       let greeting = profileResponse.data && profileResponse.data.greeting;
@@ -65,6 +66,14 @@
         }
         let { thread, identifier } = contactResponse.data;
 
+        if (!identifier) {
+          return {
+            threadId: undefined,
+            notes: [],
+            contactEmailAddress,
+            myEmailAddress,
+          };
+        }
         if (thread) {
           let threadId = thread.id;
           let notes = thread.notes.map(function ({

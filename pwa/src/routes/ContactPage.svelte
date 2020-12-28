@@ -39,10 +39,10 @@
     }
     if ("error" in response) {
       sendStatus = "failed";
-      throw "some more error needed";
       return null;
     }
     sendStatus = "suceeded";
+    page.redirect("/");
     return null;
   }
 

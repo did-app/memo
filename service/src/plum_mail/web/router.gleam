@@ -157,6 +157,31 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
+    ["contacts"] -> {
+      try user_id = web.identify_client(request, config)
+      let sql = "
+      WITH contacts AS (
+        SELECT lower_identifier_id
+        FROM pairs
+        WHERE pairs.upper_identifier_id = $1
+        UNION ALL
+        SELECT upper_identifier_id
+        FROM pairs
+        WHERE pairs.lower_identifier_id = $1
+      )
+      SELECT id, email_address, greeting
+      FROM identifiers
+      WHERE id IN (SELECT id FROM contacts)
+      AND id <> $1
+      "
+      let args = [pgo.int(user_id)]
+      try contacts = run_sql.execute(sql, args, identifier.row_to_identifier)
+      // db.run(sql, args, io.debug)
+            http.response(200)
+      |> web.set_resp_json(json.list(list.map(contacts, identifier.to_json)))
+      |> Ok()
+
+    }
     ["relationship", "start"] -> {
       try params = acl.parse_json(request)
       try params = start_relationship.params(params)
@@ -169,10 +194,6 @@ pub fn route(
     // TODO don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim
     ["relationship", contact] -> {
-      let sql = "SELECT * FROM notes WHERE thread_id = 6"
-      io.debug("-------------------")
-      run_sql.execute(sql, [], io.debug)
-      io.debug("-------------------")
       try identifier_id = web.identify_client(request, config)
       try email_address =
         email_address.validate(contact)

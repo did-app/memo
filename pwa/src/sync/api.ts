@@ -55,8 +55,13 @@ export function fetchProfile(emailAddress: string): Call<{ data: Identifier | nu
   return get(path)
 }
 
-export function fetchContact(emailAddress: string): Call<{ data: { identifier: Identifier, thread: Thread | undefined } }> {
+export function fetchContact(emailAddress: string): Call<{ data: { identifier: Identifier | undefined, thread: Thread | undefined } }> {
   const path = "/relationship/" + emailAddress
+  return get(path)
+}
+
+export function fetchContacts(): Call<{ data: { identifier: Identifier }[] }> {
+  const path = "/contacts"
   return get(path)
 }
 
