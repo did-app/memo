@@ -159,7 +159,8 @@ pub fn route(
     }
     ["contacts"] -> {
       try user_id = web.identify_client(request, config)
-      let sql = "
+      let sql =
+        "
       WITH contacts AS (
         SELECT lower_identifier_id
         FROM pairs
@@ -177,10 +178,9 @@ pub fn route(
       let args = [pgo.int(user_id)]
       try contacts = run_sql.execute(sql, args, identifier.row_to_identifier)
       // db.run(sql, args, io.debug)
-            http.response(200)
+      http.response(200)
       |> web.set_resp_json(json.list(list.map(contacts, identifier.to_json)))
       |> Ok()
-
     }
     ["relationship", "start"] -> {
       try params = acl.parse_json(request)

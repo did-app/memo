@@ -88,7 +88,7 @@ export function gatherPrompts(notes: Note[], viewer: string) {
           console.log(block, output);
           output = output.filter(function (item) {
             let reference = item.reference
-            if ('blockIndex' in reference) {
+            if ('blockIndex' in block.reference) {
               return !(reference.note === block.reference.note && reference.blockIndex === block.reference.blockIndex)
 
             } else {
