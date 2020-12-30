@@ -1,11 +1,12 @@
 <script lang="typescript">
   import router from "page";
   import { authenticationProcess } from "../sync";
-  import Loading from "../components/Loading.svelte";
-  import SignIn from "../components/SignIn.svelte";
   import * as API from "../sync/api";
   import type { Identifier } from "../sync/api";
   import type { Failure } from "../sync/client";
+  import { emailAddressToPath } from "../utils";
+  import Loading from "../components/Loading.svelte";
+  import SignIn from "../components/SignIn.svelte";
 
   let loading = true;
   let error: Failure | undefined;
@@ -38,15 +39,6 @@
     router.redirect(emailAddressToPath(contactEmailAddress));
   }
 
-  function emailAddressToPath(emailAddress: string) {
-    let [username, domain] = emailAddress.split("@");
-    if (domain === "plummail.co") {
-      return "/" + username;
-    } else {
-      return "/" + domain + "/" + username;
-    }
-  }
-
   function onSignIn(new_identifier: Identifier) {
     identifier = new_identifier;
     loadContacts();
@@ -66,6 +58,17 @@
   {:else if identifier === undefined}
     <SignIn success={onSignIn} />
   {:else}
+    {identifier.email_address}
+    {#if identifier.greeting === null}
+      <article
+        class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
+        <h2 class="font-bold">Set up a greeting</h2>
+        <p>
+          Help filter new contacts when they reach out to you. visit your
+          <a class="underline" href="/profile">profile page</a>
+        </p>
+      </article>
+    {/if}
     <a
       class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
       href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>

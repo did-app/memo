@@ -3,9 +3,12 @@
   import type { Block } from "../note/elements";
   import * as Thread from "../thread";
   import * as API from "../sync/api";
+  import { emailAddressToPath } from "../utils";
+
   import SpanComponent from "../components/Span.svelte";
   import Composer from "../components/Composer.svelte";
   import SendIcon from "../icons/Send.svelte";
+
   export let id: number;
   export let emailAddress: string;
   export let greeting: Block[] | null;
@@ -41,8 +44,15 @@
   class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
   <h1 class="text-2xl">Hi {emailAddress}</h1>
   <p>
-    Set up your welcome message, that explains how people should get in touch
+    Set up your public greeting, that explains how people should get in touch
     with you.
+  </p>
+  <p>
+    Anyone who visits
+    <a
+      class="underline"
+      href="window.location.origin}{emailAddressToPath(emailAddress)}">{window.location.origin}{emailAddressToPath(emailAddress)}</a>
+    will be able to response this greeting
   </p>
 </article>
 <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
