@@ -1,6 +1,6 @@
 import gleam/string
 
-// TODO regex match from mdn form validation
+// regex match from mdn form validation
 // split into hash user and domain
 // https://en.wikipedia.org/wiki/Email_address#Local-part
 // wiki doesn't have hash as a real definition, but postmark does

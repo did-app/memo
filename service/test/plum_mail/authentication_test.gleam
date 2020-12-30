@@ -7,32 +7,9 @@ import gleam/string
 import gleam/crypto
 import gleam/pgo
 import plum_mail/authentication
-import plum_mail/email_address.{EmailAddress}
 import plum_mail/run_sql
 import plum_mail/support
 import gleam/should
-
-pub fn validate_email_test() {
-  email_address.validate("")
-  |> should.equal(Error(Nil))
-
-  email_address.validate("@")
-  |> should.equal(Error(Nil))
-
-  email_address.validate("    @ ")
-  |> should.equal(Error(Nil))
-
-  email_address.validate("me@")
-  |> should.equal(Error(Nil))
-
-  email_address.validate("@nothing")
-  |> should.equal(Error(Nil))
-
-  email_address.validate("me@example.com")
-  |> should.equal(Ok(EmailAddress("me@example.com")))
-  email_address.validate("   me@example.com ")
-  |> should.equal(Ok(EmailAddress("me@example.com")))
-}
 
 // Fails to authenticate with invalid selector format or validator
 pub fn authenticate_with_link_token_test() {

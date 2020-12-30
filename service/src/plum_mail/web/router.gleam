@@ -113,22 +113,6 @@ pub fn route(
       web.redirect(string.append(config.client_origin, "/"))
       |> http.expire_resp_cookie("token", token_cookie_settings(request))
       |> Ok
-    // ["inbox"] -> {
-    //   try identifier_id = web.identify_client(request, config)
-    //   try conversations = show_inbox.execute(identifier_id)
-    //   // can only show conversations if there is an identifier
-    //   assert Ok(Some(tuple(identifier, _greeting))) =
-    //     authentication.fetch_identifier(identifier_id)
-    //   // If this conversations is the same as the top level conversation object for a page,
-    //   // it can be the start value when switching pages
-    //   http.response(200)
-    //   |> web.set_resp_json(json.object([
-    //     tuple("conversations", conversations),
-    //     // TODO remove
-    //     tuple("identifier", identifier_data(identifier)),
-    //   ]))
-    //   |> Ok()
-    // }
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
       let args = [pgo.text(email_address)]
@@ -231,88 +215,6 @@ pub fn route(
       |> web.set_resp_json(json.null())
       |> Ok
     }
-
-    // ["welcome"] -> {
-    //   io.debug(request)
-    //   try params = acl.parse_form(request)
-    //   assert Ok(topic) = map.get(params, "topic")
-    //   assert Ok(topic) = discuss.validate_topic(topic)
-    //   assert Ok(author_id) = map.get(params, "author_id")
-    //   assert Ok(author_id) = int.parse(author_id)
-    //   // TODO email lib should have comma separated parser
-    //   assert Ok(cc) = map.get(params, "cc")
-    //   assert Ok(cc) = authentication.validate_email(cc)
-    //   assert Ok(message) = map.get(params, "message")
-    //   assert Ok(email_address) = map.get(params, "email")
-    //   assert Ok(email_address) = authentication.validate_email(email_address)
-    //   io.debug(email_address)
-    //   try conversation = start_conversation.execute(topic, author_id)
-    //   assert Ok(author_participation) =
-    //     discuss.load_participation(conversation.id, author_id)
-    //   let params = write_message.Params(content: message, conclusion: False)
-    //   try _ = write_message.execute(author_participation, params)
-    //   // let identifier = case authentication.lookup_identifier(email_address) {
-    //   //   Ok(identifier) -> identifier
-    //   //   Error(_) -> {
-    //   //     assert Ok(identifier) =
-    //   //       plum_mail.identifier_from_email(dynamic.from(email_address.value))
-    //   //     identifier
-    //   //   }
-    //   // }
-    //   let params = add_participant.Params(cc)
-    //   assert Ok(_) = add_participant.execute(author_participation, params)
-    //   let params = add_participant.Params(email_address)
-    //   assert Ok(_) = add_participant.execute(author_participation, params)
-    //   Nil
-    //   io.debug("here")
-    //   http.response(200)
-    //   |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
-    //   |> Ok
-    // }
-    // This might not be a good name as we want a to introduce b
-    // this might be reach out or something. connect(verb) contact(verb noun the same word)
-    // ["introduction", label] -> {
-    //   try params = acl.parse_form(request)
-    //   assert Ok(topic) = map.get(params, "subject")
-    //   assert Ok(topic) = discuss.validate_topic(topic)
-    //   assert Ok(message) = map.get(params, "message")
-    //   assert Ok(from) = map.get(params, "from")
-    //   assert Ok(from) = authentication.validate_email(from)
-    //   let identifier = case authentication.lookup_identifier(from) {
-    //     Ok(identifier) -> identifier
-    //     Error(_) -> {
-    //       assert Ok(identifier) =
-    //         plum_mail.identifier_from_email(dynamic.from(from.value))
-    //       identifier
-    //     }
-    //   }
-    //   try conversation = start_conversation.execute(topic, identifier.id)
-    //   assert Ok(starter_participation) =
-    //     discuss.load_participation(conversation.id, identifier.id)
-    //   let params = write_message.Params(content: message, conclusion: False)
-    //   try _ = write_message.execute(starter_participation, params)
-    //   let email_address = string.concat([label, "@plummail.co"])
-    //   let addresses = case email_address == "team@plummail.co" {
-    //     True -> ["peter@plummail.co", "richard@plummail.co"]
-    //     False -> [email_address]
-    //   }
-    //   // TODO need a load participation function that takes integers
-    //   list.each(
-    //     addresses,
-    //     fn(email_address) {
-    //       assert Ok(email_address) =
-    //         authentication.validate_email(email_address)
-    //       let params = add_participant.Params(email_address)
-    //       // TODO note why does this not return participation
-    //       assert Ok(tuple(identifier_id, conversation_id)) =
-    //         add_participant.execute(starter_participation, params)
-    //       Nil
-    //     },
-    //   )
-    //   http.response(201)
-    //   |> http.set_resp_body(bit_builder.from_bit_string(<<"message sent":utf8>>))
-    //   |> Ok
-    // }
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
