@@ -5,6 +5,8 @@
     "test": "web-test-runner \"src/**/*.test.ts\""
   },
   "dependencies": {
+    "@sentry/browser": "^5.29.2",
+    "@sentry/tracing": "^5.29.2",
     "page": "^1.11.6",
     "svelte": "^3.24.0"
   },

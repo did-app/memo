@@ -1,3 +1,14 @@
+import * as Sentry from "@sentry/browser";
+import { Integrations } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: 'https://e3b301fb356a4e61bebf8edb110af5b3@o351506.ingest.sentry.io/5574979',
+  integrations: [
+    new Integrations.BrowserTracing(),
+  ],
+
+  tracesSampleRate: 1.0,
+});
 import App from "./App.svelte";
 
 var app = new App({
@@ -14,3 +25,7 @@ if (import.meta.hot) {
     app.$destroy();
   });
 }
+
+alert("hello")
+let myUndefinedFunction: any;
+myUndefinedFunction();
