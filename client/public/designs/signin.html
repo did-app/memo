@@ -1,0 +1,181 @@
+<html lang="en" dir="ltr" class="js-focus-visible" data-js-focus-visible="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/vendor/github-markdown.min.css" crossorigin="anonymous">
+  <script src="https://app.plummail.co/vendor/marked.min.js"></script>
+  <script src="https://kit.fontawesome.com/f868aafb81.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://app.plummail.co/vendor/TextTip.css">
+  <link rel="stylesheet" href="https://app.plummail.co/css/extra.css">
+  <script src="https://app.plummail.co/vendor/minisearch.min.js"></script>
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="https://plummail.co/images/favicon-16x16.png" sizes="16x16">
+  <title>plum mail</title>
+  <script async="" defer="" src="/build/main.js"></script>
+  <script async="" defer="" data-domain="app.plummail.co" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    .spinner-animate-to-result {
+      margin: 0 auto;
+      padding-top: 40px;
+      width: 30px;
+    }
+
+    .spinner {
+      -webkit-animation-name: spinner-anim;
+      animation-name: spinner-anim;
+      -webkit-animation-duration: 500ms;
+      animation-duration: 500ms;
+      -webkit-animation-timing-function: linear;
+      animation-timing-function: linear;
+      -webkit-animation-iteration-count: infinite;
+      animation-iteration-count: infinite;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      -webkit-transform-origin: 50% 50%;
+      -moz-transform-origin: 50px 50px;
+      transition: opacity 300ms;
+      fill: none;
+      stroke: #48bb78;
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    .spinner.--spinner-complete {
+      opacity: 0;
+    }
+
+    @-webkit-keyframes spinner-anim {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spinner-anim {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .success-ring {
+      stroke-dasharray: 285;
+      stroke-dashoffset: -257;
+      transform-origin: 50% 50%;
+      opacity: 0;
+      fill: none;
+      stroke: #48bb78;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2;
+    }
+
+    .success-ring.--ring-complete {
+      -webkit-animation: success-ring 200ms ease-in forwards;
+      animation: success-ring 200ms ease-in forwards;
+      opacity: 1;
+    }
+
+    @-webkit-keyframes success-ring {
+      0% {
+        stroke-dashoffset: -100;
+      }
+
+      100% {
+        stroke-dashoffset: 100;
+      }
+    }
+
+    @keyframes success-ring {
+      0% {
+        stroke-dashoffset: -100;
+      }
+
+      100% {
+        stroke-dashoffset: 100;
+      }
+    }
+
+    .tick {
+      stroke-dasharray: 110;
+      stroke-dashoffset: -110;
+      fill: none;
+      stroke: #48bb78;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tick.--tick-complete {
+      -webkit-animation: tick-anim 1s ease-in forwards;
+      animation: tick-anim 1s ease-in forwards;
+      stroke-width: 4;
+    }
+
+    @-webkit-keyframes tick-anim {
+      0% {
+        stroke-dashoffset: -110;
+      }
+
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes tick-anim {
+      0% {
+        stroke-dashoffset: -110;
+      }
+
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+  </style>
+  <script>
+    var animPhaseOne = 500;
+    var animPhaseTwo = animPhaseOne + 750;
+
+    setTimeout(function() {
+      document.getElementById('js-spinner').classList.add('--spinner-complete');
+    }, animPhaseOne);
+
+    setTimeout(function() {
+      document.getElementById('js-success-tick').classList.add('--tick-complete');
+    }, animPhaseOne);
+
+    setTimeout(function() {
+      document.getElementById('js-success-ring').classList.add('--ring-complete');
+    }, animPhaseOne);
+
+  </script>
+</head>
+
+<body class="min-h-screen text-gray-800 bg-gray-200">
+  <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
+    <div class="absolute bottom-0 flex flex-col left-0  p-4 right-0 top-0 bg-body">
+      <div class="md:rounded-2xl m-auto w-full max-w-2xl my-shadow p-6 rounded-lg text-center z-0 bg-white">
+        <h1 class="font-serif text-indigo-800 lg:text-6xl text-4xl">Plum Mail</h1>
+        <form class="max-w-sm block mx-auto ">
+          <input type="email" required="" autocomplete="email" class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none" placeholder="Email Address">
+          <input type="password" required="" class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none hidden" placeholder="Password">
+          <button class="w-full px-4 py-2 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2" type="submit">Sign in</button>
+          <div class="spinner-animate-to-result">
+            <svg viewBox="0, 0, 100, 100">
+              <g transform="">
+                <circle class="spinner" id="js-spinner"  stroke-miterlimit="10" cx="50" cy="50" r="44"/>
+                <polyline class="tick" id="js-success-tick" stroke-miterlimit="10" points="93,15 49,65 28,42"/>
+                <svg viewBox="0 0 50 50">
+          <path class="success-ring" id="js-success-ring" d="M37.06,4.74A23.6,23.6,0,0,0,6.63,8.93a23.32,23.32,0,0,0-.91,29.25,23.34,23.34,0,0,0,29.86,6.06A23.46,23.46,0,0,0,46.1,16.36"/>
+                </svg>
+            </g>
+            </svg>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>
