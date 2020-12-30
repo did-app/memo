@@ -3,7 +3,6 @@ import gleam/list
 import gleam/option.{Option}
 import gleam/json.{Json}
 import gleam/pgo
-import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/run_sql
 

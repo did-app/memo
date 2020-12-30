@@ -80,13 +80,15 @@
           class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
           placeholder="Email Address" />
 
-        <input
-          class:hidden={!hasPassword(emailAddress)}
-          type="password"
-          required
-          bind:value={password}
-          class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
-          placeholder="Password" />
+        {#if hasPassword(emailAddress)}
+          <input
+            type="password"
+            required
+            autocomplete="current-password"
+            bind:value={password}
+            class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
+            placeholder="Password" />
+        {/if}
         <button
           class="w-full px-4 py-2 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2"
           type="submit">{message}</button>

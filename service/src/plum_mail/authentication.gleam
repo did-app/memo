@@ -10,6 +10,7 @@ import gleam/json
 import gleam/pgo
 import plum_mail/run_sql
 import plum_mail/error
+import plum_mail/identifier
 
 fn random_string(entropy) {
   crypto.strong_random_bytes(entropy)
@@ -81,20 +82,19 @@ pub fn validate_link_token(token_string) {
   try Token(selector, secret) = parse_token(token_string)
   let sql =
     "
-      SELECT i.id, i.email_address, validator, selector, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
+      SELECT i.id, i.email_address, i.greeting, validator, selector, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
       FROM link_tokens AS lt
       JOIN identifiers AS i ON i.id = lt.identifier_id
       WHERE selector = $1
       "
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
-    // TODO does this need more than the id
-    let identifier = todo("row_to_identifier(row)")
-    assert Ok(validator) = dynamic.element(row, 2)
+    let identifier = identifier.row_to_identifier(row)
+    assert Ok(validator) = dynamic.element(row, 3)
     assert Ok(validator) = dynamic.string(validator)
-    assert Ok(link_token_selector) = dynamic.element(row, 3)
+    assert Ok(link_token_selector) = dynamic.element(row, 4)
     assert Ok(link_token_selector) = dynamic.string(link_token_selector)
-    assert Ok(current) = dynamic.element(row, 4)
+    assert Ok(current) = dynamic.element(row, 5)
     assert Ok(current) = dynamic.bool(current)
     tuple(identifier, validator, link_token_selector, current)
   }

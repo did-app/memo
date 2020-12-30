@@ -1,4 +1,5 @@
 import gleam/dynamic.{Dynamic}
+import gleam/io
 import gleam/string
 import gleam/json
 import gleam/http
@@ -45,7 +46,16 @@ pub fn execute(params, config) {
     ]
     |> string.join("")
 
-  try _ = postmark.send_email(from, to, subject, body, postmark_api_token)
+  case postmark_api_token {
+    "POSTMARK_DUMMY_TOKEN" -> {
+      io.debug(body)
+      Ok(Nil)
+    }
+    _ -> {
+      try _ = postmark.send_email(from, to, subject, body, postmark_api_token)
+      Ok(Nil)
+    }
+  }
 
   Ok(Nil)
 }
