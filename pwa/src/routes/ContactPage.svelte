@@ -176,7 +176,7 @@
       class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
       <header class="ml-12 mb-6 flex text-gray-600">
         <span class="font-bold">{author}</span>
-        <span class="ml-auto">{inserted_at}</span>
+        <span class="ml-auto">{inserted_at.toLocaleDateString()}</span>
       </header>
       <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
       <Fragment {blocks} active={noteSelection[index] || {}} {thread} />
@@ -217,7 +217,7 @@
     <!-- TODO make sure spans paragraphs notes can't be empty -->
     <header class="ml-12 mb-6 flex text-gray-600">
       <span class="font-bold">{myEmailAddress}</span>
-      <span class="ml-auto">{new Date()}</span>
+      <span class="ml-auto">{new Date().toLocaleDateString()}</span>
     </header>
     <Fragment {blocks} {thread} />
     {#each suggestions as block, index}
