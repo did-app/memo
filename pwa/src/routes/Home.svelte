@@ -49,6 +49,7 @@
   {#if loading}
     <Loading />
   {:else if identifier === undefined}
+    <!-- TODO load contacts -->
     <SignIn success={(new_identifier) => (identifier = new_identifier)} />
   {:else}
     <ol>

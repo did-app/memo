@@ -167,24 +167,26 @@ pub fn route(
       let sql =
         "
       WITH contacts AS (
-        SELECT lower_identifier_id
+        SELECT lower_identifier_id AS contact_id
         FROM pairs
         WHERE pairs.upper_identifier_id = $1
         UNION ALL
-        SELECT upper_identifier_id
+        SELECT upper_identifier_id AS contact_id
         FROM pairs
         WHERE pairs.lower_identifier_id = $1
       )
       SELECT id, email_address, greeting
       FROM identifiers
-      WHERE id IN (SELECT id FROM contacts)
+      WHERE id IN (SELECT contact_id FROM contacts)
       AND id <> $1
       "
       let args = [pgo.int(user_id)]
       try contacts = run_sql.execute(sql, args, identifier.row_to_identifier)
       // db.run(sql, args, io.debug)
       http.response(200)
-      |> web.set_resp_json(json.list(list.map(contacts, identifier.to_json)))
+      |> web.set_resp_json(json.list(list.map(contacts, fn(contact) {
+        json.object([tuple("identifier", identifier.to_json(contact))])
+      })))
       |> Ok()
     }
     ["relationship", "start"] -> {
@@ -526,7 +528,8 @@ pub fn handle(
       |> http.prepend_resp_header("access-control-allow-credentials", "true")
       |> http.prepend_resp_header(
         "access-control-allow-headers",
-        "content-type",
+        // TODO decide if we want to keep sentry trace header
+        "content-type, sentry-trace",
       )
   }
   // |> io.debug()
