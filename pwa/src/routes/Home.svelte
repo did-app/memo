@@ -35,13 +35,21 @@
 
   let contactEmailAddress: string;
   function findContact() {
-    console.log(contactEmailAddress);
-    let [username, domain] = contactEmailAddress.split("@");
+    router.redirect(emailAddressToPath(contactEmailAddress));
+  }
+
+  function emailAddressToPath(emailAddress: string) {
+    let [username, domain] = emailAddress.split("@");
     if (domain === "plummail.co") {
-      router.redirect("/" + username);
+      return "/" + username;
     } else {
-      router.redirect("/" + domain + "/" + username);
+      return "/" + domain + "/" + username;
     }
+  }
+
+  function onSignIn(new_identifier: Identifier) {
+    identifier = new_identifier;
+    loadContacts();
   }
 </script>
 
@@ -50,11 +58,20 @@
     <Loading />
   {:else if identifier === undefined}
     <!-- TODO load contacts -->
-    <SignIn success={(new_identifier) => (identifier = new_identifier)} />
+    <SignIn success={onSignIn} />
   {:else}
+    <a
+      class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
+      href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
     <ol>
+      <h1>Your contacts</h1>
       {#each contacts as { identifier }}
-        <li>{identifier.email_address}</li>
+        <li>
+          <a
+            class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl"
+            href={emailAddressToPath(identifier.email_address)}>
+            {identifier.email_address}</a>
+        </li>
       {/each}
     </ol>
     <form on:submit|preventDefault={findContact}>
@@ -62,8 +79,5 @@
       <input type="email" bind:value={contactEmailAddress} />
       <button type="submit">Submit</button>
     </form>
-    <a
-      class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
-      href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
   {/if}
 </main>

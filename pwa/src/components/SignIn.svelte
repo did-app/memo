@@ -64,6 +64,7 @@
         <input
           type="email"
           required
+          autocomplete="email"
           bind:value={emailAddress}
           class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
           placeholder="Email Address" />
