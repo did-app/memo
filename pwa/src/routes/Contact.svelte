@@ -15,6 +15,7 @@
 
   type Data = {
     threadId: number | undefined;
+    ack: number;
     notes: Note[];
     contactEmailAddress: string;
     myEmailAddress: string;
@@ -52,6 +53,7 @@
         : [];
       return {
         threadId: undefined,
+        ack: 0,
         notes,
         contactEmailAddress,
         myEmailAddress,
@@ -79,6 +81,7 @@
         if (!identifier) {
           return {
             threadId: undefined,
+            ack: 0,
             notes: [],
             contactEmailAddress,
             myEmailAddress,
@@ -95,6 +98,7 @@
           });
           return {
             threadId,
+            ack: thread.ack,
             notes: notes,
             contactEmailAddress,
             myEmailAddress,
@@ -114,6 +118,8 @@
             : [];
           return {
             threadId: undefined,
+            // It's not outstand to have not yet answered a greeting
+            ack: 1,
             notes,
             contactEmailAddress,
             myEmailAddress,
@@ -148,6 +154,7 @@
       <ContactPage
         thread={response.notes.map(mapSuggestions)}
         threadId={response.threadId}
+        ack={response.ack}
         contactEmailAddress={response.contactEmailAddress}
         myEmailAddress={response.myEmailAddress} />
     {/if}

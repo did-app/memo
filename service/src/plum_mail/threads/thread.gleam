@@ -65,9 +65,10 @@ pub fn load_notes(thread_id) {
 }
 
 pub fn to_json(thread) {
-  let tuple(thread_id, notes) = thread
+  let tuple(thread_id, ack, notes) = thread
   json.object([
     tuple("id", json.int(thread_id)),
+    tuple("ack", json.int(ack)),
     tuple("notes", json.list(notes)),
   ])
 }

@@ -54,6 +54,7 @@ export type Note = {
 }
 export type Thread = {
   id: number,
+  ack: number,
   notes: Note[]
 }
 
@@ -84,4 +85,11 @@ export function writeNote(threadId: number, counter: number, blocks: Block[]): C
   const path = "/threads/" + threadId + "/post"
   const params = { counter, blocks }
   return post(path, params)
+}
+
+export function acknowledge(threadId: number, counter: number): Call<{ data: {} }> {
+  const path = "/threads/" + threadId + "/acknowledge"
+  const params = { counter }
+  return post(path, params)
+
 }

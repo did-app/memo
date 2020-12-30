@@ -35,10 +35,10 @@ import plum_mail/discuss/set_notification
 import plum_mail/discuss/add_participant
 import plum_mail/discuss/add_pin
 import plum_mail/discuss/delete_pin
-import plum_mail/discuss/mark_done
 import plum_mail/discuss/write_message
 import plum_mail/discuss/read_message
 import plum_mail/threads/thread
+import plum_mail/threads/acknowledge
 import plum_mail/relationships/lookup_relationship
 import plum_mail/relationships/start_relationship
 import plum_mail/email/inbound/postmark
@@ -245,10 +245,16 @@ pub fn route(
       try author_id = web.identify_client(request, config)
       // // TODO a participation thing again
       try notes = thread.write_note(thread_id, counter, author_id, blocks)
-      http.response(200)
-      |> web.set_resp_json(json.null())
-      |> Ok
+      no_content()
     }
+    ["threads", thread_id, "acknowledge"] -> {
+      try raw = acl.parse_json(request)
+      try params = acknowledge.params(raw, thread_id)
+      try author_id = web.identify_client(request, config)
+      try _ = acknowledge.execute(params, author_id)
+      no_content()
+    }
+
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
@@ -388,15 +394,6 @@ pub fn route(
       try params = read_message.params(params)
       try participation = load_participation(id, request, config)
       try _ = read_message.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-      |> Ok
-    }
-    ["c", id, "mark_done"] -> {
-      try params = acl.parse_json(request)
-      try params = mark_done.params(params)
-      try participation = load_participation(id, request, config)
-      try _ = mark_done.execute(participation, params)
       http.response(201)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
