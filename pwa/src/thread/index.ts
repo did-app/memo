@@ -1,4 +1,4 @@
-import { ANNOTATION, LINK, PARAGRAPH, TEXT, PROMPT } from "../note/elements"
+import { ANNOTATION, LINK, PARAGRAPH, TEXT, PROMPT, SOFTBREAK } from "../note/elements"
 import type { Block, Link, Span, Annotation } from "../note/elements"
 import type { Range } from "../note/range"
 import type { Note } from "../note"
@@ -50,7 +50,14 @@ export function findPinnable(notes: Note[]): Pin[] {
 export function summary(blocks: Block[]): Span[] {
   let first: Block = blocks[0]
   if (first.type === PARAGRAPH) {
-    return first.spans
+    let firstBreak = first.spans.findIndex(function (span: Span) {
+      return span.type === SOFTBREAK
+    })
+    if (firstBreak === -1) {
+      return first.spans
+    } else {
+      return first.spans.slice(0, firstBreak)
+    }
   } else {
     return [{ type: "text", text: "TODO summary of nested" }]
   }
