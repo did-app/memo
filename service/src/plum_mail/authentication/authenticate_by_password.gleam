@@ -1,17 +1,31 @@
+import gleam/dynamic.{Dynamic}
+import plum_mail/acl
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
 
-pub fn run(username, password) {
+pub type Params {
+  Params(email_address: EmailAddress, password: String)
+}
+
+pub fn params(raw: Dynamic) {
+  try email_address = acl.required(raw, "email_address", acl.as_email)
+  try password = acl.required(raw, "password", acl.as_string)
+  Params(email_address, password)
+  |> Ok
+}
+
+pub fn run(params) {
   // Hardcoded because we don't want password word field on db model yet.
   // looking at alternative (OAuth) solutions
   // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
-  assert Ok(email_address) = case username {
-    "peter" -> {
+  let Params(email_address, password) = params
+  assert Ok(email_address) = case email_address.value {
+    "peter@plummail.co" -> {
       let True = password == "onion"
       assert Ok(email_address) = email_address.validate("peter@plummail.co")
       Ok(email_address)
     }
-    "richard" -> {
+    "richard@plummail.co" -> {
       let True = password == "sprout"
       assert Ok(email_address) = email_address.validate("richard@plummail.co")
       Ok(email_address)

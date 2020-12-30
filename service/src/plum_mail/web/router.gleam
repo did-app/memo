@@ -63,12 +63,17 @@ pub fn route(
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
-    ["authenticate", username, password] -> {
-      assert Ok(identifier) = authenticate_by_password.run(username, password)
+    ["authenticate", "password"] -> {
+      try params = acl.parse_json(request)
+      try params = authenticate_by_password.params(params)
+      try identifier = authenticate_by_password.run(params)
       assert Ok(user_agent) = http.get_req_header(request, "user-agent")
-      let token = web.auth_token(identifier.id, user_agent, config.secret)
-      web.redirect(string.append(config.client_origin, "/"))
+            let token = web.auth_token(identifier.id, user_agent, config.secret)
+
+      http.response(200)
+            |> web.set_resp_json(identifier.to_json(identifier))
       |> http.set_resp_cookie("token", token, token_cookie_settings(request))
+
       |> Ok
     }
     ["authenticate"] -> {

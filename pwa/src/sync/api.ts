@@ -27,6 +27,13 @@ export function authenticateWithEmail(emailAddress: string) {
   return post(path, params);
 }
 
+export function authenticateWithPassword(emailAddress: string, password: string): Call<{ data: Identifier }> {
+  const path = "/authenticate/password"
+  const params = { email_address: emailAddress, password }
+  return post(path, params);
+}
+
+
 // User Accont calls
 
 export function saveGreeting(identifier_id: number, blocks: Block[]): Call<{ data: unknown }> {

@@ -1,16 +1,36 @@
 <script type="typescript">
   import * as API from "../sync/api";
+  import type { Identifier } from "../sync/api";
+  import * as Sync from "../sync";
 
+  export let success: (identifier: Identifier) => void;
   let error: {};
   let emailAddress: string = "";
+  let password: string = "";
   let emailSent = false;
   let accountRequired = false;
-  async function requestEmailAuthentication() {
-    let response = await API.authenticateWithEmail(emailAddress);
-    if ("error" in response) {
-      throw "Bad email ";
+
+  async function authenticate() {
+    if (hasPassword(emailAddress)) {
+      let response = await Sync.authenticateWithPassword(
+        emailAddress,
+        password
+      );
+      if ("error" in response) {
+        throw "Bad email ";
+      }
+      success(response.data);
+    } else {
+      let response = await API.authenticateWithEmail(emailAddress);
+      if ("error" in response) {
+        throw "Bad email ";
+      }
+      emailSent = true;
     }
-    emailSent = true;
+  }
+
+  function hasPassword(emailAddress: string): boolean {
+    return emailAddress.split("@")[1] === "plummail.co";
   }
 </script>
 
@@ -39,7 +59,7 @@
       </div>
     {:else}
       <form
-        on:submit|preventDefault={requestEmailAuthentication}
+        on:submit|preventDefault={authenticate}
         class="max-w-sm block mx-auto ">
         <input
           type="email"
@@ -47,6 +67,14 @@
           bind:value={emailAddress}
           class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
           placeholder="Email Address" />
+
+        <input
+          class:hidden={!hasPassword(emailAddress)}
+          type="password"
+          required
+          bind:value={password}
+          class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
+          placeholder="Password" />
         <button
           class="w-full px-4 py-2 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2"
           type="submit">Sign in</button>

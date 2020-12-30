@@ -2,7 +2,7 @@ import type { Call } from "./client"
 import * as API from "./api"
 import type { Identifier } from "./api"
 
-export async function startSync(): Call<Identifier> {
+export async function startSync(): Call<{ data: Identifier }> {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('/sw.js').then(function (registration) {
@@ -35,12 +35,14 @@ export async function startSync(): Call<Identifier> {
   }
 
   const result = await authenticationProcess;
-  if ('data' in result) {
-    return result.data
-  } else {
-    return result
-  }
+  return result
 
 }
 
-export const authenticationProcess = startSync();
+export let authenticationProcess: Call<{ data: Identifier }> = startSync();
+
+export async function authenticateWithPassword(emailAddress: string, password: string) {
+  let response = API.authenticateWithPassword(emailAddress, password);
+  authenticationProcess = response;
+  return response
+}
