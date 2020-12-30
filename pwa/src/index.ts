@@ -25,7 +25,3 @@ if (import.meta.hot) {
     app.$destroy();
   });
 }
-
-alert("hello")
-let myUndefinedFunction: any;
-myUndefinedFunction();
