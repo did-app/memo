@@ -3,7 +3,7 @@
   import { parse } from "../note";
   import type { Note } from "../note";
   import { ANNOTATION, LINK } from "../note/elements";
-  import type { Block } from "../note/elements";
+  import type { Block, Annotation } from "../note/elements";
   import { isCollapsed } from "../note/range";
   import type { Range } from "../note/range";
   import { getSelected } from "../thread/view";
@@ -17,6 +17,7 @@
   import LinkComponent from "../components/Link.svelte";
   import SpanComponent from "../components/Span.svelte";
   import AttachmentIcon from "../icons/attachment.svelte";
+  import AnnotationComponent from "../components/Annotation.svelte";
 
   export let thread: Note[];
   export let threadId: number | undefined;
@@ -103,18 +104,23 @@
     }
   );
 
-  function mapAnnotation({
-    reference,
-    raw,
-  }: {
+  function mapAnnotation(draft: {
     reference: Reference;
     raw: string;
-  }) {
-    return {
-      type: "annotation",
-      reference,
-      blocks: parse(raw),
-    };
+  }): Annotation[] {
+    const { reference, raw } = draft;
+    let blocks = parse(raw);
+    if (blocks) {
+      return [
+        {
+          type: "annotation",
+          reference,
+          blocks,
+        },
+      ];
+    } else {
+      return [];
+    }
   }
 
   // DOESNT WORK ON ACTIVE message
@@ -144,7 +150,9 @@
   let choices: { ask: string; when: string }[];
   let suggestions: Block[] = [];
   $: blocks = (function (): Block[] {
-    let b = [...annotations.map(mapAnnotation), ...parse(draft)];
+    let content = parse(draft);
+    let mappedAnnotations: Annotation[] = annotations.flatMap(mapAnnotation);
+    let b = content ? [...mappedAnnotations, ...content] : mappedAnnotations;
     // suggestions = Thread.makeSuggestions(b);
     console.log("choice maping");
 
@@ -166,6 +174,9 @@
   }
 </style>
 
+<svelte:head>
+  <title>{contactEmailAddress}</title>
+</svelte:head>
 <!-- TODO pass this message as the notes to the composer -->
 <!-- This goes to a fragment that binds on block -->
 <div class="" bind:this={root}>

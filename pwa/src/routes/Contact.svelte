@@ -61,7 +61,13 @@
       const myEmailAddress = authResponse.data.email_address;
       if (myEmailAddress === contactEmailAddress) {
         page.redirect("/profile");
-        throw "redirected";
+        // throw after redirect results in unhandled promise logged in sentry
+        return {
+          error: {
+            code: "forbidden",
+            detail: "Cannot view contact page for self",
+          },
+        };
       } else {
         let contactResponse = await API.fetchContact(contactEmailAddress);
         if ("error" in contactResponse) {

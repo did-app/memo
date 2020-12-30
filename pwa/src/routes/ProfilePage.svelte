@@ -10,16 +10,18 @@
   export let emailAddress: string;
   export let greeting: Block[] | null;
 
-  let draft = toString(greeting || []);
-  let blocks: Block[] = [];
+  let draft = toString(greeting);
+  let blocks: Block[] | null = null;
   let suggestions: Thread.Question[] = [];
   type SaveStatus = "available" | "working" | "suceeded" | "failed";
   let saveStatus: SaveStatus = "available";
 
-  $: blocks = (function (): Block[] {
+  $: blocks = (function (): Block[] | null {
     saveStatus = "available";
     let blocks = parse(draft);
-    suggestions = Thread.makeSuggestions(blocks);
+    if (blocks !== null) {
+      suggestions = Thread.makeSuggestions(blocks);
+    }
     return blocks;
   })();
 

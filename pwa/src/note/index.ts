@@ -40,7 +40,11 @@ function parseLine(line: string, offset: number) {
   return output
 }
 
-export function parse(draft: string) {
+export function parse(draft: string): null | Block[] {
+  draft = draft.trim()
+  if (draft.length === 0) {
+    return null
+  }
   // TODO remove any
   const { doc, node } = draft.split(/\n/).reduce(function ({ doc, node, offset }: any, line) {
     if (line.trim() == "") {
@@ -74,7 +78,10 @@ export function parse(draft: string) {
   return doc
 }
 
-export function toString(blocks: Block[]): string {
+export function toString(blocks: Block[] | null): string {
+  if (blocks === null) {
+    return ""
+  }
   return blocks.map(function (block) {
     if (block.type === PARAGRAPH) {
       return block.spans.map(function (span: Span) {

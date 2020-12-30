@@ -36,7 +36,7 @@ export function authenticateByPassword(emailAddress: string, password: string): 
 
 // User Accont calls
 
-export function saveGreeting(identifier_id: number, blocks: Block[]): Call<{ data: unknown }> {
+export function saveGreeting(identifier_id: number, blocks: Block[] | null): Call<{ data: unknown }> {
   const path = "/identifiers/" + identifier_id + "/greeting"
   const params = { blocks }
   return post(path, params)
