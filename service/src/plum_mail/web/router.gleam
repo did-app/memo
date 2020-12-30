@@ -17,11 +17,12 @@ import gleam/pgo
 // Web/utils let session = utils.extractsession
 import datetime
 import plum_mail
-import plum_mail/config
+import plum_mail/config.{Config}
 import plum_mail/error.{Reason}
 import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
+import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/email_address.{EmailAddress}
@@ -58,41 +59,34 @@ fn token_cookie_settings(request) {
   http.CookieAttributes(..defaults, max_age: Some(604800))
 }
 
+fn successful_authentication(identifier, request, config) {
+  let Identifier(id: identifier_id, ..) = identifier
+  let Config(secret: secret, ..) = config
+  assert Ok(user_agent) = http.get_req_header(request, "user-agent")
+  let token = web.auth_token(identifier_id, user_agent, secret)
+  http.response(200)
+  |> web.set_resp_json(identifier.to_json(identifier))
+  |> http.set_resp_cookie("token", token, token_cookie_settings(request))
+  |> Ok
+}
+
 pub fn route(
   request,
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
     ["authenticate", "password"] -> {
-      try params = acl.parse_json(request)
-      try params = authenticate_by_password.params(params)
+      try raw = acl.parse_json(request)
+      try params = authenticate_by_password.params(raw)
       try identifier = authenticate_by_password.run(params)
-      assert Ok(user_agent) = http.get_req_header(request, "user-agent")
-            let token = web.auth_token(identifier.id, user_agent, config.secret)
-
-      http.response(200)
-            |> web.set_resp_json(identifier.to_json(identifier))
-      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
-
-      |> Ok
+      successful_authentication(identifier, request, config)
     }
-    ["authenticate"] -> {
-      // link tokens last for ever so might as well be a signed message as well
-      // delete and use purpose link token
-      try params = acl.parse_json(request)
-      try link_token = acl.required(params, "link_token", acl.as_string)
-      try identifier =
-        authentication.validate_link_token(link_token)
-        |> result.map_error(fn(_: Nil) { error.Forbidden })
-      assert Ok(user_agent) = http.get_req_header(request, "user-agent")
-      let Identifier(id: identifier_id, ..) = identifier
-      let token = web.auth_token(identifier_id, user_agent, config.secret)
-      http.response(200)
-      |> web.set_resp_json(identifier.to_json(identifier))
-      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
-      |> Ok
+    ["authenticate", "code"] -> {
+      try raw = acl.parse_json(request)
+      try params = authenticate_by_code.params(raw)
+      try identifier = authenticate_by_code.run(params)
+      successful_authentication(identifier, request, config)
     }
-    // TODO rename above as "code"
     ["authenticate", "session"] -> {
       try identifier_id = web.identify_client(request, config)
       try identifier = identifier.fetch_by_id(identifier_id)
@@ -184,9 +178,12 @@ pub fn route(
       try contacts = run_sql.execute(sql, args, identifier.row_to_identifier)
       // db.run(sql, args, io.debug)
       http.response(200)
-      |> web.set_resp_json(json.list(list.map(contacts, fn(contact) {
-        json.object([tuple("identifier", identifier.to_json(contact))])
-      })))
+      |> web.set_resp_json(json.list(list.map(
+        contacts,
+        fn(contact) {
+          json.object([tuple("identifier", identifier.to_json(contact))])
+        },
+      )))
       |> Ok()
     }
     ["relationship", "start"] -> {
