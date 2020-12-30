@@ -5,23 +5,23 @@
   import SignIn from "../components/SignIn.svelte";
   import * as API from "../sync/api";
   import type { Identifier } from "../sync/api";
+  import type { Failure } from "../sync/client";
 
   let loading = true;
+  let error: Failure | undefined;
   let identifier: Identifier | undefined;
   // This can probably be done by binding on an authenticationState store
   (async function () {
-    try {
-      let response = await authenticationProcess;
-      if ("error" in response) {
-        throw "TODO error";
-      } else {
-        identifier = response.data;
-        loadContacts();
-      }
-    } catch (error) {
-    } finally {
-      loading = false;
+    let response = await authenticationProcess;
+    if ("error" in response && response.error.code === "forbidden") {
+      // Do nothing loading will be set to false
+    } else if ("error" in response) {
+      error = response.error;
+    } else {
+      identifier = response.data;
+      loadContacts();
     }
+    loading = false;
   })();
 
   let contacts: { identifier: Identifier }[] = [];
@@ -54,10 +54,16 @@
 </script>
 
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
+  {#if error !== undefined}
+    <article
+      class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-red-700">
+      <!-- Title vs detail -->
+      {error.detail}
+    </article>
+  {/if}
   {#if loading}
     <Loading />
   {:else if identifier === undefined}
-    <!-- TODO load contacts -->
     <SignIn success={onSignIn} />
   {:else}
     <a

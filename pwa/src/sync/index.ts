@@ -28,10 +28,10 @@ export async function startSync(): Call<{ data: Identifier }> {
   let authenticationProcess: Call<{ data: Identifier }>;
   if (code !== null) {
     window.location.hash = "#";
-    authenticationProcess = API.authenticateWithCode(code)
+    authenticationProcess = API.authenticateByCode(code)
   } else {
     // if code should always fail even if user session exists because trying to change.
-    authenticationProcess = API.authenticateWithSession()
+    authenticationProcess = API.authenticateBySession()
   }
 
   const result = await authenticationProcess;
@@ -41,8 +41,8 @@ export async function startSync(): Call<{ data: Identifier }> {
 
 export let authenticationProcess: Call<{ data: Identifier }> = startSync();
 
-export async function authenticateWithPassword(emailAddress: string, password: string) {
-  let response = API.authenticateWithPassword(emailAddress, password);
+export async function authenticateByPassword(emailAddress: string, password: string) {
+  let response = API.authenticateByPassword(emailAddress, password);
   authenticationProcess = response;
   return response
 }

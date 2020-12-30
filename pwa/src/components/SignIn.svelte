@@ -20,10 +20,7 @@
     let delay = wait(600);
     if (hasPassword(emailAddress)) {
       message = "Checking credentials";
-      let response = await Sync.authenticateWithPassword(
-        emailAddress,
-        password
-      );
+      let response = await Sync.authenticateByPassword(emailAddress, password);
       await delay;
       if ("error" in response) {
         throw "Bad email ";
@@ -34,7 +31,7 @@
     } else {
       message = "Working";
 
-      let response = await API.authenticateWithEmail(emailAddress);
+      let response = await API.authenticateByEmail(emailAddress);
       await delay;
       if ("error" in response) {
         throw "Bad email ";

@@ -10,24 +10,24 @@ export type Identifier = {
 
 // Authentication
 
-export function authenticateWithCode(code: string): Call<{ data: Identifier }> {
+export function authenticateByCode(code: string): Call<{ data: Identifier }> {
   const path = "/authenticate/code"
   const params = { code }
   return post(path, params)
 }
 
-export function authenticateWithSession(): Call<{ data: Identifier }> {
+export function authenticateBySession(): Call<{ data: Identifier }> {
   const path = "/authenticate/session"
   return get(path)
 }
 
-export function authenticateWithEmail(emailAddress: string) {
+export function authenticateByEmail(emailAddress: string) {
   const path = "/authenticate/email"
   const params = { email_address: emailAddress }
   return post(path, params);
 }
 
-export function authenticateWithPassword(emailAddress: string, password: string): Call<{ data: Identifier }> {
+export function authenticateByPassword(emailAddress: string, password: string): Call<{ data: Identifier }> {
   const path = "/authenticate/password"
   const params = { email_address: emailAddress, password }
   return post(path, params);
