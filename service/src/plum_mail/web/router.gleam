@@ -70,11 +70,19 @@ fn successful_authentication(identifier, request, config) {
   |> Ok
 }
 
+// Responds with 200 and valid JSON object to make life easier in Client
+fn no_content() {
+  http.response(200)
+  |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+  |> Ok
+}
+
 pub fn route(
   request,
   config: config.Config,
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
+    [] -> no_content()
     ["authenticate", "password"] -> {
       try raw = acl.parse_json(request)
       try params = authenticate_by_password.params(raw)
@@ -89,8 +97,8 @@ pub fn route(
     }
     ["authenticate", "session"] -> {
       try identifier_id = web.identify_client(request, config)
-      try identifier = identifier.fetch_by_id(identifier_id)
-      assert Some(identifier) = identifier
+      try Some(identifier) = identifier.fetch_by_id(identifier_id)
+      // TODO this one doesn't set a session as it already has
       http.response(200)
       |> web.set_resp_json(identifier.to_json(identifier))
       |> Ok
@@ -99,9 +107,7 @@ pub fn route(
       try params = acl.parse_json(request)
       try params = claim_email_address.params(params)
       try _ = claim_email_address.execute(params, config)
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
-      |> Ok
+      no_content()
     }
     ["sign_out"] ->
       web.redirect(string.append(config.client_origin, "/"))
@@ -123,9 +129,6 @@ pub fn route(
     //   ]))
     //   |> Ok()
     // }
-    [] ->
-      // Ok(http.set_resp_body(http.response(200), <<>>))
-      todo("index")
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
       let args = [pgo.text(email_address)]
