@@ -16,6 +16,7 @@
         throw "TODO error";
       } else {
         identifier = response.data;
+        loadContacts();
       }
     } catch (error) {
     } finally {

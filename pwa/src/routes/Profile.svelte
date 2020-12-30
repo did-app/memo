@@ -11,15 +11,15 @@
     <Loading />
   {:then response}
     {#if 'error' in response && response.error.code === 'forbidden'}
-      <SignIn />
+      <SignIn success={() => console.log('log int to profile TODO')} />
     {:else if 'error' in response}
       unknown error
       {JSON.stringify(response.error)}
     {:else}
       <ProfilePage
-        id={response.id}
-        emailAddress={response.email_address}
-        greeting={response.greeting} />
+        id={response.data.id}
+        emailAddress={response.data.email_address}
+        greeting={response.data.greeting} />
     {/if}
   {/await}
 </main>

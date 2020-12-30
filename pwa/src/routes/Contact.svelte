@@ -58,7 +58,7 @@
     } else if ("error" in authResponse) {
       throw "error fetching self";
     } else {
-      const myEmailAddress = authResponse.email_address;
+      const myEmailAddress = authResponse.data.email_address;
       if (myEmailAddress === contactEmailAddress) {
         page.redirect("/profile");
         throw "redirected";

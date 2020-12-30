@@ -3,9 +3,6 @@
   import * as API from "../sync/api";
   import Loading from "../components/Loading.svelte";
 
-  type Date = {
-    contacts: {};
-  };
   async function load() {
     await authenticationProcess;
     let response = await API.fetchContacts();
