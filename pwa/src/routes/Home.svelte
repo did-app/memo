@@ -5,6 +5,7 @@
   import type { Identifier } from "../sync/api";
   import type { Failure } from "../sync/client";
   import { emailAddressToPath } from "../utils";
+  import * as Flash from "../state/flash";
   import Loading from "../components/Loading.svelte";
   import SignIn from "../components/SignIn.svelte";
 
@@ -18,8 +19,12 @@
       // Do nothing loading will be set to false
     } else if ("error" in response) {
       error = response.error;
+      // reportError(response.error.detail);
     } else {
       identifier = response.data;
+      if (identifier.greeting === undefined) {
+        // TODO
+      }
       loadContacts();
     }
     loading = false;
@@ -49,26 +54,33 @@
   {#if error !== undefined}
     <article
       class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-red-700">
-      <!-- Title vs detail -->
       {error.detail}
     </article>
   {/if}
+  {#each Flash.pop() as message}
+    <article
+      class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
+      <h2 class="font-bold">Sucess</h2>
+      <p>{message}</p>
+    </article>
+  {/each}
+  <!-- {#if identifier.greeting === null}
+  <article
+    class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
+    <h2 class="font-bold">Set up a greeting</h2>
+    <p>
+      Help filter new contacts when they reach out to you. visit your
+      <a class="underline" href="/profile">profile page</a>
+    </p>
+  </article>
+{/if} -->
   {#if loading}
     <Loading />
   {:else if identifier === undefined}
     <SignIn success={onSignIn} />
   {:else}
     {identifier.email_address}
-    {#if identifier.greeting === null}
-      <article
-        class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
-        <h2 class="font-bold">Set up a greeting</h2>
-        <p>
-          Help filter new contacts when they reach out to you. visit your
-          <a class="underline" href="/profile">profile page</a>
-        </p>
-      </article>
-    {/if}
+
     <a
       class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
       href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>

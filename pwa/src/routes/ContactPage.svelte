@@ -1,4 +1,5 @@
 <script lang="typescript">
+  import router from "page";
   import { onMount } from "svelte";
   import { parse } from "../note";
   import type { Note } from "../note";
@@ -11,6 +12,7 @@
   import type { Reference } from "../thread";
   import * as API from "../sync/api";
   import type { Failure } from "../sync/client";
+  import * as Flash from "../state/flash";
   import Composer from "../components/Composer.svelte";
   import Fragment from "../components/Fragment.svelte";
   import BlockComponent from "../components/Block.svelte";
@@ -47,7 +49,10 @@
       return null;
     }
     sendStatus = "suceeded";
-    page.redirect("/");
+    // reportSuccess("Message sent");
+    // TODO redirect immediatly keep message is sending at the top
+    Flash.set(["You message was sent"]);
+    router.redirect("/");
     return null;
   }
 
