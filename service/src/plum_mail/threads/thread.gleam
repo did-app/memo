@@ -8,9 +8,22 @@ import plum_mail/run_sql
 pub fn write_note(thread_id, counter, author_id, content: json.Json) {
   let sql =
     "
-    INSERT INTO notes (thread_id, counter, authored_by, content)
-    VALUES ($1, $2, $3, $4)
-    RETURNING *
+    WITH note AS (
+      INSERT INTO notes (thread_id, counter, authored_by, content)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    ), lower AS (
+      UPDATE pairs
+      SET lower_identifier_ack = $2
+      WHERE lower_identifier_id = $3
+      AND thread_id = $1
+    ), upper AS (
+      UPDATE pairs
+      SET upper_identifier_ack = $2
+      WHERE upper_identifier_id = $3
+      AND thread_id = $1
+    )
+    SELECT 42
     "
   let args = [
     pgo.int(thread_id),

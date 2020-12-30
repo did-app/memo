@@ -45,7 +45,8 @@
               blocks: greeting,
               author: contactEmailAddress,
               inserted_at: new Date(),
-              counter: 0,
+              // TODO make counter index
+              counter: 1,
             },
           ]
         : [];
@@ -107,7 +108,7 @@
                   blocks: greeting,
                   author: contactEmailAddress,
                   inserted_at: new Date(),
-                  counter: 0,
+                  counter: 1,
                 },
               ]
             : [];

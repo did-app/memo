@@ -67,7 +67,7 @@ export function fetchContact(emailAddress: string): Call<{ data: { identifier: I
   return get(path)
 }
 
-export function fetchContacts(): Call<{ data: { identifier: Identifier }[] }> {
+export function fetchContacts(): Call<{ data: { identifier: Identifier, outstanding: boolean, latest: { inserted_at: string, content: Block[]; } | undefined }[] }> {
   const path = "/contacts"
   return get(path)
 }

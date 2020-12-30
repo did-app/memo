@@ -10,7 +10,11 @@ SELECT diesel_manage_updated_at('threads');
 
 CREATE TABLE pairs (
   lower_identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  lower_identifier_ack INT NOT NULL,
+  CHECK (lower_identifier_ack >= 0),
   upper_identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  upper_identifier_ack INT NOT NULL,
+  CHECK (upper_identifier_ack >= 0),
   PRIMARY KEY (lower_identifier_id, upper_identifier_id),
   thread_id INT REFERENCES threads(id) NOT NULL
   -- timestamps on thread
@@ -23,6 +27,7 @@ ALTER TABLE pairs ADD CONSTRAINT pair_identifier_order
 CREATE TABLE notes (
   thread_id INT REFERENCES threads(id) NOT NULL,
   counter INT NOT NULL,
+  CHECK (counter > 0),
   PRIMARY KEY (thread_id, counter),
   content jsonb NOT NULL,
   authored_by INT REFERENCES identifiers(id) NOT NULL,

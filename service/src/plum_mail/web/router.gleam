@@ -5,7 +5,7 @@ import gleam/int
 import gleam/io
 import gleam/list
 import gleam/map
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleam/string
 import gleam/result
 import gleam/uri
@@ -148,27 +148,61 @@ pub fn route(
       let sql =
         "
       WITH contacts AS (
-        SELECT lower_identifier_id AS contact_id
+        SELECT lower_identifier_id AS contact_id, upper_identifier_ack AS ack, thread_id
         FROM pairs
         WHERE pairs.upper_identifier_id = $1
         UNION ALL
-        SELECT upper_identifier_id AS contact_id
+        SELECT upper_identifier_id AS contact_id, lower_identifier_ack AS ack, thread_id
         FROM pairs
         WHERE pairs.lower_identifier_id = $1
+      ), latest AS (
+        SELECT DISTINCT ON(thread_id) * FROM notes
+        ORDER BY thread_id DESC, inserted_at DESC
       )
-      SELECT id, email_address, greeting
-      FROM identifiers
-      WHERE id IN (SELECT contact_id FROM contacts)
-      AND id <> $1
+      SELECT id, email_address, greeting, COALESCE(latest.counter, 0) > contacts.ack, latest.inserted_at, latest.content FROM contacts
+      JOIN identifiers ON identifiers.id = contacts.contact_id
+      LEFT JOIN latest ON latest.thread_id = contacts.thread_id
       "
       let args = [pgo.int(user_id)]
-      try contacts = run_sql.execute(sql, args, identifier.row_to_identifier)
+      try contacts =
+        run_sql.execute(
+          sql,
+          args,
+          fn(row) {
+            let identifier = identifier.row_to_identifier(row)
+            assert Ok(outstanding) = dynamic.element(row, 3)
+            assert Ok(outstanding) = dynamic.bool(outstanding)
+            assert Ok(inserted_at) = dynamic.element(row, 4)
+            assert Ok(inserted_at) =
+              run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
+            assert Ok(content) = dynamic.element(row, 5)
+            let content: json.Json = dynamic.unsafe_coerce(content)
+            // TODO thread summary type
+            tuple(identifier, outstanding, inserted_at, content)
+          },
+        )
       // db.run(sql, args, io.debug)
       http.response(200)
       |> web.set_resp_json(json.list(list.map(
         contacts,
         fn(contact) {
-          json.object([tuple("identifier", identifier.to_json(contact))])
+          let tuple(identifier, outstanding, inserted_at, content) = contact
+          let latest_json = case inserted_at {
+            None -> json.null()
+            Some(inserted_at) ->
+              json.object([
+                tuple(
+                  "inserted_at",
+                  json.string(datetime.to_iso8601(inserted_at)),
+                ),
+                tuple("content", content),
+              ])
+          }
+          json.object([
+            tuple("identifier", identifier.to_json(identifier)),
+            tuple("outstanding", json.bool(outstanding)),
+            tuple("latest", latest_json),
+          ])
         },
       )))
       |> Ok()

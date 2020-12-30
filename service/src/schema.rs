@@ -75,7 +75,9 @@ table! {
 table! {
     pairs (lower_identifier_id, upper_identifier_id) {
         lower_identifier_id -> Int4,
+        lower_identifier_ack -> Int4,
         upper_identifier_id -> Int4,
+        upper_identifier_ack -> Int4,
         thread_id -> Int4,
     }
 }

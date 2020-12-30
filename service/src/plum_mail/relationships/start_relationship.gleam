@@ -36,12 +36,13 @@ pub fn execute(params, user_id) {
     identifier.find_or_create(email_address)
 
   let notes = case greeting {
-    None -> [tuple(0, user_id, blocks)]
+    None -> [tuple(1, user_id, blocks)]
     Some(greeting) -> [
-      tuple(0, contact_id, greeting),
-      tuple(1, user_id, blocks),
+      tuple(1, contact_id, greeting),
+      tuple(2, user_id, blocks),
     ]
   }
+  // TODO set first index to one
   let sql =
     "
   WITH new_thread AS (
@@ -49,8 +50,8 @@ pub fn execute(params, user_id) {
     DEFAULT VALUES
     RETURNING *
   )
-  INSERT INTO pairs (lower_identifier_id, upper_identifier_id, thread_id)
-  VALUES ($1, $2, (SELECT id FROM new_thread))
+  INSERT INTO pairs (lower_identifier_id, lower_identifier_ack, upper_identifier_id, upper_identifier_ack, thread_id)
+  VALUES ($1, 0, $2, 0, (SELECT id FROM new_thread))
   RETURNING thread_id
   "
   let [lower, upper] = case int.compare(user_id, contact_id) {

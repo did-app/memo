@@ -39,7 +39,7 @@
     let response: { data: null } | { error: Failure };
     // safe as there is no thread 0
     if (threadId) {
-      response = await API.writeNote(threadId, thread.length, blocks);
+      response = await API.writeNote(threadId, thread.length + 1, blocks);
     } else {
       // don't send previous.length Can ignore.
       response = await API.startRelationship(contactEmailAddress, blocks);
