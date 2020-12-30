@@ -10,18 +10,32 @@
   let emailSent = false;
   let accountRequired = false;
 
+  async function wait(milliSeconds: number) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, milliSeconds);
+    });
+  }
+  let message: string = "Sign in";
   async function authenticate() {
+    let delay = wait(600);
     if (hasPassword(emailAddress)) {
+      message = "Checking credentials";
       let response = await Sync.authenticateWithPassword(
         emailAddress,
         password
       );
+      await delay;
       if ("error" in response) {
         throw "Bad email ";
       }
+      // Doesn't show, because page is changed by success
+      message = "done";
       success(response.data);
     } else {
+      message = "Working";
+
       let response = await API.authenticateWithEmail(emailAddress);
+      await delay;
       if ("error" in response) {
         throw "Bad email ";
       }
@@ -78,7 +92,7 @@
           placeholder="Password" />
         <button
           class="w-full px-4 py-2 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2"
-          type="submit">Sign in</button>
+          type="submit">{message}</button>
       </form>
     {/if}
   </div>
