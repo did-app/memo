@@ -3,15 +3,23 @@
   import type { Block } from "../note/elements";
   import * as Thread from "../thread";
   import * as API from "../sync/api";
+  import type { Identifier } from "../sync/api";
   import { emailAddressToPath } from "../utils";
-  import type { Authenticated } from "../sync";
+  import type { State } from "../sync";
 
   import SpanComponent from "../components/Span.svelte";
   import Composer from "../components/Composer.svelte";
   import SendIcon from "../icons/Send.svelte";
 
-  export let state: Authenticated;
-  let draft = toString(state.me.greeting);
+  export let state: State;
+  let me: Identifier;
+  // let contacts: Contact[];
+  let draft: string;
+  if ("me" in state && state.me) {
+    me = state.me;
+    // contacts = state.contacts;
+    draft = toString(me.greeting);
+  }
   let blocks: Block[] | null = null;
   let suggestions: Thread.Question[] = [];
   type SaveStatus = "available" | "working" | "suceeded" | "failed";
@@ -28,7 +36,7 @@
 
   async function saveGreeting(): Promise<null> {
     saveStatus = "working";
-    let response = await API.saveGreeting(state.me.id, blocks);
+    let response = await API.saveGreeting(me.id, blocks);
     if ("error" in response) {
       saveStatus = "failed";
       throw "failed to save greeting";
@@ -40,7 +48,7 @@
 
 <article
   class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
-  <h1 class="text-2xl">Hi {state.me.email_address}</h1>
+  <h1 class="text-2xl">Hi {me.email_address}</h1>
   <p>
     Set up your public greeting, that explains how people should get in touch
     with you.
@@ -49,7 +57,7 @@
     Anyone who visits
     <a
       class="underline"
-      href="window.location.origin}{emailAddressToPath(state.me.email_address)}">{window.location.origin}{emailAddressToPath(state.me.email_address)}</a>
+      href="window.location.origin}{emailAddressToPath(me.email_address)}">{window.location.origin}{emailAddressToPath(me.email_address)}</a>
     will be able to response this greeting
   </p>
 </article>

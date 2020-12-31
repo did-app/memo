@@ -22,6 +22,7 @@
     "allowSyntheticDefaultImports": true,
     "importsNotUsedAsValues": "error",
     "strictNullChecks": true,
-    "noUncheckedIndexedAccess": true,
+    // TODO reinstate but needs a non empty list for path information
+    // "noUncheckedIndexedAccess": true,
   }
 }

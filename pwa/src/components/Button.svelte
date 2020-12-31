@@ -1,7 +1,7 @@
 <!-- Don't get carried away with this, sucess status normally moves on -->
 <script lang="typescript">
-  type SendStatus = "available" | "working" | "suceeded" | "failed";
-  let sendStatus: SendStatus = "available";
+  // type SendStatus = "available" | "working" | "suceeded" | "failed";
+  // let sendStatus: SendStatus = "available";
 </script>
 
 <button

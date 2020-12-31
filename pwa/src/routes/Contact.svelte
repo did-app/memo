@@ -4,13 +4,21 @@
   import { PROMPT } from "../note/elements";
   import type { Prompt } from "../note/elements";
   import * as Sync from "../sync";
+  import type { Identifier } from "../sync/api";
+  import type { Contact, State } from "../sync";
   import type { Authenticated } from "../sync";
 
   import Loading from "../components/Loading.svelte";
   import ContactPage from "./ContactPage.svelte";
 
   export let contactEmailAddress: string;
-  export let state: Authenticated;
+  export let state: State;
+  let me: Identifier;
+  let contacts: Contact[];
+  if ("me" in state && state.me) {
+    me = state.me;
+    contacts = state.contacts;
+  }
 
   type Data = {
     threadId: number | undefined;
@@ -35,7 +43,7 @@
   let data: Data | undefined;
   (async function run() {
     console.log("Syc");
-    data = await Sync.loadContact(state, contactEmailAddress);
+    data = await Sync.loadContact(state as Authenticated, contactEmailAddress);
   })();
 </script>
 
@@ -46,7 +54,7 @@
       threadId={data.threadId}
       ack={data.ack}
       contactEmailAddress={data.contactEmailAddress}
-      myEmailAddress={state.me.email_address} />
+      myEmailAddress={me.email_address} />
   {:else}
     <Loading />
   {/if}

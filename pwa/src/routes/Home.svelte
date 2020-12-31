@@ -1,13 +1,20 @@
 <script lang="typescript">
   import router from "page";
   import * as Thread from "../thread";
-  import type { Block } from "../note/elements";
   import { emailAddressToPath } from "../utils";
   import * as Flash from "../state/flash";
-  import type { Authenticated } from "../sync";
+  import type { State } from "../sync";
   import SpanComponent from "../components/Span.svelte";
+  import type { Identifier } from "../sync/api";
+  import type { Contact } from "../sync";
 
-  export let state: Authenticated;
+  export let state: State;
+  let me: Identifier;
+  let contacts: Contact[];
+  if ("me" in state && state.me) {
+    me = state.me;
+    contacts = state.contacts;
+  }
   let contactEmailAddress = "";
 
   function findContact() {
@@ -33,14 +40,14 @@
     </p>
   </article>
 {/if} -->
-  {state.me.email_address}
+  {me.email_address}
 
   <a
     class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
     href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
   <ol>
     <h1>Your contacts</h1>
-    {#each state.contacts as { identifier, outstanding, latest }}
+    {#each contacts as { identifier, outstanding, latest }}
       <li>
         <a
           class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl"

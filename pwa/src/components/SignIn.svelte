@@ -1,12 +1,10 @@
 <script type="typescript">
   import * as API from "../sync/api";
-  import type { Identifier } from "../sync/api";
   import * as Sync from "../sync";
 
   let emailAddress: string = "";
   let password: string = "";
   let emailSent = false;
-  let accountRequired = false;
 
   async function wait(milliSeconds: number) {
     return new Promise(function (resolve) {

@@ -54,6 +54,8 @@
               latest,
               outstanding: false,
               identifier: {
+                // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
+                id: 99999999,
                 email_address: contactEmailAddress,
                 greeting: null,
               },
@@ -71,7 +73,6 @@
       sendStatus = "failed";
       return null;
     }
-    console.log("TOOOOOOOOOOOOOOOOOOOOOOO", response.data);
 
     Sync.updateContact(response.data);
 
