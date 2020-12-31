@@ -57,18 +57,22 @@ fn token_cookie_settings(request) {
   let Request(scheme: scheme, ..) = request
   let defaults = http.cookie_defaults(scheme)
   // The policy needs to be none because we call from memo.did.app to herokuapp
-  let same_site_policy = case defaults.secure {
-    True -> http.None
-    False -> http.Lax
-  }
-  http.CookieAttributes(..defaults, max_age: Some(604800), same_site: Some(http.None), secure: True)
+  // let same_site_policy = case defaults.secure {
+  //   True -> http.None
+  //   False -> http.Lax
+  // }
+  http.CookieAttributes(..defaults, max_age: Some(604800))
 }
 
-fn successful_authentication(identifier, request, config) {
+fn authentication_token(identifier, request, config) {
   let Identifier(id: identifier_id, ..) = identifier
   let Config(secret: secret, ..) = config
   assert Ok(user_agent) = http.get_req_header(request, "user-agent")
-  let token = web.auth_token(identifier_id, user_agent, secret)
+  web.auth_token(identifier_id, user_agent, secret)
+}
+
+fn successful_authentication(identifier, request, config) {
+  let token = authentication_token(identifier, request, config)
   http.response(200)
   |> web.set_resp_json(identifier.to_json(identifier))
   |> http.set_resp_cookie("token", token, token_cookie_settings(request))
@@ -114,6 +118,16 @@ pub fn route(
       try params = authenticate_by_password.params(raw)
       try identifier = authenticate_by_password.run(params)
       successful_authentication(identifier, request, config)
+    }
+    // Note cookies wont get set on the ajax auth step
+    ["sign_in"] -> {
+      try raw = acl.parse_form(request)
+      try params = authenticate_by_password.from_form(raw)
+      try identifier = authenticate_by_password.run(params)
+      let token = authentication_token(identifier, request, config)
+      web.redirect(string.append(config.client_origin, "/"))
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
+      |> Ok
     }
     ["authenticate", "code"] -> {
       try raw = acl.parse_json(request)

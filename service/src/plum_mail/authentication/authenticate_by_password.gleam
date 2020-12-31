@@ -1,4 +1,5 @@
 import gleam/dynamic.{Dynamic}
+import gleam/map
 import plum_mail/acl
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
@@ -10,6 +11,14 @@ pub type Params {
 pub fn params(raw: Dynamic) {
   try email_address = acl.required(raw, "email_address", acl.as_email)
   try password = acl.required(raw, "password", acl.as_string)
+  Params(email_address, password)
+  |> Ok
+}
+
+pub fn from_form(raw) {
+  assert Ok(email_address) = map.get(raw, "email_address")
+  assert Ok(email_address) = email_address.validate(email_address)
+  assert Ok(password) = map.get(raw, "password")
   Params(email_address, password)
   |> Ok
 }

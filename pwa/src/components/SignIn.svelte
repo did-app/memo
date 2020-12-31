@@ -12,18 +12,19 @@
     });
   }
   let message: string = "Sign in";
-  async function authenticate() {
+  async function authenticate(event: Event) {
     let delay = wait(600);
     if (hasPassword(emailAddress)) {
-      message = "Checking credentials";
-      let response = await Sync.authenticateByPassword(emailAddress, password);
-      await delay;
-      if ("error" in response) {
-        throw "Bad email ";
-      }
-      // Doesn't show, because page is changed by success
-      message = "done";
+      // message = "Checking credentials";
+      // let response = await Sync.authenticateByPassword(emailAddress, password);
+      // await delay;
+      // if ("error" in response) {
+      //   throw "Bad email ";
+      // }
+      // // Doesn't show, because page is changed by success
+      // message = "done";
     } else {
+      event.preventDefault();
       message = "Working";
 
       let response = await API.authenticateByEmail(emailAddress);
@@ -49,10 +50,13 @@
       <p class="mt-2">Click the link inside to sign in.</p>
     {:else}
       <form
-        on:submit|preventDefault={authenticate}
+        on:submit={authenticate}
+        method="POST"
+        action="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_in"
         class="max-w-sm block mx-auto ">
         <input
           type="email"
+          name="email_address"
           required
           autocomplete="email"
           bind:value={emailAddress}
@@ -62,6 +66,7 @@
         {#if hasPassword(emailAddress)}
           <input
             type="password"
+            name="password"
             required
             autocomplete="current-password"
             bind:value={password}
