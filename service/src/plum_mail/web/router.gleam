@@ -61,7 +61,7 @@ fn token_cookie_settings(request) {
     True -> http.None
     False -> http.Lax
   }
-  http.CookieAttributes(..defaults, max_age: Some(604800), same_site: Some(same_site_policy))
+  http.CookieAttributes(..defaults, max_age: Some(604800), same_site: Some(http.None), secure: True)
 }
 
 fn successful_authentication(identifier, request, config) {
