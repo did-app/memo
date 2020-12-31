@@ -3,7 +3,7 @@ import type { Writable } from "svelte/store"
 import type { Block } from "../note/elements"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
-import type { Identifier } from "./api"
+import type { Identifier, Contact } from "./api"
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
@@ -23,7 +23,6 @@ let installPrompt = new Promise(function (resolve, reject) {
   });
 });
 
-export type Contact = { identifier: Identifier, outstanding: boolean, latest: { inserted_at: string, content: Block[]; } | undefined }
 export type Loading = { loading: true }
 export type Unauthenticated = { loading: false, me: undefined, error: Failure | undefined }
 export type Authenticated = { loading: false, me: Identifier, contacts: Contact[] }

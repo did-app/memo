@@ -102,22 +102,23 @@ fn no_content() {
 }
 
 fn latest_to_json(latest) {
-  let tuple(inserted_at, content) = latest
+  let tuple(inserted_at, content, counter) = latest
   json.object([
     tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
     tuple("content", content),
+    tuple("counter", json.int(counter)),
   ])
 }
 
 fn contact_to_json(contact) {
-  let tuple(identifier, outstanding, inserted_at, content) = contact
+  let tuple(identifier, ack, inserted_at, content, counter) = contact
   let latest_json = case inserted_at {
     None -> json.null()
-    Some(inserted_at) -> latest_to_json(tuple(inserted_at, content))
+    Some(inserted_at) -> latest_to_json(tuple(inserted_at, content, counter))
   }
   json.object([
     tuple("identifier", identifier.to_json(identifier)),
-    tuple("outstanding", json.bool(outstanding)),
+    tuple("ack", json.int(ack)),
     tuple("latest", latest_json),
   ])
 }
@@ -214,7 +215,7 @@ pub fn route(
         SELECT DISTINCT ON(thread_id) * FROM notes
         ORDER BY thread_id DESC, inserted_at DESC
       )
-      SELECT id, email_address, greeting, COALESCE(latest.counter, 0) > contacts.ack, latest.inserted_at, latest.content FROM contacts
+      SELECT id, email_address, greeting, contacts.ack, latest.inserted_at, latest.content, latest.counter FROM contacts
       JOIN identifiers ON identifiers.id = contacts.contact_id
       LEFT JOIN latest ON latest.thread_id = contacts.thread_id
       "
@@ -225,15 +226,17 @@ pub fn route(
           args,
           fn(row) {
             let identifier = identifier.row_to_identifier(row)
-            assert Ok(outstanding) = dynamic.element(row, 3)
-            assert Ok(outstanding) = dynamic.bool(outstanding)
+            assert Ok(ack) = dynamic.element(row, 3)
+            assert Ok(ack) = dynamic.int(ack)
             assert Ok(inserted_at) = dynamic.element(row, 4)
             assert Ok(inserted_at) =
               run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
             assert Ok(content) = dynamic.element(row, 5)
             let content: json.Json = dynamic.unsafe_coerce(content)
             // TODO thread summary type
-            tuple(identifier, outstanding, inserted_at, content)
+            assert Ok(counter) = dynamic.element(row, 6)
+            assert Ok(counter) = dynamic.int(counter)
+            tuple(identifier, ack, inserted_at, content, counter)
           },
         )
       // db.run(sql, args, io.debug)

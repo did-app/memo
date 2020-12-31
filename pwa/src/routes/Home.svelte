@@ -5,8 +5,7 @@
   import * as Flash from "../state/flash";
   import type { State } from "../sync";
   import SpanComponent from "../components/Span.svelte";
-  import type { Identifier } from "../sync/api";
-  import type { Contact } from "../sync";
+  import type { Identifier, Contact } from "../sync/api";
 
   export let state: State;
   let me: Identifier;
@@ -50,14 +49,16 @@
     href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
   <ol>
     <h1>Your contacts</h1>
-    {#each contacts as { identifier, outstanding, latest }}
+    {#each contacts as { identifier, latest, ack }}
       <li>
         <a
           class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl"
           href={emailAddressToPath(identifier.email_address)}>
           {identifier.email_address}
           <br />
-          {#if outstanding}outstanding{:else}up to date{/if}
+          {#if (latest || { counter: 0 }).counter > ack}
+            outstanding
+          {:else}up to date{/if}
           {latest && new Date(latest.inserted_at).toLocaleDateString()}
           <br />
           {#if latest}

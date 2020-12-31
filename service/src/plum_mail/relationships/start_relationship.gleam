@@ -77,7 +77,7 @@ pub fn execute(params, user_id) {
     }
   }
   let tuple(counter, author_id, content) = current
-  assert Ok(Some(tuple(inserted_at, content))) =
+  assert Ok(Some(tuple(inserted_at, content, counter))) =
     thread.write_note(thread_id, counter, author_id, content)
-  Ok(tuple(identifier, False, Some(inserted_at), content))
+  Ok(tuple(identifier, counter, Some(inserted_at), content, counter))
 }

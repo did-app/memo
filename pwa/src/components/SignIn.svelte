@@ -1,6 +1,5 @@
 <script type="typescript">
   import * as API from "../sync/api";
-  import * as Sync from "../sync";
 
   let emailAddress: string = "";
   let password: string = "";

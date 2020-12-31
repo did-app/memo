@@ -12,7 +12,7 @@
   import type { Reference } from "../thread";
   import * as API from "../sync/api";
   import * as Sync from "../sync";
-  import type { Contact } from "../sync";
+  import type { Contact } from "../sync/api";
   import type { Failure } from "../sync/client";
   import * as Flash from "../state/flash";
   import Composer from "../components/Composer.svelte";
@@ -52,7 +52,7 @@
             let { latest } = response.data;
             let data = {
               latest,
-              outstanding: false,
+              ack: latest.counter,
               identifier: {
                 // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
                 id: 99999999,

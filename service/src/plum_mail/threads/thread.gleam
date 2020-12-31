@@ -23,7 +23,7 @@ pub fn write_note(thread_id, counter, author_id, content: json.Json) {
       WHERE upper_identifier_id = $3
       AND thread_id = $1
     )
-    SELECT content, inserted_at 
+    SELECT content, inserted_at, counter 
     FROM note
     "
   let args = [
@@ -41,7 +41,10 @@ pub fn write_note(thread_id, counter, author_id, content: json.Json) {
         let content: json.Json = dynamic.unsafe_coerce(content)
         assert Ok(inserted_at) = dynamic.element(row, 1)
         assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
-        tuple(inserted_at, content)
+        assert Ok(counter) = dynamic.element(row, 2)
+        assert Ok(counter) = dynamic.int(counter)
+
+        tuple(inserted_at, content, counter)
       },
     )
   run_sql.single(db_response)

@@ -68,7 +68,11 @@ export function fetchContact(emailAddress: string): Call<{ data: { identifier: I
   return get(path)
 }
 
-export type Contact = { identifier: Identifier, outstanding: boolean, latest: { inserted_at: string, content: Block[]; } | undefined }
+export type Contact = {
+  identifier: Identifier,
+  ack: number
+  latest: { inserted_at: string, content: Block[], counter: number } | undefined
+}
 export function fetchContacts(): Call<{ data: Contact[] }> {
   const path = "/contacts"
   return get(path)
@@ -82,7 +86,7 @@ export function startRelationship(emailAddress: string, blocks: Block[]): Call<{
 
 // TODO postMemo
 // memo has contents and an index
-export function writeNote(threadId: number, counter: number, blocks: Block[]): Call<{ data: { latest: { inserted_at: string, content: Block[]; } } }> {
+export function writeNote(threadId: number, counter: number, blocks: Block[]): Call<{ data: { latest: { inserted_at: string, content: Block[], counter: number } } }> {
   const path = "/threads/" + threadId + "/post"
   const params = { counter, blocks }
   return post(path, params)

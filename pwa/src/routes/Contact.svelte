@@ -5,7 +5,7 @@
   import type { Prompt } from "../note/elements";
   import * as Sync from "../sync";
   import type { Identifier } from "../sync/api";
-  import type { Contact, State } from "../sync";
+  import type { State } from "../sync";
   import type { Authenticated } from "../sync";
 
   import Loading from "../components/Loading.svelte";
@@ -14,10 +14,10 @@
   export let contactEmailAddress: string;
   export let state: State;
   let me: Identifier;
-  let contacts: Contact[];
+  // let contacts: Contact[];
   if ("me" in state && state.me) {
     me = state.me;
-    contacts = state.contacts;
+    // contacts = state.contacts;
   }
 
   type Data = {

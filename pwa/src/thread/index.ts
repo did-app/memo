@@ -23,6 +23,7 @@ export function followReference(reference: Reference, notes: { blocks: Block[] }
   }
 }
 
+
 export type Pin = { noteIndex: number, type: typeof LINK, item: Link } | { noteIndex: number, type: typeof ANNOTATION, item: Annotation }
 export function findPinnable(notes: Note[]): Pin[] {
   return notes.map(function (note, noteIndex): Pin[] {
