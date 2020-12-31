@@ -28,6 +28,16 @@
   export let contactEmailAddress: string;
   export let myEmailAddress: string;
 
+  onMount(function () {
+    let id = window.location.hash.slice(1);
+    if (id) {
+      let element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView();
+      }
+    }
+  });
+
   type SendStatus = "available" | "working" | "suceeded" | "failed";
   let sendStatus: SendStatus = "available";
 
@@ -223,9 +233,9 @@
 <!-- TODO pass this message as the notes to the composer -->
 <!-- This goes to a fragment that binds on block -->
 <div class="" bind:this={root}>
-  {#each thread as { blocks, author, inserted_at }, index}
+  {#each thread as { blocks, author, inserted_at, counter }, index}
     <article
-      id={index.toString()}
+      id={counter.toString()}
       data-note-index={index}
       class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
       <header class="ml-12 mb-6 flex text-gray-600">

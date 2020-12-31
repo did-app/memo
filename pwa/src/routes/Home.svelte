@@ -53,7 +53,7 @@
       <li>
         <a
           class="block my-2 py-4 px-6 rounded border border-l-4 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-indigo-800 hover:border-indigo-800 focus:shadow-xl"
-          href={emailAddressToPath(identifier.email_address)}>
+          href={emailAddressToPath(identifier.email_address) + '#' + ack}>
           {identifier.email_address}
           <br />
           {#if (latest || { counter: 0 }).counter > ack}

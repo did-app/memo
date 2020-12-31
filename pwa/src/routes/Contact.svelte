@@ -30,7 +30,6 @@
   // TODO remove this for real prompts
   function mapSuggestions(note: Note, noteIndex: number) {
     let suggestions = Thread.makeSuggestions(note.blocks);
-    console.log(suggestions, "suggestions", noteIndex);
     let prompts = suggestions.map(function (suggestion): Prompt {
       return {
         type: PROMPT,
