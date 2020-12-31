@@ -56,7 +56,12 @@ fn load_participation(conversation_id, request, config) {
 fn token_cookie_settings(request) {
   let Request(scheme: scheme, ..) = request
   let defaults = http.cookie_defaults(scheme)
-  http.CookieAttributes(..defaults, max_age: Some(604800))
+  // The policy needs to be none because we call from memo.did.app to herokuapp
+  let same_site_policy = case defaults.secure {
+    True -> http.None
+    False -> http.Lax
+  }
+  http.CookieAttributes(..defaults, max_age: Some(604800), same_site: Some(same_site_policy))
 }
 
 fn successful_authentication(identifier, request, config) {
