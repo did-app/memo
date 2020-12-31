@@ -62,8 +62,21 @@ fn token_cookie_settings(request) {
   //   False -> http.Lax
   // }
   // NOTE need x-request
-  io.debug(request)
-  http.CookieAttributes(..defaults, max_age: Some(604800), same_site: Some(http.None), secure: True)
+  // TODO this breaks it if api call is made over http, need to handle redirect
+  // motion removing from gleam_http
+  let tuple(secure, same_site_policy) = case http.get_req_header(
+    request,
+    "x-forwarded-proto",
+  ) {
+    Ok("https") -> tuple(True, Some(http.None))
+    _ -> tuple(False, Some(http.Lax))
+  }
+  http.CookieAttributes(
+    ..defaults,
+    max_age: Some(604800),
+    same_site: same_site_policy,
+    secure: secure,
+  )
 }
 
 fn authentication_token(identifier, request, config) {
