@@ -22,6 +22,9 @@
   }
 </script>
 
+<svelte:head>
+  <title>Better Conversations</title>
+</svelte:head>
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
   {#each Flash.pop() as message}
     <article
@@ -30,16 +33,16 @@
       <p>{message}</p>
     </article>
   {/each}
-  <!-- {#if identifier.greeting === null}
-  <article
-    class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
-    <h2 class="font-bold">Set up a greeting</h2>
-    <p>
-      Help filter new contacts when they reach out to you. visit your
-      <a class="underline" href="/profile">profile page</a>
-    </p>
-  </article>
-{/if} -->
+  {#if me.greeting === null}
+    <article
+      class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
+      <h2 class="font-bold">Set up a greeting</h2>
+      <p>
+        Help filter new contacts when they reach out to you. visit your
+        <a class="underline" href="/profile">profile page</a>
+      </p>
+    </article>
+  {/if}
   {me.email_address}
 
   <a

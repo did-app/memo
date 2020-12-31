@@ -9,6 +9,11 @@
 
 <!-- $store.attribute does not get properly collapsed types with typescript -->
 
+<svelte:head>
+  <slot name="head">
+    <title>Better Conversations</title>
+  </slot>
+</svelte:head>
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
   {#if state.loading}
     <Loading />

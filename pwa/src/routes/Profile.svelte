@@ -46,6 +46,9 @@
   }
 </script>
 
+<svelte:head>
+  <title>Profile</title>
+</svelte:head>
 <article
   class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
   <h1 class="text-2xl">Hi {me.email_address}</h1>
