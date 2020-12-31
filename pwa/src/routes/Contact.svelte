@@ -1,133 +1,23 @@
 <script lang="ts">
-  import page from "page";
   import * as Thread from "../thread";
   import type { Note } from "../note";
   import { PROMPT } from "../note/elements";
   import type { Prompt } from "../note/elements";
-  import { authenticationProcess } from "../sync";
-  import * as API from "../sync/api";
-  import type { Failure } from "../sync/client";
+  import * as Sync from "../sync";
+  import type { Authenticated } from "../sync";
 
   import Loading from "../components/Loading.svelte";
   import ContactPage from "./ContactPage.svelte";
 
-  export let handle: string;
+  export let contactEmailAddress: string;
+  export let state: Authenticated;
 
   type Data = {
     threadId: number | undefined;
     ack: number;
     notes: Note[];
     contactEmailAddress: string;
-    myEmailAddress: string;
   };
-  async function load(handle: string): Promise<Data | { error: Failure }> {
-    let contactEmailAddress = handle;
-    let authResponse = await authenticationProcess;
-
-    // Contact Page
-    // API.fetchContact
-    // {identifier: {id, emailAddress, greeting}, {}}
-    // could redirect to thread page but we want to show thread plus contact information
-    // Why would we ever want to show direct thread without contact information?
-    // But linked threads will have a thread id
-    // but that could be nested under the original /contact/name/linked/1
-    // Greeting Page
-    if ("error" in authResponse && authResponse.error.code === "forbidden") {
-      // There is no 404 as will always try sending
-      let profileResponse = await API.fetchProfile(contactEmailAddress);
-      if ("error" in profileResponse) {
-        throw "todo error";
-      }
-      let myEmailAddress = "";
-      let greeting = profileResponse.data && profileResponse.data.greeting;
-      let notes = greeting
-        ? [
-            {
-              blocks: greeting,
-              author: contactEmailAddress,
-              inserted_at: new Date(),
-              // TODO make counter index
-              counter: 1,
-            },
-          ]
-        : [];
-      return {
-        threadId: undefined,
-        ack: 0,
-        notes,
-        contactEmailAddress,
-        myEmailAddress,
-      };
-    } else if ("error" in authResponse) {
-      throw "error fetching self";
-    } else {
-      const myEmailAddress = authResponse.data.email_address;
-      if (myEmailAddress === contactEmailAddress) {
-        page.redirect("/profile");
-        // throw after redirect results in unhandled promise logged in sentry
-        return {
-          error: {
-            code: "forbidden",
-            detail: "Cannot view contact page for self",
-          },
-        };
-      } else {
-        let contactResponse = await API.fetchContact(contactEmailAddress);
-        if ("error" in contactResponse) {
-          throw "error";
-        }
-        let { thread, identifier } = contactResponse.data;
-
-        if (!identifier) {
-          return {
-            threadId: undefined,
-            ack: 0,
-            notes: [],
-            contactEmailAddress,
-            myEmailAddress,
-          };
-        }
-        if (thread) {
-          let threadId = thread.id;
-          let notes = thread.notes.map(function ({
-            inserted_at: iso8601,
-            ...rest
-          }) {
-            let inserted_at = new Date(iso8601);
-            return { inserted_at, ...rest };
-          });
-          return {
-            threadId,
-            ack: thread.ack,
-            notes: notes,
-            contactEmailAddress,
-            myEmailAddress,
-          };
-        } else {
-          let greeting = identifier.greeting;
-
-          let notes = greeting
-            ? [
-                {
-                  blocks: greeting,
-                  author: contactEmailAddress,
-                  inserted_at: new Date(),
-                  counter: 1,
-                },
-              ]
-            : [];
-          return {
-            threadId: undefined,
-            // It's not outstand to have not yet answered a greeting
-            ack: 1,
-            notes,
-            contactEmailAddress,
-            myEmailAddress,
-          };
-        }
-      }
-    }
-  }
 
   // TODO remove this for real prompts
   function mapSuggestions(note: Note, noteIndex: number) {
@@ -142,21 +32,29 @@
 
     return { ...note, blocks: [...note.blocks, ...prompts] };
   }
+  let data: Data | undefined;
+  (async function run() {
+    console.log("Syc");
+    data = await Sync.loadContact(state, contactEmailAddress);
+  })();
 </script>
 
 <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-  {#await load(handle)}
+  {#if data}
+    <ContactPage
+      thread={data.notes.map(mapSuggestions)}
+      threadId={data.threadId}
+      ack={data.ack}
+      contactEmailAddress={data.contactEmailAddress}
+      myEmailAddress={state.me.email_address} />
+  {:else}
     <Loading />
+  {/if}
+  <!-- {}
   {:then response}
     {#if 'error' in response}
       unknown error
     {:else}
-      <ContactPage
-        thread={response.notes.map(mapSuggestions)}
-        threadId={response.threadId}
-        ack={response.ack}
-        contactEmailAddress={response.contactEmailAddress}
-        myEmailAddress={response.myEmailAddress} />
     {/if}
-  {/await}
+  {/await} -->
 </main>

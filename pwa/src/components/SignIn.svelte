@@ -3,8 +3,6 @@
   import type { Identifier } from "../sync/api";
   import * as Sync from "../sync";
 
-  export let success: (identifier: Identifier) => void;
-  let error: {};
   let emailAddress: string = "";
   let password: string = "";
   let emailSent = false;
@@ -27,7 +25,6 @@
       }
       // Doesn't show, because page is changed by success
       message = "done";
-      success(response.data);
     } else {
       message = "Working";
 
@@ -49,25 +46,9 @@
   <div
     class="md:rounded-2xl m-auto w-full max-w-2xl my-shadow p-6 rounded-lg text-center z-0 bg-white">
     <h1 class="font-serif text-indigo-800 text-6xl">plum mail</h1>
-    {#if error}
-      <p>
-        <strong
-          class="border-2 border-indigo-200 py-2 px-4 rounded">{error}.</strong>
-      </p>
-      <p class="mt-2">We are looking into this issue.</p>
-    {:else if emailSent}
+    {#if emailSent}
       <p>A message has been sent to: <br /><strong>{emailAddress}</strong>.</p>
       <p class="mt-2">Click the link inside to sign in.</p>
-    {:else if accountRequired}
-      <div class="max-w-sm block mx-auto">
-        <p class="my-2">You need an invitation to access Plum Mail.</p>
-        <p class="my-2">
-          <a
-            class="focus:underline hover:underline outline-none text-indigo-600 font-bold"
-            href="https://app.plummail.co/team">Contact us</a>
-          to join the waitlist.
-        </p>
-      </div>
     {:else}
       <form
         on:submit|preventDefault={authenticate}

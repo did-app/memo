@@ -77,6 +77,27 @@ fn no_content() {
   |> Ok
 }
 
+fn latest_to_json(latest) {
+  let tuple(inserted_at, content) = latest
+  json.object([
+    tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
+    tuple("content", content),
+  ])
+}
+
+fn contact_to_json(contact) {
+  let tuple(identifier, outstanding, inserted_at, content) = contact
+  let latest_json = case inserted_at {
+    None -> json.null()
+    Some(inserted_at) -> latest_to_json(tuple(inserted_at, content))
+  }
+  json.object([
+    tuple("identifier", identifier.to_json(identifier)),
+    tuple("outstanding", json.bool(outstanding)),
+    tuple("latest", latest_json),
+  ])
+}
+
 pub fn route(
   request,
   config: config.Config,
@@ -183,37 +204,16 @@ pub fn route(
         )
       // db.run(sql, args, io.debug)
       http.response(200)
-      |> web.set_resp_json(json.list(list.map(
-        contacts,
-        fn(contact) {
-          let tuple(identifier, outstanding, inserted_at, content) = contact
-          let latest_json = case inserted_at {
-            None -> json.null()
-            Some(inserted_at) ->
-              json.object([
-                tuple(
-                  "inserted_at",
-                  json.string(datetime.to_iso8601(inserted_at)),
-                ),
-                tuple("content", content),
-              ])
-          }
-          json.object([
-            tuple("identifier", identifier.to_json(identifier)),
-            tuple("outstanding", json.bool(outstanding)),
-            tuple("latest", latest_json),
-          ])
-        },
-      )))
+      |> web.set_resp_json(json.list(list.map(contacts, contact_to_json)))
       |> Ok()
     }
     ["relationship", "start"] -> {
       try params = acl.parse_json(request)
       try params = start_relationship.params(params)
       try user_id = web.identify_client(request, config)
-      try thread_id = start_relationship.execute(params, user_id)
+      try contact = start_relationship.execute(params, user_id)
       http.response(200)
-      |> web.set_resp_json(json.object([tuple("thread_id", json.int(thread_id))]))
+      |> web.set_resp_json(contact_to_json(contact))
       |> Ok()
     }
     // TODO don't bother with tim as short for tim@plummail.co
@@ -244,8 +244,12 @@ pub fn route(
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       try author_id = web.identify_client(request, config)
       // // TODO a participation thing again
-      try notes = thread.write_note(thread_id, counter, author_id, blocks)
-      no_content()
+      try Some(latest) =
+        thread.write_note(thread_id, counter, author_id, blocks)
+      let data = json.object([tuple("latest", latest_to_json(latest))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok
     }
     ["threads", thread_id, "acknowledge"] -> {
       try raw = acl.parse_json(request)

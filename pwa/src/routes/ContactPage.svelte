@@ -11,6 +11,8 @@
   import * as Thread from "../thread";
   import type { Reference } from "../thread";
   import * as API from "../sync/api";
+  import * as Sync from "../sync";
+  import type { Contact } from "../sync";
   import type { Failure } from "../sync/client";
   import * as Flash from "../state/flash";
   import Composer from "../components/Composer.svelte";
@@ -19,7 +21,6 @@
   import LinkComponent from "../components/Link.svelte";
   import SpanComponent from "../components/Span.svelte";
   import AttachmentIcon from "../icons/attachment.svelte";
-  import AnnotationComponent from "../components/Annotation.svelte";
 
   export let thread: Note[];
   export let threadId: number | undefined;
@@ -30,26 +31,50 @@
   type SendStatus = "available" | "working" | "suceeded" | "failed";
   let sendStatus: SendStatus = "available";
 
-  let reply = false;
+  // acknowledge not an option if no thread
+  let reply: boolean = threadId === undefined;
   let draft = "";
   let blocks: Block[];
   let preview = false;
-  let maxIndex = thread[thread.length - 1].counter;
+  let maxIndex = (thread[thread.length - 1] || { counter: 0 }).counter;
   let outstanding = maxIndex > ack;
 
   async function sendMessage(): Promise<null> {
     sendStatus = "working";
-    let response: { data: null } | { error: Failure };
+    let response: { data: Contact } | { error: Failure };
     // safe as there is no thread 0
     if (threadId) {
-      response = await API.writeNote(threadId, thread.length + 1, blocks);
+      response = await API.writeNote(threadId, thread.length + 1, blocks).then(
+        function (response) {
+          if ("error" in response) {
+            return response;
+          } else {
+            let { latest } = response.data;
+            let data = {
+              latest,
+              outstanding: false,
+              identifier: {
+                email_address: contactEmailAddress,
+                greeting: null,
+              },
+            };
+            return { data };
+          }
+        }
+      );
     } else {
+      // TODO define thread identifier profile types
+      // {thread, identifier} | {emailaddress, maybeGreeting}
       response = await API.startRelationship(contactEmailAddress, blocks);
     }
     if ("error" in response) {
       sendStatus = "failed";
       return null;
     }
+    console.log("TOOOOOOOOOOOOOOOOOOOOOOO", response.data);
+
+    Sync.updateContact(response.data);
+
     sendStatus = "suceeded";
     // reportSuccess("Message sent");
     // TODO redirect immediatly keep message is sending at the top

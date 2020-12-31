@@ -32,15 +32,14 @@ pub fn params(raw: Dynamic) {
 
 pub fn execute(params, user_id) {
   let Params(email_address, blocks) = params
-  try Identifier(contact_id, _, greeting) =
-    identifier.find_or_create(email_address)
-
-  let notes = case greeting {
-    None -> [tuple(1, user_id, blocks)]
-    Some(greeting) -> [
-      tuple(1, contact_id, greeting),
+  try identifier = identifier.find_or_create(email_address)
+  let Identifier(contact_id, _, greeting) = identifier
+  let tuple(first, current) = case greeting {
+    None -> tuple(None, tuple(1, user_id, blocks))
+    Some(greeting) -> tuple(
+      Some(tuple(1, contact_id, greeting)),
       tuple(2, user_id, blocks),
-    ]
+    )
   }
   // TODO set first index to one
   let sql =
@@ -67,15 +66,18 @@ pub fn execute(params, user_id) {
   }
 
   try [thread_id] = run_sql.execute(sql, args, mapper)
-  list.each(
-    notes,
-    fn(note: tuple(Int, Int, Json)) {
-      let tuple(counter, author_id, content) = note
+  case first {
+    None -> Nil
+    Some(tuple(counter, author_id, content)) -> {
       let content: Json = content
       // TODO it's just a map you pass in
-      assert Ok(_) = thread.write_note(thread_id, counter, author_id, content)
+      assert Ok(note) =
+        thread.write_note(thread_id, counter, author_id, content)
       Nil
-    },
-  )
-  Ok(thread_id)
+    }
+  }
+  let tuple(counter, author_id, content) = current
+  assert Ok(Some(tuple(inserted_at, content))) =
+    thread.write_note(thread_id, counter, author_id, content)
+  Ok(tuple(identifier, False, Some(inserted_at), content))
 }

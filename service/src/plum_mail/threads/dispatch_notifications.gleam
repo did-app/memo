@@ -98,14 +98,13 @@ fn span_from_dynamic(raw) {
     "link" -> {
       assert Ok(url) = dynamic.field(raw, "url")
       assert Ok(url) = dynamic.string(url)
-      let title = dynamic.field(raw, "title")
-      |> result.then(dynamic.string)
-      |> option.from_result()
+      let title =
+        dynamic.field(raw, "title")
+        |> result.then(dynamic.string)
+        |> option.from_result()
       Ok(Link(title, url))
     }
-    "softbreak" -> {
-      Ok(Softbreak)
-    }
+    "softbreak" -> Ok(Softbreak)
   }
 }
 

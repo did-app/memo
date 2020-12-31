@@ -23,7 +23,8 @@ pub fn write_note(thread_id, counter, author_id, content: json.Json) {
       WHERE upper_identifier_id = $3
       AND thread_id = $1
     )
-    SELECT 42
+    SELECT content, inserted_at 
+    FROM note
     "
   let args = [
     pgo.int(thread_id),
@@ -31,7 +32,20 @@ pub fn write_note(thread_id, counter, author_id, content: json.Json) {
     pgo.int(author_id),
     dynamic.unsafe_coerce(dynamic.from(content)),
   ]
-  run_sql.execute(sql, args, fn(x) { x })
+  try db_response =
+    run_sql.execute(
+      sql,
+      args,
+      fn(row) {
+        assert Ok(content) = dynamic.element(row, 0)
+        let content: json.Json = dynamic.unsafe_coerce(content)
+        assert Ok(inserted_at) = dynamic.element(row, 1)
+        assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
+        tuple(inserted_at, content)
+      },
+    )
+  run_sql.single(db_response)
+  |> Ok
 }
 
 pub fn load_notes(thread_id) {

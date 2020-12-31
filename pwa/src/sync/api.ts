@@ -3,7 +3,6 @@ import type { Call } from "./client"
 import type { Block } from "../note/elements"
 
 export type Identifier = {
-  id: number,
   email_address: string,
   greeting: Block[] | null,
 }
@@ -68,12 +67,13 @@ export function fetchContact(emailAddress: string): Call<{ data: { identifier: I
   return get(path)
 }
 
-export function fetchContacts(): Call<{ data: { identifier: Identifier, outstanding: boolean, latest: { inserted_at: string, content: Block[]; } | undefined }[] }> {
+export type Contact = { identifier: Identifier, outstanding: boolean, latest: { inserted_at: string, content: Block[]; } | undefined }
+export function fetchContacts(): Call<{ data: Contact[] }> {
   const path = "/contacts"
   return get(path)
 }
 
-export function startRelationship(emailAddress: string, blocks: Block[]) {
+export function startRelationship(emailAddress: string, blocks: Block[]): Call<{ data: Contact }> {
   const path = "/relationship/start"
   const params = { email_address: emailAddress, blocks }
   return post(path, params)
@@ -81,7 +81,7 @@ export function startRelationship(emailAddress: string, blocks: Block[]) {
 
 // TODO postMemo
 // memo has contents and an index
-export function writeNote(threadId: number, counter: number, blocks: Block[]): Call<{ data: null }> {
+export function writeNote(threadId: number, counter: number, blocks: Block[]): Call<{ data: { latest: { inserted_at: string, content: Block[]; } } }> {
   const path = "/threads/" + threadId + "/post"
   const params = { counter, blocks }
   return post(path, params)
