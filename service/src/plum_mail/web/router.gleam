@@ -61,7 +61,9 @@ fn token_cookie_settings(request) {
   //   True -> http.None
   //   False -> http.Lax
   // }
-  http.CookieAttributes(..defaults, max_age: Some(604800))
+  // NOTE need x-request
+  io.debug(request)
+  http.CookieAttributes(..defaults, max_age: Some(604800), same_site: Some(http.None), secure: True)
 }
 
 fn authentication_token(identifier, request, config) {
