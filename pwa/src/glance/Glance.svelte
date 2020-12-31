@@ -27,7 +27,8 @@
       }
     | { item: "image_reel"; images: string[]; title: string; url: string }
     | { item: "plain" }
-    | { item: "image" };
+    | { item: "image" }
+    | { item: "embeded_video"; iframe: string };
   let preview: Preview, next: string | undefined, running: boolean;
 
   async function updatePreview(href: string) {
@@ -67,6 +68,16 @@
     <a {href}>{text}</a>
   {:else if preview.item === 'image'}
     <img src={href} alt="" />
+  {:else if preview.item === 'embeded_video'}
+    <!-- Styling copied from loom -->
+    <div class="w-full relative" style="padding-bottom:56.25%;">
+      <iframe
+        title="video TODO"
+        src={preview.iframe}
+        frameborder="0"
+        allowfullscreen
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" />
+    </div>
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->
     <a {href}>{text}</a>
