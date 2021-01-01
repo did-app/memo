@@ -230,231 +230,225 @@
   }
 </script>
 
-<style>
-  .left-of-thread {
-    margin-left: 28rem;
-  }
-  @media (min-width: 768px) {
-    .left-of-thread {
-      margin-left: 48rem;
-    }
-  }
-</style>
-
 <svelte:head>
   <title>{contactEmailAddress}</title>
 </svelte:head>
-<!-- TODO pass this message as the notes to the composer -->
-<!-- This goes to a fragment that binds on block -->
-<div class="" bind:this={root}>
-  {#each thread as memo, index}
-    <Memo
-      {memo}
-      active={noteSelection[index] || {}}
-      open={memo.counter >= ack || memo.counter === focus}
-      {index}
-      {thread} />
-  {:else}
-    <h1 class="text-center text-2xl my-4 text-gray-700">
-      Contact
-      <span class="font-bold">{contactEmailAddress}</span>
-    </h1>
-  {/each}
-</div>
-<ul class="fixed my-4 px-2 top-0 max-w-sm left-of-thread">
-  {#each Thread.findPinnable(thread) as pin}
-    <li
-      class="my-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
-      {#if pin.type === LINK}
-        <LinkComponent url={pin.item.url} title={pin.item.title} index={0} />
-      {:else if pin.type === ANNOTATION}
-        <!-- TODO remove dummy index -->
 
-        <span class="w-5 inline-block">
-          <AttachmentIcon />
-        </span>
-        <!-- {#each [Thread.followReference(pin.item.reference, thread)[0]] as block, index}
+<div class="flex w-full mx-auto max-w-6xl">
+  <div class="flex-1">
+    <!-- TODO pass this message as the notes to the composer -->
+    <!-- This goes to a fragment that binds on block -->
+    <div class="" bind:this={root}>
+      {#each thread as memo, index}
+        <Memo
+          {memo}
+          active={noteSelection[index] || {}}
+          open={memo.counter >= ack || memo.counter === focus}
+          {index}
+          {thread} />
+      {:else}
+        <h1 class="text-center text-2xl my-4 text-gray-700">
+          Contact
+          <span class="font-bold">{contactEmailAddress}</span>
+        </h1>
+      {/each}
+    </div>
+    {#if reply}
+      <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+        {#if preview}
+          <!-- TODO make sure can't always add annotation, or make it work with self -->
+          <!-- TODO make sure spans paragraphs notes can't be empty -->
+          <header class="ml-12 mb-6 flex text-gray-600">
+            <span class="font-bold">{myEmailAddress}</span>
+            <span class="ml-auto">{new Date().toLocaleDateString()}</span>
+          </header>
+          <Fragment {blocks} {thread} />
+          {#each suggestions as block, index}
+            Suggestion
+            {index + blocks.length}
+
+            <BlockComponent {block} {thread} index={index + blocks.length} />
+            <div class="pl-12 my-1 flex">
+              <div>
+                Ask
+                <select bind:value={choices[index].ask}>
+                  <option value="everyone">Everyone</option>
+                  <option value="tim">tim</option>
+                  <option value="bill">Bill</option>
+                </select>
+              </div>
+              <div>
+                For
+                <select bind:value={choices[index].when}>
+                  <option value="today">Today</option>
+                  <option value="no hurry">no hurry</option>
+                </select>
+              </div>
+            </div>
+          {/each}
+
+          <div class="mt-2 pl-12 flex items-center">
+            <div class="flex flex-1">
+              <!-- TODO this needs to show your email address, or if in header nothing at all -->
+              <!-- <span class="font-bold text-gray-700 mr-1">From:</span>
+              <input class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" bind:value={contact} type="email" placeholder="Your email address" required> -->
+            </div>
+            <!-- TODO icons included as string types -->
+            <button
+              class="flex-grow-0 py-2 px-6 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold"
+              type="submit"
+              on:click={() => {
+                preview = false;
+              }}>
+              <svg
+                class="fill-current inline w-4 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                enable-background="new 0 0 24 24"
+                viewBox="0 0 24 24">
+                <path
+                  d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                <path
+                  d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+              </svg>
+              Back
+            </button>
+            {#if sendStatus === 'available'}
+              <button
+                class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
+                on:click={sendMessage}>
+                <svg
+                  class="fill-current inline w-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  enable-background="new 0 0 24 24"
+                  viewBox="0 0 24 24">
+                  <path
+                    d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                  <path
+                    d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+                </svg>
+                Send
+              </button>
+            {:else if sendStatus === 'working'}
+              <button
+                class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">
+                <svg
+                  class="fill-current inline w-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  enable-background="new 0 0 24 24"
+                  viewBox="0 0 24 24">
+                  <path
+                    d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                  <path
+                    d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+                </svg>
+                Sending
+              </button>
+            {:else if sendStatus === 'suceeded'}
+              <button
+                class="flex-grow-0 py-2 px-6 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold">
+                <svg
+                  class="fill-current inline w-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  enable-background="new 0 0 24 24"
+                  viewBox="0 0 24 24">
+                  <path
+                    d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                  <path
+                    d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+                </svg>
+                Sent
+              </button>
+            {:else if sendStatus === 'failed'}
+              <button
+                class="flex-grow-0 py-2 px-6 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold">
+                <svg
+                  class="fill-current inline w-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  enable-background="new 0 0 24 24"
+                  viewBox="0 0 24 24">
+                  <path
+                    d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                  <path
+                    d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+                </svg>
+                Failed to send message
+              </button>
+            {/if}
+          </div>
+        {:else}
+          <!-- Could do an on submit and catch whats inside -->
+          <!-- TODO name previous inside composer -->
+          <Composer
+            notes={thread}
+            bind:draft
+            {annotations}
+            on:clearAnnotation={clearAnnotation} />
+          <div class="mt-2 pl-12 flex items-center">
+            <div class="flex flex-1">
+              <span class="font-bold text-gray-700 mr-1">From:</span>
+              <input
+                class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700"
+                bind:value={myEmailAddress}
+                type="email"
+                placeholder="Your email address"
+                readonly
+                required />
+            </div>
+            <button
+              class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
+              type="submit"
+              on:click={() => {
+                preview = true;
+              }}>
+              <svg
+                class="fill-current inline w-4 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                enable-background="new 0 0 24 24"
+                viewBox="0 0 24 24">
+                <path
+                  d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
+                <path
+                  d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
+              </svg>
+              Preview
+            </button>
+          </div>
+        {/if}
+      </article>
+    {:else}
+      <nav class="text-right">
+        {#if outstanding}
+          <button
+            on:click={acknowledge}
+            class="py-2 mx-2 px-4 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold">Acknowledge</button>
+        {/if}
+        <button
+          on:click={() => (reply = true)}
+          class="py-2 mx-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">Reply</button>
+      </nav>
+    {/if}
+  </div>
+  <ul class="px-2 max-w-sm w-full flex-shrink-0">
+    {#each Thread.findPinnable(thread) as pin}
+      <li
+        class="my-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
+        {#if pin.type === LINK}
+          <LinkComponent url={pin.item.url} title={pin.item.title} index={0} />
+        {:else if pin.type === ANNOTATION}
+          <!-- TODO remove dummy index -->
+
+          <span class="w-5 inline-block">
+            <AttachmentIcon />
+          </span>
+          <!-- {#each [Thread.followReference(pin.item.reference, thread)[0]] as block, index}
           <BlockComponent {block} {index} {thread} truncate={true} />
         {/each} -->
-        <!-- TODO summary spans function -->
-        {#each Thread.summary(Thread.followReference(pin.item.reference, thread)) as span, index}
-          <SpanComponent {span} {index} unfurled={false} />
-        {/each}
-      {/if}
-    </li>
-  {/each}
-</ul>
-{#if reply}
-  <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
-    {#if preview}
-      <!-- TODO make sure can't always add annotation, or make it work with self -->
-      <!-- TODO make sure spans paragraphs notes can't be empty -->
-      <header class="ml-12 mb-6 flex text-gray-600">
-        <span class="font-bold">{myEmailAddress}</span>
-        <span class="ml-auto">{new Date().toLocaleDateString()}</span>
-      </header>
-      <Fragment {blocks} {thread} />
-      {#each suggestions as block, index}
-        Suggestion
-        {index + blocks.length}
-
-        <BlockComponent {block} {thread} index={index + blocks.length} />
-        <div class="pl-12 my-1 flex">
-          <div>
-            Ask
-            <select bind:value={choices[index].ask}>
-              <option value="everyone">Everyone</option>
-              <option value="tim">tim</option>
-              <option value="bill">Bill</option>
-            </select>
-          </div>
-          <div>
-            For
-            <select bind:value={choices[index].when}>
-              <option value="today">Today</option>
-              <option value="no hurry">no hurry</option>
-            </select>
-          </div>
-        </div>
-      {/each}
-
-      <div class="mt-2 pl-12 flex items-center">
-        <div class="flex flex-1">
-          <!-- TODO this needs to show your email address, or if in header nothing at all -->
-          <!-- <span class="font-bold text-gray-700 mr-1">From:</span>
-        <input class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" bind:value={contact} type="email" placeholder="Your email address" required> -->
-        </div>
-        <!-- TODO icons included as string types -->
-        <button
-          class="flex-grow-0 py-2 px-6 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold"
-          type="submit"
-          on:click={() => {
-            preview = false;
-          }}>
-          <svg
-            class="fill-current inline w-4 mr-2"
-            xmlns="http://www.w3.org/2000/svg"
-            enable-background="new 0 0 24 24"
-            viewBox="0 0 24 24">
-            <path
-              d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-            <path
-              d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-          </svg>
-          Back
-        </button>
-        {#if sendStatus === 'available'}
-          <button
-            class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-            on:click={sendMessage}>
-            <svg
-              class="fill-current inline w-4 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              enable-background="new 0 0 24 24"
-              viewBox="0 0 24 24">
-              <path
-                d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-              <path
-                d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-            </svg>
-            Send
-          </button>
-        {:else if sendStatus === 'working'}
-          <button
-            class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">
-            <svg
-              class="fill-current inline w-4 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              enable-background="new 0 0 24 24"
-              viewBox="0 0 24 24">
-              <path
-                d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-              <path
-                d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-            </svg>
-            Sending
-          </button>
-        {:else if sendStatus === 'suceeded'}
-          <button
-            class="flex-grow-0 py-2 px-6 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold">
-            <svg
-              class="fill-current inline w-4 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              enable-background="new 0 0 24 24"
-              viewBox="0 0 24 24">
-              <path
-                d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-              <path
-                d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-            </svg>
-            Sent
-          </button>
-        {:else if sendStatus === 'failed'}
-          <button
-            class="flex-grow-0 py-2 px-6 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold">
-            <svg
-              class="fill-current inline w-4 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              enable-background="new 0 0 24 24"
-              viewBox="0 0 24 24">
-              <path
-                d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-              <path
-                d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-            </svg>
-            Failed to send message
-          </button>
+          <!-- TODO summary spans function -->
+          {#each Thread.summary(Thread.followReference(pin.item.reference, thread)) as span, index}
+            <SpanComponent {span} {index} unfurled={false} />
+          {/each}
         {/if}
-      </div>
-    {:else}
-      <!-- Could do an on submit and catch whats inside -->
-      <!-- TODO name previous inside composer -->
-      <Composer
-        notes={thread}
-        bind:draft
-        {annotations}
-        on:clearAnnotation={clearAnnotation} />
-      <div class="mt-2 pl-12 flex items-center">
-        <div class="flex flex-1">
-          <span class="font-bold text-gray-700 mr-1">From:</span>
-          <input
-            class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700"
-            bind:value={myEmailAddress}
-            type="email"
-            placeholder="Your email address"
-            readonly
-            required />
-        </div>
-        <button
-          class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-          type="submit"
-          on:click={() => {
-            preview = true;
-          }}>
-          <svg
-            class="fill-current inline w-4 mr-2"
-            xmlns="http://www.w3.org/2000/svg"
-            enable-background="new 0 0 24 24"
-            viewBox="0 0 24 24">
-            <path
-              d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-            <path
-              d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-          </svg>
-          Preview
-        </button>
-      </div>
-    {/if}
-  </article>
-{:else}
-  <nav class="text-right">
-    {#if outstanding}
-      <button
-        on:click={acknowledge}
-        class="py-2 mx-2 px-4 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold">Acknowledge</button>
-    {/if}
-    <button
-      on:click={() => (reply = true)}
-      class="py-2 mx-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">Reply</button>
-  </nav>
-{/if}
+      </li>
+    {/each}
+  </ul>
+</div>

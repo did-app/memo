@@ -42,13 +42,8 @@
       </p>
     </article>
   {/if}
-  {me.email_address}
 
-  <a
-    class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
-    href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
   <ol>
-    <h1>Your contacts</h1>
     {#each contacts as { identifier, latest, ack }}
       <li>
         <a

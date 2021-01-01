@@ -16,11 +16,11 @@
   <article
     id={memo.counter.toString()}
     data-note-index={index}
-    class="-mt-2 border-t mb-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+    class="border-t mb-2 py-6 pr-12 bg-white rounded-lg shadow-md">
     <header
       class="ml-12 mb-6 flex text-gray-600 cursor-pointer"
       on:click={() => (open = false)}>
-      <span class="font-bold">{memo.author}</span>
+      <span class="font-bold max-w-xs truncate">{memo.author}</span>
       <span class="ml-auto">{memo.inserted_at.toLocaleDateString()}</span>
     </header>
     <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
@@ -31,9 +31,9 @@
     id={memo.counter.toString()}
     data-note-index={index}
     on:click={() => (open = true)}
-    class="-mt-2 border-t mb-0 py-1 pr-12 bg-white rounded-t-lg shadow-md cursor-pointer">
+    class="-mb-2 border-t  py-1 pr-12 bg-white rounded-t-lg shadow-md cursor-pointer">
     <header class="ml-12 mb-2 flex text-gray-600">
-      <span class="font-bold">{memo.author}</span>
+      <span class="font-bold max-w-xs truncate">{memo.author}</span>
       <span
         class="truncate pl-2 pr-8">{#each Thread.summary(memo.blocks) as span, index}
           <SpanComponent {span} {index} unfurled={false} />

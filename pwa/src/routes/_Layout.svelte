@@ -14,7 +14,33 @@
     <title>Better Conversations</title>
   </slot>
 </svelte:head>
-<main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
+<header class="px-6">
+  <nav class="max-w-6xl mx-auto flex flex-wrap items-center text-lg md:text-xl">
+    <span class="my-1 flex-grow">
+      <a
+        class="text-purple-700 hover:text-purple-900 font-bold text-2xl"
+        href="/">
+        memo
+      </a>
+      {#if state.loading === false && state.me}
+        /
+        <a href="/profile"> {state.me.email_address} </a>
+      {/if}
+    </span>
+    <span class="my-1 ml-4">
+      {#if state.loading}
+        loading
+      {:else if state.me === null}
+        <a href="https://auth.did.app" class="button solid green">Sign in</a>
+      {:else}
+        <!-- <a
+          class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
+          href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a> -->
+      {/if}
+    </span>
+  </nav>
+</header>
+<main class="w-full px-1 md:px-2">
   {#if state.loading}
     <Loading />
   {:else if state.me === undefined}

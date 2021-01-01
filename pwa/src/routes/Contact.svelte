@@ -46,22 +46,13 @@
   })();
 </script>
 
-<main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-  {#if data}
-    <ContactPage
-      thread={data.notes.map(mapSuggestions)}
-      threadId={data.threadId}
-      ack={data.ack}
-      contactEmailAddress={data.contactEmailAddress}
-      myEmailAddress={me.email_address} />
-  {:else}
-    <Loading />
-  {/if}
-  <!-- {}
-  {:then response}
-    {#if 'error' in response}
-      unknown error
-    {:else}
-    {/if}
-  {/await} -->
-</main>
+{#if data}
+  <ContactPage
+    thread={data.notes.map(mapSuggestions)}
+    threadId={data.threadId}
+    ack={data.ack}
+    contactEmailAddress={data.contactEmailAddress}
+    myEmailAddress={me.email_address} />
+{:else}
+  <Loading />
+{/if}

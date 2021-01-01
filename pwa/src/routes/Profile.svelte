@@ -49,23 +49,9 @@
 <svelte:head>
   <title>Profile</title>
 </svelte:head>
-<article
-  class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
-  <h1 class="text-2xl">Hi {me.email_address}</h1>
-  <p>
-    Set up your public greeting, that explains how people should get in touch
-    with you.
-  </p>
-  <p>
-    Anyone who visits
-    <a
-      class="underline"
-      href="window.location.origin}{emailAddressToPath(me.email_address)}">{window.location.origin}{emailAddressToPath(me.email_address)}</a>
-    will be able to response this greeting
-  </p>
-</article>
-<article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
-  <!-- Impossible to put annotations in the middle of text Impossible to save
+<div class="flex w-full mx-auto max-w-6xl">
+  <article class="flex-1 my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
+    <!-- Impossible to put annotations in the middle of text Impossible to save
   question preferences
   <br />
   Click to make question, NEEDS a text representation for editable pages Can be
@@ -87,57 +73,75 @@
   unless you have annotated previously need a dismiss annotation false
   <br />
   Still even in rich editor don't want attached to question -->
-  <Composer notes={[]} bind:draft annotations={[]} />
-  <!-- {JSON.stringify(suggestions)} -->
-  {#if suggestions.length}
-    <h2 class="font-bold pl-12">Questions</h2>
-  {/if}
-  {#each suggestions as suggestion}
-    <div class="pl-12">
-      {#each suggestion.spans as span, index}
-        <SpanComponent {span} {index} unfurled={false} />
-      {/each}
-    </div>
-  {/each}
-
-  <div class="mt-2 pl-12 flex items-center">
-    <div class="flex flex-1" />
-    {#if saveStatus === 'available'}
-      <button
-        class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-        on:click={saveGreeting}>
-        <span class="inline-block w-4 mr-2">
-          <SendIcon />
-        </span>
-        Save
-      </button>
-    {:else if saveStatus === 'working'}
-      <button
-        class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-        on:click={saveGreeting}>
-        <span class="inline-block w-4 mr-2">
-          <SendIcon />
-        </span>
-        Saving
-      </button>
-    {:else if saveStatus === 'suceeded'}
-      <button
-        class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold"
-        on:click={saveGreeting}>
-        <span class="inline-block w-4 mr-2">
-          <SendIcon />
-        </span>
-        Saved
-      </button>
-    {:else if saveStatus === 'failed'}
-      <button
-        class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold"
-        on:click={saveGreeting}>
-        <span class="inline-block w-4 mr-2">
-          <SendIcon />
-        </span>
-        Failed to save update
-      </button>
+    <Composer notes={[]} bind:draft annotations={[]} />
+    <!-- {JSON.stringify(suggestions)} -->
+    {#if suggestions.length}
+      <h2 class="font-bold pl-12">Questions</h2>
     {/if}
+    {#each suggestions as suggestion}
+      <div class="pl-12">
+        {#each suggestion.spans as span, index}
+          <SpanComponent {span} {index} unfurled={false} />
+        {/each}
+      </div>
+    {/each}
+
+    <div class="mt-2 pl-12 flex items-center">
+      <div class="flex flex-1" />
+      {#if saveStatus === 'available'}
+        <button
+          class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
+          on:click={saveGreeting}>
+          <span class="inline-block w-4 mr-2">
+            <SendIcon />
+          </span>
+          Save
+        </button>
+      {:else if saveStatus === 'working'}
+        <button
+          class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
+          on:click={saveGreeting}>
+          <span class="inline-block w-4 mr-2">
+            <SendIcon />
+          </span>
+          Saving
+        </button>
+      {:else if saveStatus === 'suceeded'}
+        <button
+          class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold"
+          on:click={saveGreeting}>
+          <span class="inline-block w-4 mr-2">
+            <SendIcon />
+          </span>
+          Saved
+        </button>
+      {:else if saveStatus === 'failed'}
+        <button
+          class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold"
+          on:click={saveGreeting}>
+          <span class="inline-block w-4 mr-2">
+            <SendIcon />
+          </span>
+          Failed to save update
+        </button>
+      {/if}
+    </div>
+  </article>
+  <div class="flex-shrink-0 max-w-sm ">
+    <article
+      class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
+      <h1 class="text-2xl">Hi {me.email_address}</h1>
+      <p>
+        Set up your public greeting, that explains how people should get in
+        touch with you.
+      </p>
+      <p>
+        Anyone who visits
+        <a
+          class="underline"
+          href="window.location.origin}{emailAddressToPath(me.email_address)}">{window.location.origin}{emailAddressToPath(me.email_address)}</a>
+        will be able to response this greeting
+      </p>
+    </article>
   </div>
-</article>
+</div>
