@@ -50,6 +50,10 @@ export function findPinnable(notes: Note[]): Pin[] {
 
 export function summary(blocks: Block[]): Span[] {
   let first: Block = blocks[0]
+  // TODO non empty list types
+  if (!first) {
+    return []
+  }
   if (first.type === PARAGRAPH) {
     let firstBreak = first.spans.findIndex(function (span: Span) {
       return span.type === SOFTBREAK
