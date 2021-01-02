@@ -43,7 +43,6 @@
 <style media="screen">
   textarea.message {
     min-height: 8rem;
-    max-height: 60vh;
   }
   textarea.comment {
     max-height: 25vh;

@@ -232,7 +232,13 @@
 
 <style>
   .sidebar {
-    grid-template-columns: minmax(0px, 1fr) 24rem;
+    grid-template-columns: minmax(0px, 1fr) 60px;
+  }
+
+  @media (min-width: 768px) {
+    .sidebar {
+      grid-template-columns: minmax(0px, 1fr) 20rem;
+    }
   }
 </style>
 
@@ -260,7 +266,9 @@
       {/each}
     </div>
     {#if reply}
-      <article class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md">
+      <article
+        class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
+        style="max-height: 60vh;">
         {#if preview}
           <!-- TODO make sure can't always add annotation, or make it work with self -->
           <!-- TODO make sure spans paragraphs notes can't be empty -->
@@ -422,7 +430,8 @@
         {/if}
       </article>
     {:else}
-      <nav class="text-right">
+      <nav
+        class="text-right px-12 border shadow-lg rounded p-4 sticky bottom-0 bg-white">
         {#if outstanding}
           <button
             on:click={acknowledge}
@@ -432,13 +441,14 @@
           on:click={() => (reply = true)}
           class="py-2 mx-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">Reply</button>
       </nav>
+      <div class="h-24" />
     {/if}
   </div>
   <div class="">
     <ul class="max-w-sm w-full sticky" style="top:0.25rem">
       {#each Thread.findPinnable(thread) as pin}
         <li
-          class="mb-1 mx-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
+          class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded">
           {#if pin.type === LINK}
             <LinkComponent
               url={pin.item.url}
