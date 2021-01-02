@@ -445,10 +445,10 @@
     {/if}
   </div>
   <div class="">
-    <ul class="max-w-sm w-full sticky" style="top:0.25rem">
+    <ul class="max-w-sm w-full sticky " style="top:0.25rem">
       {#each Thread.findPinnable(thread) as pin}
         <li
-          class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded">
+          class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded flex items-center">
           {#if pin.type === LINK}
             <LinkComponent
               url={pin.item.url}
@@ -457,13 +457,12 @@
           {:else if pin.type === ANNOTATION}
             <!-- TODO remove dummy index -->
 
-            <span class="w-5 inline-block">
+            <span class="w-5 inline-block mr-2">
               <AttachmentIcon />
             </span>
             <!-- {#each [Thread.followReference(pin.item.reference, thread)[0]] as block, index}
             <BlockComponent {block} {index} {thread} truncate={true} />
           {/each} -->
-            <!-- TODO summary spans function -->
             {#each Thread.summary(Thread.followReference(pin.item.reference, thread)) as span, index}
               <SpanComponent {span} {index} unfurled={false} />
             {/each}

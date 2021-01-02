@@ -63,6 +63,8 @@ export function summary(blocks: Block[]): Span[] {
     } else {
       return first.spans.slice(0, firstBreak)
     }
+  } else if (first.type === ANNOTATION) {
+    return summary(first.blocks)
   } else {
     return [{ type: "text", text: "TODO summary of nested" }]
   }
