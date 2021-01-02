@@ -11,10 +11,10 @@
   console.log(thread);
 </script>
 
-<div class="my-2 border-gray-600 border-l-4" data-block-index={index}>
-  <blockquote class=" opacity-50 px-2">
+<div class="my-2 border-gray-600 " data-block-index={index}>
+  <blockquote class="border-l-4 px-2 text-gray-500">
     {#each Thread.followReference(reference, thread) as block, index}
-      <div class="">
+      <div class="-mb-2">
         <BlockComponent {block} {index} {thread} />
       </div>
     {/each}
@@ -22,7 +22,7 @@
       class="text-purple-800"
       href="#{reference.note}"><small>{thread[reference.note].author}</small></a>
   </blockquote>
-  <div class="pl-4">
+  <div class="">
     {#each blocks as block, index}
       <BlockComponent {block} {index} {thread} />
     {/each}

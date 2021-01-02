@@ -139,7 +139,7 @@
         Anyone who visits
         <a
           class="underline"
-          href="window.location.origin}{emailAddressToPath(me.email_address)}">{window.location.origin}{emailAddressToPath(me.email_address)}</a>
+          href="{window.location.origin}{emailAddressToPath(me.email_address)}">{window.location.origin}{emailAddressToPath(me.email_address)}</a>
         will be able to response this greeting
       </p>
     </article>

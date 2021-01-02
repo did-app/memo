@@ -40,7 +40,7 @@
     </span>
   </nav>
 </header>
-<main class="w-full px-1 md:px-2">
+<main class="w-full md:px-2">
   {#if state.loading}
     <Loading />
   {:else if state.me === undefined}

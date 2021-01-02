@@ -4,7 +4,7 @@
   import { parse } from "../note";
   import type { Note } from "../note";
   import { ANNOTATION, LINK } from "../note/elements";
-  import type { Block, Annotation } from "../note/elements";
+  import type { Block, Annotation, Span } from "../note/elements";
   import { isCollapsed } from "../note/range";
   import type { Range } from "../note/range";
   import { getSelected } from "../thread/view";
@@ -114,35 +114,40 @@
     number,
     Record<number, undefined | (() => void)>
   > = {};
+
+  let activeAction:
+    | { type: "quote"; fragment: Block[]; callback: () => void }
+    | undefined;
   function handleSelectionChange() {
     const selected = getSelected(root);
     if (selected && selected.anchor && selected.focus) {
       let { noteIndex: anchorIndex, ...anchor } = selected.anchor;
       let { noteIndex: focusIndex, ...focus } = selected.focus;
       if (anchorIndex === focusIndex) {
+        let action = function () {
+          addAnnotation(anchorIndex, { anchor, focus });
+        };
+
+        if (anchor.offset != focus.offset) {
+          activeAction = {
+            type: "quote",
+            callback: action,
+            fragment: Thread.followReference(
+              // TODO better use of a location type
+              { note: anchorIndex, range: { anchor, focus } },
+              thread
+            ),
+          };
+        }
         noteSelection = Object.fromEntries([
-          [
-            anchorIndex,
-            Object.fromEntries([
-              [
-                anchor.path[0],
-                function () {
-                  // console.log(
-                  //   Tree.extractBlocks(thread[anchorIndex].blocks, {
-                  //     anchor,
-                  //     focus,
-                  //   })[1]
-                  // );
-                  addAnnotation(anchorIndex, { anchor, focus });
-                },
-              ],
-            ]),
-          ],
+          [anchorIndex, Object.fromEntries([[anchor.path[0], action]])],
         ]);
       } else {
+        activeAction = undefined;
         noteSelection = {};
       }
     } else {
+      activeAction = undefined;
       noteSelection = {};
     }
   }
@@ -232,21 +237,21 @@
 
 <style>
   .sidebar {
-    grid-template-columns: minmax(0px, 1fr) 60px;
+    grid-template-columns: minmax(0px, 1fr) 0px;
   }
 
-  @media (min-width: 768px) {
+  /* @media (min-width: 768px) {
     .sidebar {
       grid-template-columns: minmax(0px, 1fr) 20rem;
     }
-  }
+  } */
 </style>
 
 <svelte:head>
   <title>{contactEmailAddress}</title>
 </svelte:head>
 
-<div class="w-full mx-auto max-w-6xl grid sidebar">
+<div class="w-full mx-auto max-w-3xl grid sidebar">
   <div class="">
     <!-- TODO pass this message as the notes to the composer -->
     <!-- This goes to a fragment that binds on block -->
@@ -265,10 +270,16 @@
         </h1>
       {/each}
     </div>
-    {#if reply}
-      <article
-        class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
-        style="max-height: 60vh;">
+    <article
+      class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
+      style="max-height: 60vh;">
+      {#if activeAction}
+        <span
+          class="truncate ml-12 pr-4">{#each Thread.summary(activeAction.fragment) as span, index}
+            <SpanComponent {span} {index} unfurled={false} />
+          {/each}</span>
+      {/if}
+      {#if reply}
         {#if preview}
           <!-- TODO make sure can't always add annotation, or make it work with self -->
           <!-- TODO make sure spans paragraphs notes can't be empty -->
@@ -301,6 +312,7 @@
             </div>
           {/each}
 
+          <div>hello</div>
           <div class="mt-2 pl-12 flex items-center">
             <div class="flex flex-1">
               <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -428,24 +440,22 @@
             </button>
           </div>
         {/if}
-      </article>
-    {:else}
-      <nav
-        class="text-right px-12 border shadow-lg rounded p-4 sticky bottom-0 bg-white">
-        {#if outstanding}
+      {:else}
+        <nav class="text-right  p-4">
+          {#if outstanding}
+            <button
+              on:click={acknowledge}
+              class="py-2 mx-2 px-4 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold">Acknowledge</button>
+          {/if}
           <button
-            on:click={acknowledge}
-            class="py-2 mx-2 px-4 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold">Acknowledge</button>
-        {/if}
-        <button
-          on:click={() => (reply = true)}
-          class="py-2 mx-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">Reply</button>
-      </nav>
-      <div class="h-24" />
-    {/if}
+            on:click={() => (reply = true)}
+            class="py-2 mx-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">Reply</button>
+        </nav>
+      {/if}
+    </article>
   </div>
   <div class="">
-    <ul class="max-w-sm w-full sticky " style="top:0.25rem">
+    <ul class="max-w-sm w-full sticky overflow-hidden" style="top:0.25rem">
       {#each Thread.findPinnable(thread) as pin}
         <li
           class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded flex items-center">
