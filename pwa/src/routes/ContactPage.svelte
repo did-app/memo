@@ -230,12 +230,18 @@
   }
 </script>
 
+<style>
+  .sidebar {
+    grid-template-columns: minmax(0px, 1fr) 24rem;
+  }
+</style>
+
 <svelte:head>
   <title>{contactEmailAddress}</title>
 </svelte:head>
 
-<div class="flex w-full mx-auto max-w-6xl">
-  <div class="flex-1">
+<div class="w-full mx-auto max-w-6xl grid sidebar">
+  <div class="">
     <!-- TODO pass this message as the notes to the composer -->
     <!-- This goes to a fragment that binds on block -->
     <div class="" bind:this={root}>
@@ -428,10 +434,10 @@
       </nav>
     {/if}
   </div>
-  <ul class="px-2 max-w-sm w-full flex-shrink-0">
+  <ul class="max-w-sm w-full">
     {#each Thread.findPinnable(thread) as pin}
       <li
-        class="my-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
+        class="mb-1 mx-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
         {#if pin.type === LINK}
           <LinkComponent url={pin.item.url} title={pin.item.title} index={0} />
         {:else if pin.type === ANNOTATION}

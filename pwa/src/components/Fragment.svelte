@@ -52,7 +52,7 @@
 {#each blocks as block, index}
   <div class="flex">
     <div
-      class="w-8 m-2 cursor-pointer flex-none"
+      class="w-8 my-0 mx-2 cursor-pointer flex-none"
       on:mousedown={() => handleMouseDown(index)}>
       <svg
         class:opacity-0={undefined === active[index]}
