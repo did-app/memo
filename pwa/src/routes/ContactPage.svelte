@@ -22,6 +22,10 @@
   import LinkComponent from "../components/Link.svelte";
   import SpanComponent from "../components/Span.svelte";
   import AttachmentIcon from "../icons/attachment.svelte";
+  import QuoteIcon from "../icons/Quote.svelte";
+  import PinIcon from "../icons/Pin.svelte";
+  import CheckIcon from "../icons/Check.svelte";
+  import ReplyAllIcon from "../icons/ReplyAll.svelte";
 
   export let thread: Note[];
   export let threadId: number | undefined;
@@ -124,8 +128,11 @@
       let { noteIndex: anchorIndex, ...anchor } = selected.anchor;
       let { noteIndex: focusIndex, ...focus } = selected.focus;
       if (anchorIndex === focusIndex) {
+        reply = false;
         let action = function () {
           addAnnotation(anchorIndex, { anchor, focus });
+          reply = true;
+          // TODO focus on area
         };
 
         if (anchor.offset != focus.offset) {
@@ -240,18 +247,18 @@
     grid-template-columns: minmax(0px, 1fr) 0px;
   }
 
-  /* @media (min-width: 768px) {
+  @media (min-width: 768px) {
     .sidebar {
       grid-template-columns: minmax(0px, 1fr) 20rem;
     }
-  } */
+  }
 </style>
 
 <svelte:head>
   <title>{contactEmailAddress}</title>
 </svelte:head>
 
-<div class="w-full mx-auto max-w-3xl grid sidebar">
+<div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
   <div class="">
     <!-- TODO pass this message as the notes to the composer -->
     <!-- This goes to a fragment that binds on block -->
@@ -273,12 +280,6 @@
     <article
       class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
       style="max-height: 60vh;">
-      {#if activeAction}
-        <span
-          class="truncate ml-12 pr-4">{#each Thread.summary(activeAction.fragment) as span, index}
-            <SpanComponent {span} {index} unfurled={false} />
-          {/each}</span>
-      {/if}
       {#if reply}
         {#if preview}
           <!-- TODO make sure can't always add annotation, or make it work with self -->
@@ -312,7 +313,6 @@
             </div>
           {/each}
 
-          <div>hello</div>
           <div class="mt-2 pl-12 flex items-center">
             <div class="flex flex-1">
               <!-- TODO this needs to show your email address, or if in header nothing at all -->
@@ -441,15 +441,57 @@
           </div>
         {/if}
       {:else}
-        <nav class="text-right  p-4">
-          {#if outstanding}
+        {#if activeAction}
+          <div
+            class="truncate ml-12 border-gray-600 border-l-4 px-2 text-gray-600">
+            {#each Thread.summary(activeAction.fragment) as span, index}
+              <SpanComponent {span} {index} unfurled={false} />
+            {/each}
+          </div>
+        {/if}
+        <nav class="flex pl-12">
+          {#if activeAction}
             <button
-              on:click={acknowledge}
-              class="py-2 mx-2 px-4 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold">Acknowledge</button>
+              on:click={activeAction.callback}
+              class="flex items-center bg-gray-800 text-white ml-auto rounded px-2 ml-2">
+              <span class="w-5 mr-2 inline-block">
+                <QuoteIcon />
+              </span>
+              <span class="py-1">Quote in Reply</span>
+            </button>
+          {:else}
+            <button
+              class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+              <span class="w-5 mr-2 inline-block">
+                <PinIcon />
+              </span>
+              <span class="py-1">Pins</span>
+            </button>
+            {#if outstanding}
+              <button
+                on:click={acknowledge}
+                class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
+                <span class="w-5 mr-2 inline-block">
+                  <CheckIcon />
+                </span>
+                <span class="py-1">Acknowledge</span>
+              </button>
+            {/if}
+
+            <button
+              on:click={() => {
+                reply = true;
+              }}
+              class="flex items-center bg-gray-800 text-white rounded px-2 ml-2">
+              <span class="w-5 mr-2 inline-block">
+                <ReplyAllIcon />
+              </span>
+              <span class="py-1">
+                <!-- TODO scribe icon -->
+                {#if draft.trim().length !== 0}Draft{:else}Reply{/if}
+              </span>
+            </button>
           {/if}
-          <button
-            on:click={() => (reply = true)}
-            class="py-2 mx-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">Reply</button>
         </nav>
       {/if}
     </article>

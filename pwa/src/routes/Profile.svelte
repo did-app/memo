@@ -49,7 +49,7 @@
 <svelte:head>
   <title>Profile</title>
 </svelte:head>
-<div class="flex w-full mx-auto max-w-6xl">
+<div class="flex w-full mx-auto max-w-5">
   <article class="flex-1 my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
     <!-- Impossible to put annotations in the middle of text Impossible to save
   question preferences

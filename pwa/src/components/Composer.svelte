@@ -83,6 +83,7 @@
           bind:value={annotations[index].raw}
           on:input={resize}
           rows="1"
+          autofocus
           placeholder="Your comment ..." />
       </div>
     </div>
