@@ -16,7 +16,7 @@
   <article
     id={memo.counter.toString()}
     data-note-index={index}
-    class="border-t mb-2 pt-4 pb-2 pr-12 bg-white rounded-lg shadow-md overflow-hidden">
+    class="border-t mb-2 pt-4 pb-2 pr-12 bg-white rounded shadow-md overflow-hidden">
     <header
       class="ml-12 flex text-gray-600 cursor-pointer"
       on:click={() => (open = false)}>
@@ -31,7 +31,7 @@
     id={memo.counter.toString()}
     data-note-index={index}
     on:click={() => (open = true)}
-    class="-mb-2 border-t  py-1 pr-12 bg-white rounded-t-lg shadow-md cursor-pointer">
+    class="-mb-2 border-t  py-1 pr-12 bg-white rounded-t shadow-md cursor-pointer">
     <header class="ml-12 mb-2 flex text-gray-600 max-w-">
       <span class="truncate">
         <span class="font-bold">{memo.author}</span>

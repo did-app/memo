@@ -434,27 +434,32 @@
       </nav>
     {/if}
   </div>
-  <ul class="max-w-sm w-full">
-    {#each Thread.findPinnable(thread) as pin}
-      <li
-        class="mb-1 mx-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
-        {#if pin.type === LINK}
-          <LinkComponent url={pin.item.url} title={pin.item.title} index={0} />
-        {:else if pin.type === ANNOTATION}
-          <!-- TODO remove dummy index -->
+  <div class="">
+    <ul class="max-w-sm w-full sticky" style="top:0.25rem">
+      {#each Thread.findPinnable(thread) as pin}
+        <li
+          class="mb-1 mx-1 p-1 truncate bg-white cursor-pointer text-gray-700 hover:text-purple-700 shadow-lg hover:shadow-xl rounded">
+          {#if pin.type === LINK}
+            <LinkComponent
+              url={pin.item.url}
+              title={pin.item.title}
+              index={0} />
+          {:else if pin.type === ANNOTATION}
+            <!-- TODO remove dummy index -->
 
-          <span class="w-5 inline-block">
-            <AttachmentIcon />
-          </span>
-          <!-- {#each [Thread.followReference(pin.item.reference, thread)[0]] as block, index}
-          <BlockComponent {block} {index} {thread} truncate={true} />
-        {/each} -->
-          <!-- TODO summary spans function -->
-          {#each Thread.summary(Thread.followReference(pin.item.reference, thread)) as span, index}
-            <SpanComponent {span} {index} unfurled={false} />
-          {/each}
-        {/if}
-      </li>
-    {/each}
-  </ul>
+            <span class="w-5 inline-block">
+              <AttachmentIcon />
+            </span>
+            <!-- {#each [Thread.followReference(pin.item.reference, thread)[0]] as block, index}
+            <BlockComponent {block} {index} {thread} truncate={true} />
+          {/each} -->
+            <!-- TODO summary spans function -->
+            {#each Thread.summary(Thread.followReference(pin.item.reference, thread)) as span, index}
+              <SpanComponent {span} {index} unfurled={false} />
+            {/each}
+          {/if}
+        </li>
+      {/each}
+    </ul>
+  </div>
 </div>
