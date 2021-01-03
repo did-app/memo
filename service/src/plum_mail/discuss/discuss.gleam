@@ -29,6 +29,7 @@ pub fn validate_topic(topic) {
   }
 }
 
+// TODO remove topic as not part of direct conversation
 pub fn topic_to_string(topic) {
   let Topic(topic) = topic
   topic

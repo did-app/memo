@@ -52,7 +52,14 @@ pub fn execute(params, config) {
       Ok(Nil)
     }
     _ -> {
-      try _ = postmark.send_email(from, to, subject, body, postmark_api_token)
+      try _ =
+        postmark.send_email(
+          from.value,
+          to.value,
+          subject,
+          body,
+          postmark_api_token,
+        )
       Ok(Nil)
     }
   }

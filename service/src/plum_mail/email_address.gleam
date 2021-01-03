@@ -21,3 +21,9 @@ pub fn validate(email_address) {
     _ -> Ok(EmailAddress(email_address))
   }
 }
+
+pub fn to_path(email_address) {
+  let EmailAddress(value) = email_address
+  assert [username, domain] = string.split(value, "@")
+  string.join(["/", domain, "/", username], "")
+}

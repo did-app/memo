@@ -2,6 +2,7 @@ import gleam/bit_builder
 import gleam/dynamic
 import gleam/int
 import gleam/io
+import gleam/result
 import gleam/http
 import postmark/client
 import plum_mail/acl
@@ -36,7 +37,15 @@ pub fn handle(params, config) {
 
         Please can you visit https://app.plummail.co/peter
         "
-      try _ = client.send_email(from, to, subject, body, postmark_api_token)
+      try _ =
+        client.send_email(
+          from.value,
+          to.value,
+          subject,
+          body,
+          postmark_api_token,
+        )
+        |> result.map_error(fn(x) { todo("post mark error not handled") })
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
