@@ -57,6 +57,7 @@ table! {
         thread_id -> Int4,
         counter -> Int4,
         identifier_id -> Int4,
+        success -> Bool,
         inserted_at -> Timestamp,
     }
 }

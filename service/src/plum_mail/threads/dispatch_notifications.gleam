@@ -48,7 +48,7 @@ pub fn run() {
   LEFT JOIN note_notifications AS notifications
     ON notifications.thread_id = notes.thread_id
     AND notifications.counter = notes.counter
-    AND notifications.identifier_id = participants.thread_id
+    AND notifications.identifier_id = participants.identifier_id
   WHERE notifications IS NULL
   AND notes.counter > participants.ack
   AND participants.email_address <> 'peter@plummail.co'
@@ -233,9 +233,12 @@ fn dispatch_to_identifier(record, config) {
   let reply_to = "noreply@plummail.co"
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
+    io.debug(tuple("ssdsdsdsdsd", response))
   case response {
-    Ok(_) -> {
+    Ok(Nil) -> {
+      io.debug("dfdfd")
       assert Ok(_) = record_sent(thread_id, counter, recipient_id)
+      |> io.debug()
       Ok(Nil)
     }
     // TODO why was that, handle case of bad email addresses
@@ -246,7 +249,6 @@ fn dispatch_to_identifier(record, config) {
     }
   }
 
-  todo("discuss")
 }
 
 fn send(request, postmark_api_token) {
@@ -269,8 +271,9 @@ pub fn record_result(thread_id, counter, identifier_id, success) {
   // TODO think about renaming counter
   let sql =
     "
-    INSERT INTO note_notifications (conversation_id, counter, identifier_id, success)
+    INSERT INTO note_notifications (thread_id, counter, identifier_id, success)
     VALUES ($1, $2, $3, $4)
+    RETURNING *
     "
   let args = [
     pgo.int(thread_id),

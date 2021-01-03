@@ -46,6 +46,7 @@ CREATE TABLE note_notifications (
   -- TODO check does foreign key mean the combination is valid?
   FOREIGN KEY (thread_id, counter) REFERENCES notes(thread_id, counter),
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  success BOOLEAN NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
