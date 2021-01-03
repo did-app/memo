@@ -269,7 +269,7 @@ pub fn record_result(thread_id, counter, identifier_id, success) {
   // TODO think about renaming counter
   let sql =
     "
-    INSERT INTO notes_notifications (conversation_id, counter, identifier_id, success)
+    INSERT INTO note_notifications (conversation_id, counter, identifier_id, success)
     VALUES ($1, $2, $3, $4)
     "
   let args = [
