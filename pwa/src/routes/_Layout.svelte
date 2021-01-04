@@ -35,7 +35,9 @@
           href="https://auth.did.app"
           class="bg-gray-800 text-white ml-auto rounded px-2 py-1 ml-2">Sign in</a> -->
       {:else}
+        <!-- explicitly set target so page.js ignores it -->
         <a
+          target="_self"
           class="bg-gray-800 text-white ml-auto rounded px-2 py-1 ml-2"
           href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
       {/if}
