@@ -67,7 +67,7 @@
   {:else if preview.item === 'plain'}
     <a {href}>{text}</a>
   {:else if preview.item === 'image'}
-    <img src={href} alt="" />
+    <img class="mx-auto" src={href} alt="" />
   {:else if preview.item === 'embeded_video'}
     <!-- Styling copied from loom -->
     <div class="w-full relative" style="padding-bottom:56.25%;">

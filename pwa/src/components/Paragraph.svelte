@@ -7,7 +7,7 @@
   export let truncate: boolean;
 </script>
 
-<p class="my-1 w-full" data-block-index={index} class:truncate>
+<p class="my-1 min-w-0 w-full" data-block-index={index} class:truncate>
   {#each spans as span, index}
     <SpanComponent {span} {index} unfurled={spans.length === 1} />
   {/each}
