@@ -1,2 +1,2 @@
-/api/*  https://did-memo.herokuapp.com/:splat
+/api/*  https://did-memo.herokuapp.com/:splat 200
 /*   /index.html   200
