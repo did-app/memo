@@ -36,14 +36,14 @@ function pathFromNode(node: Node) {
 
   let element = leafElement(node)
   while (element) {
-    const { spanIndex, blockIndex, noteIndex } = element.dataset
+    const { spanIndex, blockIndex, memoPosition } = element.dataset
 
     if (spanIndex !== undefined) {
       path.unshift(parseInt(spanIndex))
     } else if (blockIndex !== undefined) {
       path.unshift(parseInt(blockIndex))
-    } else if (noteIndex !== undefined) {
-      return { noteIndex: parseInt(noteIndex), path }
+    } else if (memoPosition !== undefined) {
+      return { memoPosition: parseInt(memoPosition), path }
     }
 
     let parent = element.parentElement

@@ -1,6 +1,6 @@
 <script lang="typescript">
-  import { TEXT, LINK, SOFTBREAK } from "../note/elements";
-  import type { Span } from "../note/elements";
+  import { TEXT, LINK, SOFTBREAK } from "../memo/elements";
+  import type { Span } from "../memo/elements";
   import Text from "./Text.svelte";
   import Link from "./Link.svelte";
   import Glance from "../glance/Glance.svelte";

@@ -1,11 +1,11 @@
 import { PARAGRAPH, TEXT, LINK, SOFTBREAK } from "./elements"
 import type { Block, Span, Paragraph } from "./elements"
 
-export type Note = {
+export type Memo = {
   author: string,
-  blocks: Block[],
+  content: Block[],
   inserted_at: Date,
-  counter: number
+  position: number
 }
 
 function parseLine(line: string, offset: number) {
@@ -23,12 +23,12 @@ function parseLine(line: string, offset: number) {
     let range = document.createRange()
 
     if (unmatched) {
-      output.push({ type: TEXT, text: unmatched, start })
+      output.push({ type: TEXT, text: unmatched })
     }
     if (token[3] !== undefined) {
-      output.push({ type: LINK, url: token[3], start })
+      output.push({ type: LINK, url: token[3] })
     } else if (token[2] !== undefined) {
-      output.push({ type: LINK, url: token[2], title: token[1], start })
+      output.push({ type: LINK, url: token[2], title: token[1] })
     } else {
       throw "should be handled"
     }

@@ -1,13 +1,13 @@
 <script lang="typescript">
-  import { PARAGRAPH, ANNOTATION, PROMPT } from "../note/elements";
-  import type { Block } from "../note/elements";
-  import type { Note } from "../note";
+  import { PARAGRAPH, ANNOTATION, PROMPT } from "../memo/elements";
+  import type { Block } from "../memo/elements";
+  import type { Memo } from "../memo";
   import Paragraph from "./Paragraph.svelte";
   import Annotation from "./Annotation.svelte";
 
   export let block: Block;
   export let index: number;
-  export let thread: Note[];
+  export let thread: Memo[];
   export let truncate: boolean = false;
 </script>
 

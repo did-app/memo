@@ -52,8 +52,8 @@ pub fn execute(identifier_id, email_address: EmailAddress) {
           maybe_thread,
           fn(thread) {
             let tuple(thread_id, ack) = thread
-            assert Ok(notes) = thread.load_notes(thread_id)
-            tuple(thread_id, ack, notes)
+            assert Ok(memos) = thread.load_memos(thread_id)
+            tuple(thread_id, ack, memos)
           },
         )
       Ok(tuple(Some(contact), thread))

@@ -51,7 +51,7 @@
           href={emailAddressToPath(identifier.email_address) + '#' + ack}>
           {identifier.email_address}
           <br />
-          {#if (latest || { counter: 0 }).counter > ack}
+          {#if (latest || { position: 0 }).position > ack}
             outstanding
           {:else}up to date{/if}
           {latest && new Date(latest.inserted_at).toLocaleDateString()}

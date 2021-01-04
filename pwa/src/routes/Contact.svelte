@@ -1,8 +1,8 @@
 <script lang="ts">
   import * as Thread from "../thread";
-  import type { Note } from "../note";
-  import { PROMPT } from "../note/elements";
-  import type { Prompt } from "../note/elements";
+  import type { Memo } from "../memo";
+  import { PROMPT } from "../memo/elements";
+  import type { Prompt } from "../memo/elements";
   import * as Sync from "../sync";
   import type { Identifier } from "../sync/api";
   import type { State } from "../sync";
@@ -23,32 +23,31 @@
   type Data = {
     threadId: number | undefined;
     ack: number;
-    notes: Note[];
+    memos: Memo[];
     contactEmailAddress: string;
   };
 
   // TODO remove this for real prompts
-  function mapSuggestions(note: Note, noteIndex: number) {
-    let suggestions = Thread.makeSuggestions(note.blocks);
+  function mapSuggestions(memo: Memo, memoPosition: number) {
+    let suggestions = Thread.makeSuggestions(memo.content);
     let prompts = suggestions.map(function (suggestion): Prompt {
       return {
         type: PROMPT,
-        reference: { note: noteIndex, blockIndex: suggestion.blockIndex },
+        reference: { memoPosition, blockIndex: suggestion.blockIndex },
       };
     });
 
-    return { ...note, blocks: [...note.blocks, ...prompts] };
+    return { ...memo, content: [...memo.content, ...prompts] };
   }
   let data: Data | undefined;
   (async function run() {
-    console.log("Syc");
     data = await Sync.loadContact(state as Authenticated, contactEmailAddress);
   })();
 </script>
 
 {#if data}
   <ContactPage
-    thread={data.notes.map(mapSuggestions)}
+    thread={data.memos.map(mapSuggestions)}
     threadId={data.threadId}
     ack={data.ack}
     contactEmailAddress={data.contactEmailAddress}

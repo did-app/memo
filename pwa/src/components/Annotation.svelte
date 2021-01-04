@@ -1,14 +1,14 @@
 <script>
-  import type { Block } from "../note/elements";
-  import type { Note } from "../note";
+  import type { Block } from "../memo/elements";
+  import type { Memo } from "../memo";
   import * as Thread from "../thread";
   import type { Reference } from "../thread";
   import BlockComponent from "./Block.svelte";
+
   export let reference: Reference;
   export let blocks: Block[];
   export let index: number;
-  export let thread: Note[];
-  console.log(thread);
+  export let thread: Memo[];
 </script>
 
 <div class="my-2 border-gray-600 w-full" data-block-index={index}>

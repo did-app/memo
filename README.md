@@ -22,3 +22,14 @@ This app uses the container stack.
 ```
 heroku stack:set -a plum-mail container
 ```
+
+## Naming
+
+- An entry in a thread is a **Memo**
+  - Note was considered but this had more connotations with just text and not an audience.
+  - Also Message
+- A memo has a **Position** in a thread
+- A memo has content which consists of one or more blocks
+  - The could also be the body/text of a memo
+  - Text is reused as the lowest component
+  - The content of a memo is everything produced by a user so perhaps would include headings etc

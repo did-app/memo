@@ -1,13 +1,13 @@
 <script lang="typescript">
   import BlockComponent from "./Block.svelte";
-  // import { ANNOTATION } from "../note/elements";
-  import type { Block } from "../note/elements";
-  import type { Note } from "../note";
+  // import { ANNOTATION } from "../memo/elements";
+  import type { Block } from "../memo/elements";
+  import type { Memo } from "../memo";
   // import type { Reference } from "../thread";
 
   export let blocks: Block[];
   export let active: Record<number, undefined | (() => void)> = {};
-  export let thread: Note[];
+  export let thread: Memo[];
 
   // function annotationsForNote(notes: Note[], index: number) {
   //   // TODO this needs to do author
@@ -47,7 +47,6 @@
   }
 </script>
 
-<!-- <div data-note-index={index}> -->
 <!-- TODO put note index on container -->
 {#each blocks as block, index}
   <div class="flex">

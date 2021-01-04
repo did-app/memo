@@ -1,6 +1,6 @@
 import { writable } from "svelte/store"
 import type { Writable } from "svelte/store"
-import type { Block } from "../note/elements"
+import type { Block } from "../memo/elements"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
 import type { Identifier, Contact } from "./api"
@@ -112,13 +112,13 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
       return {
         threadId: undefined,
         ack: 0,
-        notes: [],
+        memos: [],
         contactEmailAddress,
       };
     }
     if (thread) {
       let threadId = thread.id;
-      let notes = thread.notes.map(function ({
+      let memos = thread.memos.map(function ({
         inserted_at: iso8601,
         ...rest
       }) {
@@ -128,19 +128,19 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
       return {
         threadId,
         ack: thread.ack,
-        notes: notes,
+        memos: memos,
         contactEmailAddress,
       };
     } else {
       let greeting = identifier.greeting;
 
-      let notes = greeting
+      let memos = greeting
         ? [
           {
-            blocks: greeting,
+            content: greeting,
             author: contactEmailAddress,
             inserted_at: new Date(),
-            counter: 1,
+            position: 1,
           },
         ]
         : [];
@@ -148,7 +148,7 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
         threadId: undefined,
         // It's not outstand to have not yet answered a greeting
         ack: 1,
-        notes,
+        memos,
         contactEmailAddress,
       };
     }
@@ -164,21 +164,20 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
     //     }
     //     let myEmailAddress = "";
     //     let greeting = profileResponse.data && profileResponse.data.greeting;
-    //     let notes = greeting
+    //     let memos = greeting
     //       ? [
     //           {
-    //             blocks: greeting,
+    //             content: greeting,
     //             author: contactEmailAddress,
     //             inserted_at: new Date(),
-    //             // TODO make counter index
-    //             counter: 1,
+    //             position: 1,
     //           },
     //         ]
     //       : [];
     //     return {
     //       threadId: undefined,
     //       ack: 0,
-    //       notes,
+    //       memos,
     //       contactEmailAddress,
     //       myEmailAddress,
     //     };

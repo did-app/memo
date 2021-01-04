@@ -1,6 +1,6 @@
 <script lang="typescript">
-  import { parse, toString } from "../note";
-  import type { Block } from "../note/elements";
+  import { parse, toString } from "../memo";
+  import type { Block } from "../memo/elements";
   import * as Thread from "../thread";
   import * as API from "../sync/api";
   import type { Identifier } from "../sync/api";

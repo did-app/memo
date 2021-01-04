@@ -10,21 +10,18 @@ export const PROMPT = "prompt"
 export type Paragraph = {
   type: typeof PARAGRAPH,
   spans: Span[],
-  // TODO remove start
-  start: number
+
 }
 export type Text = {
   type: typeof TEXT,
   text: string,
-  // TODO remove start
-  start?: number
+
 }
 export type Link = {
   type: typeof LINK,
   title?: string,
   url: string,
-  // TODO remove start
-  start: number
+
 }
 
 export type Annotation = {

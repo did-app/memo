@@ -28,31 +28,11 @@ import plum_mail/authentication/claim_email_address
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
 import plum_mail/web/helpers as web
-import plum_mail/discuss/discuss.{Message, Pin}
-import plum_mail/discuss/start_conversation
-import plum_mail/discuss/show_inbox
-import plum_mail/discuss/set_notification
-import plum_mail/discuss/add_participant
-import plum_mail/discuss/add_pin
-import plum_mail/discuss/delete_pin
-import plum_mail/discuss/write_message
-import plum_mail/discuss/read_message
 import plum_mail/threads/thread
 import plum_mail/threads/acknowledge
 import plum_mail/relationships/lookup_relationship
 import plum_mail/relationships/start_relationship
 import plum_mail/email/inbound/postmark
-
-fn load_participation(conversation_id, request, config) {
-  try conversation_id =
-    int.parse(conversation_id)
-    |> result.map_error(fn(_: Nil) {
-      error.BadRequest("Invalid conversation id")
-    })
-  try client_state = web.identify_client(request, config)
-  try identifier_id = web.require_authenticated(client_state)
-  discuss.load_participation(conversation_id, identifier_id)
-}
 
 fn token_cookie_settings(request) {
   let Request(scheme: scheme, ..) = request
@@ -102,19 +82,19 @@ fn no_content() {
 }
 
 fn latest_to_json(latest) {
-  let tuple(inserted_at, content, counter) = latest
+  let tuple(inserted_at, content, position) = latest
   json.object([
     tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
     tuple("content", content),
-    tuple("counter", json.int(counter)),
+    tuple("position", json.int(position)),
   ])
 }
 
 fn contact_to_json(contact) {
-  let tuple(identifier, ack, inserted_at, content, counter) = contact
+  let tuple(identifier, ack, inserted_at, content, position) = contact
   let latest_json = case inserted_at {
     None -> json.null()
-    Some(inserted_at) -> latest_to_json(tuple(inserted_at, content, counter))
+    Some(inserted_at) -> latest_to_json(tuple(inserted_at, content, position))
   }
   json.object([
     tuple("identifier", identifier.to_json(identifier)),
@@ -233,10 +213,10 @@ pub fn route(
         FROM pairs
         WHERE pairs.lower_identifier_id = $1
       ), latest AS (
-        SELECT DISTINCT ON(thread_id) * FROM notes
+        SELECT DISTINCT ON(thread_id) * FROM memos
         ORDER BY thread_id DESC, inserted_at DESC
       )
-      SELECT id, email_address, greeting, contacts.ack, latest.inserted_at, latest.content, latest.counter FROM contacts
+      SELECT id, email_address, greeting, contacts.ack, latest.inserted_at, latest.content, latest.position FROM contacts
       JOIN identifiers ON identifiers.id = contacts.contact_id
       LEFT JOIN latest ON latest.thread_id = contacts.thread_id
       "
@@ -255,9 +235,9 @@ pub fn route(
             assert Ok(content) = dynamic.element(row, 5)
             let content: json.Json = dynamic.unsafe_coerce(content)
             // TODO thread summary type
-            assert Ok(counter) = dynamic.element(row, 6)
-            assert Ok(counter) = dynamic.int(counter)
-            tuple(identifier, ack, inserted_at, content, counter)
+            assert Ok(position) = dynamic.element(row, 6)
+            assert Ok(position) = dynamic.int(position)
+            tuple(identifier, ack, inserted_at, content, position)
           },
         )
       // db.run(sql, args, io.debug)
@@ -299,14 +279,15 @@ pub fn route(
     ["threads", thread_id, "post"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
       try raw = acl.parse_json(request)
-      try counter = acl.required(raw, "counter", acl.as_int)
+      try position = acl.required(raw, "position", acl.as_int)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
       // // TODO a participation thing again
       try Some(latest) =
-        thread.write_note(thread_id, counter, author_id, blocks)
+
+        thread.post_memo(thread_id, position, author_id, blocks)
       let data = json.object([tuple("latest", latest_to_json(latest))])
       http.response(200)
       |> web.set_resp_json(data)
@@ -321,169 +302,6 @@ pub fn route(
       no_content()
     }
 
-    ["c", "create"] -> {
-      try params = acl.parse_form(request)
-      try topic = start_conversation.params(params)
-      try client_state = web.identify_client(request, config)
-      try identifier_id = web.require_authenticated(client_state)
-      try conversation = start_conversation.execute(topic, identifier_id)
-      try _ = case map.get(params, "participant") {
-        Error(Nil) -> Ok(Nil)
-        Ok(email_address) -> {
-          try participation =
-            load_participation(int.to_string(conversation.id), request, config)
-          let params =
-            dynamic.from(map.from_list([tuple("email_address", email_address)]))
-          try params = add_participant.params(params)
-          try _ = add_participant.execute(participation, params)
-          Ok(Nil)
-        }
-      }
-      web.redirect(string.append(
-        string.append(config.client_origin, "/c/"),
-        int.to_string(conversation.id),
-      ))
-      |> Ok
-    }
-
-    // This will need participation for cursor
-    // ["c", id] -> {
-    //   try participation = load_participation(id, request, config)
-    //   try participants =
-    //     discuss.load_participants(participation.conversation.id)
-    //   try messages = discuss.load_messages(participation.conversation.id)
-    //   try pins = discuss.load_pins(participation.conversation.id)
-    //   let data =
-    //     json.object([
-    //       tuple(
-    //         "conversation",
-    //         discuss.conversation_to_json(participation.conversation),
-    //       ),
-    //       tuple(
-    //         "participants",
-    //         json.list(list.map(
-    //           participants,
-    //           fn(participant) {
-    //             let Identifier(id: id, email_address: email_address) =
-    //               participant
-    //             json.object([
-    //               tuple("id", json.int(id)),
-    //               tuple("email_address", json.string(email_address.value)),
-    //             ])
-    //           },
-    //         )),
-    //       ),
-    //       tuple(
-    //         "messages",
-    //         json.list(list.map(
-    //           messages,
-    //           fn(message) {
-    //             let Message(counter, content, inserted_at, identifier) = message
-    //             let Identifier(email_address: email_address, ..) = identifier
-    //             json.object([
-    //               tuple("counter", json.int(counter)),
-    //               tuple("content", json.string(content)),
-    //               tuple("author", json.string(email_address.value)),
-    //               tuple(
-    //                 "inserted_at",
-    //                 json.string(datetime.to_human(inserted_at)),
-    //               ),
-    //             ])
-    //           },
-    //         )),
-    //       ),
-    //       tuple(
-    //         "pins",
-    //         json.list(list.map(
-    //           pins,
-    //           fn(pin) {
-    //             let Pin(id, counter, identifier_id, content) = pin
-    //             json.object([
-    //               tuple("id", json.int(id)),
-    //               tuple("counter", json.int(counter)),
-    //               tuple("identifier_id", json.int(identifier_id)),
-    //               tuple("content", json.string(content)),
-    //             ])
-    //           },
-    //         )),
-    //       ),
-    //       tuple(
-    //         "participation",
-    //         json.object([
-    //           tuple(
-    //             "email_address",
-    //             json.string(participation.identifier.email_address.value),
-    //           ),
-    //           tuple(
-    //             "notify",
-    //             json.string(discuss.notify_to_string(participation.notify)),
-    //           ),
-    //           tuple("cursor", json.int(participation.cursor)),
-    //           tuple("done", json.int(participation.done)),
-    //         ]),
-    //       ),
-    //     ])
-    //   http.response(200)
-    //   |> web.set_resp_json(data)
-    //   |> Ok
-    // }
-    ["c", id, "participant"] -> {
-      try params = acl.parse_json(request)
-      try params = add_participant.params(params)
-      try participation = load_participation(id, request, config)
-      try _ = add_participant.execute(participation, params)
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
-      |> Ok
-    }
-    ["c", id, "notify"] -> {
-      try params = acl.parse_json(request)
-      try params = set_notification.params(params)
-      try participation = load_participation(id, request, config)
-      try _ = set_notification.execute(participation, params)
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
-      |> Ok
-    }
-    // FIXME should add concurrency control
-    // Could be named write
-    ["c", id, "message"] -> {
-      try params = acl.parse_json(request)
-      try params = write_message.params(params)
-      try participation = load_participation(id, request, config)
-      try _ = write_message.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-      |> Ok
-    }
-    ["c", id, "read"] -> {
-      try params = acl.parse_json(request)
-      try params = read_message.params(params)
-      try participation = load_participation(id, request, config)
-      try _ = read_message.execute(participation, params)
-      http.response(201)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-      |> Ok
-    }
-    ["c", id, "pin"] -> {
-      try params = acl.parse_json(request)
-      try params = add_pin.params(params)
-      try participation = load_participation(id, request, config)
-      try pin_id = add_pin.execute(participation, params)
-      let data = json.object([tuple("id", json.int(pin_id))])
-      http.response(200)
-      |> web.set_resp_json(data)
-      |> Ok
-    }
-    ["c", id, "delete_pin"] -> {
-      try params = acl.parse_json(request)
-      try params = delete_pin.params(params)
-      try participation = load_participation(id, request, config)
-      try _ = delete_pin.execute(participation, params)
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
-      |> Ok
-    }
     ["inbound"] -> {
       try params = acl.parse_json(request)
       postmark.handle(params, config)

@@ -2,8 +2,6 @@ import gleam/dynamic
 import gleam/pgo
 import plum_mail/run_sql
 import plum_mail/authentication
-import plum_mail/discuss/discuss
-import plum_mail/discuss/start_conversation as inner_sc
 
 pub fn generate_link_token(identifier_id) {
   assert Ok(identifier_id) = dynamic.int(identifier_id)

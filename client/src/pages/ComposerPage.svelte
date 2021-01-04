@@ -1,9 +1,9 @@
 <script>
   import { onMount } from "svelte";
-  import { parse } from "../note";
-  import { PARAGRAPH, TEXT, LINK, ANNOTATION } from "../note/elements";
+  import { parse } from "../memo";
+  import { PARAGRAPH, TEXT, LINK, ANNOTATION } from "../memo/elements";
   import { getSelected } from "../thread/view";
-  import * as Range from "../note/range";
+  import * as Range from "../memo/range";
   import Note from "../components/Note.svelte";
   import Link from "../components/Link.svelte";
   import Composer from "../components/Composer.svelte";

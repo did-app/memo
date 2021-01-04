@@ -1,5 +1,5 @@
 <script lang="typescript">
-  import type { Span } from "../note/elements";
+  import type { Span } from "../memo/elements";
   import SpanComponent from "./Span.svelte";
 
   export let spans: Span[];

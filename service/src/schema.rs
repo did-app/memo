@@ -29,6 +29,17 @@ table! {
 }
 
 table! {
+    memos (thread_id, position) {
+        thread_id -> Int4,
+        position -> Int4,
+        content -> Jsonb,
+        authored_by -> Int4,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     message_notifications (id) {
         id -> Int4,
         conversation_id -> Int4,
@@ -55,21 +66,10 @@ table! {
     note_notifications (id) {
         id -> Int4,
         thread_id -> Int4,
-        counter -> Int4,
+        position -> Int4,
         identifier_id -> Int4,
         success -> Bool,
         inserted_at -> Timestamp,
-    }
-}
-
-table! {
-    notes (thread_id, counter) {
-        thread_id -> Int4,
-        counter -> Int4,
-        content -> Jsonb,
-        authored_by -> Int4,
-        inserted_at -> Timestamp,
-        updated_at -> Timestamp,
     }
 }
 
@@ -137,12 +137,12 @@ table! {
 
 joinable!(conversations -> identifiers (started_by));
 joinable!(link_tokens -> identifiers (identifier_id));
+joinable!(memos -> identifiers (authored_by));
+joinable!(memos -> threads (thread_id));
 joinable!(message_notifications -> identifiers (identifier_id));
 joinable!(messages -> conversations (conversation_id));
 joinable!(messages -> identifiers (authored_by));
 joinable!(note_notifications -> identifiers (identifier_id));
-joinable!(notes -> identifiers (authored_by));
-joinable!(notes -> threads (thread_id));
 joinable!(pairs -> threads (thread_id));
 joinable!(participants -> conversations (conversation_id));
 joinable!(pins -> identifiers (authored_by));
@@ -153,10 +153,10 @@ allow_tables_to_appear_in_same_query!(
     conversations,
     identifiers,
     link_tokens,
+    memos,
     message_notifications,
     messages,
     note_notifications,
-    notes,
     pairs,
     participants,
     pins,

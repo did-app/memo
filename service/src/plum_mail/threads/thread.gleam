@@ -5,11 +5,11 @@ import gleam/json
 import datetime
 import plum_mail/run_sql
 
-pub fn write_note(thread_id, counter, author_id, content: json.Json) {
+pub fn post_memo(thread_id, position, author_id, content: json.Json) {
   let sql =
     "
     WITH note AS (
-      INSERT INTO notes (thread_id, counter, authored_by, content)
+      INSERT INTO memos (thread_id, position, authored_by, content)
       VALUES ($1, $2, $3, $4)
       RETURNING *
     ), lower AS (
@@ -23,12 +23,12 @@ pub fn write_note(thread_id, counter, author_id, content: json.Json) {
       WHERE upper_identifier_id = $3
       AND thread_id = $1
     )
-    SELECT content, inserted_at, counter 
+    SELECT content, inserted_at, position 
     FROM note
     "
   let args = [
     pgo.int(thread_id),
-    pgo.int(counter),
+    pgo.int(position),
     pgo.int(author_id),
     dynamic.unsafe_coerce(dynamic.from(content)),
   ]
@@ -41,38 +41,38 @@ pub fn write_note(thread_id, counter, author_id, content: json.Json) {
         let content: json.Json = dynamic.unsafe_coerce(content)
         assert Ok(inserted_at) = dynamic.element(row, 1)
         assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
-        assert Ok(counter) = dynamic.element(row, 2)
-        assert Ok(counter) = dynamic.int(counter)
+        assert Ok(position) = dynamic.element(row, 2)
+        assert Ok(position) = dynamic.int(position)
 
-        tuple(inserted_at, content, counter)
+        tuple(inserted_at, content, position)
       },
     )
   run_sql.single(db_response)
   |> Ok
 }
 
-pub fn load_notes(thread_id) {
+pub fn load_memos(thread_id) {
   let sql =
     "
-    SELECT n.counter, n.content, a.email_address, n.inserted_at
-    FROM notes AS n
+    SELECT n.position, n.content, a.email_address, n.inserted_at
+    FROM memos AS n
     JOIN identifiers AS a ON a.id = n.authored_by
     WHERE n.thread_id = $1
-    ORDER BY n.counter ASC
+    ORDER BY n.position ASC
     "
   let args = [pgo.int(thread_id)]
   let mapper = fn(row) {
-    assert Ok(counter) = dynamic.element(row, 0)
-    assert Ok(counter) = dynamic.int(counter)
-    assert Ok(contents) = dynamic.element(row, 1)
-    // assert Ok(blocks) = dynamic.field(contents, "blocks")
+    assert Ok(position) = dynamic.element(row, 0)
+    assert Ok(position) = dynamic.int(position)
+    assert Ok(content) = dynamic.element(row, 1)
+    // assert Ok(blocks) = dynamic.field(content, "blocks")
     assert Ok(author) = dynamic.element(row, 2)
     assert Ok(author) = dynamic.string(author)
     assert Ok(inserted_at) = dynamic.element(row, 3)
     assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
     json.object([
-      tuple("counter", json.int(counter)),
-      tuple("blocks", dynamic.unsafe_coerce(contents)),
+      tuple("position", json.int(position)),
+      tuple("content", dynamic.unsafe_coerce(content)),
       tuple("author", json.string(author)),
       tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
     ])
@@ -82,10 +82,10 @@ pub fn load_notes(thread_id) {
 }
 
 pub fn to_json(thread) {
-  let tuple(thread_id, ack, notes) = thread
+  let tuple(thread_id, ack, memos) = thread
   json.object([
     tuple("id", json.int(thread_id)),
     tuple("ack", json.int(ack)),
-    tuple("notes", json.list(notes)),
+    tuple("memos", json.list(memos)),
   ])
 }

@@ -18,30 +18,29 @@ pub type Params {
   Params(
     email_address: EmailAddress,
     // message or memo
-    blocks: json.Json,
+    content: json.Json,
   )
 }
 
 pub fn params(raw: Dynamic) {
   try email_address = acl.required(raw, "email_address", acl.as_email)
-  assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
-  let blocks = dynamic.unsafe_coerce(blocks)
-  Params(email_address, blocks)
+  assert Ok(content) = dynamic.field(raw, dynamic.from("content"))
+  let content = dynamic.unsafe_coerce(content)
+  Params(email_address, content)
   |> Ok()
 }
 
 pub fn execute(params, user_id) {
-  let Params(email_address, blocks) = params
+  let Params(email_address, content) = params
   try identifier = identifier.find_or_create(email_address)
   let Identifier(contact_id, _, greeting) = identifier
   let tuple(first, current) = case greeting {
-    None -> tuple(None, tuple(1, user_id, blocks))
+    None -> tuple(None, tuple(1, user_id, content))
     Some(greeting) -> tuple(
       Some(tuple(1, contact_id, greeting)),
-      tuple(2, user_id, blocks),
+      tuple(2, user_id, content),
     )
   }
-  // TODO set first index to one
   let sql =
     "
   WITH new_thread AS (
@@ -68,16 +67,16 @@ pub fn execute(params, user_id) {
   try [thread_id] = run_sql.execute(sql, args, mapper)
   case first {
     None -> Nil
-    Some(tuple(counter, author_id, content)) -> {
+    Some(tuple(position, author_id, content)) -> {
       let content: Json = content
       // TODO it's just a map you pass in
       assert Ok(note) =
-        thread.write_note(thread_id, counter, author_id, content)
+        thread.post_memo(thread_id, position, author_id, content)
       Nil
     }
   }
-  let tuple(counter, author_id, content) = current
-  assert Ok(Some(tuple(inserted_at, content, counter))) =
-    thread.write_note(thread_id, counter, author_id, content)
-  Ok(tuple(identifier, counter, Some(inserted_at), content, counter))
+  let tuple(position, author_id, content) = current
+  assert Ok(Some(tuple(inserted_at, content, position))) =
+    thread.post_memo(thread_id, position, author_id, content)
+  Ok(tuple(identifier, position, Some(inserted_at), content, position))
 }

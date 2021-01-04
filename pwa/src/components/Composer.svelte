@@ -2,18 +2,14 @@
   import { createEventDispatcher, onMount } from "svelte";
   import * as Thread from "../thread";
   import type { Reference } from "../thread";
-  import type { Note } from "../note";
+  import type { Memo } from "../memo";
   import BlockComponent from "../components/Block.svelte";
 
   // TODO custom validation on length of blocks not being 1
   export let annotations: { reference: Reference; raw: string }[];
-  export let notes: Note[];
-  // export let suggestions = [];
+  export let notes: Memo[];
   export let draft = "";
   let textarea: HTMLTextAreaElement;
-
-  let choices = {};
-  console.log(choices);
 
   function resize(event: Event) {
     let target = event.target as HTMLTextAreaElement;

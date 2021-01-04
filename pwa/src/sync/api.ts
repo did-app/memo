@@ -1,6 +1,6 @@
 import { get, post } from "./client"
 import type { Call } from "./client"
-import type { Block } from "../note/elements"
+import type { Block } from "../memo/elements"
 
 export type Identifier = {
   id: number,
@@ -36,26 +36,25 @@ export function authenticateByPassword(emailAddress: string, password: string): 
 
 // User Accont calls
 
-export function saveGreeting(identifier_id: number, blocks: Block[] | null): Call<unknown> {
+export function saveGreeting(identifier_id: number, content: Block[] | null): Call<unknown> {
   const path = "/identifiers/" + identifier_id + "/greeting"
-  const params = { blocks }
+  const params = { content }
   return post(path, params)
 }
 
 // identifier discovery
 
-// TODO memo is note plus author
-export type Note = {
+export type Memo = {
   author: string,
-  blocks: Block[]
+  content: Block[]
   // NOTE string is human string
   inserted_at: string,
-  counter: number,
+  position: number,
 }
 export type Thread = {
   id: number,
   ack: number,
-  notes: Note[]
+  memos: Memo[]
 }
 
 export function fetchProfile(emailAddress: string): Call<Identifier | null> {
@@ -71,30 +70,28 @@ export function fetchContact(emailAddress: string): Call<{ identifier: Identifie
 export type Contact = {
   identifier: Identifier,
   ack: number
-  latest: { inserted_at: string, content: Block[], counter: number } | undefined
+  latest: Memo | undefined
 }
 export function fetchContacts(): Call<Contact[]> {
   const path = "/contacts"
   return get(path)
 }
 
-export function startRelationship(emailAddress: string, blocks: Block[]): Call<Contact> {
+export function startRelationship(emailAddress: string, content: Block[]): Call<Contact> {
   const path = "/relationship/start"
-  const params = { email_address: emailAddress, blocks }
+  const params = { email_address: emailAddress, content }
   return post(path, params)
 }
 
-// TODO postMemo
-// memo has contents and an index
-export function writeNote(threadId: number, counter: number, blocks: Block[]): Call<{ latest: { inserted_at: string, content: Block[], counter: number } }> {
+export function postMemo(threadId: number, position: number, content: Block[]): Call<{ latest: Memo }> {
   const path = "/threads/" + threadId + "/post"
-  const params = { counter, blocks }
+  const params = { position, content }
   return post(path, params)
 }
 
-export function acknowledge(threadId: number, counter: number): Call<{}> {
+export function acknowledge(threadId: number, position: number): Call<{}> {
   const path = "/threads/" + threadId + "/acknowledge"
-  const params = { counter }
+  const params = { position }
   return post(path, params)
 
 }

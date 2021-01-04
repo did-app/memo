@@ -16,7 +16,6 @@ import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
-import plum_mail/discuss/discuss.{Topic}
 
 pub fn run() {
   let config = config.from_env()
@@ -41,16 +40,16 @@ pub fn run() {
     participants.email_address,
     participants.topic,
     participants.thread_id,
-    notes.content,
-    notes.counter
-  FROM notes
-  JOIN participants ON participants.thread_id = notes.thread_id
+    memos.content,
+    memos.position
+  FROM memos
+  JOIN participants ON participants.thread_id = memos.thread_id
   LEFT JOIN note_notifications AS notifications
-    ON notifications.thread_id = notes.thread_id
-    AND notifications.counter = notes.counter
+    ON notifications.thread_id = memos.thread_id
+    AND notifications.position = memos.position
     AND notifications.identifier_id = participants.identifier_id
   WHERE notifications IS NULL
-  AND notes.counter > participants.ack
+  AND memos.position > participants.ack
   AND participants.email_address <> 'peter@plummail.co'
   AND participants.email_address <> 'richard@plummail.co'
   "
@@ -75,8 +74,8 @@ pub fn run() {
         assert Ok(topic) = email_address.validate(topic)
         assert Ok(content) = dynamic.element(row, 4)
         assert Ok(content) = dynamic.typed_list(content, block_from_dynamic)
-        assert Ok(counter) = dynamic.element(row, 5)
-        assert Ok(counter) = dynamic.int(counter)
+        assert Ok(position) = dynamic.element(row, 5)
+        assert Ok(position) = dynamic.int(position)
 
         tuple(
           recipient_id,
@@ -84,7 +83,7 @@ pub fn run() {
           topic,
           thread_id,
           content,
-          counter,
+          position,
         )
       },
     )
@@ -148,20 +147,6 @@ pub type Block {
   Annotation(reference: Reference, blocks: List(Block))
 }
 
-// pub fn to_email_html(content, link) {
-// markdown
-// |> as_html()
-// |> string.replace(
-//   "href=\"#?\"",
-//   string.join(["href=\"", conversation_link, "\""], ""),
-// )
-// list.map(content, fn(block){
-//   case block {
-//     Paragraph(spans) ->
-//     Annotation() -> 
-//   }
-// })
-// }
 fn dispatch_to_identifier(record, config) {
   let Config(
     postmark_api_token: postmark_api_token,
@@ -174,44 +159,10 @@ fn dispatch_to_identifier(record, config) {
     topic,
     thread_id,
     content,
-    counter,
+    position,
   ) = record
   let link = contact_link(client_origin, topic, recipient_id)
 
-  // let prefix =
-  //   [
-  //     // "<div style=\"padding:0.5em;border:2px solid rgb(60, 54, 107);border-radius:0.5em;max-width:640px\"><a href=\"",
-  //     "<a href=\"",
-  //     link,
-  //     "\">",
-  //     topic.value,
-  //     "</a> sent you a memo using Plum Mail. <a href=\"",
-  //     link,
-  //     "\">Click here to read more ...</a></div>",
-  //   ]
-  //   |> string.join("")
-  // let body =
-  //   [
-  //     "
-  //   <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
-  //   <html xmlns=\"http://www.w3.org/1999/xhtml\">
-  //     <head>
-  //       <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
-  //       <meta name=\"x-apple-disable-message-reformatting\" />
-  //       <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
-  //       <title></title>
-  //     </head>
-  //     <body>
-  //       <main style=\"max-width:640px;\">
-  //       <div style=\"max-width:640px;\">
-  //   ",
-  //     prefix,
-  //     "
-  //   </div>
-  //   </main>
-  //   ",
-  //   ]
-  //   |> string.join("")
   let body =
     string.concat([
       topic.value,
@@ -233,22 +184,22 @@ fn dispatch_to_identifier(record, config) {
   let reply_to = "noreply@plummail.co"
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
-    io.debug(tuple("ssdsdsdsdsd", response))
+  io.debug(tuple("ssdsdsdsdsd", response))
   case response {
     Ok(Nil) -> {
       io.debug("dfdfd")
-      assert Ok(_) = record_sent(thread_id, counter, recipient_id)
-      |> io.debug()
+      assert Ok(_) =
+        record_sent(thread_id, position, recipient_id)
+        |> io.debug()
       Ok(Nil)
     }
     // TODO why was that, handle case of bad email addresses
     Error(postmark.Failure(retry: True)) -> Ok(Nil)
     Error(postmark.Failure(retry: False)) -> {
-      record_failed(thread_id, counter, recipient_id)
+      record_failed(thread_id, position, recipient_id)
       Ok(Nil)
     }
   }
-
 }
 
 fn send(request, postmark_api_token) {
@@ -265,19 +216,19 @@ fn contact_link(origin, contact, identifier_id) {
   |> string.join("")
 }
 
-pub fn record_result(thread_id, counter, identifier_id, success) {
+pub fn record_result(thread_id, position, identifier_id, success) {
   // TODO rename to recipient id
   // TODO rename memo
-  // TODO think about renaming counter
+  // TODO think about renaming position
   let sql =
     "
-    INSERT INTO note_notifications (thread_id, counter, identifier_id, success)
+    INSERT INTO note_notifications (thread_id, position, identifier_id, success)
     VALUES ($1, $2, $3, $4)
     RETURNING *
     "
   let args = [
     pgo.int(thread_id),
-    pgo.int(counter),
+    pgo.int(position),
     pgo.int(identifier_id),
     pgo.bool(success),
   ]
@@ -285,10 +236,10 @@ pub fn record_result(thread_id, counter, identifier_id, success) {
   run_sql.execute(sql, args, mapper)
 }
 
-pub fn record_sent(thread_id, counter, identifier_id) {
-  record_result(thread_id, counter, identifier_id, True)
+pub fn record_sent(thread_id, position, identifier_id) {
+  record_result(thread_id, position, identifier_id, True)
 }
 
-pub fn record_failed(thread_id, counter, identifier_id) {
-  record_result(thread_id, counter, identifier_id, False)
+pub fn record_failed(thread_id, position, identifier_id) {
+  record_result(thread_id, position, identifier_id, False)
 }

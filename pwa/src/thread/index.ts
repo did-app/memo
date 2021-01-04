@@ -1,42 +1,47 @@
-import { ANNOTATION, LINK, PARAGRAPH, TEXT, PROMPT, SOFTBREAK } from "../note/elements"
-import type { Block, Link, Span, Annotation } from "../note/elements"
-import type { Range } from "../note/range"
-import type { Note } from "../note"
-import * as Tree from "../note/tree"
+import { ANNOTATION, LINK, PARAGRAPH, TEXT, PROMPT, SOFTBREAK } from "../memo/elements"
+import type { Block, Link, Span, Annotation } from "../memo/elements"
+import type { Range } from "../memo/range"
+import type { Memo } from "../memo"
+import * as Tree from "../memo/tree"
 // discussion/conversation has contributions
 // thread has many messages/posts/notes/memo/entry/contribution
 
-export type RangeReference = { note: number, range: Range }
-export type SectionReference = { note: number, blockIndex: number }
+export type SectionReference = { memoPosition: number, blockIndex: number }
+export type RangeReference = { memoPosition: number, range: Range }
 export type Reference = RangeReference | SectionReference
 
-// thread has many notes
-// A note has many blocks and spans in a tree
-export function followReference(reference: Reference, notes: { blocks: Block[] }[]) {
-  let note = notes[reference.note]
+export function maxPosition(memos: Memo[]) {
+  // This assumes position has been added properly, that memos are in order and positions are continuous
+  return memos.length
+}
+
+// thread has many memos
+// A memo has many blocks and spans in a tree
+export function followReference(reference: Reference, memos: { content: Block[] }[]) {
+  let memo = memos[reference.memoPosition]
   if ('blockIndex' in reference) {
     // TODO return spans Know that it is a single thing
-    let element = note.blocks[reference.blockIndex]
+    let element = memo.content[reference.blockIndex]
     return [element]
   } else {
-    return Tree.extractBlocks(note.blocks, reference.range)[1]
+    return Tree.extractBlocks(memo.content, reference.range)[1]
   }
 }
 
 
-export type Pin = { noteIndex: number, type: typeof LINK, item: Link } | { noteIndex: number, type: typeof ANNOTATION, item: Annotation }
-export function findPinnable(notes: Note[]): Pin[] {
-  return notes.map(function (note, noteIndex): Pin[] {
-    return note.blocks.map(function (block): Pin[] {
+export type Pin = { threadPosition: number, type: typeof LINK, item: Link } | { threadPosition: number, type: typeof ANNOTATION, item: Annotation }
+export function findPinnable(memos: Memo[]): Pin[] {
+  return memos.map(function (memo, threadPosition): Pin[] {
+    return memo.content.map(function (block): Pin[] {
       if (block.type === ANNOTATION) {
-        return [{ noteIndex, type: ANNOTATION, item: block }]
+        return [{ threadPosition, type: ANNOTATION, item: block }]
       } else if (block.type === PROMPT) {
         return []
       } else {
 
         return block.spans.flatMap(function name(span: Span) {
           if (span.type === LINK) {
-            return [{ noteIndex, type: LINK, item: span }]
+            return [{ threadPosition, type: LINK, item: span }]
           } else {
             return []
           }
@@ -93,17 +98,17 @@ export function makeSuggestions(blocks: Block[]): Question[] {
   return output;
 }
 
-export function gatherPrompts(notes: Note[], viewer: string) {
+export function gatherPrompts(memos: Memo[], viewer: string) {
   let output: { reference: SectionReference }[] = [];
-  notes.forEach(function (note: Note, noteIndex: number) {
-    if (note.author === viewer) {
-      note.blocks.forEach(function (block: Block, blockIndex) {
+  memos.forEach(function (memo: Memo, threadPosition: number) {
+    if (memo.author === viewer) {
+      memo.content.forEach(function (block: Block) {
         if (block.type === ANNOTATION) {
           console.log(block, output);
           output = output.filter(function (item) {
             let reference = item.reference
             if ('blockIndex' in block.reference) {
-              return !(reference.note === block.reference.note && reference.blockIndex === block.reference.blockIndex)
+              return !(reference.memoPosition === block.reference.memoPosition && reference.blockIndex === block.reference.blockIndex)
 
             } else {
               throw "only range references supported so far"
@@ -112,7 +117,7 @@ export function gatherPrompts(notes: Note[], viewer: string) {
         }
       })
     } else {
-      note.blocks.forEach(function (block: Block, blockIndex) {
+      memo.content.forEach(function (block: Block) {
         if (block.type === PROMPT) {
           output.push({ reference: block.reference })
         }

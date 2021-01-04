@@ -1,12 +1,12 @@
 <script lang="typescript">
   import router from "page";
   import { onMount } from "svelte";
-  import { parse } from "../note";
-  import type { Note } from "../note";
-  import { ANNOTATION, LINK } from "../note/elements";
-  import type { Block, Annotation, Span } from "../note/elements";
-  import { isCollapsed } from "../note/range";
-  import type { Range } from "../note/range";
+  import { parse } from "../memo";
+  import type { Memo } from "../memo";
+  import { ANNOTATION, LINK } from "../memo/elements";
+  import type { Block, Annotation, Span } from "../memo/elements";
+  import { isCollapsed } from "../memo/range";
+  import type { Range } from "../memo/range";
   import { getSelected } from "../thread/view";
   import * as Thread from "../thread";
   import type { Reference } from "../thread";
@@ -17,7 +17,7 @@
   import * as Flash from "../state/flash";
   import Composer from "../components/Composer.svelte";
   import Fragment from "../components/Fragment.svelte";
-  import Memo from "../components/Memo.svelte";
+  import MemoComponent from "../components/Memo.svelte";
   import BlockComponent from "../components/Block.svelte";
   import LinkComponent from "../components/Link.svelte";
   import SpanComponent from "../components/Span.svelte";
@@ -27,7 +27,7 @@
   import CheckIcon from "../icons/Check.svelte";
   import ReplyAllIcon from "../icons/ReplyAll.svelte";
 
-  export let thread: Note[];
+  export let thread: Memo[];
   export let threadId: number | undefined;
   export let ack: number;
   export let contactEmailAddress: string;
@@ -64,8 +64,8 @@
   let draft = "";
   let blocks: Block[];
   let preview = false;
-  let maxIndex = (thread[thread.length - 1] || { counter: 0 }).counter;
-  let outstanding = maxIndex > ack;
+  let maxPosition = Thread.maxPosition(thread);
+  let outstanding = maxPosition > ack;
 
   async function sendMessage(): Promise<null> {
     sendStatus = "working";
@@ -80,7 +80,7 @@
             let { latest } = response.data;
             let data = {
               latest,
-              ack: latest.counter,
+              ack: latest.position,
               identifier: {
                 // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
                 id: 99999999,
@@ -125,12 +125,12 @@
   function handleSelectionChange() {
     const selected = getSelected(root);
     if (selected && selected.anchor && selected.focus) {
-      let { noteIndex: anchorIndex, ...anchor } = selected.anchor;
-      let { noteIndex: focusIndex, ...focus } = selected.focus;
-      if (anchorIndex === focusIndex) {
+      let { memoPosition: anchorPosition, ...anchor } = selected.anchor;
+      let { memoPosition: focusPosition, ...focus } = selected.focus;
+      if (anchorPosition === focusPosition) {
         reply = false;
         let action = function () {
-          addAnnotation(anchorIndex, { anchor, focus });
+          addAnnotation(anchorPosition, { anchor, focus });
           reply = true;
           // TODO focus on area
         };
@@ -141,13 +141,13 @@
             callback: action,
             fragment: Thread.followReference(
               // TODO better use of a location type
-              { note: anchorIndex, range: { anchor, focus } },
+              { memoPosition: anchorPosition, range: { anchor, focus } },
               thread
             ),
           };
         }
         noteSelection = Object.fromEntries([
-          [anchorIndex, Object.fromEntries([[anchor.path[0], action]])],
+          [anchorPosition, Object.fromEntries([[anchor.path[0], action]])],
         ]);
       } else {
         activeAction = undefined;
@@ -193,19 +193,19 @@
   }
 
   // DOESNT WORK ON ACTIVE message
-  function addAnnotation(noteIndex: number, range: Range) {
+  function addAnnotation(memoPosition: number, range: Range) {
     if (isCollapsed(range)) {
       const annotation = {
         type: ANNOTATION,
         raw: "",
-        reference: { note: noteIndex, blockIndex: range.anchor.path[0] },
+        reference: { memoPosition, blockIndex: range.anchor.path[0] },
       };
       annotations = annotations.concat(annotation);
     } else {
       const annotation = {
         type: ANNOTATION,
         raw: "",
-        reference: { note: noteIndex, range: range },
+        reference: { memoPosition, range: range },
       };
       annotations = annotations.concat(annotation);
     }
@@ -233,7 +233,7 @@
 
   function acknowledge() {
     if (threadId) {
-      API.acknowledge(threadId, maxIndex);
+      API.acknowledge(threadId, maxPosition);
       // Could wait for it to work, need regular erroring buttons
       outstanding = false;
     } else {
@@ -254,6 +254,7 @@
   }
 </style>
 
+{maxPosition}
 <svelte:head>
   <title>{contactEmailAddress}</title>
 </svelte:head>
@@ -263,12 +264,11 @@
     <!-- TODO pass this message as the notes to the composer -->
     <!-- This goes to a fragment that binds on block -->
     <div class="" bind:this={root}>
-      {#each thread as memo, index}
-        <Memo
+      {#each thread as memo}
+        <MemoComponent
           {memo}
-          active={noteSelection[index] || {}}
-          open={memo.counter >= ack || memo.counter === focus}
-          {index}
+          active={noteSelection[memo.position] || {}}
+          open={memo.position >= ack || memo.position === focus}
           {thread} />
       {:else}
         <h1 class="text-center text-2xl my-4 text-gray-700">
