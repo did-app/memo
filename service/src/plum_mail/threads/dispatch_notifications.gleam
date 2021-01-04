@@ -166,7 +166,6 @@ fn dispatch_to_identifier(record, config) {
   let Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
-    origin: origin,
     ..,
   ) = config
   let tuple(
@@ -177,9 +176,9 @@ fn dispatch_to_identifier(record, config) {
     content,
     counter,
   ) = record
-  let link = contact_link(origin, topic, recipient_id)
+  let link = contact_link(client_origin, topic, recipient_id)
 
-  // let origin, "/memo"efix =
+  // let prefix =
   //   [
   //     // "<div style=\"padding:0.5em;border:2px solid rgb(60, 54, 107);border-radius:0.5em;max-width:640px\"><a href=\"",
   //     "<a href=\"",
@@ -234,13 +233,12 @@ fn dispatch_to_identifier(record, config) {
   let reply_to = "noreply@plummail.co"
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
-  io.debug(tuple("ssdsdsdsdsd", response))
+    io.debug(tuple("ssdsdsdsdsd", response))
   case response {
     Ok(Nil) -> {
       io.debug("dfdfd")
-      assert Ok(_) =
-        record_sent(thread_id, counter, recipient_id)
-        |> io.debug()
+      assert Ok(_) = record_sent(thread_id, counter, recipient_id)
+      |> io.debug()
       Ok(Nil)
     }
     // TODO why was that, handle case of bad email addresses
@@ -250,6 +248,7 @@ fn dispatch_to_identifier(record, config) {
       Ok(Nil)
     }
   }
+
 }
 
 fn send(request, postmark_api_token) {
@@ -262,7 +261,7 @@ fn send(request, postmark_api_token) {
 
 fn contact_link(origin, contact, identifier_id) {
   assert Ok(code) = authentication.generate_link_token(identifier_id)
-  [origin, "/memo", email_address.to_path(contact), "#code=", code]
+  [origin, email_address.to_path(contact), "#code=", code]
   |> string.join("")
 }
 
