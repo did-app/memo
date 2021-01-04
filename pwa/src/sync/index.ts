@@ -37,35 +37,36 @@ const fragment = window.location.hash.substring(1);
 const params = new URLSearchParams(fragment);
 const code = params.get("code");
 // Put the promise on the loading key
-(async function start() {
-  let loading: Call<{ data: Identifier }>;
+async function start(): Promise<State> {
+  let me: Identifier
   if (code !== null) {
     window.location.hash = "#";
-    loading = API.authenticateByCode(code)
-  } else {
-    // if code should always fail even if user session exists because trying to change.
-    loading = API.authenticateBySession()
-  }
-  let authResponse = await loading
-  console.log("starting", authResponse);
-
-  if ("error" in authResponse && authResponse.error.code === "forbidden") {
-    set({ loading: false, me: undefined, error: undefined })
-  } else if ("error" in authResponse) {
-    console.log("here");
-
-    set({ loading: false, me: undefined, error: authResponse.error })
-
-    // pop error in state
-  } else {
-    let me = authResponse.data
-    let inboxResponse = await API.fetchContacts();
-    if ("error" in inboxResponse) {
-      throw "TODO error";
+    let authResponse = await API.authenticateByCode(code)
+    if ("error" in authResponse) {
+      return { loading: false, me: undefined, error: authResponse.error }
     }
-    set({ loading: false, me, contacts: inboxResponse.data })
+    me = authResponse.data
+  } else {
+    let authResponse = await API.authenticateBySession()
+    if ('data' in authResponse) {
+      let data = authResponse.data
+      if (data === null) {
+        return { loading: false, me: undefined, error: undefined }
+      } else {
+        me = data
+      }
+    } else {
+      return { loading: false, me: undefined, error: authResponse.error }
+    }
   }
-}())
+
+  let inboxResponse = await API.fetchContacts();
+  if ("error" in inboxResponse) {
+    return { loading: false, me: undefined, error: inboxResponse.error }
+  }
+  return { loading: false, me, contacts: inboxResponse.data }
+}
+start().then(set)
 // TODO single function to handle auth response and fetch contacts
 // fetch contacts is separate so it can be updated periodically
 

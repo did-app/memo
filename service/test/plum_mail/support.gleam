@@ -17,6 +17,7 @@ import plum_mail/web/router.{handle}
 
 pub fn test_config() {
   config.Config(
+    origin: "https://memo.did.test",
     client_origin: "https://app.plummail.test",
     postmark_api_token: "POSTMARK_TEST_TOKEN",
     secret: <<"DUMMY_SECRET":utf8>>,

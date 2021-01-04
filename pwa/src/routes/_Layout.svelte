@@ -30,12 +30,14 @@
     <span class="my-1 ml-4">
       {#if state.loading}
         loading
-      {:else if state.me === null}
-        <a href="https://auth.did.app" class="button solid green">Sign in</a>
-      {:else}
+      {:else if state.me === undefined}
         <!-- <a
-          class="inline px-1 border-b-2 border-white hover:text-indigo-800 hover:border-indigo-800"
-          href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a> -->
+          href="https://auth.did.app"
+          class="bg-gray-800 text-white ml-auto rounded px-2 py-1 ml-2">Sign in</a> -->
+      {:else}
+        <a
+          class="bg-gray-800 text-white ml-auto rounded px-2 py-1 ml-2"
+          href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
       {/if}
     </span>
   </nav>

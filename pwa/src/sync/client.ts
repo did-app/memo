@@ -2,12 +2,13 @@ export type Failure = {
   code: "forbidden" | "network failure" | "bad response",
   detail: string
 }
-export type Call<T> = Promise<T | { error: Failure }>
+
+export type Call<T> = Promise<{ data: T } | { error: Failure }>
 const Call = Promise
 // https://github.com/microsoft/TypeScript/issues/32574
 export type Response<T> = T | Failure
 
-export async function get(path: string): Call<{ data: any }> {
+export async function get(path: string): Call<any> {
   let options = {
     credentials: "include",
     headers: {
@@ -17,7 +18,7 @@ export async function get(path: string): Call<{ data: any }> {
   return doFetch(path, options)
 }
 
-export async function post(path: string, params: object): Call<{ data: any }> {
+export async function post(path: string, params: object): Call<any> {
   let options = {
     method: "POST",
     credentials: "include",
@@ -31,12 +32,14 @@ export async function post(path: string, params: object): Call<{ data: any }> {
 }
 
 // use any because not a public function
-async function doFetch(path: string, options: any): Call<{ data: any }> {
+async function doFetch(path: string, options: any): Call<any> {
   const url = import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN + path;
   try {
     const response = await fetch(url, options);
     if (response.status === 200) {
       return parseJSON(response)
+    } else if (response.status === 204) {
+      return { data: null }
     } else if (response.status === 403) {
       return { error: { code: "forbidden", detail: "Action was forbidden" } }
     } else {

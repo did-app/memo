@@ -49,7 +49,8 @@ fn load_participation(conversation_id, request, config) {
     |> result.map_error(fn(_: Nil) {
       error.BadRequest("Invalid conversation id")
     })
-  try identifier_id = web.identify_client(request, config)
+  try client_state = web.identify_client(request, config)
+  try identifier_id = web.require_authenticated(client_state)
   discuss.load_participation(conversation_id, identifier_id)
 }
 
@@ -94,10 +95,9 @@ fn successful_authentication(identifier, request, config) {
   |> Ok
 }
 
-// Responds with 200 and valid JSON object to make life easier in Client
 fn no_content() {
-  http.response(200)
-  |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+  http.response(204)
+  |> http.set_resp_body(bit_builder.from_bit_string(<<"":utf8>>))
   |> Ok
 }
 
@@ -151,13 +151,32 @@ pub fn route(
       try identifier = authenticate_by_code.run(params)
       successful_authentication(identifier, request, config)
     }
-    ["authenticate", "session"] -> {
-      try identifier_id = web.identify_client(request, config)
-      try Some(identifier) = identifier.fetch_by_id(identifier_id)
-      // TODO this one doesn't set a session as it already has
-      http.response(200)
-      |> web.set_resp_json(identifier.to_json(identifier))
+    ["memo", ..rest] ->
+      http.response(307)
+      |> http.prepend_resp_header(
+        "location",
+        string.join([config.client_origin, ..rest], "/"),
+      )
+      |> http.set_resp_cookie(
+        "safari-fix",
+        "fixed",
+        http.cookie_defaults(request.scheme),
+      )
+      |> http.set_resp_body(bit_builder.from_bit_string(<<"":utf8>>))
       |> Ok
+    ["authenticate", "session"] -> {
+      // todo rename session, state
+      try client = web.identify_client(request, config)
+      case client {
+        Some(identifier_id) -> {
+          try Some(identifier) = identifier.fetch_by_id(identifier_id)
+          // TODO this one doesn't set a session as it already has
+          http.response(200)
+          |> web.set_resp_json(identifier.to_json(identifier))
+          |> Ok
+        }
+        None -> no_content()
+      }
     }
     ["authenticate", "email"] -> {
       try params = acl.parse_json(request)
@@ -187,7 +206,8 @@ pub fn route(
       |> Ok()
     }
     ["identifiers", id, "greeting"] -> {
-      try user_id = web.identify_client(request, config)
+      try client_state = web.identify_client(request, config)
+      try user_id = web.require_authenticated(client_state)
       assert Ok(id) = int.parse(id)
       assert true = user_id == id
       try raw = acl.parse_json(request)
@@ -200,7 +220,8 @@ pub fn route(
       |> Ok
     }
     ["contacts"] -> {
-      try user_id = web.identify_client(request, config)
+      try client_state = web.identify_client(request, config)
+      try user_id = web.require_authenticated(client_state)
       let sql =
         "
       WITH contacts AS (
@@ -247,7 +268,8 @@ pub fn route(
     ["relationship", "start"] -> {
       try params = acl.parse_json(request)
       try params = start_relationship.params(params)
-      try user_id = web.identify_client(request, config)
+      try client_state = web.identify_client(request, config)
+      try user_id = web.require_authenticated(client_state)
       try contact = start_relationship.execute(params, user_id)
       http.response(200)
       |> web.set_resp_json(contact_to_json(contact))
@@ -256,7 +278,8 @@ pub fn route(
     // TODO don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim
     ["relationship", contact] -> {
-      try identifier_id = web.identify_client(request, config)
+      try client_state = web.identify_client(request, config)
+      try identifier_id = web.require_authenticated(client_state)
       try email_address =
         email_address.validate(contact)
         |> result.map_error(fn(e: Nil) {
@@ -279,7 +302,8 @@ pub fn route(
       try counter = acl.required(raw, "counter", acl.as_int)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
-      try author_id = web.identify_client(request, config)
+      try client_state = web.identify_client(request, config)
+      try author_id = web.require_authenticated(client_state)
       // // TODO a participation thing again
       try Some(latest) =
         thread.write_note(thread_id, counter, author_id, blocks)
@@ -291,15 +315,17 @@ pub fn route(
     ["threads", thread_id, "acknowledge"] -> {
       try raw = acl.parse_json(request)
       try params = acknowledge.params(raw, thread_id)
-      try author_id = web.identify_client(request, config)
-      try _ = acknowledge.execute(params, author_id)
+      try client_state = web.identify_client(request, config)
+      try identifier_id = web.require_authenticated(client_state)
+      try _ = acknowledge.execute(params, identifier_id)
       no_content()
     }
 
     ["c", "create"] -> {
       try params = acl.parse_form(request)
       try topic = start_conversation.params(params)
-      try identifier_id = web.identify_client(request, config)
+      try client_state = web.identify_client(request, config)
+      try identifier_id = web.require_authenticated(client_state)
       try conversation = start_conversation.execute(topic, identifier_id)
       try _ = case map.get(params, "participant") {
         Error(Nil) -> Ok(Nil)

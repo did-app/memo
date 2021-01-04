@@ -30,7 +30,7 @@ pub fn execute(params, config) {
   assert Ok(token) = authentication.generate_link_token(identifier.id)
   let config.Config(
     postmark_api_token: postmark_api_token,
-    client_origin: client_origin,
+    origin: origin,
     ..,
   ) = config
 
@@ -40,8 +40,8 @@ pub fn execute(params, config) {
   let body =
     [
       "Sign in to your plum mail account with the authentication link below\r\n\r\n",
-      client_origin,
-      "/#code=",
+      origin,
+      "/memo/#code=",
       token,
     ]
     |> string.join("")

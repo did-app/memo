@@ -5,7 +5,7 @@ import gleam/dynamic
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleam/order
 import gleam/os
 import gleam/result
@@ -75,27 +75,39 @@ fn do_identify_client(request, config, now) {
     _ -> Error(Nil)
   }
   let cookies = http.get_req_cookies(request)
-  try token = list.key_find(cookies, "token")
-
-  try data = signed_message.decode(token, secret)
-  assert Ok(term) = beam.binary_to_term(data)
-  // security flaw if you issue tokens for other purpose
-  let tuple("cookie_token", identifier_id, identified_at, active_at, user_agent) =
-    dynamic.unsafe_coerce(term)
-
-  try _ = check_timestamp(identified_at, Days(30), now)
-  try _ = check_timestamp(active_at, Days(3), now)
-  try _ = case http.get_req_header(request, "user-agent") {
-    Ok(ua) if ua == user_agent -> Ok(Nil)
-    _ -> // we're not currently checking user agents match TODO
-      // NOTE putting a mobile view on chrome inspector tools changes the user agent.
-      Ok(Nil)
+  case list.key_find(cookies, "token") {
+    Ok(token) -> {
+      try data = signed_message.decode(token, secret)
+      assert Ok(term) = beam.binary_to_term(data)
+      // security flaw if you issue tokens for other purpose
+      let tuple(
+        "cookie_token",
+        identifier_id,
+        identified_at,
+        active_at,
+        user_agent,
+      ) = dynamic.unsafe_coerce(term)
+      try _ = check_timestamp(identified_at, Days(30), now)
+      try _ = check_timestamp(active_at, Days(3), now)
+      try _ = case http.get_req_header(request, "user-agent") {
+        Ok(ua) if ua == user_agent -> Ok(Nil)
+        _ -> // we're not currently checking user agents match TODO
+          // NOTE putting a mobile view on chrome inspector tools changes the user agent.
+          Ok(Nil)
+      }
+      Ok(Some(identifier_id))
+    }
+    Error(Nil) -> Ok(None)
   }
-  Ok(identifier_id)
 }
 
 pub fn identify_client(request, config) {
   let now = os.system_time(os.Second)
   do_identify_client(request, config, now)
   |> result.map_error(fn(_) { error.Forbidden })
+}
+
+pub fn require_authenticated(client_state) {
+  client_state
+  |> option.to_result(error.Unauthenticated)
 }

@@ -453,7 +453,7 @@
           {#if activeAction}
             <button
               on:click={activeAction.callback}
-              class="flex items-center bg-gray-800 text-white ml-auto rounded px-2 ml-2">
+              class="flex items-center bg-gray-800 text-white ml-auto rounded px-2">
               <span class="w-5 mr-2 inline-block">
                 <QuoteIcon />
               </span>
@@ -520,6 +520,8 @@
             {/each}
           {/if}
         </li>
+      {:else}
+        <li class="mb-1 mx-1 px-1">No items pinned yet.</li>
       {/each}
     </ul>
   </div>
