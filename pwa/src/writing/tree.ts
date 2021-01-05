@@ -16,6 +16,8 @@ function splitText(text: string, offset: number) {
 }
 function splitSpans(spans: Span[], j: number, offset: number) {
   const [pre, span, post] = arrayPopIndex(spans, j);
+  console.log(spans, j, "=========");
+
 
   let preSpan: Span, postSpan: Span;
   if (span.type === "text") {
@@ -30,22 +32,27 @@ function splitSpans(spans: Span[], j: number, offset: number) {
     preSpan = span
     postSpan = span
   }
-  return [
-    [...pre, preSpan],
-    [postSpan, ...post]
-  ]
+  return [[...pre, preSpan], [postSpan, ...post]]
 }
 function splitBlocks(blocks: Block[], { path, offset }: Point) {
   const [i, j, ...none] = path
   if (none.length !== 0) {
     throw "extractBlocks only works in paragraphs for now"
   }
-  const [pre, paragraph, post] = arrayPopIndex(blocks, i);
-  const [preSpans, postSpans] = splitSpans(paragraph.spans, j, offset)
-  return [
-    [...pre, { ...paragraph, spans: preSpans }],
-    [{ ...paragraph, spans: postSpans }, ...post]
-  ]
+
+  const [pre, block, post] = arrayPopIndex(blocks, i);
+  let preBlock: Block, postBlock: Block;
+  if (block.type === 'paragraph') {
+    // NOTE Dragging down lines can get to a cursor that is outside a text block
+    const [preSpans, postSpans] = splitSpans(block.spans, j || 0, offset)
+    preBlock = { ...block, spans: preSpans }
+    postBlock = { ...block, spans: postSpans }
+  } else {
+    // Do we want to split annotations or only work inside?
+    throw "TODO split bigger blocks"
+  }
+
+  return [[...pre, preBlock], [postBlock, ...post]]
 }
 
 export function extractBlocks(blocks: Block[], range: Range.Range) {

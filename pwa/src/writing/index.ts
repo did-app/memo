@@ -1,5 +1,6 @@
 export type { Block, Span, Paragraph, Annotation, Prompt, Softbreak, Link, Text } from "./elements"
 export type { Point } from "./point"
+export { equal as equalPoints } from "./point"
 export type { Range } from "./range"
 export { isCollapsed } from "./range"
 
