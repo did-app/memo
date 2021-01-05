@@ -20,7 +20,7 @@
     {/each}
     <a
       class="text-purple-800"
-      href="#{reference.note}"><small>{thread[reference.note].author}</small></a>
+      href="#{reference.memoPosition}"><small>{thread[reference.memoPosition].author}</small></a>
   </blockquote>
   <div class="w-full">
     {#each blocks as block, index}

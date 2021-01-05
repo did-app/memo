@@ -1,6 +1,7 @@
 import { writable } from "svelte/store"
 import type { Writable } from "svelte/store"
-import type { Block } from "../memo/elements"
+import type { Memo } from "../writing"
+import type { Block } from "../writing/elements"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
 import type { Identifier, Contact } from "./api"
@@ -110,7 +111,7 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
 
     if (!identifier) {
       return {
-        threadId: undefined,
+        threadId: null,
         ack: 0,
         memos: [],
         contactEmailAddress,
@@ -145,7 +146,7 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
         ]
         : [];
       return {
-        threadId: undefined,
+        threadId: null,
         // It's not outstand to have not yet answered a greeting
         ack: 1,
         memos,
@@ -175,7 +176,7 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
     //         ]
     //       : [];
     //     return {
-    //       threadId: undefined,
+    //       threadId: null,
     //       ack: 0,
     //       memos,
     //       contactEmailAddress,
@@ -206,3 +207,33 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
 // export async function findContactByEmail(state: Authenticated): Call<Contact> {
 // }
 
+export async function postMemo(threadId: number | null, memos: Memo[], blocks: Block[]): Call<null> {
+  let response: { data: Contact } | { error: Failure };
+  // safe as there is no thread 0
+  if (threadId) {
+    response = await API.postMemo(threadId, memos.length + 1, blocks).then(
+      function (response) {
+        if ("error" in response) {
+          return response;
+        } else {
+          let { latest } = response.data;
+          let data = {
+            latest,
+            ack: latest.position,
+            identifier: {
+              // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
+              id: 99999999,
+              email_address: contactEmailAddress,
+              greeting: null,
+            },
+          };
+          return { data };
+        }
+      }
+    );
+  } else {
+    // TODO define thread identifier profile types
+    // {thread, identifier} | {emailaddress, maybeGreeting}
+    response = await API.startRelationship(contactEmailAddress, blocks);
+  }
+}

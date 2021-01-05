@@ -21,7 +21,7 @@
   }
 
   type Data = {
-    threadId: number | undefined;
+    threadId: number | null;
     ack: number;
     memos: Memo[];
     contactEmailAddress: string;

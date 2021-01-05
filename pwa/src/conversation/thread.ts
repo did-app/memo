@@ -1,14 +1,7 @@
-import { ANNOTATION, LINK, PARAGRAPH, TEXT, PROMPT, SOFTBREAK } from "../memo/elements"
-import type { Block, Link, Span, Annotation } from "../memo/elements"
-import type { Range } from "../memo/range"
-import type { Memo } from "../memo"
-import * as Tree from "../memo/tree"
-// discussion/conversation has contributions
-// thread has many messages/posts/notes/memo/entry/contribution
-
-export type SectionReference = { memoPosition: number, blockIndex: number }
-export type RangeReference = { memoPosition: number, range: Range }
-export type Reference = RangeReference | SectionReference
+import type { Block, Link, Span, Annotation } from "../writing"
+import * as Writing from "../writing";
+import type { Memo } from "./memo"
+import type { Reference, SectionReference } from "./reference"
 
 export function maxPosition(memos: Memo[]) {
   // This assumes position has been added properly, that memos are in order and positions are continuous
@@ -24,24 +17,24 @@ export function followReference(reference: Reference, memos: { content: Block[] 
     let element = memo.content[reference.blockIndex]
     return [element]
   } else {
-    return Tree.extractBlocks(memo.content, reference.range)[1]
+    return Writing.extractBlocks(memo.content, reference.range)[1]
   }
 }
 
 
-export type Pin = { threadPosition: number, type: typeof LINK, item: Link } | { threadPosition: number, type: typeof ANNOTATION, item: Annotation }
+export type Pin = { threadPosition: number, type: "link", item: Link } | { threadPosition: number, type: "annotation", item: Annotation }
 export function findPinnable(memos: Memo[]): Pin[] {
   return memos.map(function (memo, threadPosition): Pin[] {
     return memo.content.map(function (block): Pin[] {
-      if (block.type === ANNOTATION) {
-        return [{ threadPosition, type: ANNOTATION, item: block }]
-      } else if (block.type === PROMPT) {
+      if (block.type === "annotation") {
+        return [{ threadPosition, type: "annotation", item: block }]
+      } else if (block.type === "prompt") {
         return []
       } else {
 
         return block.spans.flatMap(function name(span: Span) {
-          if (span.type === LINK) {
-            return [{ threadPosition, type: LINK, item: span }]
+          if (span.type === "link") {
+            return [{ threadPosition, type: "link", item: span }]
           } else {
             return []
           }
@@ -59,16 +52,16 @@ export function summary(blocks: Block[]): Span[] {
   if (!first) {
     return []
   }
-  if (first.type === PARAGRAPH) {
+  if (first.type === "paragraph") {
     let firstBreak = first.spans.findIndex(function (span: Span) {
-      return span.type === SOFTBREAK
+      return span.type === "softbreak"
     })
     if (firstBreak === -1) {
       return first.spans
     } else {
       return first.spans.slice(0, firstBreak)
     }
-  } else if (first.type === ANNOTATION) {
+  } else if (first.type === "annotation") {
     return summary(first.blocks)
   } else {
     return [{ type: "text", text: "TODO summary of nested" }]
@@ -82,10 +75,10 @@ export type Question = {
 export function makeSuggestions(blocks: Block[]): Question[] {
   const output: Question[] = [];
   blocks.forEach(function (block, blockIndex) {
-    if (block.type === PARAGRAPH && block.spans.length > 0) {
+    if (block.type === "paragraph" && block.spans.length > 0) {
       // always ends with softbreak
       const lastSpan = block.spans[block.spans.length - 1];
-      if (lastSpan.type === TEXT && lastSpan.text.endsWith("?")) {
+      if (lastSpan.type === "text" && lastSpan.text.endsWith("?")) {
         // TODO remove start
         let suggestion = {
           blockIndex,
@@ -103,7 +96,7 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
   memos.forEach(function (memo: Memo, threadPosition: number) {
     if (memo.author === viewer) {
       memo.content.forEach(function (block: Block) {
-        if (block.type === ANNOTATION) {
+        if (block.type === "annotation") {
           console.log(block, output);
           output = output.filter(function (item) {
             let reference = item.reference
@@ -118,7 +111,7 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
       })
     } else {
       memo.content.forEach(function (block: Block) {
-        if (block.type === PROMPT) {
+        if (block.type === "prompt") {
           output.push({ reference: block.reference })
         }
       })

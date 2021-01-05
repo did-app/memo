@@ -7,7 +7,7 @@
 
   // TODO custom validation on length of blocks not being 1
   export let annotations: { reference: Reference; raw: string }[];
-  export let notes: Memo[];
+  export let memos: Memo[];
   export let draft = "";
   let textarea: HTMLTextAreaElement;
 
@@ -65,13 +65,13 @@
     <div class="w-full border-purple-500 border-l-4">
       <blockquote class=" px-2">
         <div class="opacity-50">
-          {#each Thread.followReference(reference, notes) as block, index}
-            <BlockComponent {block} {index} thread={notes} />
+          {#each Thread.followReference(reference, memos) as block, index}
+            <BlockComponent {block} {index} thread={memos} />
           {/each}
         </div>
         <a
           class="text-purple-800"
-          href="#{reference.note}"><small>{notes[reference.note].author}</small></a>
+          href="#{reference.memoPosition}"><small>{memos[reference.memoPosition].author}</small></a>
       </blockquote>
       <div class="px-2">
         <textarea

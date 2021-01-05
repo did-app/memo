@@ -8,7 +8,6 @@
   export let memo: Memo;
   export let active: Record<number, undefined | (() => void)> = {};
   export let thread: Memo[];
-  console.log(memo);
 </script>
 
 {#if open}
@@ -22,7 +21,6 @@
       <span class="font-bold truncate">{memo.author}</span>
       <span class="ml-auto">{memo.inserted_at.toLocaleDateString()}</span>
     </header>
-    <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
     <Fragment blocks={memo.content} {active} {thread} />
   </article>
 {:else}
@@ -41,7 +39,5 @@
       </span>
       <span class="ml-auto">{memo.inserted_at.toLocaleDateString()}</span>
     </header>
-    <!-- TODO note Record<a, b>[] returns type b not b | undefined -->
-    <!-- <Fragment {blocks} active={noteSelection[index] || {}} {thread} /> -->
   </article>
 {/if}

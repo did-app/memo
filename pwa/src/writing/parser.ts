@@ -1,12 +1,4 @@
-import { PARAGRAPH, TEXT, LINK, SOFTBREAK } from "./elements"
-import type { Block, Span, Paragraph } from "./elements"
-
-export type Memo = {
-  author: string,
-  content: Block[],
-  inserted_at: Date,
-  position: number
-}
+import type { Span, Block } from "./elements"
 
 function parseLine(line: string, offset: number) {
   // Can't end with |(.+\?) because question capture will catch all middle links
@@ -23,19 +15,19 @@ function parseLine(line: string, offset: number) {
     let range = document.createRange()
 
     if (unmatched) {
-      output.push({ type: TEXT, text: unmatched })
+      output.push({ type: "text", text: unmatched })
     }
     if (token[3] !== undefined) {
-      output.push({ type: LINK, url: token[3] })
+      output.push({ type: "link", url: token[3] })
     } else if (token[2] !== undefined) {
-      output.push({ type: LINK, url: token[2], title: token[1] })
+      output.push({ type: "link", url: token[2], title: token[1] })
     } else {
       throw "should be handled"
     }
   }
   const unmatched = line.substring(cursor).trim()
   if (unmatched) {
-    output.push({ type: TEXT, text: unmatched })
+    output.push({ type: "text", text: unmatched })
   }
   return output
 }
@@ -49,7 +41,7 @@ export function parse(draft: string): null | Block[] {
   const { doc, node } = draft.split(/\n/).reduce(function ({ doc, node, offset }: any, line) {
     if (line.trim() == "") {
       // close node
-      if (node.type === PARAGRAPH) {
+      if (node.type === "paragraph") {
         doc.push(node)
         node = false
       } else {
@@ -58,45 +50,21 @@ export function parse(draft: string): null | Block[] {
 
     } else {
       // append line
-      node = node || { type: PARAGRAPH, spans: [] }
-      // TODO merge same text
+      node = node || { type: "paragraph", spans: [] }
       // Called softbreak from markdown even thought rendered with br
       if (node.spans.length === 0) {
         node.spans = node.spans.concat(...parseLine(line, offset))
       } else {
-        node.spans = node.spans.concat({ type: SOFTBREAK }, ...parseLine(line, offset))
+        node.spans = node.spans.concat({ type: "softbreak" }, ...parseLine(line, offset))
       }
     }
     // plus one for the newline
     offset = offset + line.length + 1
     return { doc, node, offset }
-  }, { doc: [], node: { type: PARAGRAPH, spans: [] }, offset: 0 })
+  }, { doc: [], node: { type: "paragraph", spans: [] }, offset: 0 })
   // close node
-  if (node.type === PARAGRAPH) {
+  if (node.type === "paragraph") {
     doc.push(node)
   }
   return doc
-}
-
-export function toString(blocks: Block[] | null): string {
-  if (blocks === null) {
-    return ""
-  }
-  return blocks.map(function (block) {
-    if (block.type === PARAGRAPH) {
-      return block.spans.map(function (span: Span) {
-        if (span.type === TEXT && "text" in span) {
-          return span.text
-        } else if (span.type === LINK && "title" in span) {
-          return ` [${span.title}](${span.url}) `
-        } else if (span.type === LINK && "url" in span) {
-          return " " + span.url + " "
-        } else if (span.type === SOFTBREAK) {
-          return "\n"
-        }
-      }).join("").trim() + "\n"
-    } else {
-      throw "what an unexpected block type" + block.type
-    }
-  }).join("\n")
 }

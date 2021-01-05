@@ -1,6 +1,6 @@
 import { get, post } from "./client"
 import type { Call } from "./client"
-import type { Block } from "../memo/elements"
+import type { Block } from "../writing/elements"
 
 export type Identifier = {
   id: number,

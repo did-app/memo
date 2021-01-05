@@ -12,9 +12,7 @@
   import type { Reference } from "../thread";
   import * as API from "../sync/api";
   import * as Sync from "../sync";
-  import type { Contact } from "../sync/api";
-  import type { Failure } from "../sync/client";
-  import * as Flash from "../state/flash";
+  import type { Call } from "../sync/client";
   import Composer from "../components/Composer.svelte";
   import Fragment from "../components/Fragment.svelte";
   import MemoComponent from "../components/Memo.svelte";
@@ -28,7 +26,7 @@
   import ReplyAllIcon from "../icons/ReplyAll.svelte";
 
   export let thread: Memo[];
-  export let threadId: number | undefined;
+  export let threadId: number | null;
   export let ack: number;
   export let contactEmailAddress: string;
   export let myEmailAddress: string;
@@ -67,49 +65,8 @@
   let maxPosition = Thread.maxPosition(thread);
   let outstanding = maxPosition > ack;
 
-  async function sendMessage(): Promise<null> {
-    sendStatus = "working";
-    let response: { data: Contact } | { error: Failure };
-    // safe as there is no thread 0
-    if (threadId) {
-      response = await API.writeNote(threadId, thread.length + 1, blocks).then(
-        function (response) {
-          if ("error" in response) {
-            return response;
-          } else {
-            let { latest } = response.data;
-            let data = {
-              latest,
-              ack: latest.position,
-              identifier: {
-                // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
-                id: 99999999,
-                email_address: contactEmailAddress,
-                greeting: null,
-              },
-            };
-            return { data };
-          }
-        }
-      );
-    } else {
-      // TODO define thread identifier profile types
-      // {thread, identifier} | {emailaddress, maybeGreeting}
-      response = await API.startRelationship(contactEmailAddress, blocks);
-    }
-    if ("error" in response) {
-      sendStatus = "failed";
-      return null;
-    }
-
-    Sync.updateContact(response.data);
-
-    sendStatus = "suceeded";
-    // reportSuccess("Message sent");
-    // TODO redirect immediatly keep message is sending at the top
-    Flash.set(["You message was sent"]);
-    router.redirect("/");
-    return null;
+  async function sendMessage(): Call<null> {
+    return Sync.postMemo(threadId, thread, blocks);
   }
 
   let root: HTMLElement;
@@ -220,10 +177,10 @@
   let suggestions: Block[] = [];
   $: blocks = (function (): Block[] {
     let content = parse(draft);
+    console.log(content, annotations, "foo");
+
     let mappedAnnotations: Annotation[] = annotations.flatMap(mapAnnotation);
     let b = content ? [...mappedAnnotations, ...content] : mappedAnnotations;
-    // suggestions = Thread.makeSuggestions(b);
-    console.log("choice maping");
 
     choices = suggestions.map(function () {
       return { ask: "everyone", when: "no hurry" };
@@ -254,7 +211,7 @@
   }
 </style>
 
-{maxPosition}
+{JSON.stringify(blocks)}
 <svelte:head>
   <title>{contactEmailAddress}</title>
 </svelte:head>
@@ -405,7 +362,7 @@
           <!-- Could do an on submit and catch whats inside -->
           <!-- TODO name previous inside composer -->
           <Composer
-            notes={thread}
+            memos={thread}
             bind:draft
             {annotations}
             on:clearAnnotation={clearAnnotation} />

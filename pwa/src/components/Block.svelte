@@ -20,7 +20,8 @@
     {index}
     {thread} />
 {:else if block.type === PROMPT}
-  <div class="hidden" />
+  <!-- <div class="hidden" /> -->
+  <div>{JSON.stringify(block)}</div>
 {:else}
   <p>unknown block {JSON.stringify(block)}</p>
 {/if}
