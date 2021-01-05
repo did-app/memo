@@ -2,7 +2,7 @@ import * as Range from "./range.js";
 import type { Span, Block } from "./elements"
 import type { Point } from "./point"
 
-function arrayPopIndex(items: any[], index: number) {
+function arrayPopIndex<T>(items: T[], index: number): [T[], T, T[]] {
   const pre = items.slice(0, index);
   const post = items.slice(index + 1);
   const item = items[index];
@@ -16,10 +16,23 @@ function splitText(text: string, offset: number) {
 }
 function splitSpans(spans: Span[], j: number, offset: number) {
   const [pre, span, post] = arrayPopIndex(spans, j);
-  const [preText, postText] = splitText(span.text, offset)
+
+  let preSpan: Span, postSpan: Span;
+  if (span.type === "text") {
+    const [preText, postText] = splitText(span.text, offset)
+    preSpan = { ...span, text: preText }
+    postSpan = { ...span, text: postText }
+  } else if (span.type === 'link') {
+    const [preText, postText] = splitText(span.title || span.url, offset)
+    preSpan = { ...span, title: preText }
+    postSpan = { ...span, title: postText }
+  } else {
+    preSpan = span
+    postSpan = span
+  }
   return [
-    [...pre, { ...span, text: preText }],
-    [{ ...span, text: postText }, ...post]
+    [...pre, preSpan],
+    [postSpan, ...post]
   ]
 }
 function splitBlocks(blocks: Block[], { path, offset }: Point) {

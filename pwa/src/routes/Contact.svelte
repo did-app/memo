@@ -377,8 +377,14 @@
               {#if userFocus}
                 <div
                   class="truncate ml-12 border-gray-600 border-l-4 px-2 text-gray-600">
-                  {#each Writing.summary(Conversation.followReference(userFocus, response.data)) as span, index}
+                  <!-- {#each Writing.summary(Conversation.followReference(userFocus, response.data)) as span, index}
                     <SpanComponent {span} {index} unfurled={false} />
+                  {/each} -->
+                  {#each Conversation.followReference(userFocus, [
+                    ...response.data,
+                    current,
+                  ]) as block, index}
+                    <BlockComponent {block} {index} peers={response.data} />
                   {/each}
                 </div>
               {/if}

@@ -1,4 +1,6 @@
 import type { Reference } from "../reference"
+import * as Writing from "../../writing"
+
 function getSelection(): Selection {
   const domSelection = window.getSelection()
   if (domSelection === null) {
@@ -33,12 +35,12 @@ export function getReference(root: HTMLElement): Reference | null {
     let { memoPosition: focusPosition, ...focus } = selected.focus;
 
     if (anchorPosition === focusPosition) {
+      let range = { anchor, focus }
 
-      if (anchor.offset === focus.offset) {
+      if (Writing.isCollapsed(range)) {
         let blockIndex = anchor.path[0]
         return { memoPosition: anchorPosition, blockIndex }
       } else {
-        let range = { anchor, focus }
         return { memoPosition: anchorPosition, range }
       }
     } else {
