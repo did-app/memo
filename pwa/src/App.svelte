@@ -6,7 +6,7 @@
   import router from "page";
 
   let route: string;
-  let contactEmailAddress: string;
+  let emailAddress: string;
   router("/profile", (_) => {
     route = "profile";
   });
@@ -15,11 +15,11 @@
   });
   router("/:handle", (context) => {
     route = "contact";
-    contactEmailAddress = context.params.handle + "@plummail.co";
+    emailAddress = context.params.handle + "@plummail.co";
   });
   router("/:domain/:username", (context) => {
     route = "contact";
-    contactEmailAddress = context.params.username + "@" + context.params.domain;
+    emailAddress = context.params.username + "@" + context.params.domain;
   });
 
   router.start();
@@ -27,7 +27,7 @@
 
 <Layout let:state>
   {#if route === 'contact'}
-    <Contact {contactEmailAddress} {state} />
+    <Contact {emailAddress} {state} />
   {:else if route === 'profile'}
     <Profile {state} />
   {:else if route === 'home'}

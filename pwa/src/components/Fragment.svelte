@@ -1,13 +1,11 @@
 <script lang="typescript">
   import BlockComponent from "./Block.svelte";
-  // import { ANNOTATION } from "../memo/elements";
-  import type { Block } from "../memo/elements";
-  import type { Memo } from "../memo";
-  // import type { Reference } from "../thread";
+  import type { Thread } from "../conversation";
+  import type { Block } from "../writing";
 
   export let blocks: Block[];
   export let active: Record<number, undefined | (() => void)> = {};
-  export let thread: Memo[];
+  export let thread: Thread;
 
   // function annotationsForNote(notes: Note[], index: number) {
   //   // TODO this needs to do author

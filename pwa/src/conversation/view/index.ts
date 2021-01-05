@@ -9,7 +9,6 @@ function getSelection(): Selection {
 
 const domSelection = getSelection();
 
-// TODO could check with root element
 export function getSelected(root: HTMLElement) {
   const domRange = domSelection.getRangeAt(0)
   if (!domRange) {

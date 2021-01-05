@@ -1,15 +1,15 @@
 <script lang="typescript">
-  import { parse, toString } from "../memo";
-  import type { Block } from "../memo/elements";
-  import * as Thread from "../thread";
+  import * as Conversation from "../conversation";
+  import type { State } from "../sync";
+  import type { Block } from "../writing";
+  import { parse, toString } from "../writing";
   import * as API from "../sync/api";
   import type { Identifier } from "../sync/api";
-  import { emailAddressToPath } from "../utils";
-  import type { State } from "../sync";
+  import { emailAddressToPath } from "../social";
 
   import SpanComponent from "../components/Span.svelte";
   import Composer from "../components/Composer.svelte";
-  import SendIcon from "../icons/Send.svelte";
+  import * as Icons from "../icons";
 
   export let state: State;
   let me: Identifier;
@@ -21,7 +21,7 @@
     draft = toString(me.greeting);
   }
   let blocks: Block[] | null = null;
-  let suggestions: Thread.Question[] = [];
+  let suggestions: Conversation.Question[] = [];
   type SaveStatus = "available" | "working" | "suceeded" | "failed";
   let saveStatus: SaveStatus = "available";
 
@@ -29,7 +29,7 @@
     saveStatus = "available";
     let blocks = parse(draft);
     if (blocks !== null) {
-      suggestions = Thread.makeSuggestions(blocks);
+      suggestions = Conversation.makeSuggestions(blocks);
     }
     return blocks;
   })();
@@ -93,7 +93,7 @@
           class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
           on:click={saveGreeting}>
           <span class="inline-block w-4 mr-2">
-            <SendIcon />
+            <Icons.Send />
           </span>
           Save
         </button>
@@ -102,7 +102,7 @@
           class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
           on:click={saveGreeting}>
           <span class="inline-block w-4 mr-2">
-            <SendIcon />
+            <Icons.Send />
           </span>
           Saving
         </button>
@@ -111,7 +111,7 @@
           class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold"
           on:click={saveGreeting}>
           <span class="inline-block w-4 mr-2">
-            <SendIcon />
+            <Icons.Send />
           </span>
           Saved
         </button>
@@ -120,7 +120,7 @@
           class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold"
           on:click={saveGreeting}>
           <span class="inline-block w-4 mr-2">
-            <SendIcon />
+            <Icons.Send />
           </span>
           Failed to save update
         </button>

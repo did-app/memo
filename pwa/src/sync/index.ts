@@ -1,10 +1,10 @@
 import { writable } from "svelte/store"
 import type { Writable } from "svelte/store"
-import type { Memo } from "../writing"
-import type { Block } from "../writing/elements"
+import type { Memo } from "../conversation"
+import type { Block } from "../writing"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
-import type { Identifier, Contact } from "./api"
+import type { Contact, Identifier } from "../social"
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
@@ -33,6 +33,10 @@ const initial: State = { loading: true }
 const store: Writable<State> = writable(initial);
 const { subscribe, set, update } = store
 
+
+export function loadMemos(emailAddress: string): Memo[] {
+  throw "load memos"
+}
 
 const fragment = window.location.hash.substring(1);
 const params = new URLSearchParams(fragment);
@@ -208,6 +212,7 @@ export async function loadContact(state: Unauthenticated | Authenticated, contac
 // }
 
 export async function postMemo(threadId: number | null, memos: Memo[], blocks: Block[]): Call<null> {
+  let contactEmailAddress = "TODO"
   let response: { data: Contact } | { error: Failure };
   // safe as there is no thread 0
   if (threadId) {
@@ -232,8 +237,9 @@ export async function postMemo(threadId: number | null, memos: Memo[], blocks: B
       }
     );
   } else {
-    // TODO define thread identifier profile types
-    // {thread, identifier} | {emailaddress, maybeGreeting}
+
     response = await API.startRelationship(contactEmailAddress, blocks);
+    throw "TODO return"
   }
+  throw "foo"
 }

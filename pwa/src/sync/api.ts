@@ -1,36 +1,56 @@
+import type { Memo, Thread } from "../conversation"
+import type { Identifier, Contact } from "../social"
+import type { Block } from "../writing"
 import { get, post } from "./client"
-import type { Call } from "./client"
-import type { Block } from "../writing/elements"
+import type { Call, Failure } from "./client"
 
-export type Identifier = {
+type Response<T> = { data: T } | { error: Failure }
+function mapData<D, T>(response: Response<D>, mapper: (_: D) => T): Response<T> {
+  if ('error' in response) {
+    return response
+  } else {
+    return { data: mapper(response.data) }
+  }
+}
+
+export type IdentifierDTO = {
   id: number,
   email_address: string,
   greeting: Block[] | null,
 }
 
+function identifierFromDTO(data: IdentifierDTO): Identifier {
+  const { id, email_address: emailAddress, greeting, } = data
+  return { emailAddress, greeting }
+}
+
 // Authentication
 
-export function authenticateByCode(code: string): Call<Identifier> {
+export async function authenticateByCode(code: string): Call<Identifier> {
   const path = "/authenticate/code"
   const params = { code }
-  return post(path, params)
+  let response: Response<IdentifierDTO> = await post(path, params)
+  return mapData(response, identifierFromDTO)
 }
 
-export function authenticateBySession(): Call<Identifier | null> {
+export async function authenticateBySession(): Call<Identifier | null> {
   const path = "/authenticate/session"
-  return get(path)
+  let response: Response<IdentifierDTO> = await get(path)
+  return mapData(response, identifierFromDTO)
 }
 
-export function authenticateByEmail(emailAddress: string) {
+export async function authenticateByEmail(emailAddress: string) {
   const path = "/authenticate/email"
   const params = { email_address: emailAddress }
-  return post(path, params);
+  let response: Response<IdentifierDTO> = await post(path, params);
+  return mapData(response, identifierFromDTO)
 }
 
-export function authenticateByPassword(emailAddress: string, password: string): Call<Identifier> {
+export async function authenticateByPassword(emailAddress: string, password: string): Call<Identifier> {
   const path = "/authenticate/password"
   const params = { email_address: emailAddress, password }
-  return post(path, params);
+  let response: Response<IdentifierDTO> = await post(path, params);
+  return mapData(response, identifierFromDTO)
 }
 
 
@@ -44,37 +64,55 @@ export function saveGreeting(identifier_id: number, content: Block[] | null): Ca
 
 // identifier discovery
 
-export type Memo = {
+export type MemoDTO = {
   author: string,
   content: Block[]
   // NOTE string is human string
-  inserted_at: string,
+  posted_at: string,
   position: number,
 }
-export type Thread = {
-  id: number,
-  ack: number,
-  memos: Memo[]
+
+function memoFromDTO(data: MemoDTO): Memo {
+  let { author, content, posted_at: postedAt, position } = data
+  return { author, content, posted_at: new Date(postedAt), position }
+}
+export type ThreadDTO = {
+  acknowledged: number,
+  latest: MemoDTO | null
+}
+function threadFromDTO(data: ThreadDTO): Thread {
+  let { latest, acknowledged } = data
+  return { latest: latest && memoFromDTO(latest), acknowledged }
 }
 
-export function fetchProfile(emailAddress: string): Call<Identifier | null> {
-  const path = "/identifiers/" + emailAddress
-  return get(path)
-}
+// export function fetchProfile(emailAddress: string): Call<IdentifierDTO | null> {
+//   const path = "/identifiers/" + emailAddress
+//   return get(path)
+// }
 
-export function fetchContact(emailAddress: string): Call<{ identifier: Identifier | undefined, thread: Thread | undefined }> {
-  const path = "/relationship/" + emailAddress
-  return get(path)
-}
+// export function fetchContact(emailAddress: string): Call<{ identifier: IdentifierDTO | undefined, thread: Thread | undefined }> {
+//   const path = "/relationship/" + emailAddress
+//   return get(path)
+// }
 
-export type Contact = {
-  identifier: Identifier,
-  ack: number
-  latest: Memo | undefined
+export type ContactDTO = {
+  identifier: IdentifierDTO,
+  thread: {
+    acknowledged: number
+    latest: MemoDTO | null
+  }
 }
-export function fetchContacts(): Call<Contact[]> {
+function contactFromDTO(data: ContactDTO): Contact {
+  const { identifier, thread } = data
+  return { identifier: identifierFromDTO(identifier), thread: threadFromDTO(thread) }
+}
+function contactsFromDTO(data: ContactDTO[]): Contact[] {
+  return data.map(contactFromDTO)
+}
+export async function fetchContacts(): Call<Contact[]> {
   const path = "/contacts"
-  return get(path)
+  let response: Response<ContactDTO[]> = await get(path)
+  return mapData(response, contactsFromDTO)
 }
 
 export function startRelationship(emailAddress: string, content: Block[]): Call<Contact> {
@@ -83,7 +121,7 @@ export function startRelationship(emailAddress: string, content: Block[]): Call<
   return post(path, params)
 }
 
-export function postMemo(threadId: number, position: number, content: Block[]): Call<{ latest: Memo }> {
+export function postMemo(threadId: number, position: number, content: Block[]): Call<{ latest: MemoDTO }> {
   const path = "/threads/" + threadId + "/post"
   const params = { position, content }
   return post(path, params)

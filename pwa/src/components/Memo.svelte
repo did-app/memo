@@ -1,13 +1,13 @@
 <script lang="typescript">
-  import type { Memo } from "../memo";
-  import * as Thread from "../thread";
+  import type { Memo, Thread } from "../conversation";
+  import * as Writing from "../writing";
   import Fragment from "./Fragment.svelte";
   import SpanComponent from "./Span.svelte";
 
   export let open: boolean;
   export let memo: Memo;
   export let active: Record<number, undefined | (() => void)> = {};
-  export let thread: Memo[];
+  export let thread: Thread;
 </script>
 
 {#if open}
@@ -19,7 +19,7 @@
       class="ml-12 flex text-gray-600 cursor-pointer"
       on:click={() => (open = false)}>
       <span class="font-bold truncate">{memo.author}</span>
-      <span class="ml-auto">{memo.inserted_at.toLocaleDateString()}</span>
+      <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span>
     </header>
     <Fragment blocks={memo.content} {active} {thread} />
   </article>
@@ -33,11 +33,11 @@
       <span class="truncate">
         <span class="font-bold">{memo.author}</span>
         <span
-          class="truncate pl-2 pr-4">{#each Thread.summary(memo.content) as span, index}
+          class="truncate pl-2 pr-4">{#each Writing.summary(memo.content) as span, index}
             <SpanComponent {span} {index} unfurled={false} />
           {/each}</span>
       </span>
-      <span class="ml-auto">{memo.inserted_at.toLocaleDateString()}</span>
+      <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span>
     </header>
   </article>
 {/if}

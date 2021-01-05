@@ -1,13 +1,12 @@
 <script type="typescript">
   import { createEventDispatcher, onMount } from "svelte";
-  import * as Thread from "../thread";
-  import type { Reference } from "../thread";
-  import type { Memo } from "../memo";
+  import type { Thread, Reference } from "../conversation";
+  import * as Conversation from "../conversation";
   import BlockComponent from "../components/Block.svelte";
 
   // TODO custom validation on length of blocks not being 1
   export let annotations: { reference: Reference; raw: string }[];
-  export let memos: Memo[];
+  export let thread: Thread;
   export let draft = "";
   let textarea: HTMLTextAreaElement;
 
@@ -65,13 +64,13 @@
     <div class="w-full border-purple-500 border-l-4">
       <blockquote class=" px-2">
         <div class="opacity-50">
-          {#each Thread.followReference(reference, memos) as block, index}
-            <BlockComponent {block} {index} thread={memos} />
+          {#each Conversation.followReference(reference, thread) as block, index}
+            <BlockComponent {block} {index} {thread} />
           {/each}
         </div>
         <a
           class="text-purple-800"
-          href="#{reference.memoPosition}"><small>{memos[reference.memoPosition].author}</small></a>
+          href="#{reference.memoPosition}"><small>{thread[reference.memoPosition].author}</small></a>
       </blockquote>
       <div class="px-2">
         <textarea

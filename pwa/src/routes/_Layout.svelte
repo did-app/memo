@@ -24,7 +24,7 @@
       </a>
       {#if state.loading === false && state.me}
         /
-        <a href="/profile"> {state.me.email_address} </a>
+        <a href="/profile"> {state.me.emailAddress} </a>
       {/if}
     </span>
     <span class="my-1 ml-4">

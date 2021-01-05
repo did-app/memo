@@ -1,29 +1,27 @@
 <script>
-  import type { Block } from "../memo/elements";
-  import type { Memo } from "../memo";
-  import * as Thread from "../thread";
-  import type { Reference } from "../thread";
+  import type { Thread } from "../conversation";
+  import * as Conversation from "../conversation";
+  import type { Annotation } from "../writing";
   import BlockComponent from "./Block.svelte";
 
-  export let reference: Reference;
-  export let blocks: Block[];
+  export let annotation: Annotation;
   export let index: number;
-  export let thread: Memo[];
+  export let thread: Thread;
 </script>
 
 <div class="my-2 border-gray-600 w-full" data-block-index={index}>
   <blockquote class="border-l-4 px-2 text-gray-500">
-    {#each Thread.followReference(reference, thread) as block, index}
+    {#each Conversation.followReference(annotation.reference, thread) as block, index}
       <div class="-mb-2">
         <BlockComponent {block} {index} {thread} />
       </div>
     {/each}
     <a
       class="text-purple-800"
-      href="#{reference.memoPosition}"><small>{thread[reference.memoPosition].author}</small></a>
+      href="#{annotation.reference.memoPosition}"><small>{thread[annotation.reference.memoPosition].author}</small></a>
   </blockquote>
   <div class="w-full">
-    {#each blocks as block, index}
+    {#each annotation.blocks as block, index}
       <BlockComponent {block} {index} {thread} />
     {/each}
   </div>

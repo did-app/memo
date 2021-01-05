@@ -41,3 +41,25 @@ export function extractBlocks(blocks: Block[], range: Range.Range) {
   const [preBlocks, slicedBlocks] = splitBlocks(tempBlocks, start)
   return [preBlocks, slicedBlocks, postBlocks]
 }
+
+export function summary(blocks: Block[]): Span[] {
+  let first: Block = blocks[0]
+  // TODO non empty list types
+  if (!first) {
+    return []
+  }
+  if (first.type === "paragraph") {
+    let firstBreak = first.spans.findIndex(function (span: Span) {
+      return span.type === "softbreak"
+    })
+    if (firstBreak === -1) {
+      return first.spans
+    } else {
+      return first.spans.slice(0, firstBreak)
+    }
+  } else if (first.type === "annotation") {
+    return summary(first.blocks)
+  } else {
+    return [{ type: "text", text: "TODO summary of nested" }]
+  }
+}

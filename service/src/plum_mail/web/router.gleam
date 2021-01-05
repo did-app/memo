@@ -84,7 +84,7 @@ fn no_content() {
 fn latest_to_json(latest) {
   let tuple(inserted_at, content, position) = latest
   json.object([
-    tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
+    tuple("posted_at", json.string(datetime.to_iso8601(inserted_at))),
     tuple("content", content),
     tuple("position", json.int(position)),
   ])
@@ -98,8 +98,10 @@ fn contact_to_json(contact) {
   }
   json.object([
     tuple("identifier", identifier.to_json(identifier)),
-    tuple("ack", json.int(ack)),
-    tuple("latest", latest_json),
+    tuple("thread", json.object([
+      tuple("acknowledged", json.int(ack)),
+      tuple("latest", latest_json),
+    ]))
   ])
 }
 

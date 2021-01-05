@@ -1,4 +1,4 @@
-import type { Reference, SectionReference } from "../conversation/thread"
+import type { Reference } from "../conversation"
 
 export type Paragraph = {
   type: "paragraph",
@@ -24,7 +24,7 @@ export type Annotation = {
 
 export type Prompt = {
   type: "prompt",
-  reference: SectionReference
+  reference: Reference
 }
 
 export type Softbreak = {
