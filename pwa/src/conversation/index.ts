@@ -6,3 +6,5 @@ export { isOutstanding, followReference, makeSuggestions } from "./thread"
 
 export type { Pin } from "./pin";
 export { findPinnable } from "./pin"
+
+export { getReference } from "./view"

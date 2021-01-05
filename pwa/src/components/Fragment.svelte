@@ -1,11 +1,11 @@
 <script lang="typescript">
   import BlockComponent from "./Block.svelte";
-  import type { Thread } from "../conversation";
+  import type { Memo } from "../conversation";
   import type { Block } from "../writing";
 
   export let blocks: Block[];
   export let active: Record<number, undefined | (() => void)> = {};
-  export let thread: Thread;
+  export let peers: Memo[];
 
   // function annotationsForNote(notes: Note[], index: number) {
   //   // TODO this needs to do author
@@ -68,7 +68,7 @@
         </g></svg>
     </div>
 
-    <BlockComponent {block} {index} {thread} />
+    <BlockComponent {block} {index} {peers} />
   </div>
   <!-- </div> -->
   <!-- {#each annotations as { blocks, author, note }}

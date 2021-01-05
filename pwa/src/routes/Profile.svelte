@@ -8,7 +8,6 @@
   import { emailAddressToPath } from "../social";
 
   import SpanComponent from "../components/Span.svelte";
-  import Composer from "../components/Composer.svelte";
   import * as Icons from "../icons";
 
   export let state: State;
@@ -73,7 +72,7 @@
   unless you have annotated previously need a dismiss annotation false
   <br />
   Still even in rich editor don't want attached to question -->
-    <Composer notes={[]} bind:draft annotations={[]} />
+    <textarea />
     <!-- {JSON.stringify(suggestions)} -->
     {#if suggestions.length}
       <h2 class="font-bold pl-12">Questions</h2>

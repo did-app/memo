@@ -34,9 +34,6 @@ const store: Writable<State> = writable(initial);
 const { subscribe, set, update } = store
 
 
-export function loadMemos(emailAddress: string): Memo[] {
-  throw "load memos"
-}
 
 const fragment = window.location.hash.substring(1);
 const params = new URLSearchParams(fragment);
@@ -104,109 +101,112 @@ export function updateContact(contact: Contact) {
     return state
   })
 }
-export async function loadContact(state: Unauthenticated | Authenticated, contactEmailAddress: string) {
-  if (state.me) {
-    console.log(state.contacts);
-    let contactResponse = await API.fetchContact(contactEmailAddress);
-    if ("error" in contactResponse) {
-      throw "error";
-    }
-    let { thread, identifier } = contactResponse.data;
 
-    if (!identifier) {
-      return {
-        threadId: null,
-        ack: 0,
-        memos: [],
-        contactEmailAddress,
-      };
-    }
-    if (thread) {
-      let threadId = thread.id;
-      let memos = thread.memos.map(function ({
-        inserted_at: iso8601,
-        ...rest
-      }) {
-        let inserted_at = new Date(iso8601);
-        return { inserted_at, ...rest };
-      });
-      return {
-        threadId,
-        ack: thread.ack,
-        memos: memos,
-        contactEmailAddress,
-      };
-    } else {
-      let greeting = identifier.greeting;
+// TODO save in cache
+export { loadMemos } from "./api"
+// export async function loadContact(state: Unauthenticated | Authenticated, contactEmailAddress: string) {
+//   if (state.me) {
+//     console.log(state.contacts);
+//     let contactResponse = await API.fetchContact(contactEmailAddress);
+//     if ("error" in contactResponse) {
+//       throw "error";
+//     }
+//     let { thread, identifier } = contactResponse.data;
 
-      let memos = greeting
-        ? [
-          {
-            content: greeting,
-            author: contactEmailAddress,
-            inserted_at: new Date(),
-            position: 1,
-          },
-        ]
-        : [];
-      return {
-        threadId: null,
-        // It's not outstand to have not yet answered a greeting
-        ack: 1,
-        memos,
-        contactEmailAddress,
-      };
-    }
-  } else {
-    // async function load(handle: string): Promise<Data | { error: Failure }> {
-    //   let contactEmailAddress = handle;
+//     if (!identifier) {
+//       return {
+//         threadId: null,
+//         ack: 0,
+//         memos: [],
+//         contactEmailAddress,
+//       };
+//     }
+//     if (thread) {
+//       let threadId = thread.id;
+//       let memos = thread.memos.map(function ({
+//         inserted_at: iso8601,
+//         ...rest
+//       }) {
+//         let inserted_at = new Date(iso8601);
+//         return { inserted_at, ...rest };
+//       });
+//       return {
+//         threadId,
+//         ack: thread.ack,
+//         memos: memos,
+//         contactEmailAddress,
+//       };
+//     } else {
+//       let greeting = identifier.greeting;
 
-    //   if ("error" in authResponse && authResponse.error.code === "forbidden") {
-    //     // There is no 404 as will always try sending
-    //     let profileResponse = await API.fetchProfile(contactEmailAddress);
-    //     if ("error" in profileResponse) {
-    //       throw "todo error";
-    //     }
-    //     let myEmailAddress = "";
-    //     let greeting = profileResponse.data && profileResponse.data.greeting;
-    //     let memos = greeting
-    //       ? [
-    //           {
-    //             content: greeting,
-    //             author: contactEmailAddress,
-    //             inserted_at: new Date(),
-    //             position: 1,
-    //           },
-    //         ]
-    //       : [];
-    //     return {
-    //       threadId: null,
-    //       ack: 0,
-    //       memos,
-    //       contactEmailAddress,
-    //       myEmailAddress,
-    //     };
-    //   } else if ("error" in authResponse) {
-    //     throw "error fetching self";
-    //   } else {
-    //     const myEmailAddress = authResponse.data.email_address;
-    //     if (myEmailAddress === contactEmailAddress) {
-    //       page.redirect("/profile");
-    //       // throw after redirect results in unhandled promise logged in sentry
-    //       return {
-    //         error: {
-    //           code: "forbidden",
-    //           detail: "Cannot view contact page for self",
-    //         },
-    //       };
-    //     } else {
-    //       let contactResponse = await API.fetchContact(contactEmailAddress);
-    //
-    //     }
-    //   }
-    // }
-  }
-}
+//       let memos = greeting
+//         ? [
+//           {
+//             content: greeting,
+//             author: contactEmailAddress,
+//             inserted_at: new Date(),
+//             position: 1,
+//           },
+//         ]
+//         : [];
+//       return {
+//         threadId: null,
+//         // It's not outstand to have not yet answered a greeting
+//         ack: 1,
+//         memos,
+//         contactEmailAddress,
+//       };
+//     }
+//   } else {
+//     // async function load(handle: string): Promise<Data | { error: Failure }> {
+//     //   let contactEmailAddress = handle;
+
+//     //   if ("error" in authResponse && authResponse.error.code === "forbidden") {
+//     //     // There is no 404 as will always try sending
+//     //     let profileResponse = await API.fetchProfile(contactEmailAddress);
+//     //     if ("error" in profileResponse) {
+//     //       throw "todo error";
+//     //     }
+//     //     let myEmailAddress = "";
+//     //     let greeting = profileResponse.data && profileResponse.data.greeting;
+//     //     let memos = greeting
+//     //       ? [
+//     //           {
+//     //             content: greeting,
+//     //             author: contactEmailAddress,
+//     //             inserted_at: new Date(),
+//     //             position: 1,
+//     //           },
+//     //         ]
+//     //       : [];
+//     //     return {
+//     //       threadId: null,
+//     //       ack: 0,
+//     //       memos,
+//     //       contactEmailAddress,
+//     //       myEmailAddress,
+//     //     };
+//     //   } else if ("error" in authResponse) {
+//     //     throw "error fetching self";
+//     //   } else {
+//     //     const myEmailAddress = authResponse.data.email_address;
+//     //     if (myEmailAddress === contactEmailAddress) {
+//     //       page.redirect("/profile");
+//     //       // throw after redirect results in unhandled promise logged in sentry
+//     //       return {
+//     //         error: {
+//     //           code: "forbidden",
+//     //           detail: "Cannot view contact page for self",
+//     //         },
+//     //       };
+//     //     } else {
+//     //       let contactResponse = await API.fetchContact(contactEmailAddress);
+//     //
+//     //     }
+//     //   }
+//     // }
+//   }
+// }
 
 // export async function findContactByEmail(state: Authenticated): Call<Contact> {
 // }

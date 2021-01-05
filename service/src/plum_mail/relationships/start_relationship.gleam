@@ -78,5 +78,12 @@ pub fn execute(params, user_id) {
   let tuple(position, author_id, content) = current
   assert Ok(Some(tuple(inserted_at, content, position))) =
     thread.post_memo(thread_id, position, author_id, content)
-  Ok(tuple(identifier, position, Some(inserted_at), content, position))
+  Ok(tuple(
+    identifier,
+    position,
+    Some(inserted_at),
+    content,
+    position,
+    thread_id,
+  ))
 }

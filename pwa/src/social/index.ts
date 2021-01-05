@@ -16,8 +16,13 @@ export type Contact = {
 
 
 
-export function contactForEmailAddress(emailAddress: string): Contact {
-  throw "TODO contact"
+export function contactForEmailAddress(contacts: Contact[], emailAddress: string): Contact {
+  let result = contacts.find(function (contact) { return contact.identifier.emailAddress === emailAddress })
+  if (result) {
+    return result
+  } else {
+    throw "No contact found"
+  }
 }
 
 export function emailAddressToPath(emailAddress: string) {

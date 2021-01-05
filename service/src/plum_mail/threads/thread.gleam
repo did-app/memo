@@ -74,7 +74,7 @@ pub fn load_memos(thread_id) {
       tuple("position", json.int(position)),
       tuple("content", dynamic.unsafe_coerce(content)),
       tuple("author", json.string(author)),
-      tuple("inserted_at", json.string(datetime.to_iso8601(inserted_at))),
+      tuple("posted_at", json.string(datetime.to_iso8601(inserted_at))),
     ])
   }
   run_sql.execute(sql, args, mapper)

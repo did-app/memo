@@ -1,9 +1,10 @@
 import type { Block, Link, Span, Annotation } from "../writing"
 import * as Writing from "../writing";
 import type { Memo } from "./memo"
-import type { Reference, SectionReference } from "./reference"
+import type { Reference } from "./reference"
 
 export type Thread = {
+  id: number
   latest: Memo | null,
   acknowledged: number
 }
@@ -18,7 +19,8 @@ export function isOutstanding(thread: Thread): boolean {
 }
 
 export function followReference(reference: Reference, memos: Memo[]) {
-  let memo = memos[reference.memoPosition]
+  // position is indexed from 1
+  let memo = memos[reference.memoPosition - 1]
   if ('blockIndex' in reference) {
     let element = memo.content[reference.blockIndex]
     return [element]
@@ -56,7 +58,6 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
     if (memo.author === viewer) {
       memo.content.forEach(function (block: Block) {
         if (block.type === "annotation") {
-          console.log(block, output);
           output = output.filter(function (item) {
             let reference = item.reference
             if ('blockIndex' in block.reference) {

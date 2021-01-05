@@ -91,17 +91,22 @@ fn latest_to_json(latest) {
 }
 
 fn contact_to_json(contact) {
-  let tuple(identifier, ack, inserted_at, content, position) = contact
+  let tuple(identifier, ack, inserted_at, content, position, thread_id) =
+    contact
   let latest_json = case inserted_at {
     None -> json.null()
     Some(inserted_at) -> latest_to_json(tuple(inserted_at, content, position))
   }
   json.object([
     tuple("identifier", identifier.to_json(identifier)),
-    tuple("thread", json.object([
-      tuple("acknowledged", json.int(ack)),
-      tuple("latest", latest_json),
-    ]))
+    tuple(
+      "thread",
+      json.object([
+        tuple("id", json.int(thread_id)),
+        tuple("acknowledged", json.int(ack)),
+        tuple("latest", latest_json),
+      ]),
+    ),
   ])
 }
 
@@ -218,7 +223,7 @@ pub fn route(
         SELECT DISTINCT ON(thread_id) * FROM memos
         ORDER BY thread_id DESC, inserted_at DESC
       )
-      SELECT id, email_address, greeting, contacts.ack, latest.inserted_at, latest.content, latest.position FROM contacts
+      SELECT id, email_address, greeting, contacts.ack, latest.inserted_at, latest.content, latest.position, contacts.thread_id FROM contacts
       JOIN identifiers ON identifiers.id = contacts.contact_id
       LEFT JOIN latest ON latest.thread_id = contacts.thread_id
       "
@@ -239,7 +244,9 @@ pub fn route(
             // TODO thread summary type
             assert Ok(position) = dynamic.element(row, 6)
             assert Ok(position) = dynamic.int(position)
-            tuple(identifier, ack, inserted_at, content, position)
+            assert Ok(thread_id) = dynamic.element(row, 7)
+            assert Ok(thread_id) = dynamic.int(thread_id)
+            tuple(identifier, ack, inserted_at, content, position, thread_id)
           },
         )
       // db.run(sql, args, io.debug)
@@ -278,6 +285,14 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
+    ["threads", thread_id, "memos"] -> {
+      assert Ok(thread_id) = int.parse(thread_id)
+      try memos = thread.load_memos(thread_id)
+      let data = json.list(memos)
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok
+    }
     ["threads", thread_id, "post"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
       try raw = acl.parse_json(request)
@@ -288,7 +303,6 @@ pub fn route(
       try author_id = web.require_authenticated(client_state)
       // // TODO a participation thing again
       try Some(latest) =
-
         thread.post_memo(thread_id, position, author_id, blocks)
       let data = json.object([tuple("latest", latest_to_json(latest))])
       http.response(200)

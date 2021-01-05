@@ -77,12 +77,13 @@ function memoFromDTO(data: MemoDTO): Memo {
   return { author, content, posted_at: new Date(postedAt), position }
 }
 export type ThreadDTO = {
+  id: number,
   acknowledged: number,
   latest: MemoDTO | null
 }
 function threadFromDTO(data: ThreadDTO): Thread {
-  let { latest, acknowledged } = data
-  return { latest: latest && memoFromDTO(latest), acknowledged }
+  let { id, latest, acknowledged } = data
+  return { id, latest: latest && memoFromDTO(latest), acknowledged }
 }
 
 // export function fetchProfile(emailAddress: string): Call<IdentifierDTO | null> {
@@ -97,10 +98,7 @@ function threadFromDTO(data: ThreadDTO): Thread {
 
 export type ContactDTO = {
   identifier: IdentifierDTO,
-  thread: {
-    acknowledged: number
-    latest: MemoDTO | null
-  }
+  thread: ThreadDTO
 }
 function contactFromDTO(data: ContactDTO): Contact {
   const { identifier, thread } = data
@@ -119,6 +117,12 @@ export function startRelationship(emailAddress: string, content: Block[]): Call<
   const path = "/relationship/start"
   const params = { email_address: emailAddress, content }
   return post(path, params)
+}
+
+export async function loadMemos(threadId: number): Call<Memo[]> {
+  const path = "/threads/" + threadId + "/memos"
+  let response: Response<MemoDTO[]> = await get(path);
+  return mapData(response, (dto) => { return dto.map(memoFromDTO) })
 }
 
 export function postMemo(threadId: number, position: number, content: Block[]): Call<{ latest: MemoDTO }> {

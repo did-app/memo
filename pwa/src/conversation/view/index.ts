@@ -1,3 +1,4 @@
+import type { Reference } from "../reference"
 function getSelection(): Selection {
   const domSelection = window.getSelection()
   if (domSelection === null) {
@@ -24,6 +25,30 @@ export function getSelected(root: HTMLElement) {
   return { anchor, focus }
 }
 
+export function getReference(root: HTMLElement): Reference | null {
+  const selected = getSelected(root)
+
+  if (selected && selected.anchor && selected.focus) {
+    let { memoPosition: anchorPosition, ...anchor } = selected.anchor;
+    let { memoPosition: focusPosition, ...focus } = selected.focus;
+
+    if (anchorPosition === focusPosition) {
+
+      if (anchor.offset === focus.offset) {
+        let blockIndex = anchor.path[0]
+        return { memoPosition: anchorPosition, blockIndex }
+      } else {
+        let range = { anchor, focus }
+        return { memoPosition: anchorPosition, range }
+      }
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
+}
+
 function leafElement(node: Node): HTMLElement {
   // FIXME, is this bad
   let temp: any = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement
@@ -35,6 +60,7 @@ function pathFromNode(node: Node) {
 
   let element = leafElement(node)
   while (element) {
+
     const { spanIndex, blockIndex, memoPosition } = element.dataset
 
     if (spanIndex !== undefined) {
@@ -51,4 +77,5 @@ function pathFromNode(node: Node) {
     }
     element = parent
   }
+
 }
