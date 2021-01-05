@@ -1,12 +1,12 @@
 <script lang="typescript">
   import { onMount } from "svelte";
   import { autoResize } from "../svelte/textarea";
-  import type { Reference } from "../conversation";
+  import type { Reference, Memo } from "../conversation";
   import * as Conversation from "../conversation";
   import * as Social from "../social";
   import type { State, Authenticated } from "../sync";
   import * as Sync from "../sync";
-  import type { Block, Annotation } from "../writing";
+  import type { Block, Annotation, Prompt } from "../writing";
   import * as Writing from "../writing";
 
   import Fragment from "../components/Fragment.svelte";
@@ -79,13 +79,17 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  // let prompts = Thread.gatherPrompts(thread, state.me.email_address);
+  let loading = Sync.loadMemos(contact.thread.id).then(function (response) {
+    if ("data" in response) {
+      let memos = response.data;
+      let references = Conversation.gatherPrompts(memos, state.me.emailAddress);
+      annotations = references.map(function (reference) {
+        return { reference, raw: "" };
+      });
+    }
 
-  // let annotations: { reference: Reference; raw: string }[] = prompts.map(
-  //   function (prompt) {
-  //     return { reference: prompt.reference, raw: "" };
-  //   }
-  // );
+    return response;
+  });
 
   function mapAnnotation(draft: {
     reference: Reference;
@@ -110,18 +114,7 @@
     reference: Reference;
     raw: string;
   };
-  let annotations: AnnotationSpace[] = [
-    {
-      raw: "",
-      reference: {
-        memoPosition: 1,
-        range: {
-          anchor: { path: [0, 0], offset: 0 },
-          focus: { path: [0, 0], offset: 2 },
-        },
-      },
-    },
-  ];
+  let annotations: AnnotationSpace[] = [];
 
   // DOESNT WORK ON ACTIVE message
   function quoteInReply() {
@@ -139,13 +132,37 @@
     annotations = annotations;
   }
 
+  // I still think at the end we should pull out very flat variables. but helpers work on known data types
+
   $: blocks = (function (): Block[] {
     let content = Writing.parse(draft);
     let mappedAnnotations: Annotation[] = annotations.flatMap(mapAnnotation);
     return content ? [...mappedAnnotations, ...content] : mappedAnnotations;
   })();
+  let current: Memo;
+  $: nextPosition = contact.thread.latest.position + 1;
+  $: current = {
+    content: blocks,
+    author: state.me.emailAddress,
+    posted_at: new Date(),
+    position: nextPosition,
+  };
+  let suggestedPrompts: Prompt[] = [];
+  $: suggestedPrompts = preview
+    ? suggestedPrompts
+    : Conversation.makeSuggestions(blocks, nextPosition);
+  function clearPrompt(index: number) {
+    suggestedPrompts.splice(index, 1);
+    suggestedPrompts = suggestedPrompts;
+  }
 
+  function postMemo() {
+    Sync.postMemo(contact, [...blocks, ...suggestedPrompts], nextPosition);
+  }
   function acknowledge() {
+    // TODO this is a background thing we should switch back almost straight away.
+    // Working message in the top
+    // Tasks list in the state
     throw "TODO acknowledge";
   }
 </script>
@@ -174,7 +191,7 @@
 
 {JSON.stringify(blocks)}
 {#if 'me' in state && state.me}
-  {#await Sync.loadMemos(contact.thread.id)}
+  {#await loading}
     LOADING
   {:then response}
     {#if 'data' in response}
@@ -203,40 +220,33 @@
                   <span class="ml-auto">{new Date().toLocaleDateString()}</span>
                 </header>
                 <Fragment {blocks} peers={response.data} />
-                <!-- {#each suggestions as block, index}
-                  Suggestion
-                  {index + blocks.length}
-
-                  <BlockComponent
-                    {block}
-                    peers={response.data}
-                    index={index + blocks.length} />
-                  <div class="pl-12 my-1 flex">
-                    <div>
-                      Ask
-                      <select bind:value={choices[index].ask}>
-                        <option value="everyone">Everyone</option>
-                        <option value="tim">tim</option>
-                        <option value="bill">Bill</option>
-                      </select>
+                {#if suggestedPrompts.length !== 0}
+                  <h3 class="ml-12 font-bold mt-4">
+                    Ask the following as highlighted questions.
+                  </h3>
+                {/if}
+                {#each suggestedPrompts as prompt, index}
+                  <div class="flex my-1">
+                    <div
+                      class="w-8 m-1 cursor-pointe preview ? suggestedPrompts :r flex-none"
+                      on:click={() => clearPrompt(index)}>
+                      <div class="w-6">
+                        <Icons.Bin />
+                      </div>
                     </div>
                     <div>
-                      For
-                      <select bind:value={choices[index].when}>
-                        <option value="today">Today</option>
-                        <option value="no hurry">no hurry</option>
-                      </select>
+                      {#each Conversation.followReference(prompt.reference, [
+                        ...response.data,
+                        current,
+                      ]) as block, index}
+                        <BlockComponent {block} {index} peers={response.data} />
+                      {/each}
                     </div>
                   </div>
-                {/each} -->
+                {/each}
 
                 <div class="mt-2 pl-12 flex items-center">
-                  <div class="flex flex-1">
-                    <!-- TODO this needs to show your email address, or if in header nothing at all -->
-                    <!-- <span class="font-bold text-gray-700 mr-1">From:</span>
-              <input class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700" bind:value={contact} type="email" placeholder="Your email address" required> -->
-                  </div>
-                  <!-- Icons.TODO s included as string types -->
+                  <div class="flex flex-1" />
                   <button
                     class="flex-grow-0 py-2 px-6 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold"
                     type="submit"
@@ -258,7 +268,7 @@
                   {#if sendStatus === 'available'}
                     <button
                       class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-                      on:click={() => alert('send message')}>
+                      on:click={postMemo}>
                       <span class="inline-block w-4 mr-2">
                         <Icons.Send />
                       </span>
@@ -297,17 +307,9 @@
                     <div
                       class="w-8 m-2 cursor-pointer flex-none"
                       on:click={() => clearAnnotation(index)}>
-                      <svg
-                        class="w-full p-1 fill-current text-gray-700"
-                        viewBox="-40 0 427 427.00131"
-                        xmlns="http://www.w3.org/2000/svg"><path
-                          d="m232.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0" />
-                        <path
-                          d="m114.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0" />
-                        <path
-                          d="m28.398438 127.121094v246.378906c0 14.5625 5.339843 28.238281 14.667968 38.050781 9.285156 9.839844 22.207032 15.425781 35.730469 15.449219h189.203125c13.527344-.023438 26.449219-5.609375 35.730469-15.449219 9.328125-9.8125 14.667969-23.488281 14.667969-38.050781v-246.378906c18.542968-4.921875 30.558593-22.835938 28.078124-41.863282-2.484374-19.023437-18.691406-33.253906-37.878906-33.257812h-51.199218v-12.5c.058593-10.511719-4.097657-20.605469-11.539063-28.03125-7.441406-7.421875-17.550781-11.5546875-28.0625-11.46875h-88.796875c-10.511719-.0859375-20.621094 4.046875-28.0625 11.46875-7.441406 7.425781-11.597656 17.519531-11.539062 28.03125v12.5h-51.199219c-19.1875.003906-35.394531 14.234375-37.878907 33.257812-2.480468 19.027344 9.535157 36.941407 28.078126 41.863282zm239.601562 279.878906h-189.203125c-17.097656 0-30.398437-14.6875-30.398437-33.5v-245.5h250v245.5c0 18.8125-13.300782 33.5-30.398438 33.5zm-158.601562-367.5c-.066407-5.207031 1.980468-10.21875 5.675781-13.894531 3.691406-3.675781 8.714843-5.695313 13.925781-5.605469h88.796875c5.210937-.089844 10.234375 1.929688 13.925781 5.605469 3.695313 3.671875 5.742188 8.6875 5.675782 13.894531v12.5h-128zm-71.199219 32.5h270.398437c9.941406 0 18 8.058594 18 18s-8.058594 18-18 18h-270.398437c-9.941407 0-18-8.058594-18-18s8.058593-18 18-18zm0 0" />
-                        <path
-                          d="m173.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0" /></svg>
+                      <div class="w-4">
+                        <Icons.Bin />
+                      </div>
                     </div>
                     <div class="w-full border-purple-500 border-l-4">
                       <blockquote class=" px-2">

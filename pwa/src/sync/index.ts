@@ -4,7 +4,7 @@ import type { Memo } from "../conversation"
 import type { Block } from "../writing"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
-import type { Contact, Identifier } from "../social"
+import type { Contact, Stranger, Identifier } from "../social"
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
@@ -211,35 +211,35 @@ export { loadMemos } from "./api"
 // export async function findContactByEmail(state: Authenticated): Call<Contact> {
 // }
 
-export async function postMemo(threadId: number | null, memos: Memo[], blocks: Block[]): Call<null> {
-  let contactEmailAddress = "TODO"
-  let response: { data: Contact } | { error: Failure };
-  // safe as there is no thread 0
-  if (threadId) {
-    response = await API.postMemo(threadId, memos.length + 1, blocks).then(
+export async function postMemo(contact: Contact | Stranger, blocks: Block[], position: number): Call<null> {
+  if ('thread' in contact) {
+    let threadId = contact.thread.id
+
+    await API.postMemo(threadId, position, blocks).then(
       function (response) {
         if ("error" in response) {
           return response;
         } else {
-          let { latest } = response.data;
-          let data = {
-            latest,
-            ack: latest.position,
-            identifier: {
-              // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
-              id: 99999999,
-              email_address: contactEmailAddress,
-              greeting: null,
-            },
-          };
-          return { data };
+          // let { latest } = response.data;
+          // let data = {
+          //   latest,
+          //   ack: latest.position,
+          //   identifier: {
+          //     // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
+          //     id: 99999999,
+          //     email_address: contactEmailAddress,
+          //     greeting: null,
+          //   },
+          // };
+          // return { data };
+          console.warn("We still need to update");
+          // window.location.reload
         }
       }
     );
   } else {
 
-    response = await API.startRelationship(contactEmailAddress, blocks);
+    // response = await API.startRelationship(contactEmailAddress, blocks);
     throw "TODO return"
   }
-  throw "foo"
 }

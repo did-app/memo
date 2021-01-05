@@ -297,7 +297,8 @@ pub fn route(
       assert Ok(thread_id) = int.parse(thread_id)
       try raw = acl.parse_json(request)
       try position = acl.required(raw, "position", acl.as_int)
-      assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
+      assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
+      // TODO We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)

@@ -18,7 +18,7 @@
     {/each}
     <a
       class="text-purple-800"
-      href="#{annotation.reference.memoPosition}"><small>{peers[annotation.reference.memoPosition].author}</small></a>
+      href="#{annotation.reference.memoPosition}"><small>{peers[annotation.reference.memoPosition - 1].author}</small></a>
   </blockquote>
   <div class="w-full">
     {#each annotation.blocks as block, index}

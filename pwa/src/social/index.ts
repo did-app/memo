@@ -13,15 +13,17 @@ export type Contact = {
   // A contact will always have a thread
   thread: Thread
 }
+export type Stranger = {
+  emailAddress: string
+}
 
 
-
-export function contactForEmailAddress(contacts: Contact[], emailAddress: string): Contact {
+export function contactForEmailAddress(contacts: Contact[], emailAddress: string): Contact | Stranger {
   let result = contacts.find(function (contact) { return contact.identifier.emailAddress === emailAddress })
   if (result) {
     return result
   } else {
-    throw "No contact found"
+    return { emailAddress }
   }
 }
 
