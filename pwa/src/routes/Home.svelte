@@ -5,10 +5,11 @@
   import { emailAddressToPath } from "../social";
   import type { State } from "../sync";
   import SpanComponent from "../components/Span.svelte";
+  // TODO export top level
+  import type { InstallPrompt } from "../sync/install";
 
   export let state: State;
   let contactEmailAddress = "";
-  console.log(state);
 
   function findContact() {
     router.redirect(emailAddressToPath(contactEmailAddress));
@@ -21,11 +22,26 @@
 {#if 'me' in state && state.me}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
     {#each state.flash as f}
-      <article
-        class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
-        <h2 class="font-bold">Sucess</h2>
-        <p>{f.contact.identifier.emailAddress}</p>
-      </article>
+      {#if f.type === 'acknowledged'}
+        <article
+          class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
+          <h2 class="font-bold">Sucess</h2>
+          <p>{f.contact.identifier.emailAddress}</p>
+        </article>
+      {:else if f.type === 'install_available'}
+        <article
+          class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
+          <h2 class="font-bold">Available to install</h2>
+          <button
+            on:click={f.prompt}
+            class="flex items-center bg-gray-200 text-gray-800 rounded px-2 ml-2">
+            <!-- <span class="w-5 mr-2 inline-block">
+                      <Icons.ReplyAll />
+                    </span> -->
+            <span class="py-1"> Install </span>
+          </button>
+        </article>
+      {/if}
     {/each}
     {#if state.me.greeting === null}
       <article

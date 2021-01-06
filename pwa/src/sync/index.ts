@@ -6,25 +6,13 @@ import type { Call, Failure } from "./client"
 import * as API from "./api"
 import type { Contact, Stranger, Identifier } from "../social"
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('/sw.js').then(function (registration) {
-      // Registration was successful
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, function (err) {
-      // registration failed :(
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
-let installPrompt = new Promise(function (resolve, reject) {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    console.log("installPrompt");
-    resolve(e);
-  });
-});
+import type { InstallPrompt } from "./install"
+import startInstall from "./install"
 
-export type Flash = { type: "acknowledged", contact: Contact }
+export type MemoAcknowledged = { type: "acknowledged", contact: Contact }
+export type InstallAvailable = { type: "install_available", prompt: InstallPrompt }
+export type Flash = MemoAcknowledged | InstallAvailable
+
 export type Loading = { loading: true, flash: Flash[] }
 export type Unauthenticated = { loading: false, flash: Flash[], me: undefined, error: Failure | undefined }
 export type Authenticated = { loading: false, flash: Flash[], me: Identifier, contacts: Contact[] }
@@ -33,8 +21,6 @@ export type State = Loading | Unauthenticated | Authenticated
 const initial: State = { loading: true, flash: [] }
 const store: Writable<State> = writable(initial);
 const { subscribe, set, update } = store
-
-
 
 const fragment = window.location.hash.substring(1);
 const params = new URLSearchParams(fragment);
@@ -69,7 +55,26 @@ async function start(): Promise<State> {
   }
   return { loading: false, flash: [], me, contacts: inboxResponse.data }
 }
-start().then(set)
+start().then(set).then(function () {
+  startInstall(window).then(function (installPrompt) {
+    update(function ({ flash, ...unchanged }) {
+      async function prompt() {
+        let result = await installPrompt()
+        console.log(result);
+        update(function ({ flash, ...unchanged }) {
+          flash = flash.filter(function (each) {
+            return each.type !== 'install_available'
+          })
+          return { flash, ...unchanged }
+        })
+        return result
+      }
+
+      flash = [{ type: "install_available", prompt }, ...flash]
+      return { flash, ...unchanged }
+    })
+  })
+})
 // TODO single function to handle auth response and fetch contacts
 // fetch contacts is separate so it can be updated periodically
 
@@ -107,7 +112,6 @@ export function updateContact(contact: Contact) {
 export { loadMemos } from "./api"
 // export async function loadContact(state: Unauthenticated | Authenticated, contactEmailAddress: string) {
 //   if (state.me) {
-//     console.log(state.contacts);
 //     let contactResponse = await API.fetchContact(contactEmailAddress);
 //     if ("error" in contactResponse) {
 //       throw "error";
@@ -246,13 +250,26 @@ export async function postMemo(contact: Contact | Stranger, blocks: Block[], pos
 }
 
 export async function acknowledge(contact: Contact, position: number): Call<null> {
-  update(function ({ flash, ...state }) {
-    flash = [{ type: 'acknowledged', contact }]
-    return { flash, ...state }
+  update(function (state) {
+    if ('contacts' in state) {
+      let { flash, contacts, ...unchanged } = state
+      contacts = contacts.map(function (each: Contact) {
+        if (each.thread.id === contact.thread.id) {
+          let acknowledged = Math.max(position, each.thread.acknowledged)
+          let thread = { ...each.thread, acknowledged }
+          return { ...each, thread }
+        } else {
+          return each
+        }
+      })
+      flash = [{ type: 'acknowledged', contact }]
+      return { flash, contacts, ...unchanged }
+    } else {
+      return state
+    }
   })
-  return { data: null }
-  // TODO this is a background thing we should switch back almost straight away.
-  // Working message in the top
-  // Tasks list in the state
+  let response = await API.acknowledge(contact.thread.id, position)
+  console.log(response);
 
+  return { data: null }
 }
