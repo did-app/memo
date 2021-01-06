@@ -24,12 +24,13 @@ let installPrompt = new Promise(function (resolve, reject) {
   });
 });
 
-export type Loading = { loading: true }
-export type Unauthenticated = { loading: false, me: undefined, error: Failure | undefined }
-export type Authenticated = { loading: false, me: Identifier, contacts: Contact[] }
+export type Flash = { type: "acknowledged", contact: Contact }
+export type Loading = { loading: true, flash: Flash[] }
+export type Unauthenticated = { loading: false, flash: Flash[], me: undefined, error: Failure | undefined }
+export type Authenticated = { loading: false, flash: Flash[], me: Identifier, contacts: Contact[] }
 export type State = Loading | Unauthenticated | Authenticated
 
-const initial: State = { loading: true }
+const initial: State = { loading: true, flash: [] }
 const store: Writable<State> = writable(initial);
 const { subscribe, set, update } = store
 
@@ -45,7 +46,7 @@ async function start(): Promise<State> {
     window.location.hash = "#";
     let authResponse = await API.authenticateByCode(code)
     if ("error" in authResponse) {
-      return { loading: false, me: undefined, error: authResponse.error }
+      return { loading: false, flash: [], me: undefined, error: authResponse.error }
     }
     me = authResponse.data
   } else {
@@ -53,20 +54,20 @@ async function start(): Promise<State> {
     if ('data' in authResponse) {
       let data = authResponse.data
       if (data === null) {
-        return { loading: false, me: undefined, error: undefined }
+        return { loading: false, flash: [], me: undefined, error: undefined }
       } else {
         me = data
       }
     } else {
-      return { loading: false, me: undefined, error: authResponse.error }
+      return { loading: false, flash: [], me: undefined, error: authResponse.error }
     }
   }
 
   let inboxResponse = await API.fetchContacts();
   if ("error" in inboxResponse) {
-    return { loading: false, me: undefined, error: inboxResponse.error }
+    return { loading: false, flash: [], me: undefined, error: inboxResponse.error }
   }
-  return { loading: false, me, contacts: inboxResponse.data }
+  return { loading: false, flash: [], me, contacts: inboxResponse.data }
 }
 start().then(set)
 // TODO single function to handle auth response and fetch contacts
@@ -86,14 +87,14 @@ export async function authenticateByPassword(emailAddress: string, password: str
   if ("error" in inboxResponse) {
     throw "TODO error";
   }
-  set({ loading: false, me, contacts: inboxResponse.data })
+  set({ loading: false, flash: [], me, contacts: inboxResponse.data })
   return authResponse
 }
 
 export function updateContact(contact: Contact) {
   update(function (state: State) {
     if ('me' in state && state.me) {
-      const index = state.contacts.findIndex(({ identifier: { email_address } }) => contact.identifier.email_address)
+      const index = state.contacts.findIndex(({ identifier: { emailAddress } }) => contact.identifier.emailAddress)
       const contacts = index === -1 ? state.contacts : [...state.contacts.slice(0, index), contact, ...state.contacts.slice(index + 1)]
 
       state.contacts = contacts
@@ -242,4 +243,16 @@ export async function postMemo(contact: Contact | Stranger, blocks: Block[], pos
     // response = await API.startRelationship(contactEmailAddress, blocks);
     throw "TODO return"
   }
+}
+
+export async function acknowledge(contact: Contact, position: number): Call<null> {
+  update(function ({ flash, ...state }) {
+    flash = [{ type: 'acknowledged', contact }]
+    return { flash, ...state }
+  })
+  return { data: null }
+  // TODO this is a background thing we should switch back almost straight away.
+  // Working message in the top
+  // Tasks list in the state
+
 }

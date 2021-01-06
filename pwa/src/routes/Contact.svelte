@@ -1,8 +1,10 @@
 <script lang="typescript">
+  import router from "page";
   import { onMount } from "svelte";
   import { autoResize } from "../svelte/textarea";
   import type { Reference, Memo } from "../conversation";
   import * as Conversation from "../conversation";
+  import type { Contact } from "../social";
   import * as Social from "../social";
   import type { State, Authenticated } from "../sync";
   import * as Sync from "../sync";
@@ -158,12 +160,12 @@
 
   function postMemo() {
     Sync.postMemo(contact, [...blocks, ...suggestedPrompts], nextPosition);
+    router.redirect("/");
   }
-  function acknowledge() {
-    // TODO this is a background thing we should switch back almost straight away.
-    // Working message in the top
-    // Tasks list in the state
-    throw "TODO acknowledge";
+
+  function acknowledge(contact: Contact) {
+    Sync.acknowledge(contact, nextPosition - 1);
+    router.redirect("/");
   }
 </script>
 
@@ -406,9 +408,9 @@
                     </span>
                     <span class="py-1">Pins</span>
                   </button>
-                  {#if Conversation.isOutstanding(contact.thread)}
+                  {#if 'thread' in contact && Conversation.isOutstanding(contact.thread)}
                     <button
-                      on:click={acknowledge}
+                      on:click={() => acknowledge(contact)}
                       class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
                       <span class="w-5 mr-2 inline-block">
                         <Icons.Check />

@@ -3,7 +3,6 @@
   import * as Conversation from "../conversation";
   import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
-  import * as Flash from "../state/flash";
   import type { State } from "../sync";
   import SpanComponent from "../components/Span.svelte";
 
@@ -21,11 +20,11 @@
 </svelte:head>
 {#if 'me' in state && state.me}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-    {#each Flash.pop() as message}
+    {#each state.flash as f}
       <article
         class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-green-700">
         <h2 class="font-bold">Sucess</h2>
-        <p>{message}</p>
+        <p>{f.contact.identifier.emailAddress}</p>
       </article>
     {/each}
     {#if state.me.greeting === null}
