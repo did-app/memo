@@ -27,7 +27,7 @@
 
 <Layout let:state>
   {#if route === 'contact'}
-    <Contact {emailAddress} {state} />
+    <Contact {emailAddress} stateAll={state} />
   {:else if route === 'profile'}
     <Profile {state} />
   {:else if route === 'home'}

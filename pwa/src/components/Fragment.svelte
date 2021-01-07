@@ -2,7 +2,7 @@
   import BlockComponent from "./Block.svelte";
   import type { Memo } from "../conversation";
   import type { Block } from "../writing";
-  import * as Icons from "../icons";
+  // import * as Icons from "../icons";
 
   export let blocks: Block[];
   export let active: Record<number, undefined | (() => void)> = {};

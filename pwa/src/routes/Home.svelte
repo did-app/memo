@@ -5,8 +5,6 @@
   import { emailAddressToPath } from "../social";
   import type { State } from "../sync";
   import SpanComponent from "../components/Span.svelte";
-  // TODO export top level
-  import type { InstallPrompt } from "../sync/install";
 
   export let state: State;
   let contactEmailAddress = "";

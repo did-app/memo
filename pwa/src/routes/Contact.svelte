@@ -4,9 +4,9 @@
   import { autoResize } from "../svelte/textarea";
   import type { Reference, Memo } from "../conversation";
   import * as Conversation from "../conversation";
-  import type { Contact } from "../social";
+  import type { Contact, Stranger } from "../social";
   import * as Social from "../social";
-  import type { State, Authenticated, Response, Call } from "../sync";
+  import type { State, Authenticated, Call } from "../sync";
   import * as Sync from "../sync";
   import type { Block, Annotation, Prompt } from "../writing";
   import * as Writing from "../writing";
@@ -18,7 +18,12 @@
   import SpanComponent from "../components/Span.svelte";
   import * as Icons from "../icons";
 
-  export let state: Authenticated;
+  export let stateAll: State;
+  if (stateAll.loading === true) {
+    throw "Shouldn't be loading";
+  }
+  let state: Authenticated = stateAll as Authenticated;
+
   export let emailAddress: string;
   // state = state as Authenticated;
 
@@ -79,22 +84,20 @@
   });
 
   let loading: Call<Memo[]>;
-  loading = (function (): Call<Memo[]> {
+  loading = (async function (): Call<Memo[]> {
     if ("id" in contact.thread) {
-      return Sync.loadMemos(contact.thread.id).then(function (response) {
-        if ("data" in response) {
-          let memos = response.data;
-          let references = Conversation.gatherPrompts(
-            memos,
-            state.me.emailAddress
-          );
-          annotations = references.map(function (reference) {
-            return { reference, raw: "" };
-          });
-        }
-
-        return response;
-      });
+      const response = await Sync.loadMemos(contact.thread.id);
+      if ("data" in response) {
+        let memos = response.data;
+        let references = Conversation.gatherPrompts(
+          memos,
+          state.me.emailAddress
+        );
+        annotations = references.map(function (reference) {
+          return { reference, raw: "" };
+        });
+      }
+      return response;
     } else {
       return Promise.resolve({ data: [] });
     }
@@ -176,9 +179,14 @@
     router.redirect("/");
   }
 
-  function acknowledge(contact: Contact) {
-    Sync.acknowledge(contact, Conversation.currentPosition(contact.thread));
-    router.redirect("/");
+  function acknowledge(user: Contact | Stranger) {
+    if ("id" in user.thread) {
+      let contact = user as Contact;
+      Sync.acknowledge(contact, Conversation.currentPosition(contact.thread));
+      router.redirect("/");
+    } else {
+      console.warn("can't acknowledge stranger");
+    }
   }
 </script>
 
@@ -398,7 +406,7 @@
                     </span>
                     <span class="py-1">Pins</span>
                   </button>
-                  {#if 'thread' in contact && Conversation.isOutstanding(contact.thread)}
+                  {#if 'thread' in contact && 'id' in contact.thread && Conversation.isOutstanding(contact.thread)}
                     <button
                       on:click={() => acknowledge(contact)}
                       class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
