@@ -6,7 +6,7 @@
   import * as Conversation from "../conversation";
   import type { Contact } from "../social";
   import * as Social from "../social";
-  import type { State, Authenticated } from "../sync";
+  import type { State, Authenticated, Response, Call } from "../sync";
   import * as Sync from "../sync";
   import type { Block, Annotation, Prompt } from "../writing";
   import * as Writing from "../writing";
@@ -18,9 +18,9 @@
   import SpanComponent from "../components/Span.svelte";
   import * as Icons from "../icons";
 
-  export let state: State;
+  export let state: Authenticated;
   export let emailAddress: string;
-  state = state as Authenticated;
+  // state = state as Authenticated;
 
   // TODO this needs to be a promise of old ones we load up
   let contact = Social.contactForEmailAddress(state.contacts, emailAddress);
@@ -48,9 +48,6 @@
       false
     );
   });
-
-  type SendStatus = "available" | "working" | "suceeded" | "failed";
-  let sendStatus: SendStatus = "available";
 
   // acknowledge not an option if no thread
   // let reply: boolean = threadId === undefined;
@@ -81,17 +78,27 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  let loading = Sync.loadMemos(contact.thread.id).then(function (response) {
-    if ("data" in response) {
-      let memos = response.data;
-      let references = Conversation.gatherPrompts(memos, state.me.emailAddress);
-      annotations = references.map(function (reference) {
-        return { reference, raw: "" };
-      });
-    }
+  let loading: Call<Memo[]>;
+  loading = (function (): Call<Memo[]> {
+    if ("id" in contact.thread) {
+      return Sync.loadMemos(contact.thread.id).then(function (response) {
+        if ("data" in response) {
+          let memos = response.data;
+          let references = Conversation.gatherPrompts(
+            memos,
+            state.me.emailAddress
+          );
+          annotations = references.map(function (reference) {
+            return { reference, raw: "" };
+          });
+        }
 
-    return response;
-  });
+        return response;
+      });
+    } else {
+      return Promise.resolve({ data: [] });
+    }
+  })();
 
   function mapAnnotation(draft: {
     reference: Reference;
@@ -142,29 +149,35 @@
     return content ? [...mappedAnnotations, ...content] : mappedAnnotations;
   })();
   let current: Memo;
-  $: nextPosition = contact.thread.latest.position + 1;
   $: current = {
     content: blocks,
     author: state.me.emailAddress,
     posted_at: new Date(),
-    position: nextPosition,
+    position: Conversation.currentPosition(contact.thread) + 1,
   };
   let suggestedPrompts: Prompt[] = [];
   $: suggestedPrompts = preview
     ? suggestedPrompts
-    : Conversation.makeSuggestions(blocks, nextPosition);
+    : Conversation.makeSuggestions(
+        blocks,
+        Conversation.currentPosition(contact.thread) + 1
+      );
   function clearPrompt(index: number) {
     suggestedPrompts.splice(index, 1);
     suggestedPrompts = suggestedPrompts;
   }
 
   function postMemo() {
-    Sync.postMemo(contact, [...blocks, ...suggestedPrompts], nextPosition);
+    Sync.postMemo(
+      contact,
+      [...blocks, ...suggestedPrompts],
+      Conversation.currentPosition(contact.thread) + 1
+    );
     router.redirect("/");
   }
 
   function acknowledge(contact: Contact) {
-    Sync.acknowledge(contact, nextPosition - 1);
+    Sync.acknowledge(contact, Conversation.currentPosition(contact.thread));
     router.redirect("/");
   }
 </script>
@@ -191,7 +204,7 @@
   <title>{emailAddress}</title>
 </svelte:head>
 
-{JSON.stringify(blocks)}
+<!-- {JSON.stringify(blocks)} -->
 {#if 'me' in state && state.me}
   {#await loading}
     LOADING
@@ -200,6 +213,9 @@
       <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
         <div class="">
           <div class="" bind:this={root}>
+            <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
+            {#each response.data.slice(contact.thread.acknowledged - 1) as memo} -->
+            <!-- TODO reduced shown -->
             {#each response.data as memo}
               <MemoComponent
                 {memo}
@@ -267,40 +283,14 @@
                     </svg>
                     Back
                   </button>
-                  {#if sendStatus === 'available'}
-                    <button
-                      class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-                      on:click={postMemo}>
-                      <span class="inline-block w-4 mr-2">
-                        <Icons.Send />
-                      </span>
-                      Send
-                    </button>
-                  {:else if sendStatus === 'working'}
-                    <button
-                      class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold">
-                      <span class="inline-block w-4 mr-2">
-                        <Icons.Send />
-                      </span>
-                      Sending
-                    </button>
-                  {:else if sendStatus === 'suceeded'}
-                    <button
-                      class="flex-grow-0 py-2 px-6 rounded-lg bg-green-500 focus:bg-green-700 hover:bg-green-700 text-white font-bold">
-                      <span class="inline-block w-4 mr-2">
-                        <Icons.Send />
-                      </span>
-                      Sent
-                    </button>
-                  {:else if sendStatus === 'failed'}
-                    <button
-                      class="flex-grow-0 py-2 px-6 rounded-lg bg-red-500 focus:bg-red-700 hover:bg-red-700 text-white font-bold">
-                      <span class="inline-block w-4 mr-2">
-                        <Icons.Send />
-                      </span>
-                      Failed to send message
-                    </button>
-                  {/if}
+                  <button
+                    class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
+                    on:click={postMemo}>
+                    <span class="inline-block w-4 mr-2">
+                      <Icons.Send />
+                    </span>
+                    Send
+                  </button>
                 </div>
               {:else}
                 <!-- TODO name previous inside composer -->

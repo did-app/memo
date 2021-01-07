@@ -49,7 +49,7 @@
     <div
       class="w-8 my-0 mx-2 p-1 cursor-pointer flex-none"
       on:mousedown={() => handleMouseDown(index)}>
-      <Icons.Attachment />
+      <!-- <Icons.Attachment /> -->
     </div>
 
     <BlockComponent {block} {index} {peers} />

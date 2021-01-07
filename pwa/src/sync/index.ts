@@ -9,6 +9,8 @@ import type { Contact, Stranger, Identifier } from "../social"
 import type { InstallPrompt } from "./install"
 import startInstall from "./install"
 
+export type { Response, Call } from "./client"
+
 export type MemoAcknowledged = { type: "acknowledged", contact: Contact }
 export type InstallAvailable = { type: "install_available", prompt: InstallPrompt }
 export type Flash = MemoAcknowledged | InstallAvailable
@@ -217,34 +219,24 @@ export { loadMemos } from "./api"
 // }
 
 export async function postMemo(contact: Contact | Stranger, blocks: Block[], position: number): Call<null> {
-  if ('thread' in contact) {
-    let threadId = contact.thread.id
+  let thread = contact.thread
+  if ('id' in thread) {
+    let threadId = thread.id
 
-    await API.postMemo(threadId, position, blocks).then(
-      function (response) {
-        if ("error" in response) {
-          return response;
-        } else {
-          // let { latest } = response.data;
-          // let data = {
-          //   latest,
-          //   ack: latest.position,
-          //   identifier: {
-          //     // TODO remove this dummy id, contacts have a different set of things i.e. you don't see there id
-          //     id: 99999999,
-          //     email_address: contactEmailAddress,
-          //     greeting: null,
-          //   },
-          // };
-          // return { data };
-          console.warn("We still need to update");
-          // window.location.reload
-        }
-      }
-    );
+    let response = await API.postMemo(threadId, position, blocks)
+    if ("error" in response) {
+      return response;
+    } else {
+      console.warn("We still need to update");
+      return { data: null }
+    }
   } else {
 
-    // response = await API.startRelationship(contactEmailAddress, blocks);
+    let response = await API.startRelationship(contact.identifier.emailAddress, blocks);
+    console.log(response);
+
+    console.warn("We still need to update");
+
     throw "TODO return"
   }
 }

@@ -14,7 +14,8 @@ export type Contact = {
   thread: Thread
 }
 export type Stranger = {
-  emailAddress: string
+  identifier: Identifier
+  thread: { latest: null, acknowledged: 0 }
 }
 
 
@@ -23,7 +24,7 @@ export function contactForEmailAddress(contacts: Contact[], emailAddress: string
   if (result) {
     return result
   } else {
-    return { emailAddress }
+    return { identifier: { emailAddress, greeting: null }, thread: { latest: null, acknowledged: 0 } }
   }
 }
 
