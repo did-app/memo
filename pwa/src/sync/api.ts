@@ -115,10 +115,11 @@ export async function fetchContacts(): Call<Contact[]> {
   return mapData(response, contactsFromDTO)
 }
 
-export function startRelationship(emailAddress: string, content: Block[]): Call<Contact> {
+export async function startRelationship(emailAddress: string, content: Block[]): Call<Contact> {
   const path = "/relationship/start"
   const params = { email_address: emailAddress, content }
-  return post(path, params)
+  let response: Response<ContactDTO> = await post(path, params)
+  return mapData(response, contactFromDTO)
 }
 
 export async function loadMemos(threadId: number): Call<Memo[]> {
@@ -127,10 +128,11 @@ export async function loadMemos(threadId: number): Call<Memo[]> {
   return mapData(response, (dto) => { return dto.map(memoFromDTO) })
 }
 
-export function postMemo(threadId: number, position: number, content: Block[]): Call<{ latest: MemoDTO }> {
+export async function postMemo(threadId: number, position: number, content: Block[]): Call<Memo> {
   const path = "/threads/" + threadId + "/post"
   const params = { position, content }
-  return post(path, params)
+  let response: Response<MemoDTO> = await post(path, params);
+  return mapData(response, memoFromDTO)
 }
 
 export function acknowledge(threadId: number, position: number): Call<{}> {

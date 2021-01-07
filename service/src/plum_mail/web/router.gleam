@@ -305,7 +305,7 @@ pub fn route(
       // // TODO a participation thing again
       try Some(latest) =
         thread.post_memo(thread_id, position, author_id, blocks)
-      let data = json.object([tuple("latest", latest_to_json(latest))])
+      let data = latest_to_json(latest)
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok

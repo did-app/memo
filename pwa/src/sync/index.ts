@@ -1,6 +1,6 @@
 import { writable } from "svelte/store"
 import type { Writable } from "svelte/store"
-import type { Memo } from "../conversation"
+import type { Memo, Thread } from "../conversation"
 import type { Block } from "../writing"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
@@ -15,12 +15,14 @@ export type MemoAcknowledged = { type: "acknowledged", contact: Contact }
 export type InstallAvailable = { type: "install_available", prompt: InstallPrompt }
 export type Flash = MemoAcknowledged | InstallAvailable
 
-export type Loading = { loading: true, flash: Flash[] }
-export type Unauthenticated = { loading: false, flash: Flash[], me: undefined, error: Failure | undefined }
-export type Authenticated = { loading: false, flash: Flash[], me: Identifier, contacts: Contact[] }
+export type Task = { message: "" }
+
+export type Loading = { loading: true, flash: Flash[], tasks: Task[], me: undefined, error: Failure | undefined }
+export type Unauthenticated = { loading: false, flash: Flash[], tasks: Task[], me: undefined, error: Failure | undefined }
+export type Authenticated = { loading: false, flash: Flash[], tasks: Task[], me: Identifier, contacts: Contact[], error: Failure | undefined }
 export type State = Loading | Unauthenticated | Authenticated
 
-const initial: State = { loading: true, flash: [] }
+const initial: State = { loading: true, flash: [], tasks: [], me: undefined, error: undefined }
 const store: Writable<State> = writable(initial);
 const { subscribe, set, update } = store
 
@@ -34,7 +36,7 @@ async function start(): Promise<State> {
     window.location.hash = "#";
     let authResponse = await API.authenticateByCode(code)
     if ("error" in authResponse) {
-      return { loading: false, flash: [], me: undefined, error: authResponse.error }
+      return { ...initial, loading: false, error: authResponse.error }
     }
     me = authResponse.data
   } else {
@@ -42,20 +44,20 @@ async function start(): Promise<State> {
     if ('data' in authResponse) {
       let data = authResponse.data
       if (data === null) {
-        return { loading: false, flash: [], me: undefined, error: undefined }
+        return { ...initial, loading: false }
       } else {
         me = data
       }
     } else {
-      return { loading: false, flash: [], me: undefined, error: authResponse.error }
+      return { ...initial, loading: false, error: authResponse.error }
     }
   }
 
   let inboxResponse = await API.fetchContacts();
   if ("error" in inboxResponse) {
-    return { loading: false, flash: [], me: undefined, error: inboxResponse.error }
+    return { ...initial, loading: false, error: inboxResponse.error }
   }
-  return { loading: false, flash: [], me, contacts: inboxResponse.data }
+  return { loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, error: undefined }
 }
 start().then(set).then(function () {
   startInstall(window).then(function (installPrompt) {
@@ -94,15 +96,15 @@ export async function authenticateByPassword(emailAddress: string, password: str
   if ("error" in inboxResponse) {
     throw "TODO error";
   }
-  set({ loading: false, flash: [], me, contacts: inboxResponse.data })
+  set({ loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, error: undefined })
   return authResponse
 }
 
 export function updateContact(contact: Contact) {
   update(function (state: State) {
     if ('me' in state && state.me) {
-      const index = state.contacts.findIndex(({ identifier: { emailAddress } }) => contact.identifier.emailAddress)
-      const contacts = index === -1 ? state.contacts : [...state.contacts.slice(0, index), contact, ...state.contacts.slice(index + 1)]
+      const index = state.contacts.findIndex(({ identifier: { emailAddress } }) => contact.identifier.emailAddress === emailAddress)
+      const contacts = index === -1 ? [...state.contacts, contact] : [...state.contacts.slice(0, index), contact, ...state.contacts.slice(index + 1)]
 
       state.contacts = contacts
     }
@@ -110,135 +112,33 @@ export function updateContact(contact: Contact) {
   })
 }
 
-// TODO save in cache
 export { loadMemos } from "./api"
-// export async function loadContact(state: Unauthenticated | Authenticated, contactEmailAddress: string) {
-//   if (state.me) {
-//     let contactResponse = await API.fetchContact(contactEmailAddress);
-//     if ("error" in contactResponse) {
-//       throw "error";
-//     }
-//     let { thread, identifier } = contactResponse.data;
-
-//     if (!identifier) {
-//       return {
-//         threadId: null,
-//         ack: 0,
-//         memos: [],
-//         contactEmailAddress,
-//       };
-//     }
-//     if (thread) {
-//       let threadId = thread.id;
-//       let memos = thread.memos.map(function ({
-//         inserted_at: iso8601,
-//         ...rest
-//       }) {
-//         let inserted_at = new Date(iso8601);
-//         return { inserted_at, ...rest };
-//       });
-//       return {
-//         threadId,
-//         ack: thread.ack,
-//         memos: memos,
-//         contactEmailAddress,
-//       };
-//     } else {
-//       let greeting = identifier.greeting;
-
-//       let memos = greeting
-//         ? [
-//           {
-//             content: greeting,
-//             author: contactEmailAddress,
-//             inserted_at: new Date(),
-//             position: 1,
-//           },
-//         ]
-//         : [];
-//       return {
-//         threadId: null,
-//         // It's not outstand to have not yet answered a greeting
-//         ack: 1,
-//         memos,
-//         contactEmailAddress,
-//       };
-//     }
-//   } else {
-//     // async function load(handle: string): Promise<Data | { error: Failure }> {
-//     //   let contactEmailAddress = handle;
-
-//     //   if ("error" in authResponse && authResponse.error.code === "forbidden") {
-//     //     // There is no 404 as will always try sending
-//     //     let profileResponse = await API.fetchProfile(contactEmailAddress);
-//     //     if ("error" in profileResponse) {
-//     //       throw "todo error";
-//     //     }
-//     //     let myEmailAddress = "";
-//     //     let greeting = profileResponse.data && profileResponse.data.greeting;
-//     //     let memos = greeting
-//     //       ? [
-//     //           {
-//     //             content: greeting,
-//     //             author: contactEmailAddress,
-//     //             inserted_at: new Date(),
-//     //             position: 1,
-//     //           },
-//     //         ]
-//     //       : [];
-//     //     return {
-//     //       threadId: null,
-//     //       ack: 0,
-//     //       memos,
-//     //       contactEmailAddress,
-//     //       myEmailAddress,
-//     //     };
-//     //   } else if ("error" in authResponse) {
-//     //     throw "error fetching self";
-//     //   } else {
-//     //     const myEmailAddress = authResponse.data.email_address;
-//     //     if (myEmailAddress === contactEmailAddress) {
-//     //       page.redirect("/profile");
-//     //       // throw after redirect results in unhandled promise logged in sentry
-//     //       return {
-//     //         error: {
-//     //           code: "forbidden",
-//     //           detail: "Cannot view contact page for self",
-//     //         },
-//     //       };
-//     //     } else {
-//     //       let contactResponse = await API.fetchContact(contactEmailAddress);
-//     //
-//     //     }
-//     //   }
-//     // }
-//   }
-// }
-
-// export async function findContactByEmail(state: Authenticated): Call<Contact> {
-// }
 
 export async function postMemo(contact: Contact | Stranger, blocks: Block[], position: number): Call<null> {
-  let thread = contact.thread
-  if ('id' in thread) {
-    let threadId = thread.id
+  let task: Call<Contact>
+  if ('id' in contact.thread) {
+    let thread: Thread = contact.thread;
+    task = API.postMemo(thread.id, position, blocks).then(function (response) {
+      if ('data' in response) {
+        let latest = response.data
+        thread = { ...thread, latest, acknowledged: latest.position }
+        return { data: { identifier: contact.identifier, thread } }
+      } else {
+        return response
+      }
+    })
+  } else {
+    task = API.startRelationship(contact.identifier.emailAddress, blocks);
 
-    let response = await API.postMemo(threadId, position, blocks)
-    if ("error" in response) {
-      return response;
-    } else {
-      console.warn("We still need to update");
-      return { data: null }
-    }
+  }
+  let response = await task
+
+  if ('data' in response) {
+    updateContact(response.data)
   } else {
 
-    let response = await API.startRelationship(contact.identifier.emailAddress, blocks);
-    console.log(response);
-
-    console.warn("We still need to update");
-
-    throw "TODO return"
   }
+  return { data: null }
 }
 
 export async function acknowledge(contact: Contact, position: number): Call<null> {
