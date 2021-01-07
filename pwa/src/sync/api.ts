@@ -35,8 +35,10 @@ export async function authenticateByCode(code: string): Call<Identifier> {
 
 export async function authenticateBySession(): Call<Identifier | null> {
   const path = "/authenticate/session"
-  let response: Response<IdentifierDTO> = await get(path)
-  return mapData(response, identifierFromDTO)
+  let response: Response<IdentifierDTO | null> = await get(path)
+  return mapData(response, function (data) {
+    return data && identifierFromDTO(data)
+  })
 }
 
 export async function authenticateByEmail(emailAddress: string) {

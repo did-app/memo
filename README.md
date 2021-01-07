@@ -2,18 +2,33 @@
 
 ### Local Development
 
+Change to the correct directory and run.
+This only needs to be done once but must be done before either of the following commands is run
+
 ```
-docker-compose run service bash
+docker-compose down --remove-orphans --volumes
+```
+
+You need to access two terminals to run locally.
+
+```
+docker-compose run -p 8000:8000 service bash
+    mix deps.get
+    diesel migration run
+    mix test
     iex -S mix
-        :plum_mail.identifier_from_email("peter@example.com")
-        :plum_mail.generate_link_token(123)
-
-docker-compose run -p 5000:5000 client bash
-    npm i
-    npm run start:dev
 ```
 
+```
+docker-compose run -p 8080:8080 -e SNOWPACK_PUBLIC_GLANCE_ORIGIN=https://glance.did.app pwa bash
+    npm i
+    npm start
+```
 
+Visit http://localhost:8080 and sign in.
+
+Login with email will not send emails when running locally.
+You can open the terminal where you are running the backend "service" and copy the link that would have been sent from there.
 
 ### Prepare Heroku app
 
