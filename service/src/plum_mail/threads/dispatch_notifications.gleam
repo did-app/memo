@@ -106,6 +106,10 @@ fn block_from_dynamic(raw) {
       let reference = RangeReference
       Ok(Annotation(reference, blocks))
     }
+    "prompt" -> {
+      let reference = RangeReference
+      Ok(Prompt(reference))
+    }
   }
 }
 
@@ -145,6 +149,7 @@ pub type Span {
 pub type Block {
   Paragraph(spans: List(Span))
   Annotation(reference: Reference, blocks: List(Block))
+  Prompt(reference: Reference)
 }
 
 fn dispatch_to_identifier(record, config) {
