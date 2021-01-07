@@ -7,6 +7,16 @@
   export let annotation: Annotation;
   export let index: number;
   export let peers: Memo[];
+
+  function referenceAuthor(peers: Memo[], annotation: Annotation) {
+    let memo = peers[annotation.reference.memoPosition - 1];
+    if (memo) {
+      memo.author;
+    } else {
+      throw "Should have crashed on referemce";
+    }
+    // Probably follow reference should return author
+  }
 </script>
 
 <div class="my-2 border-gray-600 w-full" data-block-index={index}>
@@ -18,7 +28,7 @@
     {/each}
     <a
       class="text-purple-800"
-      href="#{annotation.reference.memoPosition}"><small>{peers[annotation.reference.memoPosition - 1].author}</small></a>
+      href="#{annotation.reference.memoPosition}"><small>{referenceAuthor(peers, annotation)}</small></a>
   </blockquote>
   <div class="w-full">
     {#each annotation.blocks as block, index}

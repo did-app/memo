@@ -6,19 +6,20 @@ function arrayPopIndex<T>(items: T[], index: number): [T[], T, T[]] {
   const pre = items.slice(0, index);
   const post = items.slice(index + 1);
   const item = items[index];
+  if (!item) {
+    throw "popindex has invalid idex " + index.toString()
+  }
   return [pre, item, post]
 }
 
-function splitText(text: string, offset: number) {
+function splitText(text: string, offset: number): [string, string] {
   const pre = text.slice(0, offset);
   const post = text.slice(offset);
   return [pre, post]
 }
-function splitSpans(spans: Span[], j: number, offset: number) {
+
+function splitSpans(spans: Span[], j: number, offset: number): [Span[], Span[]] {
   const [pre, span, post] = arrayPopIndex(spans, j);
-  console.log(spans, j, "=========");
-
-
   let preSpan: Span, postSpan: Span;
   if (span.type === "text") {
     const [preText, postText] = splitText(span.text, offset)
@@ -34,10 +35,13 @@ function splitSpans(spans: Span[], j: number, offset: number) {
   }
   return [[...pre, preSpan], [postSpan, ...post]]
 }
-function splitBlocks(blocks: Block[], { path, offset }: Point) {
+function splitBlocks(blocks: Block[], { path, offset }: Point): [Block[], Block[]] {
   const [i, j, ...none] = path
   if (none.length !== 0) {
     throw "extractBlocks only works in paragraphs for now"
+  }
+  if (!i) {
+    throw "i should always exist in a path"
   }
 
   const [pre, block, post] = arrayPopIndex(blocks, i);
@@ -55,7 +59,7 @@ function splitBlocks(blocks: Block[], { path, offset }: Point) {
   return [[...pre, preBlock], [postBlock, ...post]]
 }
 
-export function extractBlocks(blocks: Block[], range: Range.Range) {
+export function extractBlocks(blocks: Block[], range: Range.Range): [Block[], Block[], Block[]] {
   const [start, end] = Range.edges(range);
   const [tempBlocks, postBlocks] = splitBlocks(blocks, end)
   const [preBlocks, slicedBlocks] = splitBlocks(tempBlocks, start)
@@ -63,8 +67,7 @@ export function extractBlocks(blocks: Block[], range: Range.Range) {
 }
 
 export function summary(blocks: Block[]): Span[] {
-  let first: Block = blocks[0]
-  // TODO non empty list types
+  let first = blocks[0]
   if (!first) {
     return []
   }

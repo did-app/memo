@@ -188,6 +188,15 @@
       console.warn("can't acknowledge stranger");
     }
   }
+  function referenceAuthor(peers: Memo[], reference: Reference) {
+    let memo = peers[reference.memoPosition - 1];
+    if (memo) {
+      memo.author;
+    } else {
+      throw "Should have crashed on referemce";
+    }
+    // Probably follow reference should return author
+  }
 </script>
 
 <style>
@@ -302,7 +311,7 @@
                 </div>
               {:else}
                 <!-- TODO name previous inside composer -->
-                {#each annotations as { reference }, index}
+                {#each annotations as { reference, raw }, index}
                   <div class="flex my-1">
                     <div
                       class="w-8 m-2 cursor-pointer flex-none"
@@ -323,12 +332,12 @@
                         </div>
                         <a
                           class="text-purple-800"
-                          href="#{reference.memoPosition}"><small>{response.data[reference.memoPosition - 1].author}</small></a>
+                          href="#{reference.memoPosition}"><small>{referenceAuthor(response.data, reference)}</small></a>
                       </blockquote>
                       <div class="px-2">
                         <textarea
                           class="comment w-full bg-white outline-none"
-                          bind:value={annotations[index].raw}
+                          bind:value={raw}
                           use:autoResize
                           rows="1"
                           autofocus

@@ -39,6 +39,9 @@ export function getReference(root: HTMLElement): Reference | null {
 
       if (Writing.isCollapsed(range)) {
         let blockIndex = anchor.path[0]
+        if (blockIndex === undefined) {
+          return null
+        }
         return { memoPosition: anchorPosition, blockIndex }
       } else {
         return { memoPosition: anchorPosition, range }

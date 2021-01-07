@@ -1,35 +1,33 @@
-import * as Path from './path';
+import type { Path } from "./path"
+import { equal as equalPath, compare as pathCompare } from './path';
 import type * as Range from './range';
 
 export type Point = {
-  path: Path.Path,
+  path: Path,
   offset: number
 }
 
-export function Point(path: Path.Path, offset: number): Point {
-  return {path, offset}
+export function Point(path: Path, offset: number): Point {
+  return { path, offset }
 }
 
 export function equal(point1: Point, point2: Point) {
-  return Path.equal(point1.path, point2.path) && point1.offset === point2.offset;
+  return equalPath(point1.path, point2.path) && point1.offset === point2.offset;
 }
 
-export function compare(point: Point, reference: Point) {
-  const min = Math.min(point.path.length, reference.path.length)
-  for (var i = 0; i < point.path.length; i++) {
-    if (point.path[i] < reference.path[i]) return {before: true}
-    if (point.path[i] > reference.path[i]) return {after: true}
+export function compare(point: Point, reference: Point): "same" | "before" | "after" {
+  let temp = pathCompare(point.path, reference.path)
+  if (temp == "same") {
+    if (point.offset < reference.offset) return "before"
+    if (point.offset > reference.offset) return "after"
+    return "same"
+  } else {
+    return temp
   }
-  if (point.path.length === reference.path.length) {
-    if (point.offset < reference.offset) return {before: true}
-    if (point.offset > reference.offset) return {after: true}
-    return {equal: true}
-  }
-  throw "Valid points can be in another"
 }
 
-export function nest(index: number, {path, offset}: Point) {
-  return {path: [index, ...path], offset}
+export function nest(index: number, { path, offset }: Point) {
+  return { path: [index, ...path], offset }
 }
 
 // export function unnest({path, offset}: Point) {
@@ -41,7 +39,7 @@ export function nest(index: number, {path, offset}: Point) {
 //   }
 // }
 //
-// function commonPathFromRange(range: Range.Range, acc = []): [Path.Path, Range.Range] {
+// function commonPathFromRange(range: Range.Range, acc = []): [Path, Range.Range] {
 //   let { anchor, focus } = range
 //   const [anchorIndex, ...anchorRemaining] = anchor.path;
 //   const [focusIndex, ...focusRemaining] = focus.path;

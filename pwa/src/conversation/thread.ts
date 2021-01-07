@@ -27,11 +27,17 @@ export function isOutstanding(thread: Thread): boolean {
   }
 }
 
-export function followReference(reference: Reference, memos: Memo[]) {
+export function followReference(reference: Reference, memos: Memo[]): Block[] {
   // position is indexed from 1
   let memo = memos[reference.memoPosition - 1]
+  if (!memo) {
+    throw "This reference has an invalid position " + JSON.stringify(reference)
+  }
   if ('blockIndex' in reference) {
     let element = memo.content[reference.blockIndex]
+    if (!element) {
+      throw "This reference has an invalid blockIndex " + JSON.stringify(reference)
+    }
     return [element]
   } else {
     return Writing.extractBlocks(memo.content, reference.range)[1]
@@ -44,7 +50,7 @@ export function makeSuggestions(blocks: Block[], memoPosition: number): Prompt[]
     if (block.type === "paragraph" && block.spans.length > 0) {
       // always ends with softbreak
       const lastSpan = block.spans[block.spans.length - 1];
-      if (lastSpan.type === "text" && lastSpan.text.endsWith("?")) {
+      if (lastSpan && lastSpan.type === "text" && lastSpan.text.endsWith("?")) {
         output.push({ type: "prompt", reference: { blockIndex, memoPosition } });
       }
     }

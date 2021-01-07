@@ -1,17 +1,18 @@
-import * as Point from "./point";
+import type { Point } from "./point"
+import { compare, equal } from "./point";
 
 export type Range = {
-  anchor: Point.Point,
-  focus: Point.Point
+  anchor: Point,
+  focus: Point
 }
 
-export function Range(anchor: Point.Point, focus: Point.Point): Range {
+export function Range(anchor: Point, focus: Point): Range {
   return { anchor, focus };
 }
 
 // Could return none if no range
-export function edges({ anchor, focus }: Range) {
-  if (Point.compare(anchor, focus).before) {
+export function edges({ anchor, focus }: Range): [Point, Point] {
+  if (compare(anchor, focus) === "before") {
     return [anchor, focus];
   } else {
     return [focus, anchor];
@@ -19,5 +20,5 @@ export function edges({ anchor, focus }: Range) {
 }
 
 export function isCollapsed({ anchor, focus }: Range) {
-  return Point.equal(anchor, focus);
+  return equal(anchor, focus);
 }
