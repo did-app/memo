@@ -32,7 +32,8 @@
   <title>Profile</title>
 </svelte:head>
 <div class="flex w-full mx-auto max-w-5">
-  <article class="flex-1 my-4 py-6 pr-12 bg-white rounded-lg shadow-md ">
+  <article
+    class="flex-1 my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md ">
     <!-- Impossible to put annotations in the middle of text Impossible to save
   question preferences
   <br />
@@ -57,7 +58,7 @@
   Still even in rich editor don't want attached to question -->
     <textarea />
 
-    <div class="mt-2 pl-12 flex items-center">
+    <div class="mt-2 pl-6 md:pl-12 flex items-center">
       <div class="flex flex-1" />
       <button
         class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
@@ -71,7 +72,7 @@
   </article>
   <div class="flex-shrink-0 max-w-sm ">
     <article
-      class="my-4 py-6 pr-12 bg-gray-800 text-white pl-12 rounded-lg shadow-md ">
+      class="my-4 py-6  pr-6 md:pr-12 bg-gray-800 text-white pl-6 md:pl-12 rounded-lg shadow-md ">
       <h1 class="text-2xl">Hi {me.emailAddress}</h1>
       <p>
         Set up your public greeting, that explains how people should get in

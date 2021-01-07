@@ -246,17 +246,17 @@
             {/each}
           </div>
           <article
-            class="my-4 py-6 pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
+            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
             style="max-height: 60vh;">
             {#if reply}
               {#if preview}
-                <header class="ml-12 mb-6 flex text-gray-600">
+                <header class="ml-6 md:ml-12 mb-6 flex text-gray-600">
                   <span class="font-bold">{state.me.emailAddress}</span>
                   <span class="ml-auto">{new Date().toLocaleDateString()}</span>
                 </header>
                 <Fragment {blocks} peers={response.data} />
                 {#if suggestedPrompts.length !== 0}
-                  <h3 class="ml-12 font-bold mt-4">
+                  <h3 class="ml-6 md:ml-12 font-bold mt-4">
                     Ask the following as highlighted questions.
                   </h3>
                 {/if}
@@ -280,33 +280,26 @@
                   </div>
                 {/each}
 
-                <div class="mt-2 pl-12 flex items-center">
+                <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />
                   <button
-                    class="flex-grow-0 py-2 px-6 rounded-lg bg-gray-500 focus:bg-gray-700 hover:bg-gray-700 text-white font-bold"
-                    type="submit"
                     on:click={() => {
                       preview = false;
-                    }}>
-                    <svg
-                      class="fill-current inline w-4 mr-2"
-                      xmlns="http://www.w3.org/2000/svg"
-                      enable-background="new 0 0 24 24"
-                      viewBox="0 0 24 24">
-                      <path
-                        d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-                      <path
-                        d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-                    </svg>
-                    Back
+                    }}
+                    class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+                    <span class="w-5 mr-2 inline-block">
+                      <Icons.ReplyAll />
+                    </span>
+                    <span class="py-1">Back</span>
                   </button>
+
                   <button
-                    class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-                    on:click={postMemo}>
-                    <span class="inline-block w-4 mr-2">
+                    on:click={postMemo}
+                    class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
+                    <span class="w-5 mr-2 inline-block">
                       <Icons.Send />
                     </span>
-                    Send
+                    <span class="py-1"> Send </span>
                   </button>
                 </div>
               {:else}
@@ -347,12 +340,12 @@
                   </div>
                 {/each}
                 <textarea
-                  class="message w-full bg-white outline-none pl-12"
+                  class="message w-full bg-white outline-none pl-6 md:pl-12"
                   use:autoResize
                   bind:value={draft}
                   placeholder="Your message ..." />
-                <div class="mt-2 pl-12 flex items-center">
-                  <div class="flex flex-1">
+                <div class="mt-2 pl-6 md:pl-12 flex items-center">
+                  <div class="flex flex-1 min-w-0">
                     <span class="font-bold text-gray-700 mr-1">From:</span>
                     <input
                       class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700"
@@ -363,29 +356,21 @@
                       required />
                   </div>
                   <button
-                    class="flex-grow-0 py-2 px-6 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-                    type="submit"
                     on:click={() => {
                       preview = true;
-                    }}>
-                    <svg
-                      class="fill-current inline w-4 mr-2"
-                      xmlns="http://www.w3.org/2000/svg"
-                      enable-background="new 0 0 24 24"
-                      viewBox="0 0 24 24">
-                      <path
-                        d="m8.75 17.612v4.638c0 .324.208.611.516.713.077.025.156.037.234.037.234 0 .46-.11.604-.306l2.713-3.692z" />
-                      <path
-                        d="m23.685.139c-.23-.163-.532-.185-.782-.054l-22.5 11.75c-.266.139-.423.423-.401.722.023.3.222.556.505.653l6.255 2.138 13.321-11.39-10.308 12.419 10.483 3.583c.078.026.16.04.242.04.136 0 .271-.037.39-.109.19-.116.319-.311.352-.53l2.75-18.5c.041-.28-.077-.558-.307-.722z" />
-                    </svg>
-                    Preview
+                    }}
+                    class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
+                    <span class="w-5 mr-2 inline-block">
+                      <Icons.Send />
+                    </span>
+                    <span class="py-1"> Preview </span>
                   </button>
                 </div>
               {/if}
             {:else}
               {#if userFocus}
                 <div
-                  class="truncate ml-12 border-gray-600 border-l-4 px-2 text-gray-600">
+                  class="truncate ml-6 md:ml-12 border-gray-600 border-l-4 px-2 text-gray-600">
                   <!-- {#each Writing.summary(Conversation.followReference(userFocus, response.data)) as span, index}
                     <SpanComponent {span} {index} unfurled={false} />
                   {/each} -->
@@ -397,7 +382,7 @@
                   {/each}
                 </div>
               {/if}
-              <nav class="flex pl-12">
+              <nav class="flex pl-6 md:pl-12">
                 {#if userFocus}
                   <button
                     on:click={quoteInReply}

@@ -45,18 +45,12 @@
 </script>
 
 {#each blocks as block, index}
-  <div class="flex">
-    <div
-      class="w-8 my-0 mx-2 p-1 cursor-pointer flex-none"
-      on:mousedown={() => handleMouseDown(index)}>
-      <!-- <Icons.Attachment /> -->
-    </div>
-
+  <div class="flex ml-6 md:ml-12">
     <BlockComponent {block} {index} {peers} />
   </div>
   <!-- </div> -->
   <!-- {#each annotations as { blocks, author, note }}
-    <blockquote class="my-1 ml-12 border-gray-600 border-l-4 opacity-50 px-2">
+    <blockquote class="my-1 ml-6 md:ml-12 border-gray-600 border-l-4 opacity-50 px-2">
       {#each blocks as span, index}
         <Block {span} {index} />
       {/each}
