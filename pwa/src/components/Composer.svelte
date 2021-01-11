@@ -1,9 +1,15 @@
 <script lang="typescript">
+  import { tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
-  import type { Block } from "../writing";
+  import type { Block, InputEvent } from "../writing";
   import * as Writing from "../writing";
   export let previous: Memo[];
-  export let blocks: Block[] = [];
+  export let document: { blocks: Block[] } = {
+    blocks: [
+      { type: "paragraph", spans: [{ type: "text", text: "hello" }] },
+      { type: "paragraph", spans: [{ type: "text", text: "hello" }] },
+    ],
+  };
 
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
@@ -12,21 +18,29 @@
   type Range = { anchor: Point; focus: Point };
   type Highlight = { range: Range };
 
+  let composer: HTMLElement;
   let lastSelection: Range;
   // range + memoPosition
   export function addAnnotation(reference: Range) {}
 
-  function handleInput(event: any) {
-    let domRanges = event.getTargetRanges();
-    let domRange: StaticRange = domRanges[0];
+  function handleInput(event: InputEvent) {
+    const range = Writing.rangeFromDom(event.getTargetRanges()[0]);
+    const [blocks, cursor] = Writing.handleInput(document.blocks, range, event);
 
-    let inputType: string = event.inputType;
-    let data: string | null = event.data;
-    let dataTransfer: DataTransfer | null = event.dataTransfer;
+    document.blocks = blocks;
+    tick().then(function () {
+      let paragraph = Writing.nodeFromPath(composer, cursor.path);
+      console.log(paragraph);
+      // This is why slate has it's weak Map
 
-    const range = Writing.rangeFromDom(domRange);
-
-    Writing.handleInput(blocks, range, { inputType, data, dataTransfer });
+      let selection = window.getSelection();
+      const domRange = selection?.getRangeAt(0);
+      if (selection && domRange) {
+        domRange.setStart(span.childNodes[0] as Node, cursor.offset);
+        domRange.setEnd(span.childNodes[0] as Node, cursor.offset);
+        selection.addRange(domRange);
+      }
+    });
   }
 
   function handleDragStart() {}
@@ -34,11 +48,12 @@
 
 Composer
 <div
+  bind:this={composer}
   class="px-2 outline-none bg-green-200"
   contenteditable
   data-memo-position="0"
   on:beforeinput|preventDefault={handleInput}>
-  {#each blocks as block, index}
+  {#each document.blocks as block, index}
     <div class="flex ">
       <div
         on:click={console.log}
