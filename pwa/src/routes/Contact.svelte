@@ -90,6 +90,7 @@
           memos,
           state.me.emailAddress
         );
+
         references.map(function (reference) {
           composer.addAnnotation(reference);
         });
@@ -100,7 +101,6 @@
     }
   })();
 
-  // DOESNT WORK ON ACTIVE message
   function quoteInReply() {
     if (focusSnapshot === null) {
       console.warn("Shouldn't be quoting without focus");
@@ -173,7 +173,7 @@
           <article
             class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
             style="max-height: 60vh;">
-            {#if reply}
+            <div class:hidden={!reply}>
               <Composer
                 let:content
                 let:back
@@ -202,7 +202,8 @@
                   </button>
                 </div>
               </Composer>
-            {:else}
+            </div>
+            {#if !reply}
               {#if userFocus}
                 <div
                   class="truncate ml-6 md:ml-12 border-gray-600 border-l-4 px-2 text-gray-600">
