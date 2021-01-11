@@ -5,7 +5,6 @@
   // import * as Icons from "../icons";
 
   export let blocks: Block[];
-  export let active: Record<number, undefined | (() => void)> = {};
   export let peers: Memo[];
 
   // function annotationsForNote(notes: Note[], index: number) {
@@ -36,12 +35,6 @@
   // }
   // let annotations: { reference: Reference; raw: string }[];
   // $: annotations = annotationsForNote(notes, index);
-  function handleMouseDown(index: number) {
-    let targetAction = active[index];
-    if (targetAction) {
-      targetAction();
-    }
-  }
 </script>
 
 {#each blocks as block, index}

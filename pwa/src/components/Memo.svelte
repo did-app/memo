@@ -6,7 +6,6 @@
 
   export let open: boolean;
   export let memo: Memo;
-  export let active: Record<number, undefined | (() => void)> = {};
   // This used to be called thread but we just pass the list of memos.
   // This could be called previous but lookup might work both ways when collecting all answers.
   export let peers: Memo[];
@@ -24,7 +23,7 @@
       <span class="truncate">{memo.author}</span>
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
-    <Fragment blocks={memo.content} {active} {peers} />
+    <Fragment blocks={memo.content} {peers} />
   </article>
 {:else}
   <article

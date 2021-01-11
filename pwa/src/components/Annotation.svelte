@@ -11,7 +11,7 @@
   function referenceAuthor(peers: Memo[], annotation: Annotation) {
     let memo = peers[annotation.reference.memoPosition - 1];
     if (memo) {
-      memo.author;
+      return memo.author;
     } else {
       throw "Should have crashed on referemce";
     }

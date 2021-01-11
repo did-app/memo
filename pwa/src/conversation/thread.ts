@@ -64,7 +64,6 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
     if (memo.author === viewer) {
       memo.content.forEach(function (block: Block) {
         if (block.type === "annotation") {
-          console.log(block);
 
           output = output.filter(function (reference: Reference) {
             return !equal(reference, block.reference)
@@ -79,7 +78,6 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
         }
       })
     }
-    console.log(output);
   })
 
   return output
