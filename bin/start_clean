@@ -1,0 +1,11 @@
+#! /bin/bash
+
+set -eux
+
+cd "${0%/*}"
+cd ".."
+
+./bin/compose down --remove-orphans
+docker system prune -f
+./bin/compose build
+./bin/compose up -d $@

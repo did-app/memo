@@ -1,0 +1,9 @@
+#! /bin/bash
+
+set -eux
+
+# Always work from development dir
+cd "${0%/*}"
+cd ".."
+
+docker-compose -f docker-compose.yml $@
