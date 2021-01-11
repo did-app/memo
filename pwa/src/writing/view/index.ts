@@ -1,5 +1,5 @@
-import type { Reference } from "../reference"
-import * as Writing from "../../writing"
+import type { Reference } from "../../conversation/reference"
+// import * as Writing from ".."
 
 function getSelection(): Selection {
   const domSelection = window.getSelection()
@@ -60,20 +60,18 @@ function leafElement(node: Node): HTMLElement {
   return temp
 }
 
-function pathFromNode(node: Node) {
+function pathFromElement(element: HTMLElement) {
   const path: number[] = []
 
-  let element = leafElement(node)
   while (element) {
 
-    const { spanIndex, blockIndex, memoPosition } = element.dataset
+    const { blockIndex, memoPosition } = element.dataset
 
-    if (spanIndex !== undefined) {
-      path.unshift(parseInt(spanIndex))
-    } else if (blockIndex !== undefined) {
+    // switch to root
+    if (blockIndex !== undefined) {
       path.unshift(parseInt(blockIndex))
     } else if (memoPosition !== undefined) {
-      return { memoPosition: parseInt(memoPosition), path }
+      return { path }
     }
 
     let parent = element.parentElement
@@ -83,4 +81,20 @@ function pathFromNode(node: Node) {
     element = parent
   }
 
+}
+
+
+function pointFromDom(node: Node, domOffset: number) {
+  const element = leafElement(node)
+  const path = pathFromElement(element)
+  const { spanOffset } = element.dataset
+  const offset = parseInt(spanOffset || "0") + domOffset
+  return { path, offset }
+}
+
+export function rangeFromDom(domRange: Range) {
+  const { startContainer, startOffset, endContainer, endOffset } = domRange;
+  const anchor = pointFromDom(startContainer, startOffset)
+  const focus = pointFromDom(endContainer, endOffset)
+  return { anchor, focus }
 }

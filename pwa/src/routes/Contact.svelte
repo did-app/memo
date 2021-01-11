@@ -57,14 +57,15 @@
 
   // acknowledge not an option if no thread
   // let reply: boolean = threadId === undefined;
-  let reply: boolean = false;
+  let reply: boolean = true;
 
   let root: HTMLElement;
 
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
   function handleSelectionChange() {
-    userFocus = Conversation.getReference(root);
+    // TODO pull apart
+    // userFocus = Conversation.getReference(root);
     if (userFocus) {
       reply = false;
     }
@@ -177,6 +178,7 @@
               <Composer
                 let:content
                 let:back
+                content={[]}
                 bind:this={composer}
                 emailAddress={state.me.emailAddress}
                 peers={response.data}

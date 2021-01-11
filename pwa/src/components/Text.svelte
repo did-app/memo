@@ -1,6 +1,6 @@
 <script lang="typescript">
   export let text: string;
-  export let index: number;
+  export let offset: number;
 </script>
 
-<span data-span-index={index}>{text}</span>
+<span class="whitespace-pre-wrap" data-span-offset={offset}>{text}</span>

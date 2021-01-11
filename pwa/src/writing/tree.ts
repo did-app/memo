@@ -66,6 +66,7 @@ export function extractBlocks(blocks: Block[], range: Range.Range): [Block[], Bl
   return [preBlocks, slicedBlocks, postBlocks]
 }
 
+// TODO same as pop spans
 export function summary(blocks: Block[]): Span[] {
   let first = blocks[0]
   if (!first) {
