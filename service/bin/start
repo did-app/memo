@@ -4,5 +4,17 @@ set -eu
 mix local.hex --force && mix local.rebar --force
 mix deps.get --force
 
-# diesel migration run
+attempts=20
+for i in `seq $attempts`; do
+    diesel migration run >/dev/null && break
+    echo "Attempt $i / $attempts - failed to create db for the Repo"
+    sleep 1
+done
+
+if [ $i -eq $attempts ]; then
+    echo "Could not connect to the database, exiting"
+    exit 2;
+fi
+
+mix test
 elixir --sname app -S mix run --no-halt
