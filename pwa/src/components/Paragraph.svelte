@@ -10,15 +10,15 @@
   $: unfurled = spans.length <= 1;
 
   function render(spans: Span[]) {
+    let offset = 0;
     const output: { span: Span; offset: number }[] = [];
     spans.reduce(function (offset, span) {
       output.push({ span, offset });
       return offset + span.text.length;
-    }, 0);
+    }, offset);
 
     if (output.length === 0) {
-      let span: Span = { type: "text", text: "\uFEFF" };
-      let offset = -1;
+      let span: Span = { type: "text", text: "" };
       output.push({ span, offset });
     }
     return output;

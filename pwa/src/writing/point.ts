@@ -1,6 +1,5 @@
 import type { Path } from "./path"
 import { equal as equalPath, compare as pathCompare } from './path';
-import type * as Range from './range';
 
 export type Point = {
   path: Path,
@@ -28,6 +27,16 @@ export function compare(point: Point, reference: Point): "same" | "before" | "af
 
 export function nest(index: number, { path, offset }: Point) {
   return { path: [index, ...path], offset }
+}
+
+export function unnest(point: Point): [number, Point] | null {
+  const { path, offset } = point
+  let [index, ...rest] = path
+  if (index !== undefined) {
+    return [index, { path: rest, offset }]
+  } else {
+    return null
+  }
 }
 
 

@@ -7,7 +7,7 @@
   export let document: { blocks: Block[] } = {
     blocks: [
       { type: "paragraph", spans: [{ type: "text", text: "hello" }] },
-      { type: "paragraph", spans: [{ type: "text", text: "hello" }] },
+      { type: "paragraph", spans: [{ type: "text", text: "bob" }] },
     ],
   };
 
