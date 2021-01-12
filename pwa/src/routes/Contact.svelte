@@ -196,7 +196,7 @@
               <Composer
                 previous={response.data}
                 bind:this={composer}
-                blocks={[{ type: 'paragraph', spans: [{ type: 'text', text: 'Yo' }] }]}
+                blocks={[{ type: 'paragraph', spans: [{ type: 'text', text: '' }] }]}
                 position={response.data.length + 1}>
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />

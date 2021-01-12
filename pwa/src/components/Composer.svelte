@@ -7,7 +7,6 @@
   export let blocks: Block[];
 
   export let position: number;
-  console.log(position);
 
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
@@ -20,7 +19,6 @@
   let lastSelection: Range;
   // range + memoPosition
   export function addAnnotation(reference: Reference) {
-    console.log(reference, "ADIT");
     blocks = [
       ...blocks,
       {
@@ -42,7 +40,6 @@
     }
     const [range, _memoPosition] = result;
     const [updated, cursor] = Writing.handleInput(blocks, range, event);
-    console.log(updated, "UUUUUUUUUUUU");
 
     blocks = updated;
     tick().then(function () {
@@ -61,7 +58,24 @@
     });
   }
 
-  function handleDragStart() {}
+  function handleDragStart(event: DragEvent, index: number) {
+    if (event.dataTransfer) {
+      event.dataTransfer.setData("memo/position", index.toString());
+    }
+  }
+  function handleDragOver() {
+    return false;
+  }
+  function handleDrop(event: DragEvent, finish: number) {
+    if (event.dataTransfer) {
+      let start = parseInt(event.dataTransfer.getData("memo/position"));
+      let removed = blocks.splice(start, 1);
+      // Don't need this because if going up
+      // finish = start < finish ? start : start - 1;
+      blocks.splice(finish, 0, ...removed);
+      blocks = blocks;
+    }
+  }
 </script>
 
 <div
@@ -71,10 +85,17 @@
   data-memo-position={position}
   on:beforeinput|preventDefault={handleInput}>
   {#each blocks as block, index}
-    <div class="flex ">
+    <div
+      class="flex "
+      draggable="true"
+      on:dragstart={(event) => {
+        handleDragStart(event, index);
+      }}
+      ondragover="return false"
+      on:drop={(event) => handleDrop(event, index)}>
+      <!-- text return false on dragover works, function call doesn't? -->
       <div
-        on:click={console.log}
-        class="w-5 pt-2 text-gray-300 hover:text-gray-800 cursor-pointer "
+        class="w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
         contenteditable="false">
         <!-- TODO get drag icon -->
         <Icons.Drag />

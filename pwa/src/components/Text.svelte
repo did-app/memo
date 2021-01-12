@@ -14,6 +14,19 @@
   }
 </script>
 
-<span
-  class="whitespace-pre-wrap"
-  data-span-offset={printOffset}>{printText}</span>
+<style>
+  .answer::after {
+    content: "Your answer";
+    color: #a6a6a6;
+  }
+</style>
+
+{#if text === ''}
+  <span
+    class="whitespace-pre-wrap answer"
+    data-span-offset={printOffset}>{printText}</span>
+{:else}
+  <span
+    class="whitespace-pre-wrap"
+    data-span-offset={printOffset}>{printText}</span>
+{/if}
