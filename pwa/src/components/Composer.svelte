@@ -108,6 +108,7 @@
       index={0}
       peers={previous} />
   {/each}
+  <slot {blocks} />
 </div>
 <!-- <hr />
 <pre>

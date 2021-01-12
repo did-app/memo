@@ -64,13 +64,13 @@
 
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
+  let currentPosition: number = 0;
+
   function handleSelectionChange() {
     let selection: Selection = (Writing as any).getSelection();
     let result = Writing.rangeFromDom(selection.getRangeAt(0));
-    // TODO fix with real maximum position
-    if (result && result[1] < 2) {
+    if (result && result[1] <= currentPosition) {
       const [range, memoPosition] = result;
-      console.log(memoPosition);
 
       if (Writing.isCollapsed(range)) {
         userFocus = {
@@ -103,6 +103,7 @@
       const response = await Sync.loadMemos(contact.thread.id);
       if ("data" in response) {
         let memos = response.data;
+        currentPosition = memos.length;
         let references = Conversation.gatherPrompts(
           memos,
           state.me.emailAddress
@@ -122,8 +123,6 @@
     if (focusSnapshot === null) {
       console.warn("Shouldn't be quoting without focus");
     } else {
-      console.log("Quioting", focusSnapshot);
-
       composer.addAnnotation(focusSnapshot);
     }
     reply = true;
@@ -197,7 +196,8 @@
                 previous={response.data}
                 bind:this={composer}
                 blocks={[{ type: 'paragraph', spans: [{ type: 'text', text: '' }] }]}
-                position={response.data.length + 1}>
+                position={response.data.length + 1}
+                let:blocks>
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />
                   <button
@@ -207,8 +207,8 @@
                     </span>
                     <span class="py-1">Back</span>
                   </button>
-
                   <button
+                    on:click={() => postMemo(blocks)}
                     class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Send />

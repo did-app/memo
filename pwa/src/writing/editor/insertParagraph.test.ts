@@ -77,7 +77,6 @@ const emptyAnnotations: Block[] = [
 test('end of empty comment lifts from annotation', function () {
   const range = R(P([0, 0], 0))
   const [updated, cursor] = insertParagraph(emptyAnnotations, range)
-  console.log(updated);
 
   expect(updated.length).to.eq(3)
   const annotation = updated[0] as Annotation
