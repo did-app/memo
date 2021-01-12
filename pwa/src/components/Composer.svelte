@@ -30,14 +30,15 @@
     document.blocks = blocks;
     tick().then(function () {
       let paragraph = Writing.nodeFromPath(composer, cursor.path);
-      console.log(paragraph);
+      let span = paragraph.childNodes[0] as HTMLElement;
+      let textNode = span.childNodes[0] as Node;
       // This is why slate has it's weak Map
 
       let selection = window.getSelection();
       const domRange = selection?.getRangeAt(0);
       if (selection && domRange) {
-        domRange.setStart(span.childNodes[0] as Node, cursor.offset);
-        domRange.setEnd(span.childNodes[0] as Node, cursor.offset);
+        domRange.setStart(textNode, cursor.offset);
+        domRange.setEnd(textNode, cursor.offset);
         selection.addRange(domRange);
       }
     });
@@ -46,7 +47,7 @@
   function handleDragStart() {}
 </script>
 
-Composer
+Composer!!!
 <div
   bind:this={composer}
   class="px-2 outline-none bg-green-200"

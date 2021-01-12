@@ -10,9 +10,12 @@ export function insertText(blocks: Block[], range: Range, text: string): [Block[
   let common = range_module.popCommon(range)
   if (common) {
     let [index, innerRange] = common
-    let child = blocks[index]
+    let [pre, child, post] = arrayPopIndex(blocks, index)
     if (child && 'blocks' in child) {
-      return insertText(child.blocks, innerRange, text)
+      const [updated, innerCursor] = insertText(child.blocks, innerRange, text)
+      child = { ...child, blocks: updated }
+      const cursor = point_module.nest(index, innerCursor)
+      return [[...pre, child, ...post], cursor]
     }
   }
   // blocks aren't necessarily paragraphs but because we have checked common when know splitting is the right thing to do.
@@ -20,10 +23,10 @@ export function insertText(blocks: Block[], range: Range, text: string): [Block[
 
   const [bumpedSpans, remainingBlocks] = popLine(postBlocks);
   blocks = appendSpans(preBlocks, { type: 'text', text: text }, bumpedSpans).concat(remainingBlocks)
-
-
+  const [start] = range_module.edges(range)
+  const cursor = { ...start, offset: start.offset + text.length }
   // Normalizing spans doesn't change length BUT pulling square brackets out to a link would
-  return [blocks, range.anchor]
+  return [blocks, cursor]
 }
 
 function normalizeSpans(spans: Span[]): Span[] {

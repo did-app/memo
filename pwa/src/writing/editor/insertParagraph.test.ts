@@ -3,7 +3,6 @@ import { expect } from "chai"
 import type { Block, Paragraph, Annotation } from "../elements"
 import type { Path } from "../path"
 import type { Point } from "../point"
-import { } from "jest";
 import { insertParagraph } from "./insertParagraph";
 
 const paragraphs: Block[] = [

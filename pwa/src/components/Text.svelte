@@ -5,7 +5,7 @@
   let printText: string;
   let printOffset: number;
 
-  if (text == "") {
+  $: if (text == "") {
     printText = "\uFEFF";
     printOffset = offset - 1;
   } else {
