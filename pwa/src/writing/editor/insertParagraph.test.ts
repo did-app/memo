@@ -5,7 +5,6 @@ import type { Path } from "../path"
 import type { Point } from "../point"
 import { } from "jest";
 import { insertParagraph } from "./insertParagraph";
-import { text } from "svelte/internal";
 
 const paragraphs: Block[] = [
   { type: "paragraph", spans: [{ type: "text", text: "abc" }] },
@@ -24,6 +23,7 @@ test('in middle of text node', function () {
   expect(first.spans).to.eql([{ type: 'text', text: "a" }])
   expect(second.spans).to.eql([{ type: 'text', text: "bc" }])
   expect(rest).to.eql(paragraphs.slice(1))
+  expect(cursor).to.eql(P([1], 0))
 })
 
 test('accross lines', function () {
@@ -33,12 +33,14 @@ test('accross lines', function () {
   const [first, second] = updated as [Paragraph, Paragraph];
   expect(first.spans).to.eql([{ type: 'text', text: "ab" }])
   expect(second.spans).to.eql([{ type: 'text', text: "d" }])
+  expect(cursor).to.eql(P([1], 0))
 })
 
 test('beginning of empty line is no op', function () {
   const range = R(P([1], 0))
   const [updated, cursor] = insertParagraph(paragraphs, range)
   expect(updated).to.eql(paragraphs)
+  expect(cursor).to.eql(P([1], 0))
 })
 
 const annotations: Block[] = [
@@ -54,6 +56,7 @@ test('end of comment stays in annotation', function () {
   expect(annotation.blocks[0]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "abc" }] })
   expect(annotation.blocks[1]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "" }] })
   expect(updated[1]).to.eq(annotations[1])
+  expect(cursor).to.eql(P([0, 1], 0))
 })
 
 test('beginning of comment leaves annotation', function () {
@@ -64,4 +67,5 @@ test('beginning of comment leaves annotation', function () {
   expect(annotation.blocks[0]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "" }] })
   expect(updated[1]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "abc" }] })
   expect(updated[2]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "d" }] })
+  expect(cursor).to.eql(P([1], 0))
 })

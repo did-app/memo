@@ -5,15 +5,21 @@ import type { Point } from "../point"
 import * as point_module from "../point"
 import { arrayPopIndex, appendSpans, extractBlocks, popLine } from "../tree"
 
-function insertAndLift(blocks: Block[], range: Range): [Block[], Block[]] {
+function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point] {
   let common = range_module.popCommon(range)
   if (common !== null) {
     let [index, innerRange] = common
     let [pre, child, post] = arrayPopIndex(blocks, index)
     if (child && 'blocks' in child) {
-      const [updated, lifted] = insertAndLift(child.blocks, innerRange)
+      const [updated, lifted, innerCursor] = insertAndLift(child.blocks, innerRange)
       child = { ...child, blocks: updated }
-      return [[...pre, child, ...lifted, ...post], []]
+      let cursor: Point
+      if (lifted.length === 0) {
+        cursor = point_module.nest(pre.length, innerCursor)
+      } else {
+        cursor = point_module.nest(pre.length + 1, innerCursor)
+      }
+      return [[...pre, child, ...lifted, ...post], [], cursor]
     }
   }
 
@@ -26,24 +32,23 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[]] {
   if (start.offset == 0) {
     // split will leave an empty one, which is fine
     // Will also exit list which is fine
-    return [preBlocks, [newBlock, ...remainingBlocks]]
+    return [preBlocks, [newBlock, ...remainingBlocks], { path: [], offset: 0 }]
   } else {
 
     blocks = [...preBlocks, newBlock, ...remainingBlocks]
     // throw "insert paragraph"
     // if start has offset zero move line to parent
-    return [blocks, []]
+    return [blocks, [], { path: [preBlocks.length], offset: 0 }]
   }
 
 }
 
 export function insertParagraph(blocks: Block[], range: Range): [Block[], Point] {
-  const [updated, lifted] = insertAndLift(blocks, range)
+  const [updated, lifted, cursor] = insertAndLift(blocks, range)
   if (lifted.length === 0) {
-    return [updated, "TODO" as any]
+    return [updated, cursor]
   } else {
-    // Last block always empty if nothing lifted
-    return [[...updated.slice(0, -1), ...lifted], "CUROSOR" as any]
+    return [[...updated.slice(0, -1), ...lifted], point_module.nest(updated.length - 1, cursor)]
   }
 }
 
