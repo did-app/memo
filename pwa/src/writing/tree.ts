@@ -1,19 +1,15 @@
 import type { Range } from "./range";
 import * as range_module from "./range"
 import type { Span, Block } from "./elements"
-// import type { Point } from "./point"
+import type { Point } from "./point"
 import * as point_module from "./point"
 
 
-export function arrayPopIndex<T>(items: T[], index: number): [T[], T, T[]] | null {
+export function arrayPopIndex<T>(items: T[], index: number): [T[], T | undefined, T[]] {
   const pre = items.slice(0, index);
   const post = items.slice(index + 1);
   const item = items[index];
-  if (item !== undefined) {
-    return [pre, item, post]
-  } else {
-    return null
-  }
+  return [pre, item, post]
 }
 const possible = RegExp("(https://[^\\s]+)\\s|([^\\.\\?]+\\?(\\s|$))\\s", "g")
 
@@ -33,7 +29,10 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
     } else {
       pre = [preSpan]
     }
-    buffer += joinSpan.text
+    if ('text' in joinSpan) {
+
+      buffer += joinSpan.text
+    }
     let post = []
     if ('text' in postSpan) {
       buffer += postSpan.text
@@ -141,7 +140,6 @@ function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
   const pre: Span[] = []
   // What do we do with an empty span? keep normalise might work.
   while (offset >= 0) {
-    console.log(spans);
 
     let span = spans[0]
     if (span === undefined) {
@@ -153,13 +151,18 @@ function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
     let length = spanLength(span)
     if (length >= offset) {
       // offset only changes if text exits, softbreak has length 0
-      let preText = span.text.slice(0, offset)
-      let postText = span.text.slice(offset)
+      if ('text' in span) {
 
-      return [
-        [...pre, { ...span, text: preText }],
-        [{ ...span, text: postText }, ...spans]
-      ]
+        let preText = span.text.slice(0, offset)
+        let postText = span.text.slice(offset)
+
+        return [
+          [...pre, { ...span, text: preText }],
+          [{ ...span, text: postText }, ...spans]
+        ]
+      } else {
+        throw "split other things"
+      }
     } else {
       pre.push(span)
       offset = offset - length
@@ -175,11 +178,12 @@ function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
   }
   const [index, inner] = unnested
 
-  const popped = arrayPopIndex(blocks, index);
-  if (!popped) {
+
+  const [pre, block, post] = arrayPopIndex(blocks, index);
+  if (!block) {
+
     throw "invalid point"
   }
-  const [pre, block, post] = popped
 
   if ('blocks' in block) {
     const [preChildren, postChildren] = splitBlocks(block.blocks, inner)
