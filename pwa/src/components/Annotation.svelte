@@ -20,7 +20,7 @@
 </script>
 
 <div class="my-2 border-gray-600 w-full" data-block-index={index}>
-  <blockquote class="border-l-4 px-2 text-gray-500">
+  <blockquote class="border-l-4 px-2 text-gray-500" contenteditable="false">
     {#each Conversation.followReference(annotation.reference, peers) as block, index}
       <div class="-mb-2">
         <BlockComponent {block} {index} {peers} />

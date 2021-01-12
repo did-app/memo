@@ -5,6 +5,7 @@
   import * as Writing from "../writing";
   export let previous: Memo[];
   export let blocks: Block[];
+
   export let position: number;
   console.log(position);
 
@@ -41,6 +42,7 @@
     }
     const [range, _memoPosition] = result;
     const [updated, cursor] = Writing.handleInput(blocks, range, event);
+    console.log(updated, "UUUUUUUUUUUU");
 
     blocks = updated;
     tick().then(function () {
@@ -64,9 +66,9 @@
 
 <div
   bind:this={composer}
-  class="px-2 outline-none bg-green-200"
+  class="px-2 outline-none"
   contenteditable
-  data-memo-position="0"
+  data-memo-position={position}
   on:beforeinput|preventDefault={handleInput}>
   {#each blocks as block, index}
     <div class="flex ">
@@ -75,7 +77,7 @@
         class="w-5 pt-2 text-gray-300 hover:text-gray-800 cursor-pointer "
         contenteditable="false">
         <!-- TODO get drag icon -->
-        <Icons.Pin />
+        <Icons.Drag />
       </div>
       <BlockComponent {block} {index} peers={previous} />
     </div>
@@ -86,8 +88,8 @@
       peers={previous} />
   {/each}
 </div>
-<hr />
+<!-- <hr />
 <pre>
 
   {JSON.stringify(blocks, null, 2)}
-</pre>
+</pre> -->

@@ -80,6 +80,7 @@ export function rangeFromDom(domRange: StaticRange): [ModelRange, number] | null
 }
 
 export function nodeFromPath(root: HTMLElement, path: number[]) {
+  console.log(root, path);
   return path.reduce(function (element: HTMLElement, idx) {
     // Mustn't find self otherwise wont decend down path [0, 0]
     const queue: HTMLElement[] = [];
@@ -104,6 +105,7 @@ export function nodeFromPath(root: HTMLElement, path: number[]) {
       }
       child = queue.shift();
     }
+
     throw "DIDN't find"
     // Search needs to be breadth first
     // return element.querySelector(`[data-sveditor-index="${idx}"]`)

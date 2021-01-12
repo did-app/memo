@@ -67,8 +67,10 @@
   function handleSelectionChange() {
     let selection: Selection = (Writing as any).getSelection();
     let result = Writing.rangeFromDom(selection.getRangeAt(0));
-    if (result) {
+    // TODO fix with real maximum position
+    if (result && result[1] < 2) {
       const [range, memoPosition] = result;
+      console.log(memoPosition);
 
       if (Writing.isCollapsed(range)) {
         userFocus = {
