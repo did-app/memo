@@ -58,7 +58,7 @@
 
   // acknowledge not an option if no thread
   // let reply: boolean = threadId === undefined;
-  let reply: boolean = true;
+  let reply: boolean = false;
 
   let root: HTMLElement;
 
@@ -191,7 +191,7 @@
           <article
             class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
             style="max-height: 60vh;">
-            <div class:hidden={false}>
+            <div class:hidden={!reply}>
               <Composer
                 previous={response.data}
                 bind:this={composer}
@@ -201,6 +201,9 @@
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />
                   <button
+                    on:click={() => {
+                      reply = false;
+                    }}
                     class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.ReplyAll />

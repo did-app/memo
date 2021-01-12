@@ -23,7 +23,7 @@
   <blockquote class="border-l-4 px-2 text-gray-500" contenteditable="false">
     {#each Conversation.followReference(annotation.reference, peers) as block, index}
       <div class="-mb-2">
-        <BlockComponent {block} {index} {peers} />
+        <BlockComponent {block} {index} {peers} placeholder={null} />
       </div>
     {/each}
     <a
@@ -32,7 +32,11 @@
   </blockquote>
   <div class="w-full">
     {#each annotation.blocks as block, index}
-      <BlockComponent {block} {index} {peers} />
+      <BlockComponent
+        {block}
+        {index}
+        {peers}
+        placeholder={index === 0 ? 'answer' : null} />
     {/each}
   </div>
   <hr class="mx-auto w-1/2 border-t-2" contenteditable="false" />

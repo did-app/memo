@@ -100,16 +100,21 @@
         <!-- TODO get drag icon -->
         <Icons.Drag />
       </div>
-      <BlockComponent {block} {index} peers={previous} />
+      <BlockComponent
+        {block}
+        {index}
+        peers={previous}
+        placeholder={index === 0 ? 'message' : null} />
     </div>
   {:else}
     <BlockComponent
       block={{ type: 'paragraph', spans: [] }}
       index={0}
-      peers={previous} />
+      peers={previous}
+      placeholder={'message'} />
   {/each}
-  <slot {blocks} />
 </div>
+<slot {blocks} />
 <!-- <hr />
 <pre>
 

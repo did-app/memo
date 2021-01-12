@@ -11,6 +11,10 @@
 
 {#each blocks as block, index}
   <div class="flex ml-6 md:ml-12" data-memo-position={position.toString()}>
-    <BlockComponent {block} {index} {peers} />
+    <BlockComponent
+      {block}
+      {index}
+      {peers}
+      placeholder={index === 0 ? 'message' : null} />
   </div>
 {/each}

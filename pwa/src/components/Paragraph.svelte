@@ -5,6 +5,7 @@
   export let spans: Span[];
   export let index: number;
   export let truncate: boolean;
+  export let placeholder: "answer" | "message" | null;
 
   let unfurled: boolean;
   $: unfurled = spans.length <= 1;
@@ -28,7 +29,11 @@
 <p class="my-1 min-w-0 w-full" data-block-index={index} class:truncate>
   <!-- TODO others will need to render empty paragraph i.e. annotation -->
   <!-- {JSON.stringify(render(spans))} -->
-  {#each render(spans) as { span, offset }}
-    <SpanComponent {span} {offset} {unfurled} />
+  {#each render(spans) as { span, offset }, index}
+    <SpanComponent
+      {span}
+      {offset}
+      {unfurled}
+      placeholder={index === 0 ? placeholder : null} />
   {/each}
 </p>

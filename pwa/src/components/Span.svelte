@@ -7,10 +7,11 @@
   export let span: Span;
   export let offset: number;
   export let unfurled: boolean;
+  export let placeholder: "answer" | "message" | null;
 </script>
 
 {#if span.type === 'text'}
-  <Text text={span.text} {offset} />
+  <Text text={span.text} {offset} {placeholder} />
 {:else if span.type === 'link'}
   <!-- TODO Need to wrap to get an offset -->
   {#if unfurled}

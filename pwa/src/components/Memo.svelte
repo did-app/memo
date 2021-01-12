@@ -33,7 +33,11 @@
       <span class="truncate">
         <span
           class="truncate pr-4">{#each Writing.summary(memo.content) as span, index}
-            <SpanComponent {span} {index} unfurled={false} />
+            <SpanComponent
+              {span}
+              offset={0}
+              unfurled={false}
+              placeholder={null} />
           {/each}</span>
       </span>
       <span class="ml-auto text-gray-600">{memo.author}</span>
