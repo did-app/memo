@@ -15,7 +15,13 @@
     const output: { span: Span; offset: number }[] = [];
     spans.reduce(function (offset, span) {
       output.push({ span, offset });
-      return offset + span.text.length;
+      if ("text" in span) {
+        return offset + span.text.length;
+      } else if ("url" in span) {
+        return offset + span.url.length;
+      } else {
+        return offset;
+      }
     }, offset);
 
     if (output.length === 0) {

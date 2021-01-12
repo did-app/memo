@@ -39,10 +39,37 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
     } else {
       post = [postSpan]
     }
-    let spans: Span[] = [{ type: 'text', text: buffer }]
+    // let spans: Span[] = [{ type: 'text', text: buffer }]
     let found = Array.from(buffer.matchAll(possible))
 
+    let current = 0
+    let output: Span[] = []
+    found.forEach(function (match) {
+      const [all, plain] = match
+      if (match.index == current) {
 
+      } else {
+        output.push({ type: 'text', text: buffer.slice(current, match.index) })
+      }
+      if (!plain) {
+        throw "We haven't sorted this link out yet"
+      }
+      output.push({ type: 'link', url: plain })
+      if (match.index === undefined) {
+        throw "Why do you get an undefined index"
+      }
+      if (all === undefined) {
+        throw "All should always b a thin"
+      }
+      current = match.index + all.length
+    })
+    if (current < buffer.length) {
+      output.push({ type: 'text', text: buffer.slice(current) })
+    }
+    console.log(...output);
+
+
+    let spans = output
     return [...unmodifiedBlocks, { ...lastBlock, spans }]
   } else {
     const innerBlocks = appendSpans(lastBlock.blocks, joinSpan, newSpans)

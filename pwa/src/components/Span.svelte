@@ -15,7 +15,9 @@
 {:else if span.type === 'link'}
   <!-- TODO Need to wrap to get an offset -->
   {#if unfurled}
-    <Glance href={span.url} text={span.title} />
+    <span contenteditable="false">
+      <Glance href={span.url} text={span.title} />
+    </span>
   {:else}
     <span class="border-b hover:border-purple-700 mx-1 whitespace-no-wrap">
       <Link url={span.url} title={span.title} {offset} />
