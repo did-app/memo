@@ -4,9 +4,9 @@
   import type { Block, InputEvent } from "../writing";
   import * as Writing from "../writing";
   export let previous: Memo[];
-  export let document: { blocks: Block[] } = {
-    blocks: [{ type: "paragraph", spans: [{ type: "text", text: "bob" }] }],
-  };
+  export let blocks: Block[];
+  export let position: number;
+  console.log(position);
 
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
@@ -18,15 +18,31 @@
   let composer: HTMLElement;
   let lastSelection: Range;
   // range + memoPosition
-  export function addAnnotation(reference: Range) {}
+  export function addAnnotation(reference: Reference) {
+    console.log(reference, "ADIT");
+    blocks = [
+      ...blocks,
+      {
+        type: "annotation",
+        reference,
+        blocks: [{ type: "paragraph", spans: [{ type: "text", text: "" }] }],
+      },
+    ];
+  }
 
   function handleInput(event: InputEvent) {
-    const [range, _memoPosition] = Writing.rangeFromDom(
-      event.getTargetRanges()[0]
-    );
-    const [blocks, cursor] = Writing.handleInput(document.blocks, range, event);
+    const domRange = event.getTargetRanges()[0];
+    if (domRange === undefined) {
+      throw "there should always be a dom range";
+    }
+    const result = Writing.rangeFromDom(domRange);
+    if (result === null) {
+      throw "There should always be a range";
+    }
+    const [range, _memoPosition] = result;
+    const [updated, cursor] = Writing.handleInput(blocks, range, event);
 
-    document.blocks = blocks;
+    blocks = updated;
     tick().then(function () {
       let paragraph = Writing.nodeFromPath(composer, cursor.path);
       let span = paragraph.childNodes[0] as HTMLElement;
@@ -52,7 +68,7 @@
   contenteditable
   data-memo-position="0"
   on:beforeinput|preventDefault={handleInput}>
-  {#each document.blocks as block, index}
+  {#each blocks as block, index}
     <div class="flex ">
       <div
         on:click={console.log}
@@ -73,5 +89,5 @@
 <hr />
 <pre>
 
-  {JSON.stringify(document.blocks, null, 2)}
+  {JSON.stringify(blocks, null, 2)}
 </pre>

@@ -6,49 +6,11 @@
 
   export let blocks: Block[];
   export let peers: Memo[];
-
-  // function annotationsForNote(notes: Note[], index: number) {
-  //   return notes
-  //     .map(function ({ blocks, author }, noteId) {
-  //       return blocks
-  //         .filter(function (block) {
-  //           return (
-  //             block.type === ANNOTATION &&
-  //             block.reference.note === index &&
-  //             "path" in block.reference
-  //           );
-  //         })
-  //         .map(function ({ reference, blocks }) {
-  //           return { reference, blocks, author, note: noteId };
-  //         });
-  //     })
-  //     .flat()
-  //     .reduce(function (state, { reference, ...data }) {
-  //       let [index, ...rest] = reference.path;
-  //       if (rest.length !== 0) {
-  //         throw "We haven't fixed this for deep blocks";
-  //       }
-  //       state[index] = [...(state[index] || []), data];
-  //       return state;
-  //     }, {});
-  //   // This group by needs to happen after flat
-  // }
-  // let annotations: { reference: Reference; raw: string }[];
-  // $: annotations = annotationsForNote(notes, index);
+  export let position: number;
 </script>
 
 {#each blocks as block, index}
-  <div class="flex ml-6 md:ml-12">
+  <div class="flex ml-6 md:ml-12" data-memo-position={position.toString()}>
     <BlockComponent {block} {index} {peers} />
   </div>
-  <!-- </div> -->
-  <!-- {#each annotations as { blocks, author, note }}
-    <blockquote class="my-1 ml-6 md:ml-12 border-gray-600 border-l-4 opacity-50 px-2">
-      {#each blocks as span, index}
-        <Block {span} {index} />
-      {/each}
-      <a class="text-purple-800" href="#{note}"><small>{author}</small></a>
-    </blockquote>
-  {/each} -->
-  <!-- </div> -->
 {/each}

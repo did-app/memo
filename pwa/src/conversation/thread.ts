@@ -72,10 +72,10 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
       })
     } else {
       memo.content.forEach(function (block: Block) {
-        if (block.type === "prompt") {
-
-          output.push(block.reference)
-        }
+        // if (block.type === "prompt") {
+        // TODO start with highlisht
+        //   output.push(block.reference)
+        // }
       })
     }
   })

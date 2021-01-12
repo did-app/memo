@@ -66,11 +66,22 @@
   let focusSnapshot: Reference | null = null;
   function handleSelectionChange() {
     let selection: Selection = (Writing as any).getSelection();
-    let userFocus = Writing.rangeFromDom(selection.getRangeAt(0));
-    if (userFocus) {
-      console.log(userFocus[0]);
+    let result = Writing.rangeFromDom(selection.getRangeAt(0));
+    if (result) {
+      const [range, memoPosition] = result;
 
-      // reply = false;
+      if (Writing.isCollapsed(range)) {
+        userFocus = {
+          memoPosition,
+          blockIndex: range.anchor.path[0] as number,
+        };
+      } else {
+        userFocus = { memoPosition, range };
+      }
+
+      reply = false;
+    } else {
+      userFocus = null;
     }
   }
   // This captures the focus for duration of a click
@@ -109,6 +120,8 @@
     if (focusSnapshot === null) {
       console.warn("Shouldn't be quoting without focus");
     } else {
+      console.log("Quioting", focusSnapshot);
+
       composer.addAnnotation(focusSnapshot);
     }
     reply = true;
@@ -177,15 +190,15 @@
           <article
             class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
             style="max-height: 60vh;">
-            <div class:hidden={!reply}>
+            <div class:hidden={false}>
               <Composer
                 previous={response.data}
                 bind:this={composer}
+                blocks={[{ type: 'paragraph', spans: [{ type: 'text', text: 'Yo' }] }]}
                 position={response.data.length + 1}>
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />
                   <button
-                    on:click={back}
                     class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.ReplyAll />
@@ -194,7 +207,6 @@
                   </button>
 
                   <button
-                    on:click={() => postMemo(content)}
                     class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Send />
@@ -277,16 +289,16 @@
                   <LinkComponent
                     url={pin.item.url}
                     title={pin.item.title}
-                    index={0} />
+                    offset={0} />
                 {:else if pin.item.type === 'annotation'}
                   <!-- TODO remove dummy index, simply make it optional -->
 
                   <span class="w-5 inline-block mr-2">
                     <Icons.Attachment />
                   </span>
-                  {#each Writing.summary(Conversation.followReference(pin.item.reference, response.data)) as span, index}
+                  <!-- {#each Writing.summary(Conversation.followReference(pin.item.reference, response.data)) as span, index}
                     <SpanComponent {span} {index} unfurled={false} />
-                  {/each}
+                  {/each} -->
                 {/if}
               </li>
             {:else}

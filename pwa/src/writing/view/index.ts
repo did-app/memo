@@ -61,7 +61,7 @@ function pointFromDom(node: Node, domOffset: number): [Point, number] | null {
   return [{ path, offset }, memoPosition]
 }
 
-export function rangeFromDom(domRange: Range): [ModelRange, number] | null {
+export function rangeFromDom(domRange: StaticRange): [ModelRange, number] | null {
   const { startContainer, startOffset, endContainer, endOffset } = domRange;
 
   const anchorResult = pointFromDom(startContainer, startOffset)

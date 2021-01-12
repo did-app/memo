@@ -1,10 +1,10 @@
 <script lang="typescript">
   import router from "page";
   import * as Conversation from "../conversation";
-  import * as Writing from "../writing";
+  // import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
   import type { State } from "../sync";
-  import SpanComponent from "../components/Span.svelte";
+  // import SpanComponent from "../components/Span.svelte";
 
   export let state: State;
   let contactEmailAddress = "";
@@ -67,9 +67,9 @@
               {thread.latest.posted_at.toLocaleDateString()}
               <br />
               <p class="truncate border rounded px-4">
-                {#each Writing.summary(thread.latest.content) as span, index}
+                <!-- {#each Writing.summary(thread.latest.content) as span, index}
                   <SpanComponent {span} {index} unfurled={false} />
-                {/each}
+                {/each} -->
               </p>
             {/if}
           </a>

@@ -9,6 +9,7 @@ export function findPinnable(memos: Memo[]): Pin[] {
       if (block.type === "annotation") {
         return [{ memoPosition, item: block }]
       } else if (block.type === "prompt") {
+        // Still exists in dummy messages
         return []
       } else {
 
