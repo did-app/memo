@@ -11,6 +11,7 @@
   import * as Writing from "../writing";
 
   import type Composer__SvelteComponent_ from "../components/Composer.svelte";
+
   import Composer from "../components/Composer.svelte";
   import MemoComponent from "../components/Memo.svelte";
   import BlockComponent from "../components/Block.svelte";
@@ -64,10 +65,12 @@
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
   function handleSelectionChange() {
-    // TODO pull apart
-    // userFocus = Conversation.getReference(root);
+    let selection: Selection = (Writing as any).getSelection();
+    let userFocus = Writing.rangeFromDom(selection.getRangeAt(0));
     if (userFocus) {
-      reply = false;
+      console.log(userFocus[0]);
+
+      // reply = false;
     }
   }
   // This captures the focus for duration of a click
@@ -159,7 +162,7 @@
             <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
             {#each response.data.slice(contact.thread.acknowledged - 1) as memo} -->
             <!-- TODO reduced shown -->
-            {#each response.data as memo}
+            {#each response.data as memo, index}
               <MemoComponent
                 {memo}
                 open={memo.position >= contact.thread.acknowledged || memo.position === target}
@@ -176,12 +179,8 @@
             style="max-height: 60vh;">
             <div class:hidden={!reply}>
               <Composer
-                let:content
-                let:back
-                content={[]}
+                previous={response.data}
                 bind:this={composer}
-                emailAddress={state.me.emailAddress}
-                peers={response.data}
                 position={response.data.length + 1}>
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />

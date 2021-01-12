@@ -35,5 +35,5 @@
       <BlockComponent {block} {index} {peers} />
     {/each}
   </div>
-  <hr class="mx-auto w-1/2 border-t-2" />
+  <hr class="mx-auto w-1/2 border-t-2" contenteditable="false" />
 </div>

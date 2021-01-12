@@ -1,76 +1,29 @@
 import type { Path } from "../path"
 import type { Point } from "../point"
 import type { Range as ModelRange } from "../range"
-import type { Reference } from "../../conversation/reference"
 
 
 export type InputEvent = {
-  getTargetRanges: () => [Range]
+  getTargetRanges: () => [StaticRange]
   inputType: string,
   data: string | null,
   dataTransfer: DataTransfer | null
 }
 
-// function getSelection(): Selection {
-//   const domSelection = window.getSelection()
-//   if (domSelection === null) {
-//     throw "Why would there be no selection"
-//   } else {
-//     return domSelection
-//   }
-// }
-
-// const domSelection = getSelection();
-
-// export function getSelected(root: HTMLElement) {
-//   const domRange = domSelection.getRangeAt(0)
-//   if (!domRange) {
-//     return undefined
-//   }
-
-//   const { startContainer, startOffset, endContainer, endOffset } = domRange;
-//   const startPath = root.contains(startContainer) ? pathFromNode(startContainer) : undefined;
-//   const endPath = root.contains(endContainer) ? pathFromNode(endContainer) : undefined;
-
-//   const anchor = startPath ? { ...startPath, offset: startOffset } : undefined
-//   const focus = endPath ? { ...endPath, offset: endOffset } : undefined
-//   return { anchor, focus }
-// }
-
-// export function getReference(root: HTMLElement): Reference | null {
-//   const selected = getSelected(root)
-
-//   if (selected && selected.anchor && selected.focus) {
-//     let { memoPosition: anchorPosition, ...anchor } = selected.anchor;
-//     let { memoPosition: focusPosition, ...focus } = selected.focus;
-
-//     if (anchorPosition === focusPosition) {
-//       let range = { anchor, focus }
-
-//       if (Writing.isCollapsed(range)) {
-//         let blockIndex = anchor.path[0]
-//         if (blockIndex === undefined) {
-//           return null
-//         }
-//         return { memoPosition: anchorPosition, blockIndex }
-//       } else {
-//         return { memoPosition: anchorPosition, range }
-//       }
-//     } else {
-//       return null
-//     }
-//   } else {
-//     return null
-//   }
-// }
-
-function leafElement(node: Node): HTMLElement {
-  // FIXME, is this bad
-  let temp: any = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement
-  return temp
+export function getSelection(): Selection {
+  const domSelection = window.getSelection()
+  if (domSelection === null) {
+    throw "Why would there be no selection"
+  } else {
+    return domSelection
+  }
 }
 
-function pathFromElement(element: HTMLElement): Path {
+function leafElement(node: Node): HTMLElement | null {
+  return node.nodeType === Node.ELEMENT_NODE ? node as HTMLElement : node.parentElement
+}
+
+function pathFromElement(element: HTMLElement): [Path, number] | null {
   const path: number[] = []
   while (element) {
     const { blockIndex, memoPosition } = element.dataset
@@ -79,7 +32,7 @@ function pathFromElement(element: HTMLElement): Path {
     if (blockIndex !== undefined) {
       path.unshift(parseInt(blockIndex))
     } else if (memoPosition !== undefined) {
-      return path
+      return [path, parseInt(memoPosition)]
     }
 
     let parent = element.parentElement
@@ -88,23 +41,42 @@ function pathFromElement(element: HTMLElement): Path {
     }
     element = parent
   }
-  throw "there should always be a parent element"
+  return null
 }
 
 
-function pointFromDom(node: Node, domOffset: number): Point {
+function pointFromDom(node: Node, domOffset: number): [Point, number] | null {
   const element = leafElement(node)
-  const path = pathFromElement(element)
+  if (element === null) {
+    return null
+  }
+
+  const result = pathFromElement(element)
+  if (result === null) {
+    return null
+  }
+  const [path, memoPosition] = result
   const { spanOffset } = element.dataset
   const offset = parseInt(spanOffset || "0") + domOffset
-  return { path, offset }
+  return [{ path, offset }, memoPosition]
 }
 
-export function rangeFromDom(domRange: Range): ModelRange {
+export function rangeFromDom(domRange: Range): [ModelRange, number] | null {
   const { startContainer, startOffset, endContainer, endOffset } = domRange;
-  const anchor = pointFromDom(startContainer, startOffset)
-  const focus = pointFromDom(endContainer, endOffset)
-  return { anchor, focus }
+
+  const anchorResult = pointFromDom(startContainer, startOffset)
+  const focusResult = pointFromDom(endContainer, endOffset)
+  if (anchorResult !== null && focusResult !== null) {
+    const [anchor, anchorPosition] = anchorResult
+    const [focus, focusPosition] = focusResult
+    if (anchorPosition === focusPosition) {
+      return [{ anchor, focus }, anchorPosition]
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
 }
 
 export function nodeFromPath(root: HTMLElement, path: number[]) {

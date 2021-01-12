@@ -5,10 +5,7 @@
   import * as Writing from "../writing";
   export let previous: Memo[];
   export let document: { blocks: Block[] } = {
-    blocks: [
-      { type: "paragraph", spans: [{ type: "text", text: "hello" }] },
-      { type: "paragraph", spans: [{ type: "text", text: "bob" }] },
-    ],
+    blocks: [{ type: "paragraph", spans: [{ type: "text", text: "bob" }] }],
   };
 
   import BlockComponent from "./Block.svelte";
@@ -24,7 +21,9 @@
   export function addAnnotation(reference: Range) {}
 
   function handleInput(event: InputEvent) {
-    const range = Writing.rangeFromDom(event.getTargetRanges()[0]);
+    const [range, _memoPosition] = Writing.rangeFromDom(
+      event.getTargetRanges()[0]
+    );
     const [blocks, cursor] = Writing.handleInput(document.blocks, range, event);
 
     document.blocks = blocks;
@@ -47,7 +46,6 @@
   function handleDragStart() {}
 </script>
 
-Composer!!!
 <div
   bind:this={composer}
   class="px-2 outline-none bg-green-200"
@@ -73,3 +71,7 @@ Composer!!!
   {/each}
 </div>
 <hr />
+<pre>
+
+  {JSON.stringify(document.blocks, null, 2)}
+</pre>

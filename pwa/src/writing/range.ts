@@ -19,14 +19,14 @@ export function isCollapsed({ anchor, focus }: Range): boolean {
   return point_module.compare(anchor, focus) === 'same';
 }
 
-function commonPath(range: Range, acc: number[] = []): [number[], Range] {
-  const result = popCommon(range)
-  if (result) {
-    return commonPath(result[1], [...acc, result[0]])
-  } else {
-    return [acc, range]
-  }
-}
+// function commonPath(range: Range, acc: number[] = []): [number[], Range] {
+//   const result = popCommon(range)
+//   if (result) {
+//     return commonPath(result[1], [...acc, result[0]])
+//   } else {
+//     return [acc, range]
+//   }
+// }
 
 export function popCommon(range: Range): [number, Range] | null {
   let { anchor, focus } = range

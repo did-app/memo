@@ -68,3 +68,22 @@ test('beginning of comment leaves annotation', function () {
   expect(updated[2]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "d" }] })
   expect(cursor).to.eql(P([1], 0))
 })
+
+const emptyAnnotations: Block[] = [
+  { type: 'annotation', reference: null as any, blocks: [{ type: "paragraph", spans: [{ type: "text", text: "" }] },] },
+  { type: "paragraph", spans: [{ type: "text", text: "d" }] },
+]
+
+test('end of empty comment lifts from annotation', function () {
+  const range = R(P([0, 0], 0))
+  const [updated, cursor] = insertParagraph(emptyAnnotations, range)
+  console.log(updated);
+
+  expect(updated.length).to.eq(3)
+  const annotation = updated[0] as Annotation
+  expect(annotation.blocks[0]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "" }] })
+  expect(updated[1]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "" }] })
+
+  expect(updated[2]).to.eq(emptyAnnotations[1])
+  expect(cursor).to.eql(P([1], 0))
+})

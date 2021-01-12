@@ -168,7 +168,7 @@ function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
       offset = offset - length
     }
   }
-  throw "should get here"
+  return [pre, spans]
 }
 
 function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {

@@ -6,6 +6,8 @@ import * as point_module from "../point"
 import { arrayPopIndex, appendSpans, extractBlocks, popLine } from "../tree"
 
 function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point] {
+  console.log(range, "------");
+
   let common = range_module.popCommon(range)
   if (common !== null) {
     let [index, innerRange] = common
