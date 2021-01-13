@@ -2,6 +2,10 @@ import type { Path } from "../path"
 import type { Point } from "../point"
 import type { Range as ModelRange } from "../range"
 
+export function isBeforeInputEventAvailable() {
+  return window.InputEvent && typeof (InputEvent.prototype as any).getTargetRanges === "function";
+}
+
 
 export type InputEvent = {
   getTargetRanges: () => [StaticRange]

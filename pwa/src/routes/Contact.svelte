@@ -259,7 +259,7 @@
                     <!-- <span class="w-5 mr-2 inline-block">
                       <Icons.ReplyAll />
                     </span> -->
-                    <span class="py-1">Cancel</span>
+                    <span class="py-1">Clear</span>
                   </button>
                   <button
                     on:click={quoteInReply}

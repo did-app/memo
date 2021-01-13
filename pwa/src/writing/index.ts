@@ -9,5 +9,5 @@ export { parse } from "./parser"
 export { toString } from "./serializer"
 
 export type { InputEvent } from "./view"
-export { rangeFromDom, nodeFromPath, getSelection } from "./view"
+export { rangeFromDom, nodeFromPath, getSelection, isBeforeInputEventAvailable } from "./view"
 export { handleInput } from "./editor"

@@ -3,16 +3,20 @@
   import type { Reference, Memo } from "../conversation";
   import type { Block, InputEvent } from "../writing";
   import * as Writing from "../writing";
-  export let previous: Memo[];
-  export let blocks: Block[];
-
-  export let position: number;
-
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
 
+  export let previous: Memo[];
+  export let blocks: Block[];
+  export let position: number;
+
   let composer: HTMLElement;
 
+  if (!Writing.isBeforeInputEventAvailable()) {
+    alert(
+      "beforeInput event not supported on this browser, sorry the editor will not work."
+    );
+  }
   export function addAnnotation(reference: Reference) {
     let lastBlock = blocks[blocks.length - 1];
     let before: Block[];
