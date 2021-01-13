@@ -23,8 +23,8 @@
 <div
   class="my-2 border rounded border-gray-200 w-full"
   data-block-index={index}>
-  <blockquote class="text-gray-500" contenteditable="false">
-    <div class="bg-gray-100 italic px-2 -mt-1 pt-1 pb-2 rounded-t border-t ">
+  <blockquote class="bg-gray-100 text-gray-500 pb-1" contenteditable="false">
+    <div class="italic px-2 -mt-1 pt-1 pb-1 rounded-t border-t ">
       {#each Conversation.followReference(annotation.reference, peers) as block, index}
         <div class="-mb-2">
           <BlockComponent {block} {index} {peers} placeholder={null} />

@@ -19,13 +19,25 @@
   let lastSelection: Range;
   // range + memoPosition
   export function addAnnotation(reference: Reference) {
+    let lastBlock = blocks[blocks.length - 1];
+    let before: Block[];
+    if (
+      lastBlock &&
+      "spans" in lastBlock &&
+      Writing.lineLength(lastBlock.spans) === 0
+    ) {
+      before = blocks.slice(0, -1);
+    } else {
+      before = blocks;
+    }
     blocks = [
-      ...blocks,
+      ...before,
       {
         type: "annotation",
         reference,
         blocks: [{ type: "paragraph", spans: [{ type: "text", text: "" }] }],
       },
+      { type: "paragraph", spans: [{ type: "text", text: "" }] },
     ];
   }
 
@@ -80,7 +92,7 @@
 
 <div
   bind:this={composer}
-  class="px-2 outline-none overflow-y-auto"
+  class="outline-none overflow-y-auto"
   style="max-height: 60vh;"
   contenteditable
   data-memo-position={position}
@@ -95,8 +107,9 @@
       ondragover="return false"
       on:drop={(event) => handleDrop(event, index)}>
       <!-- text return false on dragover works, function call doesn't? -->
+      <!-- -ml because padding on article is 2, probably should be dropped -->
       <div
-        class="w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+        class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
         contenteditable="false">
         <!-- TODO get drag icon -->
         <Icons.Drag />

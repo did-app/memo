@@ -27,7 +27,6 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point]
   const [start, end] = range_module.edges(range)
   let [preBlocks, _slice, postBlocks] = extractBlocks(blocks, range)
   preBlocks = comprehendLast(preBlocks)
-  console.log("comprehended", preBlocks);
 
   const [bumpedSpans, remainingBlocks] = popLine(postBlocks);
   // paragraph might be better called a line if in lists
