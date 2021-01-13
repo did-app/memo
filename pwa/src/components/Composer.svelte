@@ -42,6 +42,7 @@
 
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
+
     if (domRange === undefined) {
       alert("no target range");
       return;
@@ -70,10 +71,15 @@
     });
   }
 
+  let dragging = false;
   function handleDragStart(event: DragEvent, index: number) {
     if (event.dataTransfer) {
+      dragging = true;
       event.dataTransfer.setData("memo/position", index.toString());
     }
+  }
+  function handleDragEnd() {
+    dragging = false;
   }
   // function handleDragOver() {
   //   return false;
@@ -87,6 +93,15 @@
       // Don't need this because if going up
       // finish = start < finish ? start : start - 1;
       blocks.splice(finish, 0, ...removed);
+      blocks = blocks;
+    }
+  }
+  function handleDragDelete(event: DragEvent) {
+    if (event.dataTransfer) {
+      let start = parseInt(event.dataTransfer.getData("memo/position"));
+      // index is position -1
+      blocks.splice(start, 1);
+
       blocks = blocks;
     }
   }
@@ -106,6 +121,7 @@
       on:dragstart={(event) => {
         handleDragStart(event, index);
       }}
+      on:dragend={handleDragEnd}
       {ondragover}
       on:drop={(event) => handleDrop(event, index)}>
       <!-- text return false on dragover works, function call doesn't? -->
@@ -130,7 +146,21 @@
       placeholder={'message'} />
   {/each}
 </div>
-<slot {blocks} />
+{#if dragging}
+  <div class="mt-2 pl-6 md:pl-12 flex items-center">
+    <button
+      {ondragover}
+      on:drop={handleDragDelete}
+      class="flex items-center rounded px-2 inline-block mx-auto border-gray-500 border-2">
+      <span class="w-5 mr-2 inline-block">
+        <Icons.Bin />
+      </span>
+      <span class="py-1"> Bin </span>
+    </button>
+  </div>
+{:else}
+  <slot {blocks} />
+{/if}
 <!-- <hr />
 <pre>
 
