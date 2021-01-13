@@ -86,7 +86,7 @@ export function nodeFromPath(root: HTMLElement, path: number[]) {
     for (let i = 0; i < element.children.length; i++) {
       queue.push(element.children[i] as HTMLElement);
     }
-    let child: Element | undefined = queue.shift();
+    let child = queue.shift();
 
     while (child) {
       if ('dataset' in child) {

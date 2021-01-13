@@ -33,7 +33,8 @@ export async function post(path: string, params: object): Call<any> {
 
 // use any because not a public function
 async function doFetch(path: string, options: any): Call<any> {
-  const url = import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN + path;
+  let meta = import.meta as any
+  const url = meta.env.SNOWPACK_PUBLIC_API_ORIGIN + path;
   try {
     const response = await fetch(url, options);
     if (response.status === 200) {

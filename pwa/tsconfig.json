@@ -1,9 +1,17 @@
 {
+  "extends": "@tsconfig/svelte/tsconfig.json",
   "include": [
     "src",
     "types"
   ],
+  "exclude": [
+    "**/*.test.ts",
+  ],
   "compilerOptions": {
+    "types": [
+      "jest",
+      "svelte"
+    ],
     "module": "esnext",
     "target": "esnext",
     "moduleResolution": "node",

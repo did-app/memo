@@ -5,6 +5,8 @@
   import SignIn from "../components/SignIn.svelte";
   let state: State;
   $: state = $sync;
+
+  const API_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
 </script>
 
 <!-- $store.attribute does not get properly collapsed types with typescript -->
@@ -39,7 +41,7 @@
         <a
           target="_self"
           class="bg-gray-800 text-white ml-auto rounded px-2 py-1 ml-2"
-          href="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_out">Sign out</a>
+          href="{API_ORIGIN}/sign_out">Sign out</a>
       {/if}
     </span>
   </nav>

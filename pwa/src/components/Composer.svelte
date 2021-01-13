@@ -11,13 +11,8 @@
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
 
-  type Point = { path: number[]; offset: number };
-  type Range = { anchor: Point; focus: Point };
-  type Highlight = { range: Range };
-
   let composer: HTMLElement;
-  let lastSelection: Range;
-  // range + memoPosition
+
   export function addAnnotation(reference: Reference) {
     let lastBlock = blocks[blocks.length - 1];
     let before: Block[];
@@ -50,7 +45,7 @@
     if (result === null) {
       throw "There should always be a range";
     }
-    const [range, _memoPosition] = result;
+    const [range] = result;
     const [updated, cursor] = Writing.handleInput(blocks, range, event);
 
     blocks = updated;
@@ -75,9 +70,11 @@
       event.dataTransfer.setData("memo/position", index.toString());
     }
   }
-  function handleDragOver() {
-    return false;
-  }
+  // function handleDragOver() {
+  //   return false;
+  // }
+  const ondragover = "return false" as any;
+  // Seems to only work with this string
   function handleDrop(event: DragEvent, finish: number) {
     if (event.dataTransfer) {
       let start = parseInt(event.dataTransfer.getData("memo/position"));
@@ -104,7 +101,7 @@
       on:dragstart={(event) => {
         handleDragStart(event, index);
       }}
-      ondragover="return false"
+      {ondragover}
       on:drop={(event) => handleDrop(event, index)}>
       <!-- text return false on dragover works, function call doesn't? -->
       <!-- -ml because padding on article is 2, probably should be dropped -->

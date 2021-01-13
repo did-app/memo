@@ -7,7 +7,7 @@
   import * as Social from "../social";
   import type { State, Authenticated, Call } from "../sync";
   import * as Sync from "../sync";
-  import type { Block, Annotation, Prompt } from "../writing";
+  import type { Block } from "../writing";
   import * as Writing from "../writing";
 
   import type Composer__SvelteComponent_ from "../components/Composer.svelte";
@@ -18,7 +18,6 @@
   import LinkComponent from "../components/Link.svelte";
   import LoadingComponent from "../components/Loading.svelte";
 
-  import SpanComponent from "../components/Span.svelte";
   import * as Icons from "../icons";
 
   export let stateAll: State;
@@ -186,7 +185,7 @@
             <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
             {#each response.data.slice(contact.thread.acknowledged - 1) as memo} -->
             <!-- TODO reduced shown -->
-            {#each response.data as memo, index}
+            {#each response.data as memo}
               <MemoComponent
                 {memo}
                 open={memo.position >= contact.thread.acknowledged || memo.position === target}
@@ -241,7 +240,12 @@
                     ...response.data,
                     // current,
                   ]) as block, index}
-                    <BlockComponent {block} {index} peers={response.data} />
+                    <BlockComponent
+                      {index}
+                      {block}
+                      peers={response.data}
+                      truncate={false}
+                      placeholder={null} />
                   {/each}
                 </div>
               {/if}

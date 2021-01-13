@@ -32,7 +32,7 @@
     <header class="ml-6 md:ml-12 mb-2 flex  max-w-">
       <span class="truncate">
         <span
-          class="truncate pr-4">{#each Writing.summary(memo.content) as span, index}
+          class="truncate pr-4">{#each Writing.summary(memo.content) as span}
             <SpanComponent
               {span}
               offset={0}
