@@ -3,7 +3,7 @@ import type { Range } from "../range"
 import * as range_module from "../range"
 import type { Point } from "../point"
 import * as point_module from "../point"
-import { arrayPopIndex, appendSpans, extractBlocks, popLine } from "../tree"
+import { arrayPopIndex, appendSpans, extractBlocks, popLine, lineLength } from "../tree"
 
 function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point] {
   let common = range_module.popCommon(range)
@@ -12,6 +12,7 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point]
     let [pre, child, post] = arrayPopIndex(blocks, index)
     if (child && 'blocks' in child) {
       const [updated, lifted, innerCursor] = insertAndLift(child.blocks, innerRange)
+
       child = { ...child, blocks: updated }
       let cursor: Point
       if (lifted.length === 0) {
@@ -29,13 +30,27 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point]
   // paragraph might be better called a line if in lists
 
   const newBlock: Block = { type: 'paragraph', spans: bumpedSpans }
+  let afterBlocks: Block[];
+  // Merge empty lines after the linebreak
+  const firstRemaining = remainingBlocks[0]
+
+  if (firstRemaining && 'spans' in firstRemaining && lineLength(firstRemaining.spans) === 0 && lineLength(bumpedSpans) === 0) {
+    afterBlocks = [newBlock, ...remainingBlocks.slice(0, -1)]
+  } else {
+    afterBlocks = [newBlock, ...remainingBlocks]
+  }
+
   if (start.offset == 0) {
-    // split will leave an empty one, which is fine
     // Will also exit list which is fine
-    return [preBlocks, [newBlock, ...remainingBlocks], { path: [], offset: 0 }]
+    // Don't leve an empty line when exiting lists, annotations
+    if (preBlocks.length > 1) {
+      return [preBlocks.slice(0, -1), afterBlocks, { path: [], offset: 0 }]
+    } else {
+      return [preBlocks, afterBlocks, { path: [], offset: 0 }]
+    }
   } else {
 
-    blocks = [...preBlocks, newBlock, ...remainingBlocks]
+    blocks = [...preBlocks, ...afterBlocks]
     // throw "insert paragraph"
     // if start has offset zero move line to parent
     return [blocks, [], { path: [preBlocks.length], offset: 0 }]
@@ -45,10 +60,11 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point]
 
 export function insertParagraph(blocks: Block[], range: Range): [Block[], Point] {
   const [updated, lifted, cursor] = insertAndLift(blocks, range)
+
   if (lifted.length === 0) {
     return [updated, cursor]
   } else {
-    return [[...updated.slice(0, -1), ...lifted], point_module.nest(updated.length - 1, cursor)]
+    return [[...updated, ...lifted], point_module.nest(updated.length, cursor)]
   }
 }
 

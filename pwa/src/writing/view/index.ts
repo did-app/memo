@@ -57,7 +57,7 @@ function pointFromDom(node: Node, domOffset: number): [Point, number] | null {
   }
   const [path, memoPosition] = result
   const { spanOffset } = element.dataset
-  const offset = parseInt(spanOffset || "0") + domOffset
+  const offset = Math.max(parseInt(spanOffset || "0") + domOffset, 0)
   return [{ path, offset }, memoPosition]
 }
 

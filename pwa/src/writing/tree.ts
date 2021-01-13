@@ -221,12 +221,23 @@ function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
 
   }
 }
+// TODO fix this weird
 function spanLength(span: Span): number {
   if ('text' in span) {
     return span.text.length + 1
   } else {
     return 0
   }
+}
+
+export function lineLength(spans: Span[]): number {
+  return spans.reduce(function (acc: number, span: Span) {
+    if ('text' in span) {
+      return acc + span.text.length
+    } else {
+      return acc
+    }
+  }, 0)
 }
 
 export function popLine(blocks: Block[]): [Span[], Block[]] {
