@@ -6,9 +6,9 @@ export function isBeforeInputEventAvailable() {
   return window.InputEvent && typeof (InputEvent.prototype as any).getTargetRanges === "function";
 }
 
-
+// https://stackoverflow.com/questions/58892747/inputevent-gettargetranges-always-empty
 export type InputEvent = {
-  getTargetRanges: () => [StaticRange]
+  getTargetRanges: () => StaticRange[]
   inputType: string,
   data: string | null,
   dataTransfer: DataTransfer | null

@@ -44,6 +44,7 @@
     const domRange = event.getTargetRanges()[0];
     if (domRange === undefined) {
       alert("no target range");
+      return;
     }
     const result = Writing.rangeFromDom(domRange);
     if (result === null) {
