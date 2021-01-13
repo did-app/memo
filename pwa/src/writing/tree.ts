@@ -48,11 +48,11 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
   }
 }
 
-export function comprehendText(buffer: string): Span[] {
+export function comprehendText(buffer: string, matcher = possible): Span[] {
   if (buffer === "") {
     return [{ type: 'text', text: "" }]
   }
-  let found = Array.from(buffer.matchAll(possible))
+  let found = Array.from(buffer.matchAll(matcher))
 
   let current = 0
   let output: Span[] = []

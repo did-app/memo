@@ -82,7 +82,10 @@ function comprehendLast(blocks: Block[]): Block[] {
     return blocks
   }
   // This space is a bit of a hack, because we don't want the regex matching on end of line in normal serches
-  spans = spans.slice(0, -1).concat(comprehendText(lastSpan.text + " "))
+
+  // spans = spans.slice(0, -1).concat(comprehendText(lastSpan.text, RegExp("(https?://[^\\s]+)\\s", "g")))
+  spans = spans.slice(0, -1).concat(comprehendText(lastSpan.text, /(https?:\/\/[^\s])$/g))
+
   lastBlock = { ...lastBlock, spans }
   return blocks.slice(0, -1).concat(lastBlock)
 }
