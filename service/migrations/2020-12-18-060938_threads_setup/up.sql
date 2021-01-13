@@ -39,7 +39,7 @@ SELECT diesel_manage_updated_at('memos');
 
 -- We aren't tracking invited by because go on first message
 
-CREATE TABLE note_notifications (
+CREATE TABLE memo_notifications (
   id SERIAL PRIMARY KEY,
   thread_id INT NOT NULL,
   position INT NOT NULL,
