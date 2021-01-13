@@ -151,7 +151,7 @@
     <button
       {ondragover}
       on:drop={handleDragDelete}
-      class="flex items-center rounded px-2 inline-block mx-auto border-gray-500 border-2">
+      class="bg-gray-100 flex inline-block items-center justify-center mx-auto px-2 rounded w-full binnable">
       <span class="w-5 mr-2 inline-block">
         <Icons.Bin />
       </span>
