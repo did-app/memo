@@ -37,7 +37,7 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point]
   const firstRemaining = remainingBlocks[0]
 
   if (firstRemaining && 'spans' in firstRemaining && lineLength(firstRemaining.spans) === 0 && lineLength(bumpedSpans) === 0) {
-    afterBlocks = [newBlock, ...remainingBlocks.slice(0, -1)]
+    afterBlocks = [newBlock, ...remainingBlocks.slice(1)]
   } else {
     afterBlocks = [newBlock, ...remainingBlocks]
   }
