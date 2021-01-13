@@ -44,14 +44,14 @@ export function followReference(reference: Reference, memos: Memo[]): Block[] {
   }
 }
 // There is no type that is range or section at the individual memo level
-export function makeSuggestions(blocks: Block[], memoPosition: number): Prompt[] {
-  const output: Prompt[] = [];
+export function makeSuggestions(blocks: Block[], memoPosition: number): Reference[] {
+  const output: Reference[] = [];
   blocks.forEach(function (block, blockIndex) {
     if (block.type === "paragraph" && block.spans.length > 0) {
       // always ends with softbreak
       const lastSpan = block.spans[block.spans.length - 1];
       if (lastSpan && lastSpan.type === "text" && lastSpan.text.endsWith("?")) {
-        output.push({ type: "prompt", reference: { blockIndex, memoPosition } });
+        output.push({ blockIndex, memoPosition });
       }
     }
   });
@@ -71,11 +71,8 @@ export function gatherPrompts(memos: Memo[], viewer: string) {
         }
       })
     } else {
-      memo.content.forEach(function (block: Block) {
-        // if (block.type === "prompt") {
-        // TODO start with highlisht
-        //   output.push(block.reference)
-        // }
+      makeSuggestions(memo.content, memo.position).forEach(function (reference: Reference) {
+        output.push(reference)
       })
     }
   })

@@ -1,6 +1,6 @@
 <script lang="typescript">
   import router from "page";
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
   import * as Conversation from "../conversation";
   import type { Contact, Stranger } from "../social";
@@ -16,6 +16,8 @@
   import MemoComponent from "../components/Memo.svelte";
   import BlockComponent from "../components/Block.svelte";
   import LinkComponent from "../components/Link.svelte";
+  import LoadingComponent from "../components/Loading.svelte";
+
   import SpanComponent from "../components/Span.svelte";
   import * as Icons from "../icons";
 
@@ -104,13 +106,18 @@
       if ("data" in response) {
         let memos = response.data;
         currentPosition = memos.length;
-        let references = Conversation.gatherPrompts(
-          memos,
-          state.me.emailAddress
-        );
+        tick().then(function () {
+          // Tick seems to now work with the composer getting rendered.
+          setTimeout(function name() {
+            let references = Conversation.gatherPrompts(
+              memos,
+              state.me.emailAddress
+            );
 
-        references.map(function (reference) {
-          composer.addAnnotation(reference);
+            references.map(function (reference) {
+              composer.addAnnotation(reference);
+            });
+          }, 100);
         });
       }
       return response;
@@ -166,11 +173,14 @@
 
 <!-- {JSON.stringify(blocks)} -->
 {#if 'me' in state && state.me}
-  {#await loading}
-    LOADING
-  {:then response}
-    {#if 'data' in response}
-      <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
+  <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
+    {#await loading}
+      <div>
+        <LoadingComponent />
+      </div>
+      <div />
+    {:then response}
+      {#if 'data' in response}
         <div class="">
           <div class="" bind:this={root}>
             <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
@@ -310,7 +320,7 @@
             {/each}
           </ul>
         </div>
-      </div>
-    {/if}
-  {/await}
+      {/if}
+    {/await}
+  </div>
 {:else}TODO rest of contact page{/if}
