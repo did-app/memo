@@ -4,14 +4,13 @@
   export let href: string;
   export let text: string | undefined;
 
+  const GLANCE_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_GLANCE_ORIGIN;
   async function fetchPreview(href: string) {
     let url = new URL(href, window.location.origin);
     if (url.origin === window.location.origin) {
       return { preview: "plain" };
     } else {
-      let r = await fetch(
-        import.meta.env.SNOWPACK_PUBLIC_GLANCE_ORIGIN + "/?" + href
-      );
+      let r = await fetch(GLANCE_ORIGIN + "/?" + href);
 
       const { preview } = await r.json();
       return preview;

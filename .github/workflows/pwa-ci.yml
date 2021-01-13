@@ -1,0 +1,18 @@
+name: test
+on:
+  push:
+    paths:
+      - "pwa/**"
+  pull_request:
+    paths:
+      - "pwa/**"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # - name: Build the stack
+      #   run: docker-compose up -d
+      - name: Test the build process
+        # NOTE gleam build is required due to an ordering problem with deps compiling
+        run: docker-compose run pwa bash -c "npm i && npx jest && npm run build"

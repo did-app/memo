@@ -4,6 +4,10 @@ export { equal as equalPoints } from "./point"
 export type { Range } from "./range"
 export { isCollapsed } from "./range"
 
-export { extractBlocks, summary } from "./tree"
+export { extractBlocks, summary, lineLength } from "./tree"
 export { parse } from "./parser"
 export { toString } from "./serializer"
+
+export type { InputEvent } from "./view"
+export { rangeFromDom, nodeFromPath, getSelection } from "./view"
+export { handleInput } from "./editor"

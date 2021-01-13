@@ -5,10 +5,41 @@
   export let spans: Span[];
   export let index: number;
   export let truncate: boolean;
+  export let placeholder: "answer" | "message" | null;
+
+  let unfurled: boolean;
+  $: unfurled = spans.length <= 1;
+
+  function render(spans: Span[]) {
+    let offset = 0;
+    const output: { span: Span; offset: number }[] = [];
+    spans.reduce(function (offset, span) {
+      output.push({ span, offset });
+      if ("text" in span) {
+        return offset + span.text.length;
+      } else if ("url" in span) {
+        return offset + span.url.length;
+      } else {
+        return offset;
+      }
+    }, offset);
+
+    if (output.length === 0) {
+      let span: Span = { type: "text", text: "" };
+      output.push({ span, offset });
+    }
+    return output;
+  }
 </script>
 
 <p class="my-1 min-w-0 w-full" data-block-index={index} class:truncate>
-  {#each spans as span, index}
-    <SpanComponent {span} {index} unfurled={spans.length === 1} />
+  <!-- TODO others will need to render empty paragraph i.e. annotation -->
+  <!-- {JSON.stringify(render(spans))} -->
+  {#each render(spans) as { span, offset }, index}
+    <SpanComponent
+      {span}
+      {offset}
+      {unfurled}
+      placeholder={index === 0 ? placeholder : null} />
   {/each}
 </p>

@@ -1,21 +1,23 @@
 <script lang="typescript">
   import router from "page";
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
   import * as Conversation from "../conversation";
   import type { Contact, Stranger } from "../social";
   import * as Social from "../social";
   import type { State, Authenticated, Call } from "../sync";
   import * as Sync from "../sync";
-  import type { Block, Annotation, Prompt } from "../writing";
+  import type { Block } from "../writing";
   import * as Writing from "../writing";
 
   import type Composer__SvelteComponent_ from "../components/Composer.svelte";
+
   import Composer from "../components/Composer.svelte";
   import MemoComponent from "../components/Memo.svelte";
   import BlockComponent from "../components/Block.svelte";
   import LinkComponent from "../components/Link.svelte";
-  import SpanComponent from "../components/Span.svelte";
+  import LoadingComponent from "../components/Loading.svelte";
+
   import * as Icons from "../icons";
 
   export let stateAll: State;
@@ -63,10 +65,26 @@
 
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
+  let currentPosition: number = 0;
+
   function handleSelectionChange() {
-    userFocus = Conversation.getReference(root);
-    if (userFocus) {
+    let selection: Selection = (Writing as any).getSelection();
+    let result = Writing.rangeFromDom(selection.getRangeAt(0));
+    if (result && result[1] <= currentPosition) {
+      const [range, memoPosition] = result;
+
+      if (Writing.isCollapsed(range)) {
+        userFocus = {
+          memoPosition,
+          blockIndex: range.anchor.path[0] as number,
+        };
+      } else {
+        userFocus = { memoPosition, range };
+      }
+
       reply = false;
+    } else {
+      userFocus = null;
     }
   }
   // This captures the focus for duration of a click
@@ -86,13 +104,19 @@
       const response = await Sync.loadMemos(contact.thread.id);
       if ("data" in response) {
         let memos = response.data;
-        let references = Conversation.gatherPrompts(
-          memos,
-          state.me.emailAddress
-        );
+        currentPosition = memos.length;
+        tick().then(function () {
+          // Tick seems to now work with the composer getting rendered.
+          setTimeout(function name() {
+            let references = Conversation.gatherPrompts(
+              memos,
+              state.me.emailAddress
+            );
 
-        references.map(function (reference) {
-          composer.addAnnotation(reference);
+            references.map(function (reference) {
+              composer.addAnnotation(reference);
+            });
+          }, 100);
         });
       }
       return response;
@@ -148,11 +172,14 @@
 
 <!-- {JSON.stringify(blocks)} -->
 {#if 'me' in state && state.me}
-  {#await loading}
-    LOADING
-  {:then response}
-    {#if 'data' in response}
-      <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
+  <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
+    {#await loading}
+      <div>
+        <LoadingComponent />
+      </div>
+      <div />
+    {:then response}
+      {#if 'data' in response}
         <div class="">
           <div class="" bind:this={root}>
             <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
@@ -171,29 +198,28 @@
             {/each}
           </div>
           <article
-            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
-            style="max-height: 60vh;">
+            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border">
             <div class:hidden={!reply}>
               <Composer
-                let:content
-                let:back
+                previous={response.data}
                 bind:this={composer}
-                emailAddress={state.me.emailAddress}
-                peers={response.data}
-                position={response.data.length + 1}>
+                blocks={[{ type: 'paragraph', spans: [{ type: 'text', text: '' }] }]}
+                position={response.data.length + 1}
+                let:blocks>
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />
                   <button
-                    on:click={back}
+                    on:click={() => {
+                      reply = false;
+                    }}
                     class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.ReplyAll />
                     </span>
                     <span class="py-1">Back</span>
                   </button>
-
                   <button
-                    on:click={() => postMemo(content)}
+                    on:click={() => postMemo(blocks)}
                     class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Send />
@@ -214,7 +240,12 @@
                     ...response.data,
                     // current,
                   ]) as block, index}
-                    <BlockComponent {block} {index} peers={response.data} />
+                    <BlockComponent
+                      {index}
+                      {block}
+                      peers={response.data}
+                      truncate={false}
+                      placeholder={null} />
                   {/each}
                 </div>
               {/if}
@@ -276,16 +307,16 @@
                   <LinkComponent
                     url={pin.item.url}
                     title={pin.item.title}
-                    index={0} />
+                    offset={0} />
                 {:else if pin.item.type === 'annotation'}
                   <!-- TODO remove dummy index, simply make it optional -->
 
                   <span class="w-5 inline-block mr-2">
                     <Icons.Attachment />
                   </span>
-                  {#each Writing.summary(Conversation.followReference(pin.item.reference, response.data)) as span, index}
+                  <!-- {#each Writing.summary(Conversation.followReference(pin.item.reference, response.data)) as span, index}
                     <SpanComponent {span} {index} unfurled={false} />
-                  {/each}
+                  {/each} -->
                 {/if}
               </li>
             {:else}
@@ -293,7 +324,7 @@
             {/each}
           </ul>
         </div>
-      </div>
-    {/if}
-  {/await}
+      {/if}
+    {/await}
+  </div>
 {:else}TODO rest of contact page{/if}

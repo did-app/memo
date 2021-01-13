@@ -19,21 +19,30 @@
   }
 </script>
 
-<div class="my-2 border-gray-600 w-full" data-block-index={index}>
-  <blockquote class="border-l-4 px-2 text-gray-500">
-    {#each Conversation.followReference(annotation.reference, peers) as block, index}
-      <div class="-mb-2">
-        <BlockComponent {block} {index} {peers} />
-      </div>
-    {/each}
+<!-- The horizontal rule at the bottom of here was able to be a content editable target, could not fix -->
+<div
+  class="my-2 border rounded border-gray-200 w-full"
+  data-block-index={index}>
+  <blockquote class="bg-gray-100 text-gray-500 pb-1" contenteditable="false">
+    <div class="italic px-2 -mt-1 pt-1 pb-1 rounded-t border-t ">
+      {#each Conversation.followReference(annotation.reference, peers) as block, index}
+        <div class="-mb-2">
+          <BlockComponent {block} {index} {peers} placeholder={null} />
+        </div>
+      {/each}
+    </div>
     <a
-      class="text-purple-800"
+      class="px-2 font-bold"
       href="#{annotation.reference.memoPosition}"><small>{referenceAuthor(peers, annotation)}</small></a>
   </blockquote>
-  <div class="w-full">
+  <div class="w-full px-2">
     {#each annotation.blocks as block, index}
-      <BlockComponent {block} {index} {peers} />
+      <BlockComponent
+        {block}
+        {index}
+        {peers}
+        placeholder={index === 0 ? 'answer' : null} />
     {/each}
   </div>
-  <hr class="mx-auto w-1/2 border-t-2" />
+  <!-- <hr class="mx-auto w-1/2 border-t-2" contenteditable="false" /> -->
 </div>

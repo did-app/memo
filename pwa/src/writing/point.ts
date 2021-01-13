@@ -1,6 +1,5 @@
 import type { Path } from "./path"
 import { equal as equalPath, compare as pathCompare } from './path';
-import type * as Range from './range';
 
 export type Point = {
   path: Path,
@@ -30,28 +29,14 @@ export function nest(index: number, { path, offset }: Point) {
   return { path: [index, ...path], offset }
 }
 
-// export function unnest({path, offset}: Point) {
-//   let [index, ...rest] = path
-//   if (index !== undefined) {
-//     return Some([index, {path: rest, offset}])
-//   } else {
-//     return None()
-//   }
-// }
-//
-// function commonPathFromRange(range: Range.Range, acc = []): [Path, Range.Range] {
-//   let { anchor, focus } = range
-//   const [anchorIndex, ...anchorRemaining] = anchor.path;
-//   const [focusIndex, ...focusRemaining] = focus.path;
-//   if (anchorIndex !== undefined && anchorIndex == focusIndex) {
-//     return commonPathFromRange(
-//       {
-//         anchor: { ...anchor, path: anchorRemaining },
-//         focus: { ...focus, path: focusRemaining }
-//       },
-//       [...acc, anchorIndex]
-//     );
-//   } else {
-//     return [acc, range]
-//   }
-// }
+export function unnest(point: Point): [number, Point] | null {
+  const { path, offset } = point
+  let [index, ...rest] = path
+  if (index !== undefined) {
+    return [index, { path: rest, offset }]
+  } else {
+    return null
+  }
+}
+
+

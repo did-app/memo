@@ -8,8 +8,6 @@ export function findPinnable(memos: Memo[]): Pin[] {
     return memo.content.map(function (block): Pin[] {
       if (block.type === "annotation") {
         return [{ memoPosition, item: block }]
-      } else if (block.type === "prompt") {
-        return []
       } else {
 
         return block.spans.flatMap(function name(span) {

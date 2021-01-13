@@ -14,7 +14,6 @@
 {#if open}
   <article
     id={memo.position.toString()}
-    data-memo-position={memo.position.toString()}
     class="border-t mb-2 pt-4 pb-2  pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden">
     <header
       class="ml-6 md:ml-12 flex text-gray-600 cursor-pointer"
@@ -23,19 +22,22 @@
       <span class="truncate">{memo.author}</span>
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
-    <Fragment blocks={memo.content} {peers} />
+    <Fragment blocks={memo.content} position={memo.position} {peers} />
   </article>
 {:else}
   <article
     id={memo.position.toString()}
-    data-memo-position={memo.position.toString()}
     on:click={() => (open = true)}
     class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer">
     <header class="ml-6 md:ml-12 mb-2 flex  max-w-">
       <span class="truncate">
         <span
-          class="truncate pr-4">{#each Writing.summary(memo.content) as span, index}
-            <SpanComponent {span} {index} unfurled={false} />
+          class="truncate pr-4">{#each Writing.summary(memo.content) as span}
+            <SpanComponent
+              {span}
+              offset={0}
+              unfurled={false}
+              placeholder={null} />
           {/each}</span>
       </span>
       <span class="ml-auto text-gray-600">{memo.author}</span>

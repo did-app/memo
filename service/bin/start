@@ -16,5 +16,5 @@ if [ $i -eq $attempts ]; then
     exit 2;
 fi
 
-mix test
+mix test  --no-start --exclude test
 elixir --sname app -S mix run --no-halt

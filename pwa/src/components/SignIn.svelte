@@ -38,6 +38,9 @@
   function hasPassword(emailAddress: string): boolean {
     return emailAddress.split("@")[1] === "plummail.co";
   }
+  const action = `${
+    (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN
+  }/sign_in`;
 </script>
 
 <div class="absolute bottom-0 flex flex-col left-0  p-4 right-0 top-0 bg-body">
@@ -51,7 +54,7 @@
       <form
         on:submit={authenticate}
         method="POST"
-        action="{import.meta.env.SNOWPACK_PUBLIC_API_ORIGIN}/sign_in"
+        {action}
         class="max-w-sm block mx-auto ">
         <input
           type="email"

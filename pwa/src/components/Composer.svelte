@@ -1,194 +1,133 @@
 <script lang="typescript">
-  import { autoResize } from "../svelte/textarea";
+  import { tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
-  import * as Conversation from "../conversation";
-  import type { Block, Annotation, Prompt } from "../writing";
+  import type { Block, InputEvent } from "../writing";
   import * as Writing from "../writing";
-
-  import Fragment from "../components/Fragment.svelte";
-  import BlockComponent from "../components/Block.svelte";
-  import * as Icons from "../icons";
-
-  type AnnotationSpace = {
-    reference: Reference;
-    raw: string;
-  };
+  export let previous: Memo[];
+  export let blocks: Block[];
 
   export let position: number;
-  export let peers: Memo[];
-  // peers -> previous, positon derived from peers, particularly if previous changes
-  export let emailAddress: string;
-  // Might want editable to become a thing
-  // Maybe this is a slot if other things to compose
-  let draft = "";
-  let preview = false;
-  let annotations: AnnotationSpace[] = [];
+
+  import BlockComponent from "./Block.svelte";
+  import * as Icons from "../icons";
+
+  let composer: HTMLElement;
 
   export function addAnnotation(reference: Reference) {
-    annotations = [...annotations, { reference, raw: "" }];
+    let lastBlock = blocks[blocks.length - 1];
+    let before: Block[];
+    if (
+      lastBlock &&
+      "spans" in lastBlock &&
+      Writing.lineLength(lastBlock.spans) === 0
+    ) {
+      before = blocks.slice(0, -1);
+    } else {
+      before = blocks;
+    }
+    blocks = [
+      ...before,
+      {
+        type: "annotation",
+        reference,
+        blocks: [{ type: "paragraph", spans: [{ type: "text", text: "" }] }],
+      },
+      { type: "paragraph", spans: [{ type: "text", text: "" }] },
+    ];
   }
 
-  function mapAnnotation(draft: AnnotationSpace): Annotation[] {
-    const { reference, raw } = draft;
-    let blocks = Writing.parse(raw);
-    if (blocks) {
-      return [
-        {
-          type: "annotation",
-          reference,
-          blocks,
-        },
-      ];
-    } else {
-      return [];
+  function handleInput(event: InputEvent) {
+    const domRange = event.getTargetRanges()[0];
+    if (domRange === undefined) {
+      throw "there should always be a dom range";
+    }
+    const result = Writing.rangeFromDom(domRange);
+    if (result === null) {
+      throw "There should always be a range";
+    }
+    const [range] = result;
+    const [updated, cursor] = Writing.handleInput(blocks, range, event);
+
+    blocks = updated;
+    tick().then(function () {
+      let paragraph = Writing.nodeFromPath(composer, cursor.path);
+      let span = paragraph.childNodes[0] as HTMLElement;
+      let textNode = span.childNodes[0] as Node;
+      // This is why slate has it's weak Map
+
+      let selection = window.getSelection();
+      const domRange = selection?.getRangeAt(0);
+      if (selection && domRange) {
+        domRange.setStart(textNode, cursor.offset);
+        domRange.setEnd(textNode, cursor.offset);
+        selection.addRange(domRange);
+      }
+    });
+  }
+
+  function handleDragStart(event: DragEvent, index: number) {
+    if (event.dataTransfer) {
+      event.dataTransfer.setData("memo/position", index.toString());
     }
   }
-
-  function clearAnnotation(index: number) {
-    annotations.splice(index, 1);
-    annotations = annotations;
-  }
-
-  let suggestedPrompts: Prompt[] = [];
-  $: suggestedPrompts = preview
-    ? suggestedPrompts
-    : Conversation.makeSuggestions(blocks, position);
-  function clearPrompt(index: number) {
-    suggestedPrompts.splice(index, 1);
-    suggestedPrompts = suggestedPrompts;
-  }
-
-  function referenceAuthor(peers: Memo[], reference: Reference) {
-    let memo = peers[reference.memoPosition - 1];
-    if (memo) {
-      return memo.author;
-    } else {
-      throw "Should have crashed on referemce";
+  // function handleDragOver() {
+  //   return false;
+  // }
+  const ondragover = "return false" as any;
+  // Seems to only work with this string
+  function handleDrop(event: DragEvent, finish: number) {
+    if (event.dataTransfer) {
+      let start = parseInt(event.dataTransfer.getData("memo/position"));
+      let removed = blocks.splice(start, 1);
+      // Don't need this because if going up
+      // finish = start < finish ? start : start - 1;
+      blocks.splice(finish, 0, ...removed);
+      blocks = blocks;
     }
-    // Probably follow reference should return author
-  }
-
-  $: blocks = (function (): Block[] {
-    let content = Writing.parse(draft);
-    let mappedAnnotations: Annotation[] = annotations.flatMap(mapAnnotation);
-    return content ? [...mappedAnnotations, ...content] : mappedAnnotations;
-  })();
-
-  let content: Block[] = [];
-  $: content = [...blocks, ...suggestedPrompts];
-  let current: Memo;
-  $: current = {
-    content: blocks,
-    author: emailAddress,
-    posted_at: new Date(),
-    position,
-  };
-
-  function back() {
-    preview = false;
   }
 </script>
 
-<style>
-  textarea.message {
-    min-height: 8rem;
-  }
-  textarea.comment {
-    max-height: 25vh;
-  }
-</style>
-
-{#if preview}
-  <header class="ml-6 md:ml-12 mb-6 flex text-gray-600">
-    <span class="font-bold">{emailAddress}</span>
-    <span class="ml-auto">{new Date().toLocaleDateString()}</span>
-  </header>
-  <Fragment {blocks} {peers} />
-  {#if suggestedPrompts.length !== 0}
-    <h3 class="ml-6 md:ml-12 font-bold mt-4">
-      Ask the following as highlighted questions.
-    </h3>
-  {/if}
-  {#each suggestedPrompts as prompt, index}
-    <div class="flex my-1">
-      <div
-        class="w-8 m-1 cursor-pointe preview ? suggestedPrompts :r flex-none"
-        on:click={() => clearPrompt(index)}>
-        <div class="w-6">
-          <Icons.Bin />
-        </div>
-      </div>
-      <div>
-        {#each Conversation.followReference(prompt.reference, [
-          ...peers,
-          current,
-        ]) as block, index}
-          <BlockComponent {block} {index} {peers} />
-        {/each}
-      </div>
-    </div>
-  {/each}
-
-  <slot {content} {back} />
-{:else}
-  <!-- TODO name previous inside composer -->
-  {#each annotations as { reference, raw }, index}
-    <div class="flex my-1">
-      <div
-        class="w-8 m-2 cursor-pointer flex-none"
-        on:click={() => clearAnnotation(index)}>
-        <div class="w-4">
-          <Icons.Bin />
-        </div>
-      </div>
-      <div class="w-full border-purple-500 border-l-4">
-        <blockquote class=" px-2">
-          <div class="opacity-50">
-            {#each Conversation.followReference(reference, peers) as block, index}
-              <BlockComponent {block} {index} {peers} />
-            {/each}
-          </div>
-          <a
-            class="text-purple-800"
-            href="#{reference.memoPosition}"><small>{referenceAuthor(peers, reference)}</small></a>
-        </blockquote>
-        <div class="px-2">
-          <textarea
-            class="comment w-full bg-white outline-none"
-            bind:value={raw}
-            use:autoResize
-            rows="1"
-            autofocus
-            placeholder="Your comment ..." />
-        </div>
-      </div>
-    </div>
-  {/each}
-  <textarea
-    class="message w-full bg-white outline-none pl-6 md:pl-12"
-    use:autoResize
-    bind:value={draft}
-    placeholder="Your message ..." />
-  <div class="mt-2 pl-6 md:pl-12 flex items-center">
-    <div class="flex flex-1 min-w-0">
-      <span class="font-bold text-gray-700 mr-1">From:</span>
-      <input
-        class="flex-grow mr-2 bg-white border-white flex-grow focus:border-gray-700 outline-none placeholder-gray-700"
-        bind:value={emailAddress}
-        type="email"
-        placeholder="Your email address"
-        readonly
-        required />
-    </div>
-    <button
-      on:click={() => {
-        preview = true;
+<div
+  bind:this={composer}
+  class="outline-none overflow-y-auto"
+  style="max-height: 60vh;"
+  contenteditable
+  data-memo-position={position}
+  on:beforeinput|preventDefault={handleInput}>
+  {#each blocks as block, index}
+    <div
+      class="flex "
+      draggable="true"
+      on:dragstart={(event) => {
+        handleDragStart(event, index);
       }}
-      class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
-      <span class="w-5 mr-2 inline-block">
-        <Icons.Send />
-      </span>
-      <span class="py-1"> Preview </span>
-    </button>
-  </div>
-{/if}
+      {ondragover}
+      on:drop={(event) => handleDrop(event, index)}>
+      <!-- text return false on dragover works, function call doesn't? -->
+      <!-- -ml because padding on article is 2, probably should be dropped -->
+      <div
+        class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+        contenteditable="false">
+        <!-- TODO get drag icon -->
+        <Icons.Drag />
+      </div>
+      <BlockComponent
+        {block}
+        {index}
+        peers={previous}
+        placeholder={index === 0 ? 'message' : null} />
+    </div>
+  {:else}
+    <BlockComponent
+      block={{ type: 'paragraph', spans: [] }}
+      index={0}
+      peers={previous}
+      placeholder={'message'} />
+  {/each}
+</div>
+<slot {blocks} />
+<!-- <hr />
+<pre>
+
+  {JSON.stringify(blocks, null, 2)}
+</pre> -->

@@ -1,9 +1,9 @@
 import type { Reference } from "../conversation"
 
+
 export type Paragraph = {
   type: "paragraph",
   spans: Span[],
-
 }
 export type Text = {
   type: "text",
@@ -32,4 +32,4 @@ export type Softbreak = {
 }
 
 export type Span = Text | Link | Softbreak
-export type Block = Paragraph | Annotation | Prompt
+export type Block = Paragraph | Annotation 

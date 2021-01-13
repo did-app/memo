@@ -7,4 +7,4 @@ export { currentPosition, isOutstanding, followReference, makeSuggestions, gathe
 export type { Pin } from "./pin";
 export { findPinnable } from "./pin"
 
-export { getReference } from "./view"
+// export { getReference } from "../writing/view"
