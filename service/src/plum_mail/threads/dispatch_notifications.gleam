@@ -44,7 +44,7 @@ pub fn run() {
     memos.position
   FROM memos
   JOIN participants ON participants.thread_id = memos.thread_id
-  LEFT JOIN note_notifications AS notifications
+  LEFT JOIN memo_notifications AS notifications
     ON notifications.thread_id = memos.thread_id
     AND notifications.position = memos.position
     AND notifications.identifier_id = participants.identifier_id
@@ -227,7 +227,7 @@ pub fn record_result(thread_id, position, identifier_id, success) {
   // TODO think about renaming position
   let sql =
     "
-    INSERT INTO note_notifications (thread_id, position, identifier_id, success)
+    INSERT INTO memo_notifications (thread_id, position, identifier_id, success)
     VALUES ($1, $2, $3, $4)
     RETURNING *
     "
