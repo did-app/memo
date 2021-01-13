@@ -252,8 +252,18 @@
               <nav class="flex pl-6 md:pl-12">
                 {#if userFocus}
                   <button
+                    on:click={() => {
+                      userFocus = null;
+                    }}
+                    class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+                    <!-- <span class="w-5 mr-2 inline-block">
+                      <Icons.ReplyAll />
+                    </span> -->
+                    <span class="py-1">Cancel</span>
+                  </button>
+                  <button
                     on:click={quoteInReply}
-                    class="flex items-center bg-gray-800 text-white ml-auto rounded px-2">
+                    class="flex items-center bg-gray-800 text-white ml-2 rounded px-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Quote />
                     </span>

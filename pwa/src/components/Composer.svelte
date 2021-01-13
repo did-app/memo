@@ -39,7 +39,7 @@
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
     if (domRange === undefined) {
-      throw "there should always be a dom range";
+      alert("no target range");
     }
     const result = Writing.rangeFromDom(domRange);
     if (result === null) {
