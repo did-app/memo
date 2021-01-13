@@ -19,18 +19,22 @@
   }
 </script>
 
-<div class="my-2 border-gray-600 w-full" data-block-index={index}>
-  <blockquote class="border-l-4 px-2 text-gray-500" contenteditable="false">
-    {#each Conversation.followReference(annotation.reference, peers) as block, index}
-      <div class="-mb-2">
-        <BlockComponent {block} {index} {peers} placeholder={null} />
-      </div>
-    {/each}
+<div
+  class="my-2 border rounded border-gray-200 w-full"
+  data-block-index={index}>
+  <blockquote class="text-gray-500" contenteditable="false">
+    <div class="bg-gray-100 italic px-2 -mt-1 pt-1 pb-2 rounded-t border-t ">
+      {#each Conversation.followReference(annotation.reference, peers) as block, index}
+        <div class="-mb-2">
+          <BlockComponent {block} {index} {peers} placeholder={null} />
+        </div>
+      {/each}
+    </div>
     <a
-      class="text-purple-800"
+      class="px-2 font-bold"
       href="#{annotation.reference.memoPosition}"><small>{referenceAuthor(peers, annotation)}</small></a>
   </blockquote>
-  <div class="w-full">
+  <div class="w-full px-2">
     {#each annotation.blocks as block, index}
       <BlockComponent
         {block}
@@ -39,5 +43,5 @@
         placeholder={index === 0 ? 'answer' : null} />
     {/each}
   </div>
-  <hr class="mx-auto w-1/2 border-t-2" contenteditable="false" />
+  <!-- <hr class="mx-auto w-1/2 border-t-2" contenteditable="false" /> -->
 </div>
