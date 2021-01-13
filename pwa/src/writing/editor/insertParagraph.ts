@@ -3,7 +3,7 @@ import type { Range } from "../range"
 import * as range_module from "../range"
 import type { Point } from "../point"
 import * as point_module from "../point"
-import { arrayPopIndex, appendSpans, extractBlocks, popLine, lineLength } from "../tree"
+import { arrayPopIndex, appendSpans, extractBlocks, popLine, lineLength, comprehendText } from "../tree"
 
 function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point] {
   let common = range_module.popCommon(range)
@@ -25,7 +25,10 @@ function insertAndLift(blocks: Block[], range: Range): [Block[], Block[], Point]
   }
 
   const [start, end] = range_module.edges(range)
-  const [preBlocks, _slice, postBlocks] = extractBlocks(blocks, range)
+  let [preBlocks, _slice, postBlocks] = extractBlocks(blocks, range)
+  preBlocks = comprehendLast(preBlocks)
+  console.log("comprehended", preBlocks);
+
   const [bumpedSpans, remainingBlocks] = popLine(postBlocks);
   // paragraph might be better called a line if in lists
 
@@ -68,3 +71,19 @@ export function insertParagraph(blocks: Block[], range: Range): [Block[], Point]
   }
 }
 
+
+function comprehendLast(blocks: Block[]): Block[] {
+  let lastBlock = blocks[blocks.length - 1]
+  if (!lastBlock || !('spans' in lastBlock)) {
+    return blocks
+  }
+  let spans = lastBlock.spans
+  let lastSpan = spans[spans.length - 1]
+  if (!lastSpan || !('text' in lastSpan)) {
+    return blocks
+  }
+  // This space is a bit of a hack, because we don't want the regex matching on end of line in normal serches
+  spans = spans.slice(0, -1).concat(comprehendText(lastSpan.text + " "))
+  lastBlock = { ...lastBlock, spans }
+  return blocks.slice(0, -1).concat(lastBlock)
+}

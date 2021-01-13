@@ -189,8 +189,7 @@
             {/each}
           </div>
           <article
-            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border overflow-y-auto"
-            style="max-height: 60vh;">
+            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border">
             <div class:hidden={!reply}>
               <Composer
                 previous={response.data}

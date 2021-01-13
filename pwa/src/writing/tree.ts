@@ -11,7 +11,7 @@ export function arrayPopIndex<T>(items: T[], index: number): [T[], T | undefined
   const item = items[index];
   return [pre, item, post]
 }
-const possible = RegExp("(https://[^\\s]+)\\s|([^\\.\\?]+\\?(\\s|$))\\s", "g")
+const possible = RegExp("(https?://[^\\s]+)\\s|([^\\.\\?]+\\?(\\s|$))\\s", "g")
 
 export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): Block[] {
   const unmodifiedBlocks = blocks.slice(0, -1)
@@ -39,37 +39,8 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
     } else {
       post = [postSpan]
     }
-    // let spans: Span[] = [{ type: 'text', text: buffer }]
-    let found = Array.from(buffer.matchAll(possible))
 
-    let current = 0
-    let output: Span[] = []
-    found.forEach(function (match) {
-      const [all, plain] = match
-      if (match.index == current) {
-
-      } else {
-        output.push({ type: 'text', text: buffer.slice(current, match.index) })
-      }
-      if (!plain) {
-        throw "We haven't sorted this link out yet"
-      }
-      output.push({ type: 'link', url: plain })
-      if (match.index === undefined) {
-        throw "Why do you get an undefined index"
-      }
-      if (all === undefined) {
-        throw "All should always b a thin"
-      }
-      current = match.index + all.length
-    })
-    if (current < buffer.length) {
-      output.push({ type: 'text', text: buffer.slice(current) })
-    }
-    console.log(...output);
-
-
-    let spans = output
+    let spans = comprehendText(buffer)
     return [...unmodifiedBlocks, { ...lastBlock, spans }]
   } else {
     const innerBlocks = appendSpans(lastBlock.blocks, joinSpan, newSpans)
@@ -77,74 +48,42 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
   }
 }
 
-// function splitText(text: string, offset: number): [string, string] {
-//   const pre = text.slice(0, offset);
-//   const post = text.slice(offset);
-//   return [pre, post]
-// }
+export function comprehendText(buffer: string): Span[] {
+  if (buffer === "") {
+    return [{ type: 'text', text: "" }]
+  }
+  let found = Array.from(buffer.matchAll(possible))
 
-// function splitSpans(spans: Span[], j: number, offset: number): [Span[], Span[]] {
-//   const [pre, span, post] = arrayPopIndex(spans, j);
-//   let preSpan: Span, postSpan: Span;
-//   if (span.type === "text") {
-//     const [preText, postText] = splitText(span.text, offset)
-//     preSpan = { ...span, text: preText }
-//     postSpan = { ...span, text: postText }
-//   } else if (span.type === 'link') {
-//     const [preText, postText] = splitText(span.title || span.url, offset)
-//     preSpan = { ...span, title: preText }
-//     postSpan = { ...span, title: postText }
-//   } else {
-//     preSpan = span
-//     postSpan = span
-//   }
-//   return [[...pre, preSpan], [postSpan, ...post]]
-// }
-// function splitBlocks(blocks: Block[], { path, offset }: Point): [Block[], Block[]] {
-//   const [i, j, ...none] = path
-//   if (none.length !== 0) {
-//     throw "extractBlocks only works in paragraphs for now"
-//   }
-//   if (!i) {
-//     throw "i should always exist in a path"
-//   }
+  let current = 0
+  let output: Span[] = []
+  found.forEach(function (match) {
+    const [all, plain] = match
+    if (match.index == current) {
 
-//   const [pre, block, post] = arrayPopIndex(blocks, i);
-//   let preBlock: Block, postBlock: Block;
-//   if (block.type === 'paragraph') {
-//     // NOTE Dragging down lines can get to a cursor that is outside a text block
-//     const [preSpans, postSpans] = splitSpans(block.spans, j || 0, offset)
-//     preBlock = { ...block, spans: preSpans }
-//     postBlock = { ...block, spans: postSpans }
-//   } else {
-//     // Do we want to split annotations or only work inside?
-//     throw "TODO split bigger blocks"
-//   }
+    } else {
+      output.push({ type: 'text', text: buffer.slice(current, match.index) })
+    }
+    if (!plain) {
+      throw "We haven't sorted this link out yet"
+    }
+    output.push({ type: 'link', url: plain })
+    if (match.index === undefined) {
+      throw "Why do you get an undefined index"
+    }
+    if (all === undefined) {
+      throw "All should always b a thin"
+    }
+    current = match.index + all.length
+  })
+  if (current < buffer.length) {
+    output.push({ type: 'text', text: buffer.slice(current) })
+  }
+  return output
+}
 
-//   return [[...pre, preBlock], [postBlock, ...post]]
-// }
-
-
-// // TODO same as pop spans
 export function summary(blocks: Block[]): Span[] {
-  //   let first = blocks[0]
-  //   if (!first) {
-  //     return []
-  //   }
-  //   if (first.type === "paragraph") {
-  //     let firstBreak = first.spans.findIndex(function (span: Span) {
-  //       return span.type === "softbreak"
-  //     })
-  //     if (firstBreak === -1) {
-  //       return first.spans
-  //     } else {
-  //       return first.spans.slice(0, firstBreak)
-  //     }
-  //   } else if (first.type === "annotation") {
-  //     return summary(first.blocks)
-  //   } else {
-  return [{ type: "text", text: "TODO summary of nested" }]
-  //   }
+  const [spans] = popLine(blocks)
+  return spans
 }
 
 // function followPath(fragment: Block, path: number[]): Block | null {

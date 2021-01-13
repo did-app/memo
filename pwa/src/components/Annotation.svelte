@@ -19,6 +19,7 @@
   }
 </script>
 
+<!-- The horizontal rule at the bottom of here was able to be a content editable target, could not fix -->
 <div
   class="my-2 border rounded border-gray-200 w-full"
   data-block-index={index}>

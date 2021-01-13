@@ -80,7 +80,8 @@
 
 <div
   bind:this={composer}
-  class="px-2 outline-none"
+  class="px-2 outline-none overflow-y-auto"
+  style="max-height: 60vh;"
   contenteditable
   data-memo-position={position}
   on:beforeinput|preventDefault={handleInput}>
