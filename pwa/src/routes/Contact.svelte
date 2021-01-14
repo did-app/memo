@@ -161,8 +161,11 @@
 
   @media (min-width: 768px) {
     .sidebar {
-      grid-template-columns: minmax(0px, 1fr) 20rem;
+      grid-template-columns: minmax(0px, 1fr) 0px;
     }
+  }
+  .shadow-top {
+    box-shadow: 0 -3px 10px 0px rgb(143 143 143);
   }
 </style>
 
@@ -172,7 +175,7 @@
 
 <!-- {JSON.stringify(blocks)} -->
 {#if 'me' in state && state.me}
-  <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-5xl">
+  <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-2xl">
     {#await loading}
       <div>
         <LoadingComponent />
@@ -198,7 +201,7 @@
             {/each}
           </div>
           <article
-            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md sticky bottom-0 border">
+            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top">
             <div class:hidden={!reply}>
               <Composer
                 previous={response.data}
