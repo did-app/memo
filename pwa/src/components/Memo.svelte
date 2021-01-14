@@ -29,7 +29,7 @@
     id={memo.position.toString()}
     on:click={() => (open = true)}
     class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer">
-    <header class="ml-6 md:ml-12 mb-2 flex  max-w-">
+    <header class="ml-6 md:ml-12 mb-2 flex opacity-40">
       <span class="truncate">
         <span
           class="truncate pr-4">{#each Writing.summary(memo.content) as span}

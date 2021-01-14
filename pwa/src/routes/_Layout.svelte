@@ -17,7 +17,7 @@
   </slot>
 </svelte:head>
 <header class="px-6">
-  <nav class="max-w-5xl mx-auto flex flex-wrap items-center text-lg md:text-xl">
+  <nav class="mx-auto flex flex-wrap items-center text-lg md:text-xl">
     <span class="my-1 flex-grow">
       <a
         class="text-purple-700 hover:text-purple-900 font-bold text-2xl"
