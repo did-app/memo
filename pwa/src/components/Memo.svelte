@@ -14,15 +14,18 @@
 {#if open}
   <article
     id={memo.position.toString()}
-    class="border-t mb-2 pt-4 pb-2  pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden">
+    class="border-t mb-2 pt-4 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden">
     <header
-      class="ml-6 md:ml-12 flex text-gray-600 cursor-pointer"
+      class="ml-6 md:ml-12 flex text-gray-600 cursor-pointer pb-6"
       on:click={() => (open = false)}>
       <span class="mr-auto" />
-      <span class="truncate">{memo.author}</span>
+      <span class="truncate font-bold text-gray-500 text-xs truncate">{memo.author}</span>
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
     <Fragment blocks={memo.content} position={memo.position} {peers} />
+    <footer class="border-t-2 flex md:ml-12 ml-6 mt-4">
+      <p class="my-1 min-w-0 w-full text-xs text-gray-400">Received: <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span></p>
+    </footer>
   </article>
 {:else}
   <article
