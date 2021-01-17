@@ -52,12 +52,11 @@ pub fn row_to_identifier(row) {
 }
 
 pub fn find_or_create(email_address: EmailAddress) {
-  // TODO drop refered_by
   let sql =
     "
   WITH new_identifier AS (
-    INSERT INTO identifiers (email_address, referred_by)
-    VALUES ($1, currval('identifiers_id_seq'))
+    INSERT INTO identifiers (email_address)
+    VALUES ($1)
     ON CONFLICT (email_address) DO NOTHING
     RETURNING id, email_address, greeting
   )
