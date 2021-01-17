@@ -10,7 +10,7 @@ pub type Failure {
 }
 
 // let's make all email bodies work with ,markdown
-// TODO content type that is always text but has HTML as optional
+// Could make a content type Type that always has text but has HTML as optional
 pub fn send_email(from, to, subject, text_body, api_token) {
   case api_token {
     "POSTMARK_DUMMY_TOKEN" -> {

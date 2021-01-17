@@ -198,7 +198,7 @@ fn dispatch_to_identifier(record, config) {
         |> io.debug()
       Ok(Nil)
     }
-    // TODO why was that, handle case of bad email addresses
+    // why was that, handle case of bad email addresses
     Error(postmark.Failure(retry: True)) -> Ok(Nil)
     Error(postmark.Failure(retry: False)) -> {
       record_failed(thread_id, position, recipient_id)
@@ -223,8 +223,7 @@ fn contact_link(origin, contact, identifier_id) {
 
 pub fn record_result(thread_id, position, identifier_id, success) {
   // TODO rename to recipient id
-  // TODO rename memo
-  // TODO think about renaming position
+  // think about renaming position
   let sql =
     "
     INSERT INTO memo_notifications (thread_id, position, identifier_id, success)

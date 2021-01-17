@@ -25,7 +25,7 @@ pub fn handle(params, config) {
   case tuple(to_email_address.value, to_hash) {
     tuple("peter@plummail.co", "") -> {
       // We just send back, assuming it is set up properly
-      // TODO look up profile/account/contact
+      // look up profile/account/contact
       let from = to_email_address
       let to = from_email_address
       let subject = "Please add some context"

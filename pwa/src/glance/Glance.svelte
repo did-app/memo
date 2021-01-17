@@ -59,23 +59,24 @@
 </script>
 
 {#if preview}
-  {#if preview.item === 'page'}
+  {#if preview.item === "page"}
     <Page {...preview} />
-  {:else if preview.item === 'image_reel'}
+  {:else if preview.item === "image_reel"}
     <ImageReel {...preview} />
-  {:else if preview.item === 'plain'}
+  {:else if preview.item === "plain"}
     <a {href}>{text}</a>
-  {:else if preview.item === 'image'}
+  {:else if preview.item === "image"}
     <img class="mx-auto" src={href} alt="" />
-  {:else if preview.item === 'embeded_video'}
+  {:else if preview.item === "embeded_video"}
     <!-- Styling copied from loom -->
     <div class="w-full relative" style="padding-bottom:56.25%;">
       <iframe
-        title="video TODO"
+        title="video name required"
         src={preview.iframe}
         frameborder="0"
         allowfullscreen
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" />
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+      />
     </div>
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->

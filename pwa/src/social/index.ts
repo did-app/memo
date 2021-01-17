@@ -7,7 +7,7 @@ export type Identifier = {
   greeting: Block[] | null
 }
 
-// TODO define thread identifier profile types
+// define thread identifier profile types
 export type Contact = {
   identifier: Identifier,
   // A contact will always have a thread

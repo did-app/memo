@@ -22,11 +22,9 @@ export function handleInput(blocks: Block[], range: Range, event: Event): [Block
   } else if (inputType === "insertFromPaste") {
     let replacement = dataTransfer && dataTransfer.getData("text/plain") || ""
     return insertText(blocks, range, replacement)
-    // TODO our rich quoting
   } else if (inputType === "insertFromDrop") {
     let replacement = dataTransfer && dataTransfer.getData("text/plain") || ""
     return insertText(blocks, range, replacement)
-    // TODO our rich quoting
   } else if (inputType === "insertParagraph") {
     return insertParagraph(blocks, range)
   } else if (inputType === "insertLineBreak") {

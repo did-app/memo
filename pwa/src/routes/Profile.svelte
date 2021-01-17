@@ -19,7 +19,7 @@
   console.log(draft);
 
   async function saveGreeting(): Promise<null> {
-    // TODO return id somehow, separate public profile from identifier
+    // return id somehow, separate public profile from identifier
     // let response = await API.saveGreeting(me.id, blocks);
     // if ("error" in response) {
     //   throw "failed to save greeting";
@@ -33,7 +33,8 @@
 </svelte:head>
 <div class="flex w-full mx-auto max-w-5">
   <article
-    class="flex-1 my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md ">
+    class="flex-1 my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md "
+  >
     <!-- Impossible to put annotations in the middle of text Impossible to save
   question preferences
   <br />
@@ -72,7 +73,8 @@
   </article>
   <div class="flex-shrink-0 max-w-sm ">
     <article
-      class="my-4 py-6  pr-6 md:pr-12 bg-gray-800 text-white pl-6 md:pl-12 rounded-lg shadow-md ">
+      class="my-4 py-6  pr-6 md:pr-12 bg-gray-800 text-white pl-6 md:pl-12 rounded-lg shadow-md "
+    >
       <h1 class="text-2xl">Hi {me.emailAddress}</h1>
       <p>
         Set up your public greeting, that explains how people should get in
@@ -82,7 +84,9 @@
         Anyone who visits
         <a
           class="underline"
-          href="{window.location.origin}{emailAddressToPath(me.emailAddress)}">{window.location.origin}{emailAddressToPath(me.emailAddress)}</a>
+          href="{window.location.origin}{emailAddressToPath(me.emailAddress)}"
+          >{window.location.origin}{emailAddressToPath(me.emailAddress)}</a
+        >
         will be able to response this greeting
       </p>
     </article>

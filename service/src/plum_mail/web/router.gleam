@@ -43,7 +43,7 @@ fn token_cookie_settings(request) {
   //   False -> http.Lax
   // }
   // NOTE need x-request
-  // TODO this breaks it if api call is made over http, need to handle redirect
+  // this breaks it if api call is made over http, need to handle redirect
   // motion removing from gleam_http
   let tuple(secure, same_site_policy) = case http.get_req_header(
     request,
@@ -152,12 +152,11 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"":utf8>>))
       |> Ok
     ["authenticate", "session"] -> {
-      // todo rename session, state
       try client = web.identify_client(request, config)
       case client {
         Some(identifier_id) -> {
           try Some(identifier) = identifier.fetch_by_id(identifier_id)
-          // TODO this one doesn't set a session as it already has
+          // This one doesn't set a session as it already has one
           http.response(200)
           |> web.set_resp_json(identifier.to_json(identifier))
           |> Ok
@@ -241,7 +240,7 @@ pub fn route(
               run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
             assert Ok(content) = dynamic.element(row, 5)
             let content: json.Json = dynamic.unsafe_coerce(content)
-            // TODO thread summary type
+            // Might be nice to replace tuple with a thread summary type
             assert Ok(position) = dynamic.element(row, 6)
             assert Ok(position) = dynamic.int(position)
             assert Ok(thread_id) = dynamic.element(row, 7)
@@ -264,7 +263,7 @@ pub fn route(
       |> web.set_resp_json(contact_to_json(contact))
       |> Ok()
     }
-    // TODO don't bother with tim as short for tim@plummail.co
+    // don't bother with tim as short for tim@plummail.co
     // tim32@plummail.co might also want name tim
     ["relationship", contact] -> {
       try client_state = web.identify_client(request, config)
@@ -298,11 +297,11 @@ pub fn route(
       try raw = acl.parse_json(request)
       try position = acl.required(raw, "position", acl.as_int)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
-      // TODO We can pass validity
+      // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
-      // // TODO a participation thing again
+      // // Needs a participation thing again
       try Some(latest) =
         thread.post_memo(thread_id, position, author_id, blocks)
       let data = latest_to_json(latest)
@@ -353,17 +352,17 @@ pub fn handle(
       |> http.prepend_resp_header("access-control-allow-origin", "*")
     _ ->
       response
-      // TODO put everthing under /api /client
+      // Could put everthing under /api /client thought I think I prefer a Halt solution
       |> http.prepend_resp_header(
         "access-control-allow-origin",
-        // TODO does this need limiting to just the client origin
+        // does this need limiting to just the client origin
         // can't be wild card with credentials included
         config.client_origin,
       )
       |> http.prepend_resp_header("access-control-allow-credentials", "true")
       |> http.prepend_resp_header(
         "access-control-allow-headers",
-        // TODO decide if we want to keep sentry trace header
+        // decide if we want to keep sentry trace header
         "content-type, sentry-trace",
       )
   }
