@@ -5,15 +5,15 @@
   export let url: string;
 </script>
 
-<div class="bg-gray-100 rounded border-l-4 border-gray-300">
+<div class="rounded-lg border p-4" style="background:#F9F5F1;">
   <div class="flex px-2 pt-2 overflow-hidden">
-    <img style="max-width:35%" class="object-cover" src={image} alt="" />
-    <div class="ml-2">
+    <img style="max-width:35%" class="rounded object-cover" src={image} alt="" />
+    <div class="ml-4">
       <h5 style="margin:0.5rem 0;">{title}</h5>
-      <p>{description}</p>
+      <p class="text-xs">{description}</p>
     </div>
   </div>
-  <div class="flex items-center text-purple-800 px-2 py-1 opacity-75">
+  <div class="flex items-center px-2 py-1 opacity-75 mt-2">
     <svg
       class="fill-current w-4 h-4 mr-1 inline"
       xmlns="http://www.w3.org/2000/svg"
@@ -31,8 +31,7 @@
     </svg>
     <!-- style added because markdown a taking precidence -->
     <a
-      style="color:#553c9a"
-      class="truncate text-purple-800 flex-1 text-sm"
+      class="truncate flex-1 text-sm"
       href={url}
       target="_blank">
       {url}
