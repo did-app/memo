@@ -148,7 +148,7 @@ export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
 
     let span = spans[0]
     if (span === undefined) {
-      throw "no more spans"
+      return [pre, []]
     }
     spans = spans.slice(1)
 
