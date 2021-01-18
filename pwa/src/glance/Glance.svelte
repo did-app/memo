@@ -64,7 +64,7 @@
   {:else if preview.item === "image_reel"}
     <ImageReel {...preview} />
   {:else if preview.item === "plain"}
-    <a {href}>{text}</a>
+    <a {href}>{text || href}</a>
   {:else if preview.item === "image"}
     <img class="mx-auto" src={href} alt="" />
   {:else if preview.item === "embeded_video"}
@@ -80,6 +80,6 @@
     </div>
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->
-    <a {href}>{text}</a>
+    <a {href}>{text || href}</a>
   {/if}
-{:else}<a {href}>{text}</a>{/if}
+{:else}<a {href}>{text || href}</a>{/if}
