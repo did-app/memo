@@ -22,7 +22,7 @@ table! {
         id -> Int4,
         thread_id -> Int4,
         position -> Int4,
-        identifier_id -> Int4,
+        recipient_id -> Int4,
         success -> Bool,
         inserted_at -> Timestamp,
     }
@@ -58,7 +58,7 @@ table! {
 }
 
 joinable!(link_tokens -> identifiers (identifier_id));
-joinable!(memo_notifications -> identifiers (identifier_id));
+joinable!(memo_notifications -> identifiers (recipient_id));
 joinable!(memos -> identifiers (authored_by));
 joinable!(memos -> threads (thread_id));
 joinable!(pairs -> threads (thread_id));

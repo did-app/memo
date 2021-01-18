@@ -57,7 +57,7 @@ CREATE TABLE memo_notifications (
   thread_id INT NOT NULL,
   position INT NOT NULL,
   FOREIGN KEY (thread_id, position) REFERENCES memos(thread_id, position),
-  identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  recipient_id INT REFERENCES identifiers(id) NOT NULL,
   success BOOLEAN NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
