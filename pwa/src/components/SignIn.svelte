@@ -45,8 +45,8 @@
 
 <div class="absolute bottom-0 flex flex-col left-0  p-4 right-0 top-0 bg-body">
   <div
-    class="md:rounded-2xl m-auto w-full max-w-2xl my-shadow p-6 rounded-lg text-center z-0 bg-white">
-    <h1 class="font-serif text-indigo-800 text-6xl">plum mail</h1>
+    class="md:rounded-2xl m-auto w-full max-w-2xl my-shadow p-6 rounded-lg text-center z-0 bg-white border">
+    <p class="text-gray-800 text-lg">Sign-in to Memo</p>
     {#if emailSent}
       <p>A message has been sent to: <br /><strong>{emailAddress}</strong>.</p>
       <p class="mt-2">Click the link inside to sign in.</p>
@@ -62,7 +62,7 @@
           required
           autocomplete="email"
           bind:value={emailAddress}
-          class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
+          class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-green-600 outline-none"
           placeholder="Email Address" />
 
         {#if hasPassword(emailAddress)}
@@ -72,11 +72,11 @@
             required
             autocomplete="current-password"
             bind:value={password}
-            class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-indigo-800 outline-none"
+            class="w-full px-4 py-2 my-4 rounded border-2 border-gray-500 focus:bg-gray-100 text-black shadow-md focus:border-green-600 outline-none"
             placeholder="Password" />
         {/if}
         <button
-          class="w-full px-4 py-2 hover:bg-indigo-700 rounded bg-indigo-900 text-white mt-2"
+          class="bg-green-500 hover:bg-green-700 mt-2 px-4 py-2 rounded text-white"
           type="submit">{message}</button>
       </form>
     {/if}

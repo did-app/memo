@@ -22,19 +22,19 @@
       <a
         class=" text-2xl font-light hover:opacity-50"
         href="/">
-        <svg class="float-left mr-2 mt-2 w-8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-           viewBox="0 0 81 74" enable-background="new 0 0 81 74" xml:space="preserve">
-          <g id="BG">
-          </g>
-          <g id="Layer_1">
-              <g>
-                  <g>
-                      <path fill="#6AB869" d="M1.3,58.4h9.8v15.2l16.8-15.2h29.7V17H1.3L1.3,58.4z"/>
-                      <path fill="#015D2C" d="M23.6,1v11.4h38.7v37.1l8.9,8.1V42.4h8.7V1L23.6,1z"/>
-                  </g>
-              </g>
-          </g>
-      </svg>
+        <svg class="float-left mr-2 mt-1.5 w-6" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 301.4 356.4" enable-background="new 0 0 301.4 356.4" xml:space="preserve">
+        <g>
+            <g>
+                <path fill="#34D399" d="M150.7,2.6l149.1,304.7h-93.7l-33.3-69.2L150.7,2.6z"/>
+                <path fill="#6EE7B7" d="M150.7,2.6L1.6,307.3h93.7l33.3-69.2L150.7,2.6z"/>
+                <g>
+                    <path fill="#059669" d="M150.7,2.6l55.4,304.7l-55.4,47.5L143.4,216L150.7,2.6z"/>
+                    <path fill="#10B981" d="M150.7,2.6L95.4,307.3l55.4,47.5V2.6z"/>
+                </g>
+            </g>
+        </g>
+        </svg>
         memo
       </a>
       {#if state.loading === false && state.me}
@@ -71,7 +71,7 @@
   {:else if state.me === undefined}
     {#if state.error !== undefined}
       <article
-        class="my-4 p-4 md:px-12 bg-white rounded-lg shadow-md bg-gradient-to-t from-gray-900 to-gray-700 text-white border-l-4 border-red-700">
+        class="bg-gray-800 border-l-8 border-r-8 md:px-12 my-4 p-4 rounded shadow-md text-white border-red-700">
         {state.error.detail}
       </article>
     {/if}
