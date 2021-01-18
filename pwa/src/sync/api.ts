@@ -88,10 +88,11 @@ function threadFromDTO(data: ThreadDTO): Thread {
   return { id, latest: latest && memoFromDTO(latest), acknowledged }
 }
 
-// export function fetchProfile(emailAddress: string): Call<IdentifierDTO | null> {
-//   const path = "/identifiers/" + emailAddress
-//   return get(path)
-// }
+export async function fetchProfile(emailAddress: string): Call<Identifier | null> {
+  const path = "/identifiers/" + emailAddress
+  let response: Response<IdentifierDTO> = await get(path);
+  return mapData(response, identifierFromDTO)
+}
 
 // export function fetchContact(emailAddress: string): Call<{ identifier: IdentifierDTO | undefined, thread: Thread | undefined }> {
 //   const path = "/relationship/" + emailAddress

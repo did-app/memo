@@ -1,6 +1,8 @@
 
-import type { Thread } from "../conversation";
+import type { Thread, Memo } from "../conversation";
+import type { Call } from "../sync"
 import type { Block } from "../writing"
+import * as API from "../sync/api"
 
 export type Identifier = {
   emailAddress: string
@@ -19,12 +21,28 @@ export type Stranger = {
 }
 
 
-export function contactForEmailAddress(contacts: Contact[], emailAddress: string): Contact | Stranger {
+export async function contactForEmailAddress(contacts: Contact[], emailAddress: string): Call<Contact | Stranger> {
   let result = contacts.find(function (contact) { return contact.identifier.emailAddress === emailAddress })
   if (result) {
-    return result
+    return { data: result }
   } else {
-    return { identifier: { emailAddress, greeting: null }, thread: { latest: null, acknowledged: 0 } }
+    let response = await API.fetchProfile(emailAddress)
+    if ('data' in response && response.data !== null) {
+      let greeting = response.data.greeting
+      let thread: Thread | { latest: null; acknowledged: 0; };
+      thread = { latest: null, acknowledged: 0 }
+      // if (greeting === null) {
+      // } else {
+      //   let latest: Memo = { author: emailAddress, content: greeting, posted_at: new Date(), position: 0 }
+      //   thread = { latest, acknowledged: 1 }
+      // }
+      let identifier = { emailAddress, greeting }
+
+      return { data: { identifier, thread } }
+    } else {
+
+      throw "failed to look up public info"
+    }
   }
 }
 
