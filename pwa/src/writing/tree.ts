@@ -11,7 +11,9 @@ export function arrayPopIndex<T>(items: T[], index: number): [T[], T | undefined
   const item = items[index];
   return [pre, item, post]
 }
-const possible = RegExp("(https?://[^\\s]+)\\s|([^\\.\\?]+\\?(\\s|$))\\s", "g")
+// https://www.smashingmagazine.com/2019/02/regexp-features-regular-expressions/#lookbehind-assertions
+// lookahead assertion
+const possible = RegExp("(https?://[^\\s]+)(?=\\s)|([^\\.\\?]+\\?(\\s|$))(?=\\s)", "g")
 
 export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): Block[] {
   const unmodifiedBlocks = blocks.slice(0, -1)
@@ -104,6 +106,7 @@ export function extractBlocks(blocks: Block[], range: Range): [Block[], Block[],
 }
 
 export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
+
   const pre: Span[] = []
   // What do we do with an empty span? keep normalise might work.
   while (offset >= 0) {

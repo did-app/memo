@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import type { Block, Paragraph, Annotation } from "../elements"
+import type { Block, Paragraph, Annotation, Span } from "../elements"
 import type { Path } from "../path"
 import type { Point } from "../point"
 import { insertText } from "./insertText";
@@ -47,4 +47,18 @@ test('type comment in annotation', function () {
   expect(annotation.blocks[0]).to.eql({ type: "paragraph", spans: [{ type: "text", text: "abcX" }] })
   expect(updated[1]).to.eq(annotations[1])
   expect(cursor).to.eql(P([0, 0], 4))
+})
+
+test('link discovery inline', function () {
+  const line: Span[] = [{ type: 'text', text: "check http://example.co" }]
+  const fragment: Block[] = [{ type: 'paragraph', spans: line }]
+  const range = R(P([0, 0], 23))
+
+  const [updated, cursor] = insertText(fragment, range, " ")
+  expect(updated.length).to.eq(1)
+  const [before, link, after] = (updated[0] as Paragraph).spans
+  expect(before).to.eql({ type: 'text', text: "check " })
+  expect(link).to.eql({ type: 'link', url: "http://example.co" })
+  expect(after).to.eql({ type: 'text', text: " " })
+
 })
