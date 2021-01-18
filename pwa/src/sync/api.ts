@@ -58,9 +58,9 @@ export async function authenticateByPassword(emailAddress: string, password: str
 
 // User Accont calls
 
-export function saveGreeting(identifier_id: number, content: Block[] | null): Call<unknown> {
-  const path = "/identifiers/" + identifier_id + "/greeting"
-  const params = { content }
+export function saveGreeting(blocks: Block[] | null): Call<unknown> {
+  const path = "/me/greeting"
+  const params = { blocks }
   return post(path, params)
 }
 

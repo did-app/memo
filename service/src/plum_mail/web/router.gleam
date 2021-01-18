@@ -191,11 +191,9 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok()
     }
-    ["identifiers", id, "greeting"] -> {
+    ["me", "greeting"] -> {
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      assert Ok(id) = int.parse(id)
-      assert true = user_id == id
       try raw = acl.parse_json(request)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
       let sql = "UPDATE identifiers SET greeting = $2 WHERE id = $1"
