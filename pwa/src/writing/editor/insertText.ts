@@ -23,6 +23,8 @@ export function insertText(blocks: Block[], range: Range, text: string): [Block[
 
   const [bumpedSpans, remainingBlocks] = popLine(postBlocks);
   blocks = appendSpans(preBlocks, { type: 'text', text: text }, bumpedSpans).concat(remainingBlocks)
+  console.log(blocks, "BLOCKs");
+
   const [start] = range_module.edges(range)
   const cursor = { ...start, offset: start.offset + text.length }
   // Normalizing spans doesn't change length BUT pulling square brackets out to a link would

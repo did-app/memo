@@ -33,14 +33,15 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
 
       buffer += joinSpan.text
     }
-    let post = []
+    let post: Span[] = []
     if ('text' in postSpan) {
       buffer += postSpan.text
     } else {
       post = [postSpan]
     }
+    post = post.concat(newSpans.slice(1))
 
-    let spans = comprehendText(buffer)
+    let spans = comprehendText(buffer).concat(post)
     return [...unmodifiedBlocks, { ...lastBlock, spans }]
   } else {
     const innerBlocks = appendSpans(lastBlock.blocks, joinSpan, newSpans)
@@ -141,14 +142,6 @@ export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
     }
   }
   return [pre, spans]
-}
-
-function spanLength(span: Span): number {
-  if ('text' in span) {
-    return span.text.length
-  } else {
-    return 1
-  }
 }
 
 function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
