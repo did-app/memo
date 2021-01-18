@@ -244,7 +244,7 @@
                   {/each}
                 </div>
               {/if}
-              <nav class="flex pl-6 md:pl-12">
+              <nav class="flex flex-row-reverse pl-6 md:pl-12">
                 {#if userFocus}
                   <button
                     on:click={() => {
@@ -265,13 +265,13 @@
                     <span class="py-1">Quote in Reply</span>
                   </button>
                 {:else}
-                  <button
+                  <!--<button
                     class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Pin />
                     </span>
                     <span class="py-1">Pins</span>
-                  </button>
+                  </button>-->
                   {#if "thread" in contact && "id" in contact.thread && Conversation.isOutstanding(contact.thread)}
                     <button
                       on:click={() => acknowledge(contact)}
