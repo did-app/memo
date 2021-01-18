@@ -14,8 +14,8 @@
   }
 </style>
 
-<div class="bg-gray-100 rounded border-l-4 border-gray-300">
-  <div class="flex flex-wrap px-2 pt-2">
+<div class="rounded-lg border p-4" style="background:#F9F5F1;">  
+  <div class="flex flex-wrap">
     {#each images as image}
       <label class="h-32 w-1/2 md:w-1/3 overflow-hidden cursor-pointer">
         <img class="object-cover hover-zoom min-h-full" src={image} alt="" />
@@ -30,7 +30,7 @@
     {/each}
   </div>
   <h5 style="margin:0;" class="pt-1 px-2">{title}</h5>
-  <div class="flex items-center text-purple-800 px-2 pb-1 opacity-75">
+  <div class="flex items-center px-2 pb-1 opacity-75">
     <svg
       class="fill-current w-4 h-4 mr-1 inline"
       xmlns="http://www.w3.org/2000/svg"
@@ -48,8 +48,7 @@
     </svg>
     <!-- style added because markdown a taking precidence -->
     <a
-      style="color:#553c9a"
-      class="truncate text-purple-800 flex-1 text-sm"
+      class="truncate flex-1 text-sm"
       href={url}
       target="_blank">
       {url}
