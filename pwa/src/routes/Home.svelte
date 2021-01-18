@@ -74,8 +74,13 @@
 
               <br />
               <p class="mt-2 truncate">
-                {#each Writing.summary(thread.latest.content) as span, index}
-                  <SpanComponent {span} {index} unfurled={false} />
+                {#each Writing.summary(thread.latest.content) as span}
+                  <SpanComponent
+                    {span}
+                    offset={0}
+                    unfurled={false}
+                    placeholder={null}
+                  />
                 {/each}
               </p>
             {/if}
