@@ -18,7 +18,7 @@
       if ("text" in span) {
         return offset + span.text.length;
       } else if ("url" in span) {
-        return offset + span.url.length;
+        return offset + 1;
       } else {
         return offset;
       }

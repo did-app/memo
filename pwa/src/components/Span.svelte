@@ -19,7 +19,9 @@
       <Glance href={span.url} text={span.title} />
     </span>
   {:else}
-    <span class="border-b hover:border-purple-700 mx-1 whitespace-no-wrap">
+    <span
+      class="border-b hover:border-purple-700 whitespace-no-wrap"
+      contenteditable="false">
       <Link url={span.url} title={span.title} {offset} />
     </span>
   {/if}

@@ -47,10 +47,7 @@
       alert("no target range");
       return;
     }
-    console.log(domRange);
-
     const result = Writing.rangeFromDom(domRange);
-    console.log(result);
 
     if (result === null) {
       throw "There should always be a range";
@@ -61,15 +58,18 @@
     blocks = updated;
     tick().then(function () {
       let paragraph = Writing.nodeFromPath(composer, cursor.path);
-      let span = paragraph.childNodes[0] as HTMLElement;
+      let line = Writing.getLine(updated, cursor.path);
+      let [spanIndex, offset] = Writing.spanFromOffset(line, cursor.offset);
+      let span = paragraph.children[spanIndex] as HTMLElement;
       let textNode = span.childNodes[0] as Node;
+
       // This is why slate has it's weak Map
 
       let selection = window.getSelection();
       const domRange = selection?.getRangeAt(0);
       if (selection && domRange) {
-        domRange.setStart(textNode, cursor.offset);
-        domRange.setEnd(textNode, cursor.offset);
+        domRange.setStart(textNode, offset);
+        domRange.setEnd(textNode, offset);
         selection.addRange(domRange);
       }
     });

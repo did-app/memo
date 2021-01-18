@@ -3,7 +3,7 @@ import type { Path } from "./path"
 import type { Point } from "./point"
 
 import type { Span } from "./elements"
-import { splitSpans } from "./tree"
+import { splitSpans, spanFromOffset } from "./tree"
 
 function P(path: Path, offset: number) { return { path, offset } }
 function R(anchor: Point, focus: Point | undefined = anchor) { return { anchor, focus } }
@@ -37,4 +37,28 @@ test("split line with link", function () {
   parts = splitSpans(lineWithLink, 7)
   expect(parts[0]).to.eql(lineWithLink)
   expect(parts[1]).to.eql([{ type: 'text', text: "" }])
+})
+
+test("offset to span", function () {
+  let result: [number, number]
+
+  result = spanFromOffset(lineWithLink, 0)
+  expect(result[0]).to.eq(0)
+  expect(result[1]).to.eq(0)
+
+  result = spanFromOffset(lineWithLink, 1)
+  expect(result[0]).to.eq(0)
+  expect(result[1]).to.eq(1)
+
+  result = spanFromOffset(lineWithLink, 3)
+  expect(result[0]).to.eq(0)
+  expect(result[1]).to.eq(3)
+
+  result = spanFromOffset(lineWithLink, 4)
+  expect(result[0]).to.eq(2)
+  expect(result[1]).to.eq(0)
+
+  result = spanFromOffset(lineWithLink, 5)
+  expect(result[0]).to.eq(2)
+  expect(result[1]).to.eq(1)
 })

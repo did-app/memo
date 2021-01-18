@@ -22,12 +22,14 @@ export function insertText(blocks: Block[], range: Range, text: string): [Block[
   const [preBlocks, _slice, postBlocks] = extractBlocks(blocks, range)
 
   const [bumpedSpans, remainingBlocks] = popLine(postBlocks);
-  blocks = appendSpans(preBlocks, { type: 'text', text: text }, bumpedSpans).concat(remainingBlocks)
+  let [updated, removed] = appendSpans(preBlocks, { type: 'text', text: text }, bumpedSpans)
+
+  updated = updated.concat(remainingBlocks)
 
   const [start] = range_module.edges(range)
-  const cursor = { ...start, offset: start.offset + text.length }
+  const cursor = { ...start, offset: start.offset + text.length - removed }
   // Normalizing spans doesn't change length BUT pulling square brackets out to a link would
-  return [blocks, cursor]
+  return [updated, cursor]
 }
 
 function normalizeSpans(spans: Span[]): Span[] {

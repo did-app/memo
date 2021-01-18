@@ -1,6 +1,7 @@
 import type { Range } from "./range";
 import * as range_module from "./range"
 import type { Span, Block } from "./elements"
+import type { Path } from "./path"
 import type { Point } from "./point"
 import * as point_module from "./point"
 
@@ -11,14 +12,39 @@ export function arrayPopIndex<T>(items: T[], index: number): [T[], T | undefined
   const item = items[index];
   return [pre, item, post]
 }
+
+export function spanFromOffset(spans: Span[], offset: number): [number, number] {
+  let index = 0
+  let remaining = offset
+  while (remaining > 0) {
+    let span = spans[0]
+    spans = spans.slice(1)
+    if (!span) {
+      throw "I think there should be a span"
+    }
+    if ('text' in span) {
+      let length = span.text.length
+      if (length < remaining) {
+        remaining = remaining - length
+        index = index + 1
+      } else {
+        break
+      }
+    } else {
+      remaining = remaining - 1
+      index = index + 1
+    }
+  }
+  return [index, remaining]
+}
+
 // https://www.smashingmagazine.com/2019/02/regexp-features-regular-expressions/#lookbehind-assertions
 // lookahead assertion
 const possible = RegExp("(https?://[^\\s]+)(?=\\s)|([^\\.\\?]+\\?(\\s|$))(?=\\s)", "g")
 
-export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): Block[] {
+export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): [Block[], number] {
   const unmodifiedBlocks = blocks.slice(0, -1)
   const lastBlock = blocks[blocks.length - 1] || { type: 'paragraph', spans: [] };
-
 
   if ("spans" in lastBlock) {
     // const spans = normalizeSpans([...lastBlock.spans, ...newSpans])
@@ -43,22 +69,25 @@ export function appendSpans(blocks: Block[], joinSpan: Span, newSpans: Span[]): 
     }
     post = post.concat(newSpans.slice(1))
 
-    let spans = comprehendText(buffer).concat(post)
-    return [...unmodifiedBlocks, { ...lastBlock, spans }]
+    let [spans, removed] = comprehendText(buffer)
+    spans = lastBlock.spans.slice(0, -1).concat(spans).concat(post)
+    return [[...unmodifiedBlocks, { ...lastBlock, spans }], removed]
   } else {
-    const innerBlocks = appendSpans(lastBlock.blocks, joinSpan, newSpans)
-    return [...unmodifiedBlocks, { ...lastBlock, blocks: innerBlocks }]
+    const [innerBlocks, removed] = appendSpans(lastBlock.blocks, joinSpan, newSpans)
+    return [[...unmodifiedBlocks, { ...lastBlock, blocks: innerBlocks }], removed]
   }
 }
 
-export function comprehendText(buffer: string, matcher = possible): Span[] {
+export function comprehendText(buffer: string, matcher = possible): [Span[], number] {
   if (buffer === "") {
-    return [{ type: 'text', text: "" }]
+    let span: Span = { type: 'text', text: "" }
+    return [[span], 0]
   }
   let found = Array.from(buffer.matchAll(matcher))
 
   let current = 0
   let output: Span[] = []
+  let removed = 0
   found.forEach(function (match) {
     const [all, plain] = match
     if (match.index == current) {
@@ -66,6 +95,11 @@ export function comprehendText(buffer: string, matcher = possible): Span[] {
     } else {
       output.push({ type: 'text', text: buffer.slice(current, match.index) })
     }
+    let matchedText = match[0]
+    if (matchedText === undefined) {
+      throw "there should be some text, otherwise it wouldn't be a match"
+    }
+    removed = removed + matchedText.length - 1
     if (!plain) {
       throw "We haven't sorted this link out yet"
     }
@@ -81,7 +115,8 @@ export function comprehendText(buffer: string, matcher = possible): Span[] {
   if (current < buffer.length) {
     output.push({ type: 'text', text: buffer.slice(current) })
   }
-  return output
+
+  return [output, removed]
 }
 
 export function summary(blocks: Block[]): Span[] {
@@ -168,6 +203,22 @@ function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
     const [preChildren, postChildren] = splitSpans(block.spans, inner.offset)
     return [[...pre, { ...block, spans: preChildren }], [{ ...block, spans: postChildren }, ...post]]
 
+  }
+}
+
+export function getLine(blocks: Block[], path: Path): Span[] {
+  const [index, ...rest] = path
+  if (index === undefined) {
+    throw "Could not get line"
+  }
+  let block = blocks[index]
+  if (!block) {
+    throw "invalid path"
+  }
+  if ('spans' in block) {
+    return block.spans
+  } else {
+    return getLine(block.blocks, rest)
   }
 }
 
