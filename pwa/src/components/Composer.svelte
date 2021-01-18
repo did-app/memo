@@ -47,7 +47,11 @@
       alert("no target range");
       return;
     }
+    console.log(domRange);
+
     const result = Writing.rangeFromDom(domRange);
+    console.log(result);
+
     if (result === null) {
       throw "There should always be a range";
     }

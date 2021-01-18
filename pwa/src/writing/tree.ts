@@ -102,7 +102,7 @@ export function extractBlocks(blocks: Block[], range: Range): [Block[], Block[],
   return [preBlocks, slicedBlocks, postBlocks]
 }
 
-function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
+export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
   const pre: Span[] = []
   // What do we do with an empty span? keep normalise might work.
   while (offset >= 0) {
@@ -114,11 +114,8 @@ function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
     spans = spans.slice(1)
 
 
-    let length = spanLength(span)
-    if (length >= offset) {
-      // offset only changes if text exits, softbreak has length 0
-      if ('text' in span) {
-
+    if ('text' in span) {
+      if (span.text.length >= offset) {
         let preText = span.text.slice(0, offset)
         let postText = span.text.slice(offset)
 
@@ -127,14 +124,31 @@ function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
           [{ ...span, text: postText }, ...spans]
         ]
       } else {
-        throw "split other things"
+        pre.push(span)
+        offset = offset - span.text.length
+
       }
     } else {
-      pre.push(span)
-      offset = offset - length
+      if (offset === 1) {
+        return [
+          [...pre, span],
+          spans
+        ]
+      } else {
+        pre.push(span)
+        offset = offset - 1
+      }
     }
   }
   return [pre, spans]
+}
+
+function spanLength(span: Span): number {
+  if ('text' in span) {
+    return span.text.length
+  } else {
+    return 1
+  }
 }
 
 function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
@@ -158,14 +172,6 @@ function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
     const [preChildren, postChildren] = splitSpans(block.spans, inner.offset)
     return [[...pre, { ...block, spans: preChildren }], [{ ...block, spans: postChildren }, ...post]]
 
-  }
-}
-// TODO fix this weird
-function spanLength(span: Span): number {
-  if ('text' in span) {
-    return span.text.length + 1
-  } else {
-    return 0
   }
 }
 
