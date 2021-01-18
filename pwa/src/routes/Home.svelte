@@ -1,10 +1,10 @@
 <script lang="typescript">
   import router from "page";
   import * as Conversation from "../conversation";
-  // import * as Writing from "../writing";
+  import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
   import type { State } from "../sync";
-  // import SpanComponent from "../components/Span.svelte";
+  import SpanComponent from "../components/Span.svelte";
 
   export let state: State;
   let contactEmailAddress = "";
@@ -17,19 +17,21 @@
 <svelte:head>
   <title>Better Conversations</title>
 </svelte:head>
-{#if 'me' in state && state.me}
+{#if "me" in state && state.me}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
     <h1 class="text-2xl pb-2">Your Contacts</h1>
     {#each state.flash as f}
-      {#if f.type === 'acknowledged'}
+      {#if f.type === "acknowledged"}
         <article
-          class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white">
+          class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+        >
           <h2 class="font-bold">Sucess</h2>
           <p>{f.contact.identifier.emailAddress}</p>
         </article>
-      {:else if f.type === 'install_available'}
+      {:else if f.type === "install_available"}
         <article
-          class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white">
+          class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+        >
           <h2 class="font-bold">Available to install</h2>
           <button
             on:click={f.prompt}
@@ -44,7 +46,8 @@
     {/each}
     {#if state.me.greeting === null}
       <article
-        class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white">
+        class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+      >
         <h2 class="font-bold">Set up a greeting</h2>
         <p>
           Help filter new contacts when they reach out to you. Set up your
@@ -58,30 +61,39 @@
         <li>
           <a
             class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-gray-400 hover:border-gray-800 focus:shadow-xl"
-            href={emailAddressToPath(identifier.emailAddress) + '#' + thread.acknowledged}>
+            href={emailAddressToPath(identifier.emailAddress) +
+              "#" +
+              thread.acknowledged}>
             <span class="font-bold text-base">{identifier.emailAddress}</span>
-            
-              {#if Conversation.isOutstanding(thread)}
-                New message
-              {:else}All caught up{/if}
-              {#if thread.latest}
-                {thread.latest.posted_at.toLocaleDateString()}
-                       
+
+            {#if Conversation.isOutstanding(thread)}
+              New message
+            {:else}All caught up{/if}
+            {#if thread.latest}
+              {thread.latest.posted_at.toLocaleDateString()}
+
               <br />
-              <p class="mt-2 truncate">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-              <!--<p class="truncate border rounded px-4">
+              <p class="mt-2 truncate">
                 {#each Writing.summary(thread.latest.content) as span, index}
                   <SpanComponent {span} {index} unfurled={false} />
                 {/each}
-              </p>-->
+              </p>
             {/if}
           </a>
         </li>
       {/each}
     </ol>
     <form on:submit|preventDefault={findContact}>
-      <input class="border border-gray-400 focus:border-2 focus:border-gray-800 mt-8 p-2 rounded w-3/6" type="email" bind:value={contactEmailAddress} placeholder="Search Contacts"/>
-      <button class="px-6 py-2 border bg-gray-400 hover:bg-gray-800 text-white rounded" type="submit">Search</button>
+      <input
+        class="border border-gray-400 focus:border-2 focus:border-gray-800 mt-8 p-2 rounded w-3/6"
+        type="email"
+        bind:value={contactEmailAddress}
+        placeholder="Search Contacts"
+      />
+      <button
+        class="px-6 py-2 border bg-gray-400 hover:bg-gray-800 text-white rounded"
+        type="submit">Search</button
+      >
     </form>
   </main>
 {/if}
