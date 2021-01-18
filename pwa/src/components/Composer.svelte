@@ -99,8 +99,11 @@
   function handleDragDelete(event: DragEvent) {
     if (event.dataTransfer) {
       let start = parseInt(event.dataTransfer.getData("memo/position"));
-      // index is position -1
+
       blocks.splice(start, 1);
+      if (blocks.length === 0) {
+        blocks = [{ type: "paragraph", spans: [{ type: "text", text: "" }] }];
+      }
 
       blocks = blocks;
     }
