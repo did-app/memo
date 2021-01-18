@@ -10,10 +10,10 @@
   export let placeholder: "answer" | "message" | null;
 </script>
 
-{#if span.type === 'text'}
+{#if span.type === "text"}
   <Text text={span.text} {offset} {placeholder} />
-{:else if span.type === 'link'}
-  <!-- TODO Need to wrap to get an offset -->
+{:else if span.type === "link"}
+  <!-- Need to wrap to get an offset -->
   {#if unfurled}
     <span contenteditable="false">
       <Glance href={span.url} text={span.title} />
@@ -23,4 +23,4 @@
       <Link url={span.url} title={span.title} {offset} />
     </span>
   {/if}
-{:else if span.type === 'softbreak'}<br />{/if}
+{:else if span.type === "softbreak"}<br />{/if}

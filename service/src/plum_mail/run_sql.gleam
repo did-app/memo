@@ -47,7 +47,7 @@ pub fn execute(sql, args, mapper) {
   try tuple(_, _, rows) =
     pgo.query(conn, sql, args)
     |> result.map_error(fn(err) {
-      // TODO this should have a bug report and bug report id
+      // this should have a bug report and bug report id, but we can see it in the heroku SQL view perhaps
       io.debug(err)
       // tuple(error.InternalServiceError, "Failed to query the database")
       todo("DB Error")
@@ -57,8 +57,8 @@ pub fn execute(sql, args, mapper) {
   |> Ok()
 }
 
-// TODO return error with a not found type that can use try
-// TODO replace with list.head
+//  return error with a not found type that can use try
+//  replace with list.head
 pub fn single(rows) {
   case rows {
     [] -> None

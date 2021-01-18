@@ -108,7 +108,7 @@ test('end of empty comment lifts from annotation', function () {
 
 
 
-// TODO we don't do this because if multiple lines lifted what do we merge.
+// we don't do this because if multiple lines lifted what do we merge.
 // test('empty lines are merged when lifted', function () {
 //   const blocks: Block[] = [
 //     {
@@ -136,5 +136,4 @@ test('empty lines are merged when inline', function () {
 
   expect(updated.length).to.eq(3)
   expect(cursor).to.eql(P([2], 0))
-  // TODO at the beggining of the line
 })

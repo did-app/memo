@@ -113,7 +113,8 @@
   style="max-height: 60vh;"
   contenteditable
   data-memo-position={position}
-  on:beforeinput|preventDefault={handleInput}>
+  on:beforeinput|preventDefault={handleInput}
+>
   {#each blocks as block, index}
     <div
       class="flex "
@@ -123,27 +124,30 @@
       }}
       on:dragend={handleDragEnd}
       {ondragover}
-      on:drop={(event) => handleDrop(event, index)}>
+      on:drop={(event) => handleDrop(event, index)}
+    >
       <!-- text return false on dragover works, function call doesn't? -->
       <!-- -ml because padding on article is 2, probably should be dropped -->
       <div
         class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
-        contenteditable="false">
-        <!-- TODO get drag icon -->
+        contenteditable="false"
+      >
         <Icons.Drag />
       </div>
       <BlockComponent
         {block}
         {index}
         peers={previous}
-        placeholder={index === 0 ? 'message' : null} />
+        placeholder={index === 0 ? "message" : null}
+      />
     </div>
   {:else}
     <BlockComponent
-      block={{ type: 'paragraph', spans: [] }}
+      block={{ type: "paragraph", spans: [] }}
       index={0}
       peers={previous}
-      placeholder={'message'} />
+      placeholder={"message"}
+    />
   {/each}
 </div>
 {#if dragging}

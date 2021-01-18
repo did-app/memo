@@ -25,7 +25,7 @@ pub fn handle(params, config) {
   case tuple(to_email_address.value, to_hash) {
     tuple("peter@plummail.co", "") -> {
       // We just send back, assuming it is set up properly
-      // TODO look up profile/account/contact
+      // look up profile/account/contact
       let from = to_email_address
       let to = from_email_address
       let subject = "Please add some context"
@@ -56,7 +56,7 @@ pub fn handle(params, config) {
       assert Ok(identifier) = identifier.find_or_create(from_email_address)
       // assert Ok(participation) =
       //   discuss.load_participation(conversation_id, identifier.id)
-      // TODO actually write a message
+      // Need to actually write a message
       // try _ = write_message.execute(participation, params)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))

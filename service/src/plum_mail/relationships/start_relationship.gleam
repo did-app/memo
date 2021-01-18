@@ -69,7 +69,7 @@ pub fn execute(params, user_id) {
     None -> Nil
     Some(tuple(position, author_id, content)) -> {
       let content: Json = content
-      // TODO it's just a map you pass in
+      // it's just a map you pass in
       assert Ok(note) =
         thread.post_memo(thread_id, position, author_id, content)
       Nil

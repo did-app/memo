@@ -91,7 +91,7 @@ fn do_identify_client(request, config, now) {
       try _ = check_timestamp(active_at, Days(3), now)
       try _ = case http.get_req_header(request, "user-agent") {
         Ok(ua) if ua == user_agent -> Ok(Nil)
-        _ -> // we're not currently checking user agents match TODO
+        _ -> // we're not currently checking user agents match
           // NOTE putting a mobile view on chrome inspector tools changes the user agent.
           Ok(Nil)
       }

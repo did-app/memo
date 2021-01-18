@@ -41,7 +41,7 @@ has become
 https://github.com/open-telemetry/opentelemetry-js/pull/300
 
 ```js
-// TODO ConsoleSpanExporter doesn't exist
+//  ConsoleSpanExporter doesn't exist
 // import { SimpleSpanProcessor } from '@opentelemetry/tracing';
 // import * as WebTracerProvider from '@opentelemetry/web';
 // console.log(WebTracerProvider);

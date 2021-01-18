@@ -11,7 +11,7 @@ import plum_mail/run_sql
 import plum_mail/threads/thread
 
 fn load_pairing(contact_id, identifier_id) {
-  // TODO switch this over to select on lower upper and return ack.
+  // switch this over to select on lower upper and return ack.
   // Can pull in gleam land last message for thread summary
   let sql =
     "

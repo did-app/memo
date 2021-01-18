@@ -47,7 +47,7 @@ pub fn run() {
   LEFT JOIN memo_notifications AS notifications
     ON notifications.thread_id = memos.thread_id
     AND notifications.position = memos.position
-    AND notifications.identifier_id = participants.identifier_id
+    AND notifications.recipient_id = participants.identifier_id
   WHERE notifications IS NULL
   AND memos.position > participants.ack
   AND participants.email_address <> 'peter@plummail.co'
@@ -198,7 +198,7 @@ fn dispatch_to_identifier(record, config) {
         |> io.debug()
       Ok(Nil)
     }
-    // TODO why was that, handle case of bad email addresses
+    // why was that, handle case of bad email addresses
     Error(postmark.Failure(retry: True)) -> Ok(Nil)
     Error(postmark.Failure(retry: False)) -> {
       record_failed(thread_id, position, recipient_id)
@@ -215,36 +215,33 @@ fn send(request, postmark_api_token) {
   }
 }
 
-fn contact_link(origin, contact, identifier_id) {
-  assert Ok(code) = authentication.generate_link_token(identifier_id)
+fn contact_link(origin, contact, recipient_id) {
+  assert Ok(code) = authentication.generate_link_token(recipient_id)
   [origin, email_address.to_path(contact), "#code=", code]
   |> string.join("")
 }
 
-pub fn record_result(thread_id, position, identifier_id, success) {
-  // TODO rename to recipient id
-  // TODO rename memo
-  // TODO think about renaming position
+pub fn record_result(thread_id, position, recipient_id, success) {
   let sql =
     "
-    INSERT INTO memo_notifications (thread_id, position, identifier_id, success)
+    INSERT INTO memo_notifications (thread_id, position, recipient_id, success)
     VALUES ($1, $2, $3, $4)
     RETURNING *
     "
   let args = [
     pgo.int(thread_id),
     pgo.int(position),
-    pgo.int(identifier_id),
+    pgo.int(recipient_id),
     pgo.bool(success),
   ]
   let mapper = fn(x) { x }
   run_sql.execute(sql, args, mapper)
 }
 
-pub fn record_sent(thread_id, position, identifier_id) {
-  record_result(thread_id, position, identifier_id, True)
+pub fn record_sent(thread_id, position, recipient_id) {
+  record_result(thread_id, position, recipient_id, True)
 }
 
-pub fn record_failed(thread_id, position, identifier_id) {
-  record_result(thread_id, position, identifier_id, False)
+pub fn record_failed(thread_id, position, recipient_id) {
+  record_result(thread_id, position, recipient_id, False)
 }

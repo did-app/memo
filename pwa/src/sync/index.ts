@@ -79,7 +79,7 @@ start().then(set).then(function () {
     })
   })
 })
-// TODO single function to handle auth response and fetch contacts
+// Needs single function to handle auth response and fetch contacts
 // fetch contacts is separate so it can be updated periodically
 
 export const sync = {
@@ -94,7 +94,7 @@ export async function authenticateByPassword(emailAddress: string, password: str
   let me = authResponse.data
   let inboxResponse = await API.fetchContacts();
   if ("error" in inboxResponse) {
-    throw "TODO error";
+    throw "some error we aint fixed yet";
   }
   set({ loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, error: undefined })
   return authResponse

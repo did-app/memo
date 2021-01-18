@@ -30,7 +30,7 @@
 
   export let emailAddress: string;
 
-  // TODO this needs to be a promise of old ones we load up
+  // This needs to be a promise of old ones we load up
   let contact = Social.contactForEmailAddress(state.contacts, emailAddress);
 
   // Note scroll after loadMemos
@@ -48,7 +48,7 @@
       "hashchange",
       function () {
         let id = window.location.hash.slice(1);
-        // TODO I think we need an on distroy
+        // I think we need an on distroy
         if (id) {
           target = parseInt(id);
         }
@@ -154,27 +154,12 @@
   }
 </script>
 
-<style>
-  .sidebar {
-    grid-template-columns: minmax(0px, 1fr) 0px;
-  }
-
-  @media (min-width: 768px) {
-    .sidebar {
-      grid-template-columns: minmax(0px, 1fr) 0px;
-    }
-  }
-  .shadow-top {
-    box-shadow: 0 -3px 10px 0px rgb(143 143 143);
-  }
-</style>
-
 <svelte:head>
   <title>{emailAddress}</title>
 </svelte:head>
 
 <!-- {JSON.stringify(blocks)} -->
-{#if 'me' in state && state.me}
+{#if "me" in state && state.me}
   <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-2xl">
     {#await loading}
       <div>
@@ -182,17 +167,18 @@
       </div>
       <div />
     {:then response}
-      {#if 'data' in response}
+      {#if "data" in response}
         <div class="">
           <div class="" bind:this={root}>
             <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
             {#each response.data.slice(contact.thread.acknowledged - 1) as memo} -->
-            <!-- TODO reduced shown -->
             {#each response.data as memo}
               <MemoComponent
                 {memo}
-                open={memo.position >= contact.thread.acknowledged || memo.position === target}
-                peers={response.data} />
+                open={memo.position >= contact.thread.acknowledged ||
+                  memo.position === target}
+                peers={response.data}
+              />
             {:else}
               <h1 class="text-center text-2xl my-4 text-gray-700">
                 Contact
@@ -201,14 +187,18 @@
             {/each}
           </div>
           <article
-            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top">
+            class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
+          >
             <div class:hidden={!reply}>
               <Composer
                 previous={response.data}
                 bind:this={composer}
-                blocks={[{ type: 'paragraph', spans: [{ type: 'text', text: '' }] }]}
+                blocks={[
+                  { type: "paragraph", spans: [{ type: "text", text: "" }] },
+                ]}
                 position={response.data.length + 1}
-                let:blocks>
+                let:blocks
+              >
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
                   <div class="flex flex-1" />
                   <button
@@ -235,7 +225,8 @@
             {#if !reply}
               {#if userFocus}
                 <div
-                  class="truncate ml-6 md:ml-12 border-gray-600 border-l-4 px-2 text-gray-600">
+                  class="truncate ml-6 md:ml-12 border-gray-600 border-l-4 px-2 text-gray-600"
+                >
                   <!-- {#each Writing.summary(Conversation.followReference(userFocus, response.data)) as span, index}
                     <SpanComponent {span} {index} unfurled={false} />
                   {/each} -->
@@ -248,7 +239,8 @@
                       {block}
                       peers={response.data}
                       truncate={false}
-                      placeholder={null} />
+                      placeholder={null}
+                    />
                   {/each}
                 </div>
               {/if}
@@ -280,7 +272,7 @@
                     </span>
                     <span class="py-1">Pins</span>
                   </button>
-                  {#if 'thread' in contact && 'id' in contact.thread && Conversation.isOutstanding(contact.thread)}
+                  {#if "thread" in contact && "id" in contact.thread && Conversation.isOutstanding(contact.thread)}
                     <button
                       on:click={() => acknowledge(contact)}
                       class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
@@ -300,7 +292,6 @@
                       <Icons.ReplyAll />
                     </span>
                     <span class="py-1">
-                      <!-- TODO Icons.scribe  -->
                       {#if false}Draft{:else}Reply{/if}
                     </span>
                   </button>
@@ -312,17 +303,20 @@
         <div class="">
           <ul
             class="max-w-sm w-full sticky overflow-hidden"
-            style="top:0.25rem">
+            style="top:0.25rem"
+          >
             {#each Conversation.findPinnable(response.data) as pin}
               <li
-                class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded flex items-center">
-                {#if pin.item.type === 'link'}
+                class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded flex items-center"
+              >
+                {#if pin.item.type === "link"}
                   <LinkComponent
                     url={pin.item.url}
                     title={pin.item.title}
-                    offset={0} />
-                {:else if pin.item.type === 'annotation'}
-                  <!-- TODO remove dummy index, simply make it optional -->
+                    offset={0}
+                  />
+                {:else if pin.item.type === "annotation"}
+                  <!-- remove dummy index, simply make it optional -->
 
                   <span class="w-5 inline-block mr-2">
                     <Icons.Attachment />
@@ -340,4 +334,19 @@
       {/if}
     {/await}
   </div>
-{:else}TODO rest of contact page{/if}
+{:else}rest of contact page{/if}
+
+<style>
+  .sidebar {
+    grid-template-columns: minmax(0px, 1fr) 0px;
+  }
+
+  @media (min-width: 768px) {
+    .sidebar {
+      grid-template-columns: minmax(0px, 1fr) 0px;
+    }
+  }
+  .shadow-top {
+    box-shadow: 0 -3px 10px 0px rgb(143 143 143);
+  }
+</style>

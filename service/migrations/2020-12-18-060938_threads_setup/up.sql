@@ -1,5 +1,20 @@
--- TODO this might need a topic/subject but only applies to linked thread
--- I suspect linked joins to threads in the same way pair or group does
+CREATE TABLE identifiers (
+  id SERIAL PRIMARY KEY,
+  email_address VARCHAR NOT NULL UNIQUE,
+  greeting jsonb,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+SELECT diesel_manage_updated_at('identifiers');
+
+CREATE TABLE link_tokens (
+  selector VARCHAR PRIMARY KEY,
+  validator VARCHAR NOT NULL,
+  identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE threads (
   id SERIAL PRIMARY KEY,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -17,12 +32,12 @@ CREATE TABLE pairs (
   CHECK (upper_identifier_ack >= 0),
   PRIMARY KEY (lower_identifier_id, upper_identifier_id),
   thread_id INT REFERENCES threads(id) NOT NULL
-  -- timestamps on thread
+  -- Doesn't need a timestamps as it is always references a thread and is an immutable record
 );
 
 ALTER TABLE pairs ADD CONSTRAINT pair_identifier_order
     CHECK (lower_identifier_id < upper_identifier_id);
--- STRICTLY lover so can't be pair with oneself
+-- This is strictly lower so identifier can't be pair with itself
 
 CREATE TABLE memos (
   thread_id INT REFERENCES threads(id) NOT NULL,
@@ -37,17 +52,12 @@ CREATE TABLE memos (
 
 SELECT diesel_manage_updated_at('memos');
 
--- We aren't tracking invited by because go on first message
-
 CREATE TABLE memo_notifications (
   id SERIAL PRIMARY KEY,
   thread_id INT NOT NULL,
   position INT NOT NULL,
-  -- TODO check does foreign key mean the combination is valid?
   FOREIGN KEY (thread_id, position) REFERENCES memos(thread_id, position),
-  identifier_id INT REFERENCES identifiers(id) NOT NULL,
+  recipient_id INT REFERENCES identifiers(id) NOT NULL,
   success BOOLEAN NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-
-ALTER TABLE identifiers ADD COLUMN greeting jsonb;
