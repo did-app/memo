@@ -31,6 +31,8 @@ export function spanFromOffset(spans: Span[], offset: number): [number, number] 
         break
       }
     } else {
+      // Links count as length one items and we skip over them as much as possible so the cursor is in spans either side.
+      // Because they have length one they can be caught in ranges for deletion
       remaining = remaining - 1
       index = index + 1
     }
