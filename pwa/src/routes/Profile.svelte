@@ -98,8 +98,8 @@
             <span class="py-1"> Save </span>
           </button>
         </div>
+        {JSON.stringify(blocks)}
       </Composer>
     </article>
-    {JSON.stringify(blocks)}
   </main>
 {/if}
