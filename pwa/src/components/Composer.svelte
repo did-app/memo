@@ -44,14 +44,14 @@
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
 
-    console.log(event);
-    alert(
-      event.inputType +
-        " with the following composing " +
-        isComposing +
-        " data: " +
-        JSON.stringify(event.data)
-    );
+    // console.log(event);
+    // alert(
+    //   event.inputType +
+    //     " with the following composing " +
+    //     isComposing +
+    //     " data: " +
+    //     JSON.stringify(event.data)
+    // );
 
     let range: Range;
     if (domRange !== undefined) {
@@ -143,9 +143,10 @@
   contenteditable
   on:input={() => {
     // This shouldn't be firing, it might on android
-    alert(
-      "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
-    );
+    // alert(
+    //   "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
+    // );
+    return false;
     // Disabled doesn't seem to do anything on content editable
   }}
   disabled
