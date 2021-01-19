@@ -56,6 +56,8 @@
       // domRange SHOULD NOT be undefined however on chrome for android this often seems to be the case.
       // This fix doesn't tackle moving the range for collapsed delete events
       if (selected === null) {
+        // We still to this point on chrome on android when we press Space or new line
+        alert(event.inputType + " with the following data: " + event.data);
         throw "How did we get input";
       } else {
         range = selected;
@@ -125,11 +127,13 @@
 <div
   bind:this={composer}
   class="outline-none overflow-y-auto"
-  style="max-height: 60vh;"
+  style="max-height: 60vh; caret-color: #6ab869;"
   contenteditable
   on:input={() => {
     // This shouldn't be firing, it might on android
-    alert("input event");
+    alert(
+      "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
+    );
     // Disabled doesn't seem to do anything on content editable
   }}
   disabled
