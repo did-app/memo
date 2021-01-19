@@ -131,7 +131,7 @@
 
     // );
     // Prevent default on before input stops this mostly
-    console.log("input", event, event.getTargetRanges());
+    console.log("input!!!!", event, event.getTargetRanges());
 
     return false;
     // Disabled doesn't seem to do anything on content editable
@@ -167,6 +167,7 @@
       let { updated, cursor } = composition;
       composition = null;
       tick().then(() => {
+        blocks = blocks;
         Writing.placeCursor(composer, updated, cursor);
       });
     }
