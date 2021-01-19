@@ -57,7 +57,11 @@
       // This fix doesn't tackle moving the range for collapsed delete events
       if (selected === null) {
         // We still to this point on chrome on android when we press Space or new line
-        alert(event.inputType + " with the following data: " + event.data);
+        alert(
+          event.inputType +
+            " with the following data: " +
+            JSON.stringify(event.data)
+        );
         throw "How did we get input";
       } else {
         range = selected;
