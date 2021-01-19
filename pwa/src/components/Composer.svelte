@@ -127,6 +127,12 @@
   class="outline-none overflow-y-auto"
   style="max-height: 60vh;"
   contenteditable
+  on:input={() => {
+    // This shouldn't be firing, it might on android
+    alert("input event");
+    // Disabled doesn't seem to do anything on content editable
+  }}
+  disabled
   data-memo-position={position}
   on:beforeinput|preventDefault={handleInput}
 >
