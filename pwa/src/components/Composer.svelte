@@ -145,7 +145,9 @@
     // This shouldn't be firing, it might on android
     // alert(
     //   "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
+
     // );
+    // Prevent default on before input stops this mostly
     return false;
     // Disabled doesn't seem to do anything on content editable
   }}

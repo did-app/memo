@@ -76,8 +76,7 @@
         let:blocks
       >
         <!-- {JSON.stringify(state.me)}
-        <br />
-        {JSON.stringify(blocks)} -->
+        <br /> -->
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
           <div class="flex flex-1" />
           <button
@@ -101,5 +100,6 @@
         </div>
       </Composer>
     </article>
+    {JSON.stringify(blocks)}
   </main>
 {/if}
