@@ -4,11 +4,9 @@ import gleam/json
 import plum_mail/relationships/start_relationship
 import gleam/should
 import plum_mail/support
-
 // pub fn successfully_start_relationship_test() {
 //   assert Ok(user) = support.generate_identifier("example.test")
 //   assert Ok(other) = support.generate_identifier("example.test")
-
 //   // let json =
 //   //   json.object([
 //   //     tuple(
