@@ -1,7 +1,7 @@
 <script lang="typescript">
   import { tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
-  import type { Block, InputEvent, Range } from "../writing";
+  import type { Block, InputEvent, Range, Point } from "../writing";
   import * as Writing from "../writing";
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
@@ -12,6 +12,7 @@
   export let selected: Range | null;
 
   let composer: HTMLElement;
+  let composition: { updated: Block[]; cursor: Point } | null = null;
 
   if (!Writing.isBeforeInputEventAvailable()) {
     alert(
@@ -41,59 +42,60 @@
     ];
   }
 
+  function placeCursor(updated: Block[], cursor: Point) {
+    let paragraph = Writing.nodeFromPath(composer, cursor.path);
+    let line = Writing.getLine(updated, cursor.path);
+    let [spanIndex, offset] = Writing.spanFromOffset(line, cursor.offset);
+    let span = paragraph.children[spanIndex] as HTMLElement;
+    let textNode = span.childNodes[0] as Node;
+
+    // This is why slate has it's weak Map
+
+    let selection = window.getSelection();
+    const domRange = selection?.getRangeAt(0);
+    if (selection && domRange) {
+      domRange.setStart(textNode, offset);
+      domRange.setEnd(textNode, offset);
+      selection.addRange(domRange);
+    }
+  }
   function handleInput(event: InputEvent) {
-    const domRange = event.getTargetRanges()[0];
+    const domRanges = event.getTargetRanges();
 
-    // console.log(event);
-    // alert(
-    //   event.inputType +
-    //     " with the following composing " +
-    //     isComposing +
-    //     " data: " +
-    //     JSON.stringify(event.data)
-    // );
+    if (event.isComposing === false) {
+      const domRange = domRanges[0];
+      if (domRange === undefined) {
+        throw "Should have a target range";
+      }
 
-    let range: Range;
-    if (domRange !== undefined) {
+      let range: Range;
       const result = Writing.rangeFromDom(domRange);
 
       if (result === null) {
-        throw "There should always be a range";
+        throw "There should always be a range for a domRange";
       }
       range = result[0];
-    } else {
-      // domRange SHOULD NOT be undefined however on chrome for android this often seems to be the case.
-      // This fix doesn't tackle moving the range for collapsed delete events
-      if (selected === null) {
-        // We still to this point on chrome on android when we press Space or new line
-        if (isComposing) {
-          return null;
-        }
-        throw "How did we get input";
-      } else {
-        range = selected;
+      const [updated, cursor] = Writing.handleInput(blocks, range, event);
+
+      blocks = updated;
+      tick().then(() => {
+        placeCursor(updated, cursor);
+      });
+    } else if (event.isComposing) {
+      console.log("doo the compose version");
+      const domRange = window.getSelection()?.getRangeAt(0);
+      if (domRange === undefined) {
+        throw "Should have a current selection";
       }
+      const result = Writing.rangeFromDom(domRange);
+
+      if (result === null) {
+        throw "There should always be a range for a domRange";
+      }
+      const [range] = result;
+      const [updated, cursor] = Writing.handleInput(blocks, range, event);
+      composition = { updated, cursor };
     }
-    const [updated, cursor] = Writing.handleInput(blocks, range, event);
-
-    blocks = updated;
-    tick().then(function () {
-      let paragraph = Writing.nodeFromPath(composer, cursor.path);
-      let line = Writing.getLine(updated, cursor.path);
-      let [spanIndex, offset] = Writing.spanFromOffset(line, cursor.offset);
-      let span = paragraph.children[spanIndex] as HTMLElement;
-      let textNode = span.childNodes[0] as Node;
-
-      // This is why slate has it's weak Map
-
-      let selection = window.getSelection();
-      const domRange = selection?.getRangeAt(0);
-      if (selection && domRange) {
-        domRange.setStart(textNode, offset);
-        domRange.setEnd(textNode, offset);
-        selection.addRange(domRange);
-      }
-    });
   }
 
   let dragging = false;
@@ -141,23 +143,52 @@
   class="outline-none overflow-y-auto"
   style="max-height: 60vh; caret-color: #6ab869;"
   contenteditable
-  on:input={() => {
+  on:input={(event) => {
     // This shouldn't be firing, it might on android
     // alert(
     //   "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
 
     // );
     // Prevent default on before input stops this mostly
+    console.log("input", event, event.getTargetRanges());
+
     return false;
     // Disabled doesn't seem to do anything on content editable
   }}
   disabled
   data-memo-position={position}
-  on:compositionstart={() => {
+  on:compositionstart={(event) => {
+    console.log("composition start", window.getSelection().getRangeAt(0));
+
     isComposing = true;
   }}
-  on:compositionend={() => {
+  on:compositionupdate|preventDefault={(event) => {
+    // console.log(
+    //   "composition update",
+    //   event
+    //   //   window.getSelection().getRangeAt(0)
+    // );
+
+    blocks = blocks;
     isComposing = false;
+  }}
+  on:compositionend={(event) => {
+    console.log(event.preventDefault());
+
+    console.log(
+      "composition end",
+      event.data
+      //   window.getSelection().getRangeAt(0),
+      //   false
+    );
+    if (composition) {
+      blocks = composition.updated;
+      let { updated, cursor } = composition;
+      composition = null;
+      tick().then(() => {
+        placeCursor(updated, cursor);
+      });
+    }
   }}
   on:beforeinput|preventDefault={handleInput}
 >
