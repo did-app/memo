@@ -233,10 +233,7 @@
               <Composer
                 previous={response.data.memos}
                 bind:this={composer}
-                selected={composerRange}
-                blocks={[
-                  { type: "paragraph", spans: [{ type: "text", text: "" }] },
-                ]}
+                blocks={[]}
                 position={response.data.memos.length + 1}
                 let:blocks
               >

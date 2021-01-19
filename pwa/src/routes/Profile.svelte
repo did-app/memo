@@ -14,20 +14,7 @@
   if (!("me" in state) || state.me === undefined) {
     throw "This should be an idified page only";
   }
-
-  let composerRange: Range | null = null;
-
-  function handleSelectionChange() {
-    let selection: Selection = (Writing as any).getSelection();
-    let result = Writing.rangeFromDom(selection.getRangeAt(0));
-
-    if (result && result[1] == 1) {
-      const [range] = result;
-      composerRange = range;
-    } else {
-      composerRange = null;
-    }
-  }
+  let blocks = state.me.greeting || [];
 
   async function saveGreeting(blocks: Block[]) {
     // return id somehow, separate public profile from identifier
@@ -68,13 +55,7 @@
     <article
       class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
     >
-      <Composer
-        previous={[]}
-        blocks={state.me.greeting || [{ type: "paragraph", spans: [] }]}
-        position={1}
-        selected={composerRange}
-        let:blocks
-      >
+      <Composer previous={[]} {blocks} position={1} let:blocks>
         <!-- {JSON.stringify(state.me)}
         <br /> -->
         <div class="mt-2 pl-6 md:pl-12 flex items-center">

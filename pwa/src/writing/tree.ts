@@ -193,9 +193,9 @@ function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
 
 
   const [pre, block, post] = arrayPopIndex(blocks, index);
+  // Point must be after blocks
   if (!block) {
-
-    throw "invalid point"
+    return [pre, []]
   }
 
   if ('blocks' in block) {

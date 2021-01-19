@@ -9,7 +9,6 @@
   export let previous: Memo[];
   export let blocks: Block[];
   export let position: number;
-  export let selected: Range | null;
 
   let composer: HTMLElement;
   let composition: { updated: Block[]; cursor: Point } | null = null;
@@ -19,6 +18,8 @@
       "beforeInput event not supported on this browser, sorry the editor will not work."
     );
   }
+
+  // TODO move to editor
   export function addAnnotation(reference: Reference) {
     let lastBlock = blocks[blocks.length - 1];
     let before: Block[];
@@ -42,47 +43,27 @@
     ];
   }
 
-  function placeCursor(updated: Block[], cursor: Point) {
-    let paragraph = Writing.nodeFromPath(composer, cursor.path);
-    let line = Writing.getLine(updated, cursor.path);
-    let [spanIndex, offset] = Writing.spanFromOffset(line, cursor.offset);
-    let span = paragraph.children[spanIndex] as HTMLElement;
-    let textNode = span.childNodes[0] as Node;
-
-    // This is why slate has it's weak Map
-
-    let selection = window.getSelection();
-    const domRange = selection?.getRangeAt(0);
-    if (selection && domRange) {
-      domRange.setStart(textNode, offset);
-      domRange.setEnd(textNode, offset);
-      selection.addRange(domRange);
-    }
-  }
   function handleInput(event: InputEvent) {
-    const domRanges = event.getTargetRanges();
-
     if (event.isComposing === false) {
-      const domRange = domRanges[0];
+      const domRange = event.getTargetRanges()[0];
       if (domRange === undefined) {
         throw "Should have a target range";
       }
 
-      let range: Range;
       const result = Writing.rangeFromDom(domRange);
-
       if (result === null) {
         throw "There should always be a range for a domRange";
       }
-      range = result[0];
+
+      const range = result[0];
       const [updated, cursor] = Writing.handleInput(blocks, range, event);
 
       blocks = updated;
+
       tick().then(() => {
-        placeCursor(updated, cursor);
+        Writing.placeCursor(composer, updated, cursor);
       });
     } else if (event.isComposing) {
-      console.log("doo the compose version");
       const domRange = window.getSelection()?.getRangeAt(0);
       if (domRange === undefined) {
         throw "Should have a current selection";
@@ -186,7 +167,7 @@
       let { updated, cursor } = composition;
       composition = null;
       tick().then(() => {
-        placeCursor(updated, cursor);
+        Writing.placeCursor(composer, updated, cursor);
       });
     }
   }}
@@ -219,12 +200,21 @@
       />
     </div>
   {:else}
-    <BlockComponent
-      block={{ type: "paragraph", spans: [] }}
-      index={0}
-      peers={previous}
-      placeholder={"message"}
-    />
+    <div class="flex">
+      <div
+        class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+        contenteditable="false"
+      >
+        <Icons.Drag />
+      </div>
+
+      <BlockComponent
+        block={{ type: "paragraph", spans: [] }}
+        index={0}
+        peers={previous}
+        placeholder={"message"}
+      />
+    </div>
   {/each}
 </div>
 {#if dragging}
