@@ -261,8 +261,6 @@ pub fn route(
       |> web.set_resp_json(contact_to_json(contact))
       |> Ok()
     }
-    // don't bother with tim as short for tim@plummail.co
-    // tim32@plummail.co might also want name tim
     ["relationship", contact] -> {
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)

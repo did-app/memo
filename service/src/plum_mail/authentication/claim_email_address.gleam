@@ -22,7 +22,7 @@ pub fn params(raw: Dynamic) {
   |> Ok
 }
 
-// some profiles e.g. yesplease@plummail.co have no authentication information
+// some profiles e.g. founders@sendmemo.app have no authentication information
 // some accounts have more than one authentication id
 pub fn execute(params, config) {
   let Params(email_address: email_address) = params
@@ -34,12 +34,12 @@ pub fn execute(params, config) {
     ..,
   ) = config
 
-  assert Ok(from) = email_address.validate("updates@plummail.co")
+  assert Ok(from) = email_address.validate("memo@sendmemo.app")
   let to = email_address
-  let subject = "Welcome back to plum mail"
+  let subject = "Welcome back to memo"
   let body =
     [
-      "Sign in to your plum mail account with the authentication link below\r\n\r\n",
+      "Sign in to memo using the link below\r\n\r\n",
       client_origin,
       "/#code=",
       token,
