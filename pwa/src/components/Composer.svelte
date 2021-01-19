@@ -61,7 +61,9 @@
         // We still to this point on chrome on android when we press Space or new line
         alert(
           event.inputType +
-            " with the following data: " +
+            " with the following composing " +
+            isComposing +
+            " data: " +
             JSON.stringify(event.data)
         );
         throw "How did we get input";
@@ -128,6 +130,7 @@
       blocks = blocks;
     }
   }
+  let isComposing = false;
 </script>
 
 <div
@@ -144,8 +147,12 @@
   }}
   disabled
   data-memo-position={position}
-  on:compositionstart|preventDefault={() =>
-    alert("composition started and prevented")}
+  on:compositionstart={() => {
+    isComposing = true;
+  }}
+  on:compositionend={() => {
+    isComposing = false;
+  }}
   on:beforeinput|preventDefault={handleInput}
 >
   {#each blocks as block, index}
