@@ -44,8 +44,8 @@ export async function authenticateBySession(): Call<Identifier | null> {
 export async function authenticateByEmail(emailAddress: string) {
   const path = "/authenticate/email"
   const params = { email_address: emailAddress }
-  let response: Response<IdentifierDTO> = await post(path, params);
-  return mapData(response, identifierFromDTO)
+  let response: Response<null> = await post(path, params);
+  return response
 }
 
 export async function authenticateByPassword(emailAddress: string, password: string): Call<Identifier> {
