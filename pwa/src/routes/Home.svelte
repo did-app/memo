@@ -31,7 +31,7 @@
       {:else if f.type === "install_available"}
         <article
           class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white">
-          <h2 class="font-bold">Web-app download available</h2>
+          <h2 class="font-bold">Web-app available to install</h2>
           <p>
           Install Memo's web-app on your computer, tablet or smartphone for faster access.
         </p>
@@ -41,7 +41,7 @@
             <!-- <span class="w-5 mr-2 inline-block">
                       <Icons.ReplyAll />
                     </span> -->
-            <span class="py-1"> Download </span>
+            <span class="py-1"> Install </span>
           </button>
         </article>
       {/if}

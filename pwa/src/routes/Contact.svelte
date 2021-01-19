@@ -244,7 +244,7 @@
                   {/each}
                 </div>
               {/if}
-              <nav class="flex flex-row-reverse pl-6 md:pl-12">
+              <nav class="flex pl-6 md:pl-12">
                 {#if userFocus}
                   <button
                     on:click={() => {
