@@ -177,8 +177,5 @@ export async function acknowledge(contact: Contact, position: number): Call<null
       return state
     }
   })
-  let response = await API.acknowledge(contact.thread.id, position)
-  console.log(response);
-
-  return { data: null }
+  return await API.acknowledge(contact.thread.id, position)
 }

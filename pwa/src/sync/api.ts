@@ -136,9 +136,9 @@ export async function postMemo(threadId: number, position: number, content: Bloc
   return mapData(response, memoFromDTO)
 }
 
-export function acknowledge(threadId: number, position: number): Call<{}> {
+export async function acknowledge(threadId: number, position: number): Call<null> {
   const path = "/threads/" + threadId + "/acknowledge"
   const params = { position }
-  return post(path, params)
-
+  let response: Response<null> = await post(path, params);
+  return response
 }
