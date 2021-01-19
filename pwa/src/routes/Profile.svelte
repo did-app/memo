@@ -45,14 +45,13 @@
     <article
       class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
     >
-      <h2 class="font-bold">Hi {state.me.emailAddress}</h2>
-      <p>
-        Set up your public greeting, that explains how people should get in
+      <h2 class="font-bold">Welcome {state.me.emailAddress}</h2>
+      <p class="my-4">
+        Set up your public greeting that explains how people should get in
         touch with you.
       </p>
-      <br />
-      <p>
-        Anyone who visits
+      <p class="my-4">
+        Share your contact page using this link:
         <a
           class="underline"
           href="{window.location.origin}{emailAddressToPath(
@@ -62,7 +61,9 @@
             state.me.emailAddress
           )}</a
         >
-        will be able to response this greeting and get in touch with you.
+      </p>
+      <p class="my-4">
+       Only new contacts will see your greeting, anyone you already communicate with using Memo will see your message history when they visit your contact page.
       </p>
     </article>
     <article
