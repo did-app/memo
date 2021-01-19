@@ -44,6 +44,8 @@
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
 
+    console.log(event);
+
     let range: Range;
     if (domRange !== undefined) {
       const result = Writing.rangeFromDom(domRange);
@@ -142,6 +144,8 @@
   }}
   disabled
   data-memo-position={position}
+  on:compositionstart|preventDefault={() =>
+    alert("composition started and prevented")}
   on:beforeinput|preventDefault={handleInput}
 >
   {#each blocks as block, index}
