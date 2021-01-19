@@ -45,6 +45,13 @@
     const domRange = event.getTargetRanges()[0];
 
     console.log(event);
+    alert(
+      event.inputType +
+        " with the following composing " +
+        isComposing +
+        " data: " +
+        JSON.stringify(event.data)
+    );
 
     let range: Range;
     if (domRange !== undefined) {
@@ -59,13 +66,9 @@
       // This fix doesn't tackle moving the range for collapsed delete events
       if (selected === null) {
         // We still to this point on chrome on android when we press Space or new line
-        alert(
-          event.inputType +
-            " with the following composing " +
-            isComposing +
-            " data: " +
-            JSON.stringify(event.data)
-        );
+        if (isComposing) {
+          return null;
+        }
         throw "How did we get input";
       } else {
         range = selected;
