@@ -7,7 +7,7 @@
   import * as Social from "../social";
   import type { State, Authenticated, Call } from "../sync";
   import * as Sync from "../sync";
-  import type { Block } from "../writing";
+  import type { Block, Range } from "../writing";
   import * as Writing from "../writing";
 
   import type Composer__SvelteComponent_ from "../components/Composer.svelte";
@@ -69,10 +69,12 @@
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
   let currentPosition: number = 0;
+  let composerRange: Range | null = null;
 
   function handleSelectionChange() {
     let selection: Selection = (Writing as any).getSelection();
     let result = Writing.rangeFromDom(selection.getRangeAt(0));
+
     if (result && result[1] <= currentPosition) {
       const [range, memoPosition] = result;
 
@@ -88,6 +90,12 @@
       reply = false;
     } else {
       userFocus = null;
+    }
+    if (result && result[1] == currentPosition + 1) {
+      const [range] = result;
+      composerRange = range;
+    } else {
+      composerRange = null;
     }
   }
   // This captures the focus for duration of a click
@@ -225,6 +233,7 @@
               <Composer
                 previous={response.data.memos}
                 bind:this={composer}
+                selected={composerRange}
                 blocks={[
                   { type: "paragraph", spans: [{ type: "text", text: "" }] },
                 ]}

@@ -1,7 +1,7 @@
 <script lang="typescript">
   import { tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
-  import type { Block, InputEvent } from "../writing";
+  import type { Block, InputEvent, Range } from "../writing";
   import * as Writing from "../writing";
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
@@ -9,6 +9,7 @@
   export let previous: Memo[];
   export let blocks: Block[];
   export let position: number;
+  export let selected: Range | null;
 
   let composer: HTMLElement;
 
@@ -43,16 +44,23 @@
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
 
-    if (domRange === undefined) {
-      alert("no target range");
-      return;
-    }
-    const result = Writing.rangeFromDom(domRange);
+    let range: Range;
+    if (domRange !== undefined) {
+      const result = Writing.rangeFromDom(domRange);
 
-    if (result === null) {
-      throw "There should always be a range";
+      if (result === null) {
+        throw "There should always be a range";
+      }
+      range = result[0];
+    } else {
+      // domRange SHOULD NOT be undefined however on chrome for android this often seems to be the case.
+      // This fix doesn't tackle moving the range for collapsed delete events
+      if (selected === null) {
+        throw "How did we get input";
+      } else {
+        range = selected;
+      }
     }
-    const [range] = result;
     const [updated, cursor] = Writing.handleInput(blocks, range, event);
 
     blocks = updated;

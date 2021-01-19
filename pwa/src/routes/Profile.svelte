@@ -2,7 +2,8 @@
   import router from "page";
   import type { State } from "../sync";
   import * as Sync from "../sync";
-  import type { Block } from "../writing";
+  import type { Block, Range } from "../writing";
+  import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
 
   import Composer from "../components/Composer.svelte";
@@ -12,6 +13,20 @@
   export let state: State;
   if (!("me" in state) || state.me === undefined) {
     throw "This should be an idified page only";
+  }
+
+  let composerRange: Range | null = null;
+
+  function handleSelectionChange() {
+    let selection: Selection = (Writing as any).getSelection();
+    let result = Writing.rangeFromDom(selection.getRangeAt(0));
+
+    if (result && result[1] == 1) {
+      const [range] = result;
+      composerRange = range;
+    } else {
+      composerRange = null;
+    }
   }
 
   async function saveGreeting(blocks: Block[]) {
@@ -56,7 +71,8 @@
       <Composer
         previous={[]}
         blocks={state.me.greeting || [{ type: "paragraph", spans: [] }]}
-        position={0}
+        position={1}
+        selected={composerRange}
         let:blocks
       >
         <!-- {JSON.stringify(state.me)}
