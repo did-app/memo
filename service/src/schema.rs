@@ -16,6 +16,16 @@ table! {
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
         group_id -> Nullable<Int4>,
+        individual_id -> Nullable<Int4>,
+    }
+}
+
+table! {
+    individuals (id) {
+        id -> Int4,
+        name -> Varchar,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -68,6 +78,16 @@ table! {
 }
 
 table! {
+    participations (individual_id, thread_id) {
+        individual_id -> Int4,
+        thread_id -> Int4,
+        acknowledged -> Int4,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     threads (id) {
         id -> Int4,
         inserted_at -> Timestamp,
@@ -75,6 +95,8 @@ table! {
     }
 }
 
+joinable!(identifiers -> groups (group_id));
+joinable!(identifiers -> individuals (individual_id));
 joinable!(invitations -> groups (group_id));
 joinable!(invitations -> identifiers (individual_id));
 joinable!(link_tokens -> identifiers (identifier_id));
@@ -82,14 +104,18 @@ joinable!(memo_notifications -> identifiers (recipient_id));
 joinable!(memos -> identifiers (authored_by));
 joinable!(memos -> threads (thread_id));
 joinable!(pairs -> threads (thread_id));
+joinable!(participations -> individuals (individual_id));
+joinable!(participations -> threads (thread_id));
 
 allow_tables_to_appear_in_same_query!(
     groups,
     identifiers,
+    individuals,
     invitations,
     link_tokens,
     memo_notifications,
     memos,
     pairs,
+    participations,
     threads,
 );

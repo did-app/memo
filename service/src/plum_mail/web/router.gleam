@@ -26,12 +26,13 @@ import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/conversation/group
+import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
 import plum_mail/web/helpers as web
 import plum_mail/threads/thread
 import plum_mail/threads/acknowledge
-import plum_mail/relationships/start_relationship
+// import plum_mail/relationships/start_relationship
 import plum_mail/email/inbound/postmark
 
 fn token_cookie_settings(request) {
@@ -190,6 +191,14 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
+    ["individuals", individual_id, "threads"] -> {
+      try client_state = web.identify_client(request, config)
+      try session = web.require_authenticated(client_state)
+      assert Ok(individual_id) = int.parse(individual_id)
+      assert True = session == individual_id
+      try conversations = conversation.all_participating(individual_id)
+      todo
+    }
     ["contacts"] -> {
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
@@ -243,16 +252,16 @@ pub fn route(
       // tuple("group", json.list(list.map(groups, group_to_json)))
       |> Ok()
     }
-    ["relationship", "start"] -> {
-      try params = acl.parse_json(request)
-      try params = start_relationship.params(params)
-      try client_state = web.identify_client(request, config)
-      try user_id = web.require_authenticated(client_state)
-      try contact = start_relationship.execute(params, user_id)
-      http.response(200)
-      |> web.set_resp_json(contact_to_json(contact))
-      |> Ok()
-    }
+    // ["relationship", "start"] -> {
+    //   try params = acl.parse_json(request)
+    //   try params = start_relationship.params(params)
+    //   try client_state = web.identify_client(request, config)
+    //   try user_id = web.require_authenticated(client_state)
+    //   try contact = start_relationship.execute(params, user_id)
+    //   http.response(200)
+    //   |> web.set_resp_json(contact_to_json(contact))
+    //   |> Ok()
+    // }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
       try memos = thread.load_memos(thread_id)

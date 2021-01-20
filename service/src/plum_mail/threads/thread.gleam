@@ -8,7 +8,7 @@ import plum_mail/run_sql
 pub fn post_memo(thread_id, position, author_id, content: json.Json) {
   let sql =
     "
-    WITH note AS (
+    WITH memo AS (
       INSERT INTO memos (thread_id, position, authored_by, content)
       VALUES ($1, $2, $3, $4)
       RETURNING *
@@ -24,7 +24,7 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
       AND thread_id = $1
     )
     SELECT content, inserted_at, position 
-    FROM note
+    FROM memo
     "
   let args = [
     pgo.int(thread_id),

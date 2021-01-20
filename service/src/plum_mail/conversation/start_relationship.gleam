@@ -47,6 +47,9 @@ pub fn execute(params, user_id) {
     INSERT INTO threads
     DEFAULT VALUES
     RETURNING *
+  ), lower_participation AS(
+    INSERT INTO participations (thread_id, identifi)
+    VALUES ()
   )
   INSERT INTO pairs (lower_identifier_id, lower_identifier_ack, upper_identifier_id, upper_identifier_ack, thread_id)
   VALUES ($1, 0, $2, 0, (SELECT id FROM new_thread))

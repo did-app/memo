@@ -1,12 +1,35 @@
 import gleam/dynamic
 import gleam/io
+import gleam/json
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/support
 import plum_mail/conversation/group
-import plum_mail/conversation/participation
+import plum_mail/conversation/conversation
+import plum_mail/conversation/start_relationship
 import plum_mail/run_sql
 import gleam/should
+
+pub fn talking_to_a_new_individual_test() {
+  // This needs to create an individual
+  assert Ok(alice) = support.generate_identifier("customer.test")
+
+  // Start talking to bob who is not in the system
+  let bob_email = support.generate_email_address("customer.test")
+  let params = start_relationship.Params(bob_email, json.list([]))
+  // TODO return conversation view
+  assert Ok(conversation) = start_relationship.execute(params, alice.id)
+  // This is alices view od the conversation
+  io.debug(conversation)
+
+  assert Ok([alice_participation]) = conversation.all_participating(alice.id)
+  alice_participation.acknowledged
+  |> should.equal(1)
+  io.debug(alice_participation)
+
+  // Bobs view of the conversation will have a different ack level
+  todo
+}
 
 pub fn create_a_group_test() {
   assert Ok(identifier) = support.generate_identifier("sendmemo.test")
@@ -24,7 +47,7 @@ pub fn create_a_group_test() {
   assert Ok(groups) = group.load_all(second_membership.individual_id)
   io.debug(groups)
   assert Ok(threads) =
-    participation.participation(second_membership.individual_id)
+    conversation.all_participating(second_membership.individual_id)
   // After accepting invitation to a group you need all the groups you are a member of
   // Separate permission from participation, participation is the accepted blah blah
   todo("create visible group with first member")
