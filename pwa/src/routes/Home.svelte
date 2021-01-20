@@ -19,7 +19,6 @@
 </svelte:head>
 {#if "me" in state && state.me}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-    <h1 class="text-2xl pb-2">Your Contacts</h1>
     {#each state.flash as f}
       <article
         class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
@@ -31,10 +30,14 @@
               .emailAddress}
           </p>
         {:else if f.type === "install_available"}
-          <h2 class="font-bold">Available to install</h2>
+          <h2 class="font-bold">Web-app available to install</h2>
+          <p>
+            Install Memo's web-app on your computer, tablet or smartphone for
+            faster access.
+          </p>
           <button
             on:click={f.prompt}
-            class="flex items-center bg-gray-200 text-gray-800 rounded px-2 ml-2">
+            class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white">
             <!-- <span class="w-5 mr-2 inline-block">
                       <Icons.ReplyAll />
                     </span> -->
@@ -58,7 +61,7 @@
         </p>
       </article>
     {/if}
-
+    <h1 class="text-2xl py-4">Your Contacts</h1>
     <ol>
       {#each state.contacts as { identifier, thread }}
         <li>

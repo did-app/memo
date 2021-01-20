@@ -306,13 +306,13 @@
                     <span class="py-1">Quote in Reply</span>
                   </button>
                 {:else}
-                  <button
+                  <!--<button
                     class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Pin />
                     </span>
                     <span class="py-1">Pins</span>
-                  </button>
+                  </button>-->
                   {#if "thread" in response.data.contact && "id" in response.data.contact.thread && Conversation.isOutstanding(response.data.contact.thread)}
                     <button
                       on:click={() => acknowledge(response.data.contact)}
