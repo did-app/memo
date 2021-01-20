@@ -26,7 +26,7 @@
         {#if f.type === "acknowledged"}
           <h2 class="font-bold">Acknowledged</h2>
           <p>
-            You have no outstanding messages with{f.contact.identifier
+            You have no outstanding messages with {f.contact.identifier
               .emailAddress}
           </p>
         {:else if f.type === "install_available"}
