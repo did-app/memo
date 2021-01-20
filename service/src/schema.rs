@@ -2,6 +2,7 @@ table! {
     groups (id) {
         id -> Int4,
         name -> Varchar,
+        thread_id -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }

@@ -69,6 +69,7 @@ CREATE TABLE memo_notifications (
 CREATE TABLE groups (
   id SERIAL PRIMARY KEY,
   name VARCHAR NOT NULL,
+  thread_id INT NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

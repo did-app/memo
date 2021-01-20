@@ -25,6 +25,7 @@ import plum_mail/authentication
 import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
+import plum_mail/conversation/group
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
 import plum_mail/web/helpers as web
@@ -246,9 +247,14 @@ pub fn route(
             tuple(identifier, ack, inserted_at, content, position, thread_id)
           },
         )
+      try groups = group.load_all(user_id)
       // db.run(sql, args, io.debug)
+      // TODO rename load conversations
       http.response(200)
-      |> web.set_resp_json(json.list(list.map(contacts, contact_to_json)))
+      |> web.set_resp_json(json.object([
+        tuple("contacts", json.list(list.map(contacts, contact_to_json))),
+      ]))
+      // tuple("group", json.list(list.map(groups, group_to_json)))
       |> Ok()
     }
     ["relationship", "start"] -> {
