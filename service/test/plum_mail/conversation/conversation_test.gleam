@@ -22,12 +22,12 @@ pub fn talking_to_a_new_individual_test() {
   // TODO return conversation view
   assert Ok(conversation) = conversation.start_direct(alice, bob_email)
   assert Ok(_) =
-    thread.post_memo(conversation.thread_id, 1, alice.id, json.list([]))
+    thread.post_memo(conversation.thread.id, 1, alice.id, json.list([]))
 
   // This is alices view od the conversation
   assert Ok([alice_participation]) = conversation.all_participating(alice.id)
 
-  alice_participation.acknowledged
+  alice_participation.thread.acknowledged
   |> should.equal(1)
   // TODO test latest is the correct values
   // TODO fetch identifier id for bob

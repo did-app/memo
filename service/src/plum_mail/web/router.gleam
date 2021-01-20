@@ -91,26 +91,6 @@ fn latest_to_json(latest) {
   ])
 }
 
-fn contact_to_json(contact) {
-  let tuple(identifier, ack, inserted_at, content, position, thread_id) =
-    contact
-  let latest_json = case inserted_at {
-    None -> json.null()
-    Some(inserted_at) -> latest_to_json(tuple(inserted_at, content, position))
-  }
-  json.object([
-    tuple("identifier", identifier.to_json(identifier)),
-    tuple(
-      "thread",
-      json.object([
-        tuple("id", json.int(thread_id)),
-        tuple("acknowledged", json.int(ack)),
-        tuple("latest", latest_json),
-      ]),
-    ),
-  ])
-}
-
 pub fn route(
   request,
   config: config.Config,
@@ -199,69 +179,6 @@ pub fn route(
       try conversations = conversation.all_participating(individual_id)
       todo
     }
-    ["contacts"] -> {
-      try client_state = web.identify_client(request, config)
-      try user_id = web.require_authenticated(client_state)
-      let sql =
-        "
-      WITH contacts AS (
-        SELECT lower_identifier_id AS contact_id, upper_identifier_ack AS ack, thread_id
-        FROM pairs
-        WHERE pairs.upper_identifier_id = $1
-        UNION ALL
-        SELECT upper_identifier_id AS contact_id, lower_identifier_ack AS ack, thread_id
-        FROM pairs
-        WHERE pairs.lower_identifier_id = $1
-      ), latest AS (
-        SELECT DISTINCT ON(thread_id) * FROM memos
-        ORDER BY thread_id DESC, inserted_at DESC
-      )
-      SELECT id, email_address, greeting, contacts.ack, latest.inserted_at, latest.content, latest.position, contacts.thread_id FROM contacts
-      JOIN identifiers ON identifiers.id = contacts.contact_id
-      LEFT JOIN latest ON latest.thread_id = contacts.thread_id
-      "
-      let args = [pgo.int(user_id)]
-      try contacts =
-        run_sql.execute(
-          sql,
-          args,
-          fn(row) {
-            let identifier = identifier.row_to_identifier(row)
-            assert Ok(ack) = dynamic.element(row, 3)
-            assert Ok(ack) = dynamic.int(ack)
-            assert Ok(inserted_at) = dynamic.element(row, 4)
-            assert Ok(inserted_at) =
-              run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
-            assert Ok(content) = dynamic.element(row, 5)
-            let content: json.Json = dynamic.unsafe_coerce(content)
-            // Might be nice to replace tuple with a thread summary type
-            assert Ok(position) = dynamic.element(row, 6)
-            assert Ok(position) = dynamic.int(position)
-            assert Ok(thread_id) = dynamic.element(row, 7)
-            assert Ok(thread_id) = dynamic.int(thread_id)
-            tuple(identifier, ack, inserted_at, content, position, thread_id)
-          },
-        )
-      try groups = group.load_all(user_id)
-      // db.run(sql, args, io.debug)
-      // TODO rename load conversations
-      http.response(200)
-      |> web.set_resp_json(json.object([
-        tuple("contacts", json.list(list.map(contacts, contact_to_json))),
-      ]))
-      // tuple("group", json.list(list.map(groups, group_to_json)))
-      |> Ok()
-    }
-    // ["relationship", "start"] -> {
-    //   try params = acl.parse_json(request)
-    //   try params = start_relationship.params(params)
-    //   try client_state = web.identify_client(request, config)
-    //   try user_id = web.require_authenticated(client_state)
-    //   try contact = start_relationship.execute(params, user_id)
-    //   http.response(200)
-    //   |> web.set_resp_json(contact_to_json(contact))
-    //   |> Ok()
-    // }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
       try memos = thread.load_memos(thread_id)

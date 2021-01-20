@@ -7,7 +7,7 @@ import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/run_sql
 
-type Memo {
+pub type Memo {
   Memo(posted_at: DateTime, content: Json, position: Int)
 }
 
@@ -20,7 +20,7 @@ fn memo_to_json(memo) {
   ])
 }
 
-type Thread {
+pub type Thread {
   Thread(id: Int, acknowledged: Int, latest: Option(Memo))
 }
 
@@ -45,8 +45,7 @@ fn thread_to_json(thread) {
 pub type Participation {
   Participation(
     // direct or group
-    id: Thread,
-    acknowledged: Int,
+    thread: Thread,
   )
 }
 
@@ -95,7 +94,8 @@ pub fn start_direct(identifier: Identifier, email_address) {
         assert Ok(thread_id) = dynamic.element(row, 0)
         assert Ok(thread_id) = dynamic.int(thread_id)
 
-        Participation(thread_id: thread_id, acknowledged: 0)
+        let thread = Thread(thread_id, 0, None)
+        Participation(thread: thread)
       },
     )
   participation
@@ -147,7 +147,20 @@ pub fn all_participating(identifier_id) {
       assert Ok(thread_id) = dynamic.int(thread_id)
       assert Ok(acknowledged) = dynamic.element(row, 1)
       assert Ok(acknowledged) = dynamic.int(acknowledged)
-      Participation(thread_id: thread_id, acknowledged: acknowledged)
+      assert Ok(inserted_at) = dynamic.element(row, 3)
+      assert Ok(inserted_at) =
+        run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
+      assert Ok(content) = dynamic.element(row, 4)
+      let content: json.Json = dynamic.unsafe_coerce(content)
+      assert Ok(position) = dynamic.element(row, 5)
+      assert Ok(position) = run_sql.dynamic_option(position, dynamic.int)
+      let latest = case inserted_at, position {
+        Some(posted_at), Some(position) ->
+          Some(Memo(posted_at, content, position))
+        None, None -> None
+      }
+      let thread = Thread(thread_id, acknowledged, latest)
+      Participation(thread)
     },
   )
 }
