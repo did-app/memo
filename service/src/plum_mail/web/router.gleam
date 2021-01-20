@@ -171,7 +171,7 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
-    ["individuals", individual_id, "threads"] -> {
+    ["individuals", individual_id, "conversations"] -> {
       try client_state = web.identify_client(request, config)
       try session = web.require_authenticated(client_state)
       assert Ok(individual_id) = int.parse(individual_id)

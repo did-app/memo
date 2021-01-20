@@ -42,11 +42,16 @@ fn thread_to_json(thread) {
 //   participation (ack)
 //   thread (id, latest, participants)
 // }
-pub type Participation {
-  Participation(
+pub type Conversation {
+  Conversation(
     // direct or group
     thread: Thread,
   )
+}
+
+pub fn to_json(conversation) {
+  let Conversation(thread) = conversation
+  json.object([tuple("thread", thread_to_json(thread))])
 }
 
 // TODO add uniqueness on identifier
@@ -95,7 +100,7 @@ pub fn start_direct(identifier: Identifier, email_address) {
         assert Ok(thread_id) = dynamic.int(thread_id)
 
         let thread = Thread(thread_id, 0, None)
-        Participation(thread: thread)
+        Conversation(thread: thread)
       },
     )
   participation
@@ -160,7 +165,7 @@ pub fn all_participating(identifier_id) {
         None, None -> None
       }
       let thread = Thread(thread_id, acknowledged, latest)
-      Participation(thread)
+      Conversation(thread)
     },
   )
 }
