@@ -30,7 +30,6 @@ import plum_mail/identifier.{Identifier}
 import plum_mail/web/helpers as web
 import plum_mail/threads/thread
 import plum_mail/threads/acknowledge
-import plum_mail/relationships/lookup_relationship
 import plum_mail/relationships/start_relationship
 import plum_mail/email/inbound/postmark
 
@@ -247,25 +246,6 @@ pub fn route(
       http.response(200)
       |> web.set_resp_json(contact_to_json(contact))
       |> Ok()
-    }
-    ["relationship", contact] -> {
-      try client_state = web.identify_client(request, config)
-      try identifier_id = web.require_authenticated(client_state)
-      try email_address =
-        email_address.validate(contact)
-        |> result.map_error(fn(e: Nil) {
-          todo("proper error for email validation")
-        })
-      try tuple(identifier, thread) =
-        lookup_relationship.execute(identifier_id, email_address)
-      let data =
-        json.object([
-          tuple("identifier", json.nullable(identifier, identifier.to_json)),
-          tuple("thread", json.nullable(thread, thread.to_json)),
-        ])
-      http.response(200)
-      |> web.set_resp_json(data)
-      |> Ok
     }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
