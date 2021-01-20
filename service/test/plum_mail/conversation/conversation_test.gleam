@@ -7,28 +7,34 @@ import plum_mail/support
 import plum_mail/conversation/group
 import plum_mail/conversation/conversation
 import plum_mail/conversation/start_relationship
+import plum_mail/threads/thread
 import plum_mail/run_sql
 import gleam/should
 
 pub fn talking_to_a_new_individual_test() {
   // This needs to create an individual
-  assert Ok(alice) = support.generate_identifier("customer.test")
+  let alice = support.generate_individual("customer.test")
 
   // Start talking to bob who is not in the system
   let bob_email = support.generate_email_address("customer.test")
-  let params = start_relationship.Params(bob_email, json.list([]))
-  // TODO return conversation view
-  assert Ok(conversation) = start_relationship.execute(params, alice.id)
-  // This is alices view od the conversation
-  io.debug(conversation)
 
+  // let params = start_relationship.Params(bob_email, json.list([]))
+  // TODO return conversation view
+  assert Ok(conversation) = conversation.start_direct(alice, bob_email)
+  assert Ok(_) =
+    thread.post_memo(conversation.thread_id, 1, alice.id, json.list([]))
+
+  // This is alices view od the conversation
   assert Ok([alice_participation]) = conversation.all_participating(alice.id)
+
   alice_participation.acknowledged
   |> should.equal(1)
-  io.debug(alice_participation)
-
+  // TODO test latest is the correct values
+  // TODO fetch identifier id for bob
+  // assert Ok([bob_participation]) = conversation.all_participating(bob.id)
+  // bob_participation.acknowledged
+  // |> should.equal(1)
   // Bobs view of the conversation will have a different ack level
-  todo
 }
 
 pub fn create_a_group_test() {

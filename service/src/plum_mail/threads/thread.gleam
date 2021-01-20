@@ -12,16 +12,11 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
       INSERT INTO memos (thread_id, position, authored_by, content)
       VALUES ($1, $2, $3, $4)
       RETURNING *
-    ), lower AS (
-      UPDATE pairs
-      SET lower_identifier_ack = $2
-      WHERE lower_identifier_id = $3
-      AND thread_id = $1
-    ), upper AS (
-      UPDATE pairs
-      SET upper_identifier_ack = $2
-      WHERE upper_identifier_id = $3
-      AND thread_id = $1
+    ), participation AS (
+      UPDATE participations
+      SET acknowledged = $2
+      WHERE thread_id = $1
+      AND identifier_id = $3
     )
     SELECT content, inserted_at, position 
     FROM memo
