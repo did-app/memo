@@ -34,7 +34,7 @@ pub fn handle(params, config) {
     [client_origin, email_address.to_path(to_email_address), "#code=", code]
     |> string.concat()
 
-// If domain is in supported domain, 
+  // If domain is in supported domain, 
   case tuple(to_email_address.value, to_hash) {
     tuple("peter@plummail.co", _) | tuple("peter@sendmemo.app", _) -> {
       // We just send back, assuming it is set up properly

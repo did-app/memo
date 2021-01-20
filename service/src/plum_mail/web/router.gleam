@@ -138,19 +138,6 @@ pub fn route(
       try identifier = authenticate_by_code.run(params)
       successful_authentication(identifier, request, config)
     }
-    ["memo", ..rest] ->
-      http.response(307)
-      |> http.prepend_resp_header(
-        "location",
-        string.join([config.client_origin, ..rest], "/"),
-      )
-      |> http.set_resp_cookie(
-        "safari-fix",
-        "fixed",
-        http.cookie_defaults(request.scheme),
-      )
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"":utf8>>))
-      |> Ok
     ["authenticate", "session"] -> {
       try client = web.identify_client(request, config)
       case client {
