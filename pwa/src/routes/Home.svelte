@@ -19,22 +19,22 @@
 </svelte:head>
 {#if "me" in state && state.me}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-    
     {#each state.flash as f}
-      {#if f.type === "acknowledged"}
-        <article
-          class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
-        >
-          <h2 class="font-bold">Sucess</h2>
-          <p>{f.contact.identifier.emailAddress}</p>
-        </article>
-      {:else if f.type === "install_available"}
-        <article
-          class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white">
+      <article
+        class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+      >
+        {#if f.type === "acknowledged"}
+          <h2 class="font-bold">Acknowledged</h2>
+          <p>
+            You have no outstanding messages with{f.contact.identifier
+              .emailAddress}
+          </p>
+        {:else if f.type === "install_available"}
           <h2 class="font-bold">Web-app available to install</h2>
           <p>
-          Install Memo's web-app on your computer, tablet or smartphone for faster access.
-        </p>
+            Install Memo's web-app on your computer, tablet or smartphone for
+            faster access.
+          </p>
           <button
             on:click={f.prompt}
             class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white">
@@ -43,8 +43,12 @@
                     </span> -->
             <span class="py-1"> Install </span>
           </button>
-        </article>
-      {/if}
+        {:else if f.type === "profile_saved"}
+          <h2 class="font-bold">Profile successfully updated</h2>
+        {:else}
+          {JSON.stringify(f)}
+        {/if}
+      </article>
     {/each}
     {#if state.me.greeting === null}
       <article

@@ -44,8 +44,8 @@ export async function authenticateBySession(): Call<Identifier | null> {
 export async function authenticateByEmail(emailAddress: string) {
   const path = "/authenticate/email"
   const params = { email_address: emailAddress }
-  let response: Response<IdentifierDTO> = await post(path, params);
-  return mapData(response, identifierFromDTO)
+  let response: Response<null> = await post(path, params);
+  return response
 }
 
 export async function authenticateByPassword(emailAddress: string, password: string): Call<Identifier> {
@@ -58,9 +58,9 @@ export async function authenticateByPassword(emailAddress: string, password: str
 
 // User Accont calls
 
-export function saveGreeting(identifier_id: number, content: Block[] | null): Call<unknown> {
-  const path = "/identifiers/" + identifier_id + "/greeting"
-  const params = { content }
+export function saveGreeting(blocks: Block[] | null): Call<unknown> {
+  const path = "/me/greeting"
+  const params = { blocks }
   return post(path, params)
 }
 
@@ -88,10 +88,11 @@ function threadFromDTO(data: ThreadDTO): Thread {
   return { id, latest: latest && memoFromDTO(latest), acknowledged }
 }
 
-// export function fetchProfile(emailAddress: string): Call<IdentifierDTO | null> {
-//   const path = "/identifiers/" + emailAddress
-//   return get(path)
-// }
+export async function fetchProfile(emailAddress: string): Call<Identifier | null> {
+  const path = "/identifiers/" + emailAddress
+  let response: Response<IdentifierDTO> = await get(path);
+  return mapData(response, identifierFromDTO)
+}
 
 // export function fetchContact(emailAddress: string): Call<{ identifier: IdentifierDTO | undefined, thread: Thread | undefined }> {
 //   const path = "/relationship/" + emailAddress
@@ -135,9 +136,9 @@ export async function postMemo(threadId: number, position: number, content: Bloc
   return mapData(response, memoFromDTO)
 }
 
-export function acknowledge(threadId: number, position: number): Call<{}> {
+export async function acknowledge(threadId: number, position: number): Call<null> {
   const path = "/threads/" + threadId + "/acknowledge"
   const params = { position }
-  return post(path, params)
-
+  let response: Response<null> = await post(path, params);
+  return response
 }

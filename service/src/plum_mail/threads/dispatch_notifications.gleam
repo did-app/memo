@@ -183,10 +183,9 @@ fn dispatch_to_identifier(record, config) {
   let from = case topic.value {
     "richard@plummail.co" -> "Richard Shepherd <richard@plummail.co>"
     "peter@plummail.co" -> "Peter Saxton <peter@plummail.co>"
-    // string_email -> string.concat([string_email, " <notify@plummail.co>"])
-    _ -> "Memo (DID) <notify@plummail.co>"
+    _ -> "memo <memo@sendmemo.app>"
   }
-  let reply_to = "noreply@plummail.co"
+  let reply_to = "noreply@sendmemo.app"
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
   io.debug(tuple("ssdsdsdsdsd", response))

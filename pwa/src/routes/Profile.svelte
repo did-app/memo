@@ -1,94 +1,106 @@
 <script lang="typescript">
+  import router from "page";
   import type { State } from "../sync";
-  import { toString } from "../writing";
-  import type { Identifier } from "../social";
+  import * as Sync from "../sync";
+  import type { Block, Range } from "../writing";
+  import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
 
+  import Composer from "../components/Composer.svelte";
   // import SpanComponent from "../components/Span.svelte";
   import * as Icons from "../icons";
 
   export let state: State;
-  let me: Identifier;
-  // let contacts: Contact[];
-  let draft: string = "";
-  if ("me" in state && state.me) {
-    me = state.me;
-    // contacts = state.contacts;
-    draft = toString(me.greeting);
+  if (!("me" in state) || state.me === undefined) {
+    throw "This should be an idified page only";
   }
-  console.log(draft);
 
-  async function saveGreeting(): Promise<null> {
+  let composerRange: Range | null = null;
+
+  function handleSelectionChange() {
+    let selection: Selection = (Writing as any).getSelection();
+    let result = Writing.rangeFromDom(selection.getRangeAt(0));
+
+    if (result && result[1] == 1) {
+      const [range] = result;
+      composerRange = range;
+    } else {
+      composerRange = null;
+    }
+  }
+
+  async function saveGreeting(blocks: Block[]) {
     // return id somehow, separate public profile from identifier
-    // let response = await API.saveGreeting(me.id, blocks);
-    // if ("error" in response) {
-    //   throw "failed to save greeting";
-    // }
-    return null;
+    Sync.saveGreeting(blocks);
+    router.redirect("/");
   }
 </script>
 
 <svelte:head>
-  <title>Profile</title>
+  <title>Memo Profile</title>
 </svelte:head>
-<div class="flex w-full mx-auto max-w-5">
-  <article
-    class="flex-1 my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg shadow-md "
-  >
-    <!-- Impossible to put annotations in the middle of text Impossible to save
-  question preferences
-  <br />
-  Click to make question, NEEDS a text representation for editable pages Can be
-  '#? can't have multiple blocks
-  `#?ask=peter@plummail.co,bob@plummail.co&urgency=` Question dismissed needs a
-  text representation for editing Could simply not make questions optional.
-  Keeping the question choices separate means that we can use text editing. BUT
-  any change matching to choices requires a hack or tracking where someone is
-  typing in the textarea, at which point we might as well have a right text edit
-  Ahh but key feature is making annotations look like answers. Alice writes
-  something, Bob asks for comment, but without further text. type is Prompt. If
-  not optional, direct conversation, no urgency levels
-  <br />
-  steps are
-  <br />
-  Go through the example creating what will be created
-  <br />
-  Find all the questions that are not from you, link to blocks make suggestions
-  unless you have annotated previously need a dismiss annotation false
-  <br />
-  Still even in rich editor don't want attached to question -->
-    <textarea />
 
-    <div class="mt-2 pl-6 md:pl-12 flex items-center">
-      <div class="flex flex-1" />
-      <button
-        class="flex-grow-0 flex items-center py-2 px-4 rounded-lg bg-indigo-500 focus:bg-indigo-700 hover:bg-indigo-700 text-white font-bold"
-        on:click={saveGreeting}>
-        <span class="inline-block w-4 mr-2">
-          <Icons.Send />
-        </span>
-        Save
-      </button>
-    </div>
-  </article>
-  <div class="flex-shrink-0 max-w-sm ">
+{#if "me" in state && state.me}
+  <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
     <article
-      class="my-4 py-6  pr-6 md:pr-12 bg-gray-800 text-white pl-6 md:pl-12 rounded-lg shadow-md "
+      class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
     >
-      <h1 class="text-2xl">Hi {me.emailAddress}</h1>
-      <p>
-        Set up your public greeting, that explains how people should get in
+      <h2 class="font-bold">Welcome {state.me.emailAddress}</h2>
+      <p class="my-4">
+        Set up your public greeting that explains how people should get in
         touch with you.
       </p>
-      <p>
-        Anyone who visits
+      <p class="my-4">
+        Share your contact page using this link:
         <a
           class="underline"
-          href="{window.location.origin}{emailAddressToPath(me.emailAddress)}"
-          >{window.location.origin}{emailAddressToPath(me.emailAddress)}</a
+          href="{window.location.origin}{emailAddressToPath(
+            state.me.emailAddress
+          )}"
+          >{window.location.origin}{emailAddressToPath(
+            state.me.emailAddress
+          )}</a
         >
-        will be able to response this greeting
+      </p>
+      <p class="my-4">
+       Only new contacts will see your greeting, anyone you already communicate with using Memo will see your message history when they visit your contact page.
       </p>
     </article>
-  </div>
-</div>
+    <article
+      class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
+    >
+      <Composer
+        previous={[]}
+        blocks={state.me.greeting || [{ type: "paragraph", spans: [] }]}
+        position={1}
+        selected={composerRange}
+        let:blocks
+      >
+        <!-- {JSON.stringify(state.me)}
+        <br /> -->
+        <div class="mt-2 pl-6 md:pl-12 flex items-center">
+          <div class="flex flex-1" />
+          <button
+            on:click={() => {
+              blocks = [];
+            }}
+            class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+            <span class="w-5 mr-2 inline-block">
+              <Icons.Bin />
+            </span>
+            <span class="py-1">Clear</span>
+          </button>
+          <button
+            on:click={() => saveGreeting(blocks)}
+            class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
+            <span class="w-5 mr-2 inline-block">
+              <Icons.Send />
+            </span>
+            <span class="py-1"> Save </span>
+          </button>
+        </div>
+        {JSON.stringify(blocks)}
+      </Composer>
+    </article>
+  </main>
+{/if}

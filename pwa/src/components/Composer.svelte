@@ -1,7 +1,7 @@
 <script lang="typescript">
   import { tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
-  import type { Block, InputEvent } from "../writing";
+  import type { Block, InputEvent, Range } from "../writing";
   import * as Writing from "../writing";
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
@@ -9,6 +9,7 @@
   export let previous: Memo[];
   export let blocks: Block[];
   export let position: number;
+  export let selected: Range | null;
 
   let composer: HTMLElement;
 
@@ -43,16 +44,36 @@
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
 
-    if (domRange === undefined) {
-      alert("no target range");
-      return;
-    }
-    const result = Writing.rangeFromDom(domRange);
+    // console.log(event);
+    // alert(
+    //   event.inputType +
+    //     " with the following composing " +
+    //     isComposing +
+    //     " data: " +
+    //     JSON.stringify(event.data)
+    // );
 
-    if (result === null) {
-      throw "There should always be a range";
+    let range: Range;
+    if (domRange !== undefined) {
+      const result = Writing.rangeFromDom(domRange);
+
+      if (result === null) {
+        throw "There should always be a range";
+      }
+      range = result[0];
+    } else {
+      // domRange SHOULD NOT be undefined however on chrome for android this often seems to be the case.
+      // This fix doesn't tackle moving the range for collapsed delete events
+      if (selected === null) {
+        // We still to this point on chrome on android when we press Space or new line
+        if (isComposing) {
+          return null;
+        }
+        throw "How did we get input";
+      } else {
+        range = selected;
+      }
     }
-    const [range] = result;
     const [updated, cursor] = Writing.handleInput(blocks, range, event);
 
     blocks = updated;
@@ -112,14 +133,32 @@
       blocks = blocks;
     }
   }
+  let isComposing = false;
 </script>
 
 <div
   bind:this={composer}
   class="outline-none overflow-y-auto"
-  style="max-height: 60vh;"
+  style="max-height: 60vh; caret-color: #6ab869;"
   contenteditable
+  on:input={() => {
+    // This shouldn't be firing, it might on android
+    // alert(
+    //   "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
+
+    // );
+    // Prevent default on before input stops this mostly
+    return false;
+    // Disabled doesn't seem to do anything on content editable
+  }}
+  disabled
   data-memo-position={position}
+  on:compositionstart={() => {
+    isComposing = true;
+  }}
+  on:compositionend={() => {
+    isComposing = false;
+  }}
   on:beforeinput|preventDefault={handleInput}
 >
   {#each blocks as block, index}

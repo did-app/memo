@@ -13,7 +13,8 @@ export type { Response, Call } from "./client"
 
 export type MemoAcknowledged = { type: "acknowledged", contact: Contact }
 export type InstallAvailable = { type: "install_available", prompt: InstallPrompt }
-export type Flash = MemoAcknowledged | InstallAvailable
+export type ProfileSaved = { type: 'profile_saved' }
+export type Flash = MemoAcknowledged | InstallAvailable | ProfileSaved
 
 export type Task = { message: "" }
 
@@ -112,6 +113,22 @@ export function updateContact(contact: Contact) {
   })
 }
 
+export async function saveGreeting(blocks: Block[]): Call<null> {
+  let task = await API.saveGreeting(blocks)
+  if ('error' in task) {
+    throw "Failed to save greeting"
+  }
+  update(function (state) {
+    if ('me' in state && state.me !== undefined) {
+      let me = { ...state.me, greeting: blocks }
+      let flash: Flash[] = [{ type: 'profile_saved' }]
+      state = { ...state, me, flash }
+    }
+    return state
+  })
+  return { data: null }
+}
+
 export { loadMemos } from "./api"
 
 export async function postMemo(contact: Contact | Stranger, blocks: Block[], position: number): Call<null> {
@@ -160,8 +177,5 @@ export async function acknowledge(contact: Contact, position: number): Call<null
       return state
     }
   })
-  let response = await API.acknowledge(contact.thread.id, position)
-  console.log(response);
-
-  return { data: null }
+  return await API.acknowledge(contact.thread.id, position)
 }

@@ -7,7 +7,7 @@
   import * as Social from "../social";
   import type { State, Authenticated, Call } from "../sync";
   import * as Sync from "../sync";
-  import type { Block } from "../writing";
+  import type { Block, Range } from "../writing";
   import * as Writing from "../writing";
 
   import type Composer__SvelteComponent_ from "../components/Composer.svelte";
@@ -31,7 +31,10 @@
   export let emailAddress: string;
 
   // This needs to be a promise of old ones we load up
-  let contact = Social.contactForEmailAddress(state.contacts, emailAddress);
+  let contactLookup = Social.contactForEmailAddress(
+    state.contacts,
+    emailAddress
+  );
 
   // Note scroll after loadMemos
   let target: number | undefined;
@@ -66,10 +69,12 @@
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
   let currentPosition: number = 0;
+  let composerRange: Range | null = null;
 
   function handleSelectionChange() {
     let selection: Selection = (Writing as any).getSelection();
     let result = Writing.rangeFromDom(selection.getRangeAt(0));
+
     if (result && result[1] <= currentPosition) {
       const [range, memoPosition] = result;
 
@@ -86,6 +91,12 @@
     } else {
       userFocus = null;
     }
+    if (result && result[1] == currentPosition + 1) {
+      const [range] = result;
+      composerRange = range;
+    } else {
+      composerRange = null;
+    }
   }
   // This captures the focus for duration of a click
   document.addEventListener("mousedown", function () {
@@ -98,30 +109,41 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  let loading: Call<Memo[]>;
-  loading = (async function (): Call<Memo[]> {
-    if ("id" in contact.thread) {
-      const response = await Sync.loadMemos(contact.thread.id);
-      if ("data" in response) {
-        let memos = response.data;
-        currentPosition = memos.length;
-        tick().then(function () {
-          // Tick seems to now work with the composer getting rendered.
-          setTimeout(function name() {
-            let references = Conversation.gatherPrompts(
-              memos,
-              state.me.emailAddress
-            );
+  let loading: Call<{ contact: Contact | Stranger; memos: Memo[] }>;
+  loading = (async function (): Call<{
+    contact: Contact | Stranger;
+    memos: Memo[];
+  }> {
+    let contactResult = await contactLookup;
+    if ("data" in contactResult) {
+      let contact = contactResult.data;
+      if ("id" in contact.thread) {
+        const response = await Sync.loadMemos(contact.thread.id);
+        if ("data" in response) {
+          let memos = response.data;
+          currentPosition = memos.length;
+          tick().then(function () {
+            // Tick seems to now work with the composer getting rendered.
+            setTimeout(function name() {
+              let references = Conversation.gatherPrompts(
+                memos,
+                state.me.emailAddress
+              );
 
-            references.map(function (reference) {
-              composer.addAnnotation(reference);
-            });
-          }, 100);
-        });
+              references.map(function (reference) {
+                composer.addAnnotation(reference);
+              });
+            }, 100);
+          });
+          return { data: { contact, memos } };
+        } else {
+          throw "TROUBLE looking up memos";
+        }
+      } else {
+        return Promise.resolve({ data: { contact, memos: [] } });
       }
-      return response;
     } else {
-      return Promise.resolve({ data: [] });
+      throw "We had trouble looking up contact information";
     }
   })();
 
@@ -134,7 +156,7 @@
     reply = true;
   }
 
-  function postMemo(content: Block[]) {
+  function postMemo(contact: Contact | Stranger, content: Block[]) {
     Sync.postMemo(
       contact,
       content,
@@ -158,7 +180,6 @@
   <title>{emailAddress}</title>
 </svelte:head>
 
-<!-- {JSON.stringify(blocks)} -->
 {#if "me" in state && state.me}
   <div class="w-full mx-auto max-w-3xl grid sidebar md:max-w-2xl">
     {#await loading}
@@ -172,18 +193,37 @@
           <div class="" bind:this={root}>
             <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
             {#each response.data.slice(contact.thread.acknowledged - 1) as memo} -->
-            {#each response.data as memo}
+            {#each response.data.memos as memo}
               <MemoComponent
                 {memo}
-                open={memo.position >= contact.thread.acknowledged ||
+                open={memo.position >=
+                  response.data.contact.thread.acknowledged ||
                   memo.position === target}
-                peers={response.data}
+                peers={response.data.memos}
               />
             {:else}
-              <h1 class="text-center text-2xl my-4 text-gray-700">
-                Contact
-                <span class="font-bold">{emailAddress}</span>
-              </h1>
+              {#if response.data.contact.identifier.greeting === null}
+                <h1 class="text-center text-2xl my-4 text-gray-700">
+                  Contact
+                  <span class="font-bold">{emailAddress}</span>
+                </h1>
+              {:else}
+                <h1 class="text-center text-lg my-4 text-gray-700">
+                  This is an automated greeting from
+                  <span class="font-bold">{emailAddress}</span>
+                </h1>
+
+                <MemoComponent
+                  memo={{
+                    content: response.data.contact.identifier.greeting,
+                    posted_at: new Date(),
+                    position: 0,
+                    author: response.data.contact.identifier.emailAddress,
+                  }}
+                  open={true}
+                  peers={[]}
+                />
+              {/if}
             {/each}
           </div>
           <article
@@ -191,12 +231,13 @@
           >
             <div class:hidden={!reply}>
               <Composer
-                previous={response.data}
+                previous={response.data.memos}
                 bind:this={composer}
+                selected={composerRange}
                 blocks={[
                   { type: "paragraph", spans: [{ type: "text", text: "" }] },
                 ]}
-                position={response.data.length + 1}
+                position={response.data.memos.length + 1}
                 let:blocks
               >
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
@@ -212,7 +253,7 @@
                     <span class="py-1">Back</span>
                   </button>
                   <button
-                    on:click={() => postMemo(blocks)}
+                    on:click={() => postMemo(response.data.contact, blocks)}
                     class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
                     <span class="w-5 mr-2 inline-block">
                       <Icons.Send />
@@ -231,13 +272,13 @@
                     <SpanComponent {span} {index} unfurled={false} />
                   {/each} -->
                   {#each Conversation.followReference(userFocus, [
-                    ...response.data,
+                    ...response.data.memos,
                     // current,
                   ]) as block, index}
                     <BlockComponent
                       {index}
                       {block}
-                      peers={response.data}
+                      peers={response.data.memos}
                       truncate={false}
                       placeholder={null}
                     />
@@ -272,9 +313,9 @@
                     </span>
                     <span class="py-1">Pins</span>
                   </button>-->
-                  {#if "thread" in contact && "id" in contact.thread && Conversation.isOutstanding(contact.thread)}
+                  {#if "thread" in response.data.contact && "id" in response.data.contact.thread && Conversation.isOutstanding(response.data.contact.thread)}
                     <button
-                      on:click={() => acknowledge(contact)}
+                      on:click={() => acknowledge(response.data.contact)}
                       class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
                       <span class="w-5 mr-2 inline-block">
                         <Icons.Check />
@@ -305,7 +346,7 @@
             class="max-w-sm w-full sticky overflow-hidden"
             style="top:0.25rem"
           >
-            {#each Conversation.findPinnable(response.data) as pin}
+            {#each Conversation.findPinnable(response.data.memos) as pin}
               <li
                 class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded flex items-center"
               >
