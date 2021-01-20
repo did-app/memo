@@ -86,3 +86,52 @@ Names not all set in this section
 This section is probably better completed by understanding how our group/ hello thread works.
 
 - An **Identifier** is a communication address for something, i.e. thread/ individual
+- An **Individual** has many **Link Tokens**/**Authentication Codes**
+- A **Group** has Individuals as **Members**
+
+
+Groups don't always need a contact
+
+team@sendmemo.app -> group -> me + Richard
+                  -> group -> me + laura
+
+How do you discover a group, for direct conversation, don't need to.
+
+
+
+Group has id, optionally has a profile, needs to be discovered for the greeting to work.
+Group could have a name, but not a profile.
+
+Do threads get a profile, no it's groups become open.
+
+Threads don't get identifiers but they do if replying.
+When sending a memo, the sending from address indentifies the author, but the reply-to address identifies the thread
+reply to code
+
+Might be useful sending link_tokens to group emails so you can validate team@thirdparty.com
+Both group and individual might have payment information, although I think it's more likely enterprise with lot's of groups
+
+Ideally identifiers have a unique id set
+Identifier/Profile
+email_address | greeting | group_id | individual_id
+email_address | greeting | id | group_id
+
+it's simply not a group until you start adding members
+
+Sign in then have a make group button.
+
+Groups can have a name but not a profile me + Richard
+
+Group
+id, name,
+
+A visibile group is one that has an identifier, 
+An open(not public) group is one where new people can join themselves.
+
+
+Memberships
+group_id(group_id) individual(indentifiers.id) member_id
+
+Test, sign in as group returns message saying sign in as individual instead
+
+<!-- FOREIGN KEY (thread_id, Null) REFERENCES memos(thread_id, position), -->

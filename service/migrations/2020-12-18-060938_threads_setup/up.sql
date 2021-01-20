@@ -61,3 +61,29 @@ CREATE TABLE memo_notifications (
   success BOOLEAN NOT NULL,
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+
+-- new
+
+-- TODO UUID
+CREATE TABLE groups (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR NOT NULL,
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+SELECT diesel_manage_updated_at('groups');
+
+-- TODO add an individual table and check that an identifier is group or individual
+-- https://stackoverflow.com/questions/15178859/postgres-constraint-ensuring-one-column-of-many-is-present
+ALTER TABLE identifiers
+  ADD COLUMN group_id INT UNIQUE REFERENCES identifiers(id);
+
+-- TODO Add accepted | pending
+CREATE TABLE invitations (
+  group_id INT REFERENCES groups(id) NOT NULL,
+  individual_id INT NOT NULL,
+  PRIMARY KEY (group_id, individual_id),
+  FOREIGN KEY (individual_id) REFERENCES identifiers(id)
+);

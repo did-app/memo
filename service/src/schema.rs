@@ -1,10 +1,27 @@
 table! {
+    groups (id) {
+        id -> Int4,
+        name -> Varchar,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     identifiers (id) {
         id -> Int4,
         email_address -> Varchar,
         greeting -> Nullable<Jsonb>,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
+        group_id -> Nullable<Int4>,
+    }
+}
+
+table! {
+    invitations (group_id, individual_id) {
+        group_id -> Int4,
+        individual_id -> Int4,
     }
 }
 
@@ -57,6 +74,8 @@ table! {
     }
 }
 
+joinable!(invitations -> groups (group_id));
+joinable!(invitations -> identifiers (individual_id));
 joinable!(link_tokens -> identifiers (identifier_id));
 joinable!(memo_notifications -> identifiers (recipient_id));
 joinable!(memos -> identifiers (authored_by));
@@ -64,7 +83,9 @@ joinable!(memos -> threads (thread_id));
 joinable!(pairs -> threads (thread_id));
 
 allow_tables_to_appear_in_same_query!(
+    groups,
     identifiers,
+    invitations,
     link_tokens,
     memo_notifications,
     memos,
