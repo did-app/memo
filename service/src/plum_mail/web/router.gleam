@@ -97,6 +97,7 @@ pub fn route(
 ) -> Result(Response(BitBuilder), Reason) {
   case http.path_segments(request) {
     [] -> no_content()
+    // Note this endpoint is never used 
     ["authenticate", "password"] -> {
       try raw = acl.parse_json(request)
       try params = authenticate_by_password.params(raw)
@@ -177,11 +178,10 @@ pub fn route(
       assert Ok(individual_id) = int.parse(individual_id)
       assert True = session == individual_id
       try conversations = conversation.all_participating(individual_id)
-      let data = json.list(list.map(conversations, conversation))
+      let data = json.list(list.map(conversations, conversation.to_json))
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok
-
     }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)

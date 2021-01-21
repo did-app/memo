@@ -8,6 +8,7 @@ pub type Params {
   Params(email_address: EmailAddress, password: String)
 }
 
+// Note params is never used
 pub fn params(raw: Dynamic) {
   try email_address = acl.required(raw, "email_address", acl.as_email)
   try password = acl.required(raw, "password", acl.as_string)

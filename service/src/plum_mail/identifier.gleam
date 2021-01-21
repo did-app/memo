@@ -13,19 +13,6 @@ import plum_mail/run_sql
 // acquaintance contacts
 // relationships is direct or group membership
 // a contact is my view of a connection
-// pub fn fetch(identifier_id) {
-//   let sql =
-//     "
-//     SELECT id, email_address
-//     FROM identifiers
-//     WHERE email_address = $1
-//     "
-//   let args = [pgo.text(email_address.value)]
-//
-//   try db_result = run_sql.execute(sql, args, authentication.row_to_identifier)
-//
-//   Ok(list.head(db_result))
-// }
 pub type Identifier {
   Identifier(id: Int, email_address: EmailAddress, greeting: Option(Json))
 }
@@ -70,17 +57,6 @@ pub fn find_or_create(email_address: EmailAddress) {
   Ok(identifier)
 }
 
-pub fn find(email_address: EmailAddress) {
-  let sql =
-    "
-  SELECT id, email_address, greeting FROM identifiers WHERE email_address = $1
-  "
-  let args = [pgo.text(email_address.value)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier)
-  run_sql.single(db_result)
-  |> Ok
-}
-
 pub fn fetch_by_id(id) {
   let sql =
     "
@@ -92,4 +68,3 @@ pub fn fetch_by_id(id) {
   run_sql.single(db_result)
   |> Ok
 }
-// // https://www.postgresql.org/message-id/CAHiCE4VBFg7Zp75x8h8QoHf3qpH_GqoQEDUd6QWC0bLGb6ZhVg%40mail.gmail.com
