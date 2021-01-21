@@ -12,7 +12,7 @@ import plum_mail/run_sql
 import plum_mail/threads/thread
 import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/identifier.{Identifier}
+import plum_mail/identifier.{Personal}
 
 pub type Params {
   Params(
@@ -33,7 +33,7 @@ pub fn params(raw: Dynamic) {
 pub fn execute(params, user_id) {
   let Params(email_address, content) = params
   try identifier = identifier.find_or_create(email_address)
-  let Identifier(contact_id, _, greeting) = identifier
+  let Personal(contact_id, _, greeting) = identifier
   let tuple(first, current) = case greeting {
     None -> tuple(None, tuple(1, user_id, content))
     Some(greeting) -> tuple(

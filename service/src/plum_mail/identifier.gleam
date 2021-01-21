@@ -1,6 +1,6 @@
 import gleam/dynamic
 import gleam/list
-import gleam/option.{Option}
+import gleam/option.{None, Option, Some}
 import gleam/json.{Json}
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
@@ -13,14 +13,34 @@ import plum_mail/run_sql
 // acquaintance contacts
 // relationships is direct or group membership
 // a contact is my view of a connection
+// TODO is inbox a better name for this? it identifies an inbox
+// identifier is Individual or Shared
+// "a single human being as distinct from a group."
+// "of or for a particular person."
+// Personal had connotations of not work
 pub type Identifier {
-  Identifier(id: Int, email_address: EmailAddress, greeting: Option(Json))
+  Personal(id: Int, email_address: EmailAddress, greeting: Option(Json))
+  Shared(id: Int, email_address: EmailAddress, greeting: Option(Json))
 }
 
 pub fn to_json(identifier: Identifier) {
-  let Identifier(id, email_address, greeting) = identifier
+  let tuple(identifier_type, id, email_address, greeting) = case identifier {
+    Personal(id, email_address, greeting) -> tuple(
+      "personal",
+      id,
+      email_address,
+      greeting,
+    )
+    Shared(id, email_address, greeting) -> tuple(
+      "shared",
+      id,
+      email_address,
+      greeting,
+    )
+  }
   json.object([
     tuple("id", json.int(id)),
+    tuple("type", json.string(identifier_type)),
     tuple("email_address", json.string(email_address.value)),
     tuple("greeting", json.nullable(greeting, fn(x) { x })),
   ])
@@ -35,7 +55,13 @@ pub fn row_to_identifier(row) {
   assert Ok(greeting) = dynamic.element(row, 2)
   assert Ok(greeting): Result(Option(Json), Nil) =
     run_sql.dynamic_option(greeting, fn(x) { Ok(dynamic.unsafe_coerce(x)) })
-  Identifier(id, email_address, greeting)
+  assert Ok(group_id) = dynamic.element(row, 2)
+  assert Ok(group_id) = run_sql.dynamic_option(group_id, dynamic.int)
+
+  case group_id {
+    Some(_) -> Shared(id, email_address, greeting)
+    None -> Personal(id, email_address, greeting)
+  }
 }
 
 pub fn find_or_create(email_address: EmailAddress) {
@@ -45,11 +71,11 @@ pub fn find_or_create(email_address: EmailAddress) {
     INSERT INTO identifiers (email_address)
     VALUES ($1)
     ON CONFLICT (email_address) DO NOTHING
-    RETURNING id, email_address, greeting
+    RETURNING *
   )
-  SELECT id, email_address, greeting FROM new_identifier
+  SELECT id, email_address, greeting, group_id FROM new_identifier
   UNION ALL
-  SELECT id, email_address, greeting FROM identifiers WHERE email_address = $1
+  SELECT id, email_address, greeting, group_id FROM identifiers WHERE email_address = $1
   "
   let args = [pgo.text(email_address.value)]
   try db_result = run_sql.execute(sql, args, row_to_identifier)
@@ -60,7 +86,7 @@ pub fn find_or_create(email_address: EmailAddress) {
 pub fn fetch_by_id(id) {
   let sql =
     "
-    SELECT id, email_address, greeting
+    SELECT id, email_address, greeting, group_id
     FROM identifiers
     WHERE id = $1"
   let args = [pgo.int(id)]

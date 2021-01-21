@@ -28,7 +28,7 @@ import plum_mail/authentication/claim_email_address
 import plum_mail/conversation/group
 import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/identifier.{Identifier}
+import plum_mail/identifier.{Personal}
 import plum_mail/web/helpers as web
 import plum_mail/threads/thread
 import plum_mail/threads/acknowledge
@@ -62,7 +62,7 @@ fn token_cookie_settings(request) {
 }
 
 fn authentication_token(identifier, request, config) {
-  let Identifier(id: identifier_id, ..) = identifier
+  let Personal(id: identifier_id, ..) = identifier
   let Config(secret: secret, ..) = config
   assert Ok(user_agent) = http.get_req_header(request, "user-agent")
   web.auth_token(identifier_id, user_agent, secret)

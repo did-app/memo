@@ -7,22 +7,25 @@ import gleam/string
 import gleam/crypto
 import gleam/pgo
 import plum_mail/authentication
+import plum_mail/identifier.{Personal}
 import plum_mail/run_sql
 import plum_mail/support
 import gleam/should
 
 // Fails to authenticate with invalid selector format or validator
 pub fn authenticate_with_link_token_test() {
-  assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
+  assert Ok(Personal(identifier_id, ..) as identifier) =
+    support.generate_identifier("example.test")
+  assert Ok(link_token) = authentication.generate_link_token(identifier_id)
 
   authentication.validate_link_token(link_token)
   |> should.equal(Ok(identifier))
 }
 
 pub fn link_token_should_not_be_valid_after_seven_days_test() {
-  assert Ok(identifier) = support.generate_identifier("example.test")
-  assert Ok(link_token) = authentication.generate_link_token(identifier.id)
+  assert Ok(Personal(identifier_id, ..)) =
+    support.generate_identifier("example.test")
+  assert Ok(link_token) = authentication.generate_link_token(identifier_id)
   assert Ok(tuple(selector, _)) = string.split_once(link_token, ":")
   let sql =
     "

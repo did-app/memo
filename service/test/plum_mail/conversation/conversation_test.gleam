@@ -3,6 +3,7 @@ import gleam/io
 import gleam/json
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier.{Personal}
 import plum_mail/support
 import plum_mail/conversation/group
 import plum_mail/conversation/conversation
@@ -38,11 +39,12 @@ pub fn talking_to_a_new_individual_test() {
 }
 
 pub fn create_a_group_test() {
-  assert Ok(identifier) = support.generate_identifier("sendmemo.test")
+  assert Ok(Personal(identifier_id, ..)) =
+    support.generate_identifier("sendmemo.test")
   let name = "Memo Team"
   let first_member = support.generate_email_address("example.test")
   assert Ok(first_membership) =
-    group.create_visible_group(name, identifier.id, first_member)
+    group.create_visible_group(name, identifier_id, first_member)
   // If your logged in as the team address then it should be unaccepted on the first member
   let second_member = support.generate_email_address("example.test")
   assert Ok(second_membership) =

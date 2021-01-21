@@ -10,7 +10,7 @@ import plum_mail/acl
 import plum_mail/config.{Config}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/authentication
-import plum_mail/identifier
+import plum_mail/identifier.{Personal}
 
 pub fn handle(params, config) {
   io.debug(params)
@@ -28,8 +28,9 @@ pub fn handle(params, config) {
 
   try from_email_address = acl.required(params, "From", acl.as_email)
 
-  try identifier = identifier.find_or_create(from_email_address)
-  assert Ok(code) = authentication.generate_link_token(identifier.id)
+  try Personal(identifier_id, ..) =
+    identifier.find_or_create(from_email_address)
+  assert Ok(code) = authentication.generate_link_token(identifier_id)
   let link =
     [client_origin, email_address.to_path(to_email_address), "#code=", code]
     |> string.concat()
@@ -62,20 +63,6 @@ pub fn handle(params, config) {
           postmark_api_token,
         )
         |> result.map_error(fn(x) { todo("post mark error not handled") })
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-      |> Ok
-    }
-    // Note this address has the full email address including the hash
-    tuple(<<c:utf8_codepoint, _:binary>>, conversation_id) -> {
-      assert Ok(conversation_id) = int.parse(conversation_id)
-      try reply = acl.required(params, "StrippedTextReply", acl.as_string)
-      // let params = write_message.Params(reply, False)
-      assert Ok(identifier) = identifier.find_or_create(from_email_address)
-      // assert Ok(participation) =
-      //   discuss.load_participation(conversation_id, identifier.id)
-      // Need to actually write a message
-      // try _ = write_message.execute(participation, params)
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok

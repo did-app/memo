@@ -10,7 +10,7 @@ import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/identifier
+import plum_mail/identifier.{Personal}
 
 pub type Params {
   Params(email_address: EmailAddress)
@@ -26,8 +26,8 @@ pub fn params(raw: Dynamic) {
 // some accounts have more than one authentication id
 pub fn execute(params, config) {
   let Params(email_address: email_address) = params
-  try identifier = identifier.find_or_create(email_address)
-  assert Ok(token) = authentication.generate_link_token(identifier.id)
+  try Personal(identifier_id, ..) = identifier.find_or_create(email_address)
+  assert Ok(token) = authentication.generate_link_token(identifier_id)
   let config.Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
