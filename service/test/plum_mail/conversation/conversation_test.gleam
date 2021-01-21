@@ -7,7 +7,6 @@ import plum_mail/identifier.{Personal}
 import plum_mail/support
 import plum_mail/conversation/group
 import plum_mail/conversation/conversation
-import plum_mail/conversation/start_relationship
 import plum_mail/threads/thread
 import plum_mail/run_sql
 import gleam/should
@@ -19,17 +18,16 @@ pub fn talking_to_a_new_individual_test() {
   // Start talking to bob who is not in the system
   let bob_email = support.generate_email_address("customer.test")
 
-  // let params = start_relationship.Params(bob_email, json.list([]))
   // TODO return conversation view
   assert Ok(conversation) = conversation.start_direct(alice, bob_email)
-  assert Ok(_) =
-    thread.post_memo(conversation.thread.id, 1, alice.id, json.list([]))
 
-  // This is alices view od the conversation
-  assert Ok([alice_participation]) = conversation.all_participating(alice.id)
-
-  alice_participation.thread.acknowledged
-  |> should.equal(1)
+  // assert Ok(_) =
+  //   thread.post_memo(conversation.thread.id, 1, alice.id, json.list([]))
+  // // This is alices view od the conversation
+  // assert Ok([alice_participation]) = conversation.all_participating(alice.id)
+  // alice_participation.thread.acknowledged
+  // |> should.equal(1)
+  todo("reinstate above")
   // TODO test latest is the correct values
   // TODO fetch identifier id for bob
   // assert Ok([bob_participation]) = conversation.all_participating(bob.id)
@@ -52,10 +50,10 @@ pub fn create_a_group_test() {
   second_membership.group_id
   |> should.equal(first_membership.group_id)
 
-  assert Ok(groups) = group.load_all(second_membership.individual_id)
+  assert Ok(groups) = group.load_all(second_membership.identifier_id)
   io.debug(groups)
   assert Ok(threads) =
-    conversation.all_participating(second_membership.individual_id)
+    conversation.all_participating(second_membership.identifier_id)
   // After accepting invitation to a group you need all the groups you are a member of
   // Separate permission from participation, participation is the accepted blah blah
   todo("create visible group with first member")

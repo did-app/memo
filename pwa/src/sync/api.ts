@@ -21,8 +21,8 @@ export type IdentifierDTO = {
 }
 
 function identifierFromDTO(data: IdentifierDTO): Identifier {
-  const { id, email_address: emailAddress, greeting, } = data
-  return { emailAddress, greeting }
+  const { id, type, email_address: emailAddress, greeting, } = data
+  return { id, type, emailAddress, greeting }
 }
 
 // Authentication
@@ -123,8 +123,8 @@ export async function fetchContacts(): Call<Contact[]> {
   return { data: [] }
 }
 
-export async function startRelationship(emailAddress: string, content: Block[]): Call<Contact> {
-  const path = "/relationship/start"
+export async function startDirectConversation(identifierId: number, emailAddress: string, content: Block[]): Call<Contact> {
+  const path = "/identifiers/" + identifierId + "/start_direct"
   const params = { email_address: emailAddress, content }
   let response: Response<ContactDTO> = await post(path, params)
   return mapData(response, contactFromDTO)

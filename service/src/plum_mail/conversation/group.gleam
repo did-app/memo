@@ -5,7 +5,7 @@ import plum_mail/email_address.{EmailAddress}
 import plum_mail/run_sql
 
 pub type Membership {
-  Membership(group_id: Int, individual_id: Int)
+  Membership(group_id: Int, identifier_id: Int)
 }
 
 pub fn create_visible_group(name, identifier_id, first_member) {
@@ -40,9 +40,9 @@ pub fn create_visible_group(name, identifier_id, first_member) {
         WHERE email_address = $3
     )
 
-    INSERT INTO invitations(group_id, individual_id)
+    INSERT INTO invitations(group_id, identifier_id)
     VALUES ((SELECT id FROM new_group), (SELECT id FROM invited))
-    RETURNING group_id, individual_id;
+    RETURNING group_id, identifier_id;
     "
   // let args = [pgo.nullable(name, pgo.text)]
   let args = [pgo.text(name), pgo.int(identifier_id), pgo.text(first_member)]
@@ -54,9 +54,9 @@ pub fn create_visible_group(name, identifier_id, first_member) {
 fn row_to_membership(row) {
   assert Ok(group_id) = dynamic.element(row, 0)
   assert Ok(group_id) = dynamic.int(group_id)
-  assert Ok(individual_id) = dynamic.element(row, 1)
-  assert Ok(individual_id) = dynamic.int(individual_id)
-  Membership(group_id, individual_id)
+  assert Ok(identifier_id) = dynamic.element(row, 1)
+  assert Ok(identifier_id) = dynamic.int(identifier_id)
+  Membership(group_id, identifier_id)
 }
 
 pub fn add_member(group_id, new_member) {
@@ -75,9 +75,9 @@ pub fn add_member(group_id, new_member) {
         SELECT id FROM identifiers 
         WHERE email_address = $2
     )
-    INSERT INTO invitations(group_id, individual_id)
+    INSERT INTO invitations(group_id, identifier_id)
     VALUES ($1, (SELECT id FROM invited))
-    RETURNING group_id, individual_id;
+    RETURNING group_id, identifier_id;
     "
   let args = [pgo.int(group_id), pgo.text(new_member)]
   try [membership] = run_sql.execute(sql, args, row_to_membership)
@@ -97,7 +97,7 @@ pub fn load_all(identifier_id) {
   FROM groups
   LEFT JOIN latest ON latest.thread_id = groups.thread_id
   JOIN invitations ON invitations.group_id = groups.id
-  WHERE individual_id = $1
+  WHERE identifier_id = $1
   "
   let args = [pgo.int(identifier_id)]
   run_sql.execute(sql, args, io.debug)

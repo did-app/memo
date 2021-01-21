@@ -10,9 +10,9 @@ export type Thread = {
   acknowledged: number
 }
 
-export function currentPosition({ latest }: { latest: Memo | null }) {
-  if (latest) {
-    return latest.position
+export function currentPosition(thread: Thread | null): number {
+  if (thread && thread.latest) {
+    return thread.latest.position
   } else {
     return 0
   }

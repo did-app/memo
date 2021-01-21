@@ -5,14 +5,14 @@ import gleam/int
 import gleam/io
 import gleam/list
 import gleam/map
-import gleam/option.{None, Some}
+import gleam/option.{None, Option, Some}
 import gleam/string
 import gleam/result
 import gleam/uri
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/httpc
-import gleam/json
+import gleam/json.{Json}
 import gleam/pgo
 // Web/utils let session = utils.extractsession
 import datetime
@@ -26,13 +26,12 @@ import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/conversation/group
-import plum_mail/conversation/conversation
+import plum_mail/conversation/conversation.{Conversation, Thread}
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/identifier.{Personal}
+import plum_mail/identifier.{Personal, Shared}
 import plum_mail/web/helpers as web
 import plum_mail/threads/thread
 import plum_mail/threads/acknowledge
-// import plum_mail/relationships/start_relationship
 import plum_mail/email/inbound/postmark
 
 fn token_cookie_settings(request) {
@@ -84,15 +83,6 @@ fn no_content() {
   http.response(204)
   |> http.set_resp_body(bit_builder.from_bit_string(<<"":utf8>>))
   |> Ok
-}
-
-fn latest_to_json(latest) {
-  let tuple(inserted_at, content, position) = latest
-  json.object([
-    tuple("posted_at", json.string(datetime.to_iso8601(inserted_at))),
-    tuple("content", content),
-    tuple("position", json.int(position)),
-  ])
 }
 
 pub fn route(
@@ -168,6 +158,7 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok()
     }
+    // TODO this should become identifiers identifiers_id greeting
     ["me", "greeting"] -> {
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
@@ -180,12 +171,52 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
       |> Ok
     }
-    ["individuals", individual_id, "conversations"] -> {
+    // connect | start_direct
+    // should return conversation
+    // rest would be POST identifiers/id/conversations but is conversations really nested under?
+    ["identifiers", identifier_id, "start_direct"] -> {
+      try params = acl.parse_json(request)
+      try email_address = acl.required(params, "email_address", acl.as_email)
+      assert Ok(content) = dynamic.field(params, dynamic.from("content"))
       try client_state = web.identify_client(request, config)
       try session = web.require_authenticated(client_state)
-      assert Ok(individual_id) = int.parse(individual_id)
-      assert True = session == individual_id
-      try conversations = conversation.all_participating(individual_id)
+      assert Ok(identifier_id) = int.parse(identifier_id)
+      assert True = session == identifier_id
+      let content: Json = dynamic.unsafe_coerce(content)
+      try conversation = conversation.start_direct(identifier_id, email_address)
+      let thread = conversation.thread
+      // load up greeting, write ack but the recipient won't have already accepted.
+      // write message requires a participation object
+      // This is greeting for the other person, it needs writing in the thread
+      let tuple(recipient_id, greeting) = case identifier.find_or_create(
+        email_address,
+      ) {
+        Ok(Personal(id: id, greeting: greeting, ..)) -> tuple(id, greeting)
+        Ok(Shared(id: id, greeting: greeting, ..)) -> tuple(id, greeting)
+      }
+      try position = case greeting {
+        Some(greeting) -> {
+          assert Ok(_) = thread.post_memo(thread.id, 1, recipient_id, greeting)
+          Ok(0)
+        }
+        None -> Ok(1)
+      }
+      try memo = thread.post_memo(thread.id, position, identifier_id, content)
+      let conversation =
+        Conversation(
+          ..conversation,
+          thread: Thread(..thread, latest: Some(memo)),
+        )
+      http.response(200)
+      |> web.set_resp_json(conversation.to_json(conversation))
+      |> Ok
+    }
+    ["identifiers", identifier_id, "conversations"] -> {
+      try client_state = web.identify_client(request, config)
+      try session = web.require_authenticated(client_state)
+      assert Ok(identifier_id) = int.parse(identifier_id)
+      assert True = session == identifier_id
+      try conversations = conversation.all_participating(identifier_id)
       let data = json.list(list.map(conversations, conversation.to_json))
       http.response(200)
       |> web.set_resp_json(data)
@@ -209,9 +240,8 @@ pub fn route(
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
       // // Needs a participation thing again
-      try Some(latest) =
-        thread.post_memo(thread_id, position, author_id, blocks)
-      let data = latest_to_json(latest)
+      try latest = thread.post_memo(thread_id, position, author_id, blocks)
+      let data = thread.memo_to_json(latest)
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok

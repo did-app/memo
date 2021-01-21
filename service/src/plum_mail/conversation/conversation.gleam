@@ -5,20 +5,9 @@ import datetime.{DateTime}
 import gleam/json.{Json}
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
+import plum_mail/identifier.{Identifier}
+import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
-
-pub type Memo {
-  Memo(posted_at: DateTime, content: Json, position: Int)
-}
-
-fn memo_to_json(memo) {
-  let Memo(posted_at, content, position) = memo
-  json.object([
-    tuple("posted_at", json.string(datetime.to_iso8601(posted_at))),
-    tuple("content", content),
-    tuple("position", json.int(position)),
-  ])
-}
 
 pub type Thread {
   Thread(id: Int, acknowledged: Int, latest: Option(Memo))
@@ -28,7 +17,7 @@ fn thread_to_json(thread) {
   let Thread(id, acknowledged, latest) = thread
   let latest_json = case latest {
     None -> json.null()
-    Some(memo) -> memo_to_json(memo)
+    Some(memo) -> thread.memo_to_json(memo)
   }
   json.object([
     tuple("id", json.int(id)),
@@ -42,25 +31,25 @@ fn thread_to_json(thread) {
 //   participation (ack)
 //   thread (id, latest, participants)
 // }
+// This should probably be contact or relation
 pub type Conversation {
   Conversation(
     // direct or group
+    identifier: Identifier,
     thread: Thread,
   )
 }
 
 pub fn to_json(conversation) {
-  let Conversation(thread) = conversation
-  json.object([tuple("thread", thread_to_json(thread))])
-}
-
-// TODO add uniqueness on identifier
-pub type Identifier {
-  Individual(id: Int, email_address: String, greeting: Option(Json))
+  let Conversation(thread: thread, identifier: identifier) = conversation
+  json.object([
+    tuple("identifier", identifier.to_json(identifier)),
+    tuple("thread", thread_to_json(thread)),
+  ])
 }
 
 // There's no invited by on direct messages just who ever spoke first
-pub fn start_direct(identifier: Identifier, email_address) {
+pub fn start_direct(identifier_id, email_address) {
   let EmailAddress(email_address) = email_address
   // Find or create contact id
   let sql =
@@ -88,9 +77,9 @@ pub fn start_direct(identifier: Identifier, email_address) {
   )
   INSERT INTO pairs (lower_identifier_id, upper_identifier_id, thread_id)
   VALUES (LEAST($1, (SELECT id FROM new_identifier)), GREATEST($1, (SELECT id FROM new_identifier)), (SELECT id FROM new_thread))
-  RETURNING thread_id
+  RETURNING thread_id, (SELECT id, email_address, greeting, group_id FROM invited)
   "
-  let args = [pgo.int(identifier.id), pgo.text(email_address)]
+  let args = [pgo.int(identifier_id), pgo.text(email_address)]
   try [participation] =
     run_sql.execute(
       sql,
@@ -99,8 +88,9 @@ pub fn start_direct(identifier: Identifier, email_address) {
         assert Ok(thread_id) = dynamic.element(row, 0)
         assert Ok(thread_id) = dynamic.int(thread_id)
 
+        let contact = identifier.row_to_identifier(row, 1)
         let thread = Thread(thread_id, 0, None)
-        Conversation(thread: thread)
+        Conversation(thread: thread, identifier: contact)
       },
     )
   participation
@@ -165,7 +155,8 @@ pub fn all_participating(identifier_id) {
         None, None -> None
       }
       let thread = Thread(thread_id, acknowledged, latest)
-      Conversation(thread)
+      let identifier = todo("create identifier")
+      Conversation(thread: thread, identifier: identifier)
     },
   )
 }

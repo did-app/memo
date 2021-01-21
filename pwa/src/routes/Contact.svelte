@@ -3,7 +3,7 @@
   import { onMount, tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
   import * as Conversation from "../conversation";
-  import type { Contact, Stranger } from "../social";
+  import type { Contact, Relationship, Stranger } from "../social";
   import * as Social from "../social";
   import type { State, Authenticated, Call } from "../sync";
   import * as Sync from "../sync";
@@ -109,15 +109,24 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  let loading: Call<{ contact: Contact | Stranger; memos: Memo[] }>;
-  loading = (async function (): Call<{
-    contact: Contact | Stranger;
-    memos: Memo[];
-  }> {
+  let loading: Call<
+    | {
+        contact: Contact;
+        memos: Memo[];
+      }
+    | { contact: Stranger; memos: null }
+  >;
+  loading = (async function (): Call<
+    | {
+        contact: Contact;
+        memos: Memo[];
+      }
+    | { contact: Stranger; memos: null }
+  > {
     let contactResult = await contactLookup;
     if ("data" in contactResult) {
       let contact = contactResult.data;
-      if ("id" in contact.thread) {
+      if (contact.thread) {
         const response = await Sync.loadMemos(contact.thread.id);
         if ("data" in response) {
           let memos = response.data;
@@ -140,7 +149,7 @@
           throw "TROUBLE looking up memos";
         }
       } else {
-        return Promise.resolve({ data: { contact, memos: [] } });
+        return Promise.resolve({ data: { contact, memos: null } });
       }
     } else {
       throw "We had trouble looking up contact information";
@@ -156,8 +165,9 @@
     reply = true;
   }
 
-  function postMemo(contact: Contact | Stranger, content: Block[]) {
+  function postMemo(contact: Relationship, content: Block[]) {
     Sync.postMemo(
+      state.me.id,
       contact,
       content,
       Conversation.currentPosition(contact.thread) + 1
@@ -165,8 +175,8 @@
     router.redirect("/");
   }
 
-  function acknowledge(user: Contact | Stranger) {
-    if ("id" in user.thread) {
+  function acknowledge(user: Relationship) {
+    if (user.thread) {
       let contact = user as Contact;
       Sync.acknowledge(contact, Conversation.currentPosition(contact.thread));
       router.redirect("/");
@@ -191,53 +201,53 @@
       {#if "data" in response}
         <div class="">
           <div class="" bind:this={root}>
-            <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
+            {#if response.data.memos}
+              <!-- <p class="text-center">{contact.thread.acknowledged - 1} older</p>
             {#each response.data.slice(contact.thread.acknowledged - 1) as memo} -->
-            {#each response.data.memos as memo}
-              <MemoComponent
-                {memo}
-                open={memo.position >=
-                  response.data.contact.thread.acknowledged ||
-                  memo.position === target}
-                peers={response.data.memos}
-              />
-            {:else}
-              {#if response.data.contact.identifier.greeting === null}
-                <h1 class="text-center text-2xl my-4 text-gray-700">
-                  Contact
-                  <span class="font-bold">{emailAddress}</span>
-                </h1>
-              {:else}
-                <h1 class="text-center text-lg my-4 text-gray-700">
-                  This is an automated greeting from
-                  <span class="font-bold">{emailAddress}</span>
-                </h1>
-
+              {#each response.data.memos as memo}
                 <MemoComponent
-                  memo={{
-                    content: response.data.contact.identifier.greeting,
-                    posted_at: new Date(),
-                    position: 0,
-                    author: response.data.contact.identifier.emailAddress,
-                  }}
-                  open={true}
-                  peers={[]}
+                  {memo}
+                  open={memo.position >=
+                    response.data.contact.thread.acknowledged ||
+                    memo.position === target}
+                  peers={response.data.memos || []}
                 />
-              {/if}
-            {/each}
+              {/each}
+            {:else if response.data.contact.identifier.greeting === null}
+              <h1 class="text-center text-2xl my-4 text-gray-700">
+                Contact
+                <span class="font-bold">{emailAddress}</span>
+              </h1>
+            {:else}
+              <h1 class="text-center text-lg my-4 text-gray-700">
+                This is an automated greeting from
+                <span class="font-bold">{emailAddress}</span>
+              </h1>
+
+              <MemoComponent
+                memo={{
+                  content: response.data.contact.identifier.greeting,
+                  posted_at: new Date(),
+                  position: 0,
+                  author: response.data.contact.identifier.emailAddress,
+                }}
+                open={true}
+                peers={[]}
+              />
+            {/if}
           </div>
           <article
             class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
           >
             <div class:hidden={!reply}>
               <Composer
-                previous={response.data.memos}
+                previous={response.data.memos || []}
                 bind:this={composer}
                 selected={composerRange}
                 blocks={[
                   { type: "paragraph", spans: [{ type: "text", text: "" }] },
                 ]}
-                position={response.data.memos.length + 1}
+                position={(response.data.memos?.length || 0) + 1}
                 let:blocks
               >
                 <div class="mt-2 pl-6 md:pl-12 flex items-center">
@@ -271,14 +281,11 @@
                   <!-- {#each Writing.summary(Conversation.followReference(userFocus, response.data)) as span, index}
                     <SpanComponent {span} {index} unfurled={false} />
                   {/each} -->
-                  {#each Conversation.followReference(userFocus, [
-                    ...response.data.memos,
-                    // current,
-                  ]) as block, index}
+                  {#each Conversation.followReference(userFocus, response.data.memos || []) as block, index}
                     <BlockComponent
                       {index}
                       {block}
-                      peers={response.data.memos}
+                      peers={response.data.memos || []}
                       truncate={false}
                       placeholder={null}
                     />
@@ -313,7 +320,7 @@
                     </span>
                     <span class="py-1">Pins</span>
                   </button>-->
-                  {#if "thread" in response.data.contact && "id" in response.data.contact.thread && Conversation.isOutstanding(response.data.contact.thread)}
+                  {#if "thread" in response.data.contact && response.data.contact.thread && Conversation.isOutstanding(response.data.contact.thread)}
                     <button
                       on:click={() => acknowledge(response.data.contact)}
                       class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
@@ -346,7 +353,7 @@
             class="max-w-sm w-full sticky overflow-hidden"
             style="top:0.25rem"
           >
-            {#each Conversation.findPinnable(response.data.memos) as pin}
+            {#each Conversation.findPinnable(response.data.memos || []) as pin}
               <li
                 class="mb-1 mx-1 px-1 truncate  cursor-pointer text-gray-700 hover:text-purple-700 border-2 rounded flex items-center"
               >

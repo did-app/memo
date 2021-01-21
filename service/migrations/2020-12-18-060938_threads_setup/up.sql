@@ -96,6 +96,7 @@ ALTER TABLE identifiers
 
 -- TODO Add accepted | pending
 -- This points at individuals so we don't get a circular reference
+-- could be member id but the participations would have participant id and group would become collective_id
 CREATE TABLE invitations (
   group_id INT REFERENCES groups(id) NOT NULL,
   identifier_id INT NOT NULL,

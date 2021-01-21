@@ -5,23 +5,28 @@ import type { Block } from "../writing"
 import * as API from "../sync/api"
 
 export type Identifier = {
+  type: "personal" | "shared"
+  id: number,
   emailAddress: string
   greeting: Block[] | null
 }
 
-// define thread identifier profile types
 export type Contact = {
   identifier: Identifier,
-  // A contact will always have a thread
   thread: Thread
 }
 export type Stranger = {
-  identifier: Identifier
-  thread: { latest: null, acknowledged: 0 }
+  identifier: {
+    type: "unknown",
+    emailAddress: string,
+    greeting: Block[] | null
+  }
+  thread: null
 }
 
+export type Relationship = Contact | Stranger
 
-export async function contactForEmailAddress(contacts: Contact[], emailAddress: string): Call<Contact | Stranger> {
+export async function contactForEmailAddress(contacts: Contact[], emailAddress: string): Call<Relationship> {
   let result = contacts.find(function (contact) { return contact.identifier.emailAddress === emailAddress })
   if (result) {
     return { data: result }
@@ -29,16 +34,9 @@ export async function contactForEmailAddress(contacts: Contact[], emailAddress: 
     let response = await API.fetchProfile(emailAddress)
     if ('data' in response && response.data !== null) {
       let greeting = response.data.greeting
-      let thread: Thread | { latest: null; acknowledged: 0; };
-      thread = { latest: null, acknowledged: 0 }
-      // if (greeting === null) {
-      // } else {
-      //   let latest: Memo = { author: emailAddress, content: greeting, posted_at: new Date(), position: 0 }
-      //   thread = { latest, acknowledged: 1 }
-      // }
-      let identifier = { emailAddress, greeting }
+      let stranger: Stranger = { identifier: { type: "unknown", emailAddress, greeting }, thread: null }
 
-      return { data: { identifier, thread } }
+      return { data: stranger }
     } else {
 
       throw "failed to look up public info"

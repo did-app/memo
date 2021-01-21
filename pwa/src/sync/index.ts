@@ -4,7 +4,7 @@ import type { Memo, Thread } from "../conversation"
 import type { Block } from "../writing"
 import type { Call, Failure } from "./client"
 import * as API from "./api"
-import type { Contact, Stranger, Identifier } from "../social"
+import type { Contact, Relationship, Identifier } from "../social"
 
 import type { InstallPrompt } from "./install"
 import startInstall from "./install"
@@ -132,9 +132,9 @@ export async function saveGreeting(blocks: Block[]): Call<null> {
 
 export { loadMemos } from "./api"
 
-export async function postMemo(contact: Contact | Stranger, blocks: Block[], position: number): Call<null> {
+export async function postMemo(me: number, contact: Relationship, blocks: Block[], position: number): Call<null> {
   let task: Call<Contact>
-  if ('id' in contact.thread) {
+  if (contact.thread) {
     let thread: Thread = contact.thread;
     task = API.postMemo(thread.id, position, blocks).then(function (response) {
       if ('data' in response) {
@@ -146,7 +146,7 @@ export async function postMemo(contact: Contact | Stranger, blocks: Block[], pos
       }
     })
   } else {
-    task = API.startRelationship(contact.identifier.emailAddress, blocks);
+    task = API.startDirectConversation(me, contact.identifier.emailAddress, blocks);
 
   }
   let response = await task

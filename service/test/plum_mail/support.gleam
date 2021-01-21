@@ -12,7 +12,6 @@ import gleam/pgo
 import plum_mail/config
 import plum_mail/run_sql
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/conversation/conversation.{Individual}
 import plum_mail/identifier
 import plum_mail/web/helpers as web
 import plum_mail/web/router.{handle}
@@ -70,7 +69,8 @@ fn row_to_identifier(row) {
   // assert Ok(individual_id) = run_sql.dynamic_option(individual_id, dynamic.int)
   assert Ok(group_id) = dynamic.element(row, 3)
   assert Ok(group_id) = run_sql.dynamic_option(group_id, dynamic.int)
-  case group_id {
-    None -> Individual(id, email_address, greeting)
-  }
+  todo("ack to old version")
+  // case group_id {
+  //   None -> Individual(id, email_address, greeting)
+  // }
 }

@@ -1,14 +1,27 @@
 import gleam/dynamic
 import gleam/io
 import gleam/pgo
-import gleam/json
-import datetime
+import gleam/json.{Json}
+import datetime.{DateTime}
 import plum_mail/run_sql
+
+pub type Memo {
+  Memo(posted_at: DateTime, content: Json, position: Int)
+}
+
+pub fn memo_to_json(memo) {
+  let Memo(posted_at, content, position) = memo
+  json.object([
+    tuple("posted_at", json.string(datetime.to_iso8601(posted_at))),
+    tuple("content", content),
+    tuple("position", json.int(position)),
+  ])
+}
 
 pub fn post_memo(thread_id, position, author_id, content: json.Json) {
   let sql =
     "
-    WITH memo AS (
+    WITH new_memo AS (
       INSERT INTO memos (thread_id, position, authored_by, content)
       VALUES ($1, $2, $3, $4)
       RETURNING *
@@ -19,7 +32,7 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
       AND identifier_id = $3
     )
     SELECT content, inserted_at, position 
-    FROM memo
+    FROM new_memo
     "
   let args = [
     pgo.int(thread_id),
@@ -27,22 +40,22 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
     pgo.int(author_id),
     dynamic.unsafe_coerce(dynamic.from(content)),
   ]
-  try db_response =
+  try [memo] =
     run_sql.execute(
       sql,
       args,
       fn(row) {
         assert Ok(content) = dynamic.element(row, 0)
         let content: json.Json = dynamic.unsafe_coerce(content)
-        assert Ok(inserted_at) = dynamic.element(row, 1)
-        assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
+        assert Ok(posted_at) = dynamic.element(row, 1)
+        assert Ok(posted_at) = run_sql.cast_datetime(posted_at)
         assert Ok(position) = dynamic.element(row, 2)
         assert Ok(position) = dynamic.int(position)
 
-        tuple(inserted_at, content, position)
+        Memo(posted_at, content, position)
       },
     )
-  run_sql.single(db_response)
+  memo
   |> Ok
 }
 

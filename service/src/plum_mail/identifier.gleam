@@ -46,16 +46,16 @@ pub fn to_json(identifier: Identifier) {
   ])
 }
 
-pub fn row_to_identifier(row) {
-  assert Ok(id) = dynamic.element(row, 0)
+pub fn row_to_identifier(row, offset) {
+  assert Ok(id) = dynamic.element(row, offset + 0)
   assert Ok(id) = dynamic.int(id)
-  assert Ok(email_address) = dynamic.element(row, 1)
+  assert Ok(email_address) = dynamic.element(row, offset + 1)
   assert Ok(email_address) = dynamic.string(email_address)
   assert Ok(email_address) = email_address.validate(email_address)
-  assert Ok(greeting) = dynamic.element(row, 2)
+  assert Ok(greeting) = dynamic.element(row, offset + 2)
   assert Ok(greeting): Result(Option(Json), Nil) =
     run_sql.dynamic_option(greeting, fn(x) { Ok(dynamic.unsafe_coerce(x)) })
-  assert Ok(group_id) = dynamic.element(row, 2)
+  assert Ok(group_id) = dynamic.element(row, offset + 3)
   assert Ok(group_id) = run_sql.dynamic_option(group_id, dynamic.int)
 
   case group_id {
@@ -78,7 +78,7 @@ pub fn find_or_create(email_address: EmailAddress) {
   SELECT id, email_address, greeting, group_id FROM identifiers WHERE email_address = $1
   "
   let args = [pgo.text(email_address.value)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier)
+  try db_result = run_sql.execute(sql, args, row_to_identifier(_, 0))
   assert [identifier] = db_result
   Ok(identifier)
 }
@@ -90,7 +90,7 @@ pub fn fetch_by_id(id) {
     FROM identifiers
     WHERE id = $1"
   let args = [pgo.int(id)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier)
+  try db_result = run_sql.execute(sql, args, row_to_identifier(_, 0))
   run_sql.single(db_result)
   |> Ok
 }
@@ -106,5 +106,5 @@ pub fn shared_identifiers(identifier) {
   WHERE invitations.identifier_id = $1
   "
   let args = [pgo.int(identifier_id)]
-  run_sql.execute(sql, args, row_to_identifier)
+  run_sql.execute(sql, args, row_to_identifier(_, 0))
 }

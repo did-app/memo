@@ -89,7 +89,7 @@ pub fn validate_link_token(token_string) {
       "
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
-    let identifier = identifier.row_to_identifier(row)
+    let identifier = identifier.row_to_identifier(row, 0)
     assert Ok(validator) = dynamic.element(row, 3)
     assert Ok(validator) = dynamic.string(validator)
     assert Ok(link_token_selector) = dynamic.element(row, 4)

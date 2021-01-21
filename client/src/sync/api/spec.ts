@@ -24,7 +24,7 @@ export type Identifier = {
 
 export type AuthenticateWithCode = Post<
   ["authenticate", "code"],
-  {code: string},
+  { code: string },
   Identifier
 >
 
@@ -49,8 +49,8 @@ function post<Path extends (number | string)[], Params, Data>(request: Get<Path,
 }
 
 // let request: Api = {method: "POST", path: "boo", params: 5}
-let request: Api = {method: "GET", path: ["identifiers", 5]}
-let response: {foo: true} = post(request)
+let request: Api = { method: "GET", path: ["identifiers", 5] }
+let response: { foo: true } = post(request)
 
 // let p: AuthenticateWithCode = {params: {code: "2"}}
 // let y = post(p)
