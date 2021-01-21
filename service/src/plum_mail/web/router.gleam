@@ -177,7 +177,11 @@ pub fn route(
       assert Ok(individual_id) = int.parse(individual_id)
       assert True = session == individual_id
       try conversations = conversation.all_participating(individual_id)
-      todo
+      let data = json.list(list.map(conversations, conversation))
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok
+
     }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
