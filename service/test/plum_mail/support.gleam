@@ -33,44 +33,8 @@ pub fn generate_email_address(domain) {
   |> EmailAddress()
 }
 
-// TODO remove
-pub fn generate_identifier(domain) {
-  generate_email_address(domain)
-  |> identifier.find_or_create()
-}
-
-pub fn generate_individual(domain) {
-  let email_address = generate_email_address(domain)
-  let sql =
-    "
-  -- WITH new_individual AS (
-  --  INSERT INTO individuals DEFAULT VALUES
-  --  RETURNING id
-  -- )
-  
-  INSERT INTO identifiers (email_address)
-  VALUES ($1)
-  RETURNING id, email_address, greeting, group_id
-  "
-  let args = [pgo.text(email_address.value)]
-  assert Ok([identifier]) = run_sql.execute(sql, args, row_to_identifier)
+pub fn generate_personal_identifier(domain) {
+  assert Ok(identifier) =
+    identifier.find_or_create(generate_email_address(domain))
   identifier
-}
-
-fn row_to_identifier(row) {
-  assert Ok(id) = dynamic.element(row, 0)
-  assert Ok(id) = dynamic.int(id)
-  assert Ok(email_address) = dynamic.element(row, 1)
-  assert Ok(email_address) = dynamic.string(email_address)
-  assert Ok(greeting) = dynamic.element(row, 2)
-  assert Ok(greeting): Result(Option(Json), Nil) =
-    run_sql.dynamic_option(greeting, fn(x) { Ok(dynamic.unsafe_coerce(x)) })
-  // assert Ok(individual_id) = dynamic.element(row, )
-  // assert Ok(individual_id) = run_sql.dynamic_option(individual_id, dynamic.int)
-  assert Ok(group_id) = dynamic.element(row, 3)
-  assert Ok(group_id) = run_sql.dynamic_option(group_id, dynamic.int)
-  todo("ack to old version")
-  // case group_id {
-  //   None -> Individual(id, email_address, greeting)
-  // }
 }

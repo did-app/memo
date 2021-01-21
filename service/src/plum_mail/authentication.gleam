@@ -98,7 +98,9 @@ pub fn validate_link_token(token_string) {
     assert Ok(current) = dynamic.bool(current)
     tuple(identifier, validator, link_token_selector, current)
   }
-  try challenge_tokens = run_sql.execute(sql, args, mapper)
+  try challenge_tokens =
+    run_sql.execute(sql, args, mapper)
+    |> result.map_error(fn(x) { todo("map error when validating link token") })
   case challenge_tokens {
     [] -> todo
     [tuple(identifier, validator, link_token_selector, current)] -> {

@@ -26,7 +26,7 @@ import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/conversation/group
-import plum_mail/conversation/conversation.{Conversation, Thread}
+import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal, Shared}
 import plum_mail/web/helpers as web
@@ -164,11 +164,12 @@ pub fn route(
       try user_id = web.require_authenticated(client_state)
       try raw = acl.parse_json(request)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
-      let sql = "UPDATE identifiers SET greeting = $2 WHERE id = $1"
-      let args = [pgo.int(user_id), dynamic.unsafe_coerce(blocks)]
-      try [] = run_sql.execute(sql, args, fn(x) { x })
+      // casts from json to pg type
+      let blocks = dynamic.unsafe_coerce(blocks)
+      let identifier = identifier.update_greeting(user_id, blocks)
+      let identifier = todo("finis mapping")
       http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<"{}":utf8>>))
+      |> web.set_resp_json(identifier.to_json(identifier))
       |> Ok
     }
     // connect | start_direct
@@ -183,30 +184,8 @@ pub fn route(
       assert Ok(identifier_id) = int.parse(identifier_id)
       assert True = session == identifier_id
       let content: Json = dynamic.unsafe_coerce(content)
-      try conversation = conversation.start_direct(identifier_id, email_address)
-      let thread = conversation.thread
-      // load up greeting, write ack but the recipient won't have already accepted.
-      // write message requires a participation object
-      // This is greeting for the other person, it needs writing in the thread
-      let tuple(recipient_id, greeting) = case identifier.find_or_create(
-        email_address,
-      ) {
-        Ok(Personal(id: id, greeting: greeting, ..)) -> tuple(id, greeting)
-        Ok(Shared(id: id, greeting: greeting, ..)) -> tuple(id, greeting)
-      }
-      try position = case greeting {
-        Some(greeting) -> {
-          assert Ok(_) = thread.post_memo(thread.id, 1, recipient_id, greeting)
-          Ok(0)
-        }
-        None -> Ok(1)
-      }
-      try memo = thread.post_memo(thread.id, position, identifier_id, content)
-      let conversation =
-        Conversation(
-          ..conversation,
-          thread: Thread(..thread, latest: Some(memo)),
-        )
+      try conversation =
+        conversation.start_direct(identifier_id, email_address, content)
       http.response(200)
       |> web.set_resp_json(conversation.to_json(conversation))
       |> Ok

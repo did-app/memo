@@ -7,6 +7,7 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/pgo
 import datetime
+import plum_mail/error.{InternalServerError}
 
 pub fn dynamic_option(raw, cast) {
   let null = dynamic.from(atom.create_from_string("null"))
@@ -49,8 +50,7 @@ pub fn execute(sql, args, mapper) {
     |> result.map_error(fn(err) {
       // this should have a bug report and bug report id, but we can see it in the heroku SQL view perhaps
       io.debug(err)
-      // tuple(error.InternalServiceError, "Failed to query the database")
-      todo("DB Error")
+      InternalServerError("Failed to connect to the database")
     })
 
   list.map(rows, mapper)

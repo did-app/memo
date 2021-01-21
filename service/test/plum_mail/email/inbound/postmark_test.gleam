@@ -36,7 +36,7 @@
 //   should.equal(response.status, 200)
 // }
 // pub fn conversation_reply_test() {
-//   assert Ok(identifier) = support.generate_identifier("example.test")
+//   assert Ok(identifier) = support.generate_personal_identifier("example.test")
 //   assert Ok(topic) = discuss.validate_topic("Test topic")
 //   assert Ok(conversation) = start_conversation.execute(topic, identifier.id)
 //   let request =

@@ -13,9 +13,3 @@ pub type Reason {
   // specific
   UnknownIdentifier(email_address: String)
 }
-// pub type Failure {
-//     Failure(
-//         id: String,
-//         reason:
-//     )
-// }

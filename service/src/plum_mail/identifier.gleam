@@ -1,4 +1,5 @@
 import gleam/dynamic
+import gleam/io
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/json.{Json}
@@ -107,4 +108,17 @@ pub fn shared_identifiers(identifier) {
   "
   let args = [pgo.int(identifier_id)]
   run_sql.execute(sql, args, row_to_identifier(_, 0))
+}
+
+pub fn update_greeting(identifier_id, greeting) {
+  let sql =
+    "
+        UPDATE identifiers 
+        SET greeting = $2 
+        WHERE id = $1
+        "
+  let args = [pgo.int(identifier_id), greeting]
+  try [identifier] = run_sql.execute(sql, args, fn(x) { io.debug(x) })
+  identifier
+  |> Ok
 }

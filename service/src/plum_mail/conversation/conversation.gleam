@@ -5,7 +5,7 @@ import datetime.{DateTime}
 import gleam/json.{Json}
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/identifier.{Identifier}
+import plum_mail/identifier.{Identifier, Personal, Shared}
 import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
 
@@ -26,14 +26,8 @@ fn thread_to_json(thread) {
   ])
 }
 
-// type Conversation {
-//   Conversation(thread: Thread)
-//   participation (ack)
-//   thread (id, latest, participants)
-// }
-// This should probably be contact or relation
-pub type Conversation {
-  Conversation(
+pub type Contact {
+  Contact(
     // direct or group
     identifier: Identifier,
     thread: Thread,
@@ -41,15 +35,38 @@ pub type Conversation {
 }
 
 pub fn to_json(conversation) {
-  let Conversation(thread: thread, identifier: identifier) = conversation
+  let Contact(thread: thread, identifier: identifier) = conversation
   json.object([
     tuple("identifier", identifier.to_json(identifier)),
     tuple("thread", thread_to_json(thread)),
   ])
 }
 
+pub fn start_direct(identifier_id, email_address, content) {
+  try Contact(identifier, thread) =
+    new_direct_contact(identifier_id, email_address)
+
+  // load up greeting, write ack but the recipient won't have already accepted.
+  // write message requires a participation object
+  // This is greeting for the other person, it needs writing in the thread
+  let tuple(recipient_id, greeting) = case identifier {
+    Personal(id: id, greeting: greeting, ..) -> tuple(id, greeting)
+    Shared(id: id, greeting: greeting, ..) -> tuple(id, greeting)
+  }
+  try position = case greeting {
+    Some(greeting) -> {
+      assert Ok(_) = thread.post_memo(thread.id, 1, recipient_id, greeting)
+      Ok(0)
+    }
+    None -> Ok(1)
+  }
+  try memo = thread.post_memo(thread.id, position, identifier_id, content)
+  Contact(identifier, thread: Thread(..thread, latest: Some(memo)))
+  |> Ok
+}
+
 // There's no invited by on direct messages just who ever spoke first
-pub fn start_direct(identifier_id, email_address) {
+fn new_direct_contact(identifier_id, email_address) {
   let EmailAddress(email_address) = email_address
   // Find or create contact id
   let sql =
@@ -67,17 +84,19 @@ pub fn start_direct(identifier_id, email_address) {
     ON CONFLICT DO NOTHING
     RETURNING *
   ), invited AS (
-      SELECT id FROM new_identifier
+      SELECT * FROM new_identifier
     UNION ALL
-      SELECT id FROM identifiers 
+      SELECT * FROM identifiers 
       WHERE email_address = $2
   ), passive_participant AS (
     INSERT INTO participations (identifier_id, thread_id, acknowledged)
     VALUES ((SELECT id FROM invited), (SELECT id FROM new_thread), 0)
+  ), new_pair AS (
+    INSERT INTO pairs (lower_identifier_id, upper_identifier_id, thread_id)
+    VALUES (LEAST($1, (SELECT id FROM invited)), GREATEST($1, (SELECT id FROM invited)), (SELECT id FROM new_thread))
+    RETURNING thread_id
   )
-  INSERT INTO pairs (lower_identifier_id, upper_identifier_id, thread_id)
-  VALUES (LEAST($1, (SELECT id FROM new_identifier)), GREATEST($1, (SELECT id FROM new_identifier)), (SELECT id FROM new_thread))
-  RETURNING thread_id, (SELECT id, email_address, greeting, group_id FROM invited)
+  SELECT (SELECT thread_id FROM new_pair), id, email_address, greeting, group_id FROM invited
   "
   let args = [pgo.int(identifier_id), pgo.text(email_address)]
   try [participation] =
@@ -90,7 +109,7 @@ pub fn start_direct(identifier_id, email_address) {
 
         let contact = identifier.row_to_identifier(row, 1)
         let thread = Thread(thread_id, 0, None)
-        Conversation(thread: thread, identifier: contact)
+        Contact(thread: thread, identifier: contact)
       },
     )
   participation
@@ -119,15 +138,25 @@ pub fn all_participating(identifier_id) {
     JOIN invitations ON invitations.group_id = groups.id
     WHERE identifier_id = $1
   ), my_conversations AS (
-    SELECT thread_id, 'DIRECT'
+    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id
     FROM my_contacts
+    JOIN identifiers AS i ON i.id = my_contacts.contact_id
     
     UNION ALL
 
-    SELECT thread_id, 'GROUP'
+    SELECT thread_id, 'GROUP', NULL, NULL, NULL, NULL
     FROM my_groups
   )
-  SELECT my_conversations.thread_id, COALESCE(participations.acknowledged, 0), latest.inserted_at, latest.content, latest.position 
+  SELECT 
+    my_conversations.thread_id,
+    COALESCE(participations.acknowledged, 0),
+    latest.inserted_at,
+    latest.content,
+    latest.position, 
+    my_conversations.contact_id,
+    my_conversations.email_address,
+    my_conversations.greeting,
+    my_conversations.group_id
   FROM my_conversations
   LEFT JOIN latest ON latest.thread_id = my_conversations.thread_id
   LEFT JOIN participations ON participations.thread_id = my_conversations.thread_id
@@ -138,16 +167,17 @@ pub fn all_participating(identifier_id) {
     sql,
     args,
     fn(row) {
+      io.debug(row)
       assert Ok(thread_id) = dynamic.element(row, 0)
       assert Ok(thread_id) = dynamic.int(thread_id)
       assert Ok(acknowledged) = dynamic.element(row, 1)
       assert Ok(acknowledged) = dynamic.int(acknowledged)
-      assert Ok(inserted_at) = dynamic.element(row, 3)
+      assert Ok(inserted_at) = dynamic.element(row, 2)
       assert Ok(inserted_at) =
         run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
-      assert Ok(content) = dynamic.element(row, 4)
+      assert Ok(content) = dynamic.element(row, 3)
       let content: json.Json = dynamic.unsafe_coerce(content)
-      assert Ok(position) = dynamic.element(row, 5)
+      assert Ok(position) = dynamic.element(row, 4)
       assert Ok(position) = run_sql.dynamic_option(position, dynamic.int)
       let latest = case inserted_at, position {
         Some(posted_at), Some(position) ->
@@ -155,8 +185,8 @@ pub fn all_participating(identifier_id) {
         None, None -> None
       }
       let thread = Thread(thread_id, acknowledged, latest)
-      let identifier = todo("create identifier")
-      Conversation(thread: thread, identifier: identifier)
+      let identifier = identifier.row_to_identifier(row, 5)
+      Contact(thread: thread, identifier: identifier)
     },
   )
 }

@@ -1,5 +1,6 @@
 import gleam/dynamic
 import gleam/io
+import gleam/option.{Some}
 import gleam/json
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
@@ -7,57 +8,98 @@ import plum_mail/identifier.{Personal}
 import plum_mail/support
 import plum_mail/conversation/group
 import plum_mail/conversation/conversation
-import plum_mail/threads/thread
+import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
 import gleam/should
 
-pub fn talking_to_a_new_individual_test() {
-  // This needs to create an individual
-  let alice = support.generate_individual("customer.test")
+pub fn talking_to_a_unknown_identifier_test() {
+  let alice = support.generate_personal_identifier("alice.test")
+  assert Personal(id: alice_id, ..) = alice
+  let bob_email = support.generate_email_address("bob.test")
 
-  // Start talking to bob who is not in the system
-  let bob_email = support.generate_email_address("customer.test")
+  let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
+  assert Ok(contact) = conversation.start_direct(alice_id, bob_email, memo)
 
-  // TODO return conversation view
-  assert Ok(conversation) = conversation.start_direct(alice, bob_email)
+  assert Ok([alice_contact]) = conversation.all_participating(alice_id)
+  assert Personal(id: bob_id, email_address: contact_email, ..) =
+    alice_contact.identifier
+  assert Ok(bob) = identifier.fetch_by_id(bob_id)
 
-  // assert Ok(_) =
-  //   thread.post_memo(conversation.thread.id, 1, alice.id, json.list([]))
-  // // This is alices view od the conversation
-  // assert Ok([alice_participation]) = conversation.all_participating(alice.id)
-  // alice_participation.thread.acknowledged
-  // |> should.equal(1)
-  todo("reinstate above")
-  // TODO test latest is the correct values
-  // TODO fetch identifier id for bob
-  // assert Ok([bob_participation]) = conversation.all_participating(bob.id)
-  // bob_participation.acknowledged
-  // |> should.equal(1)
-  // Bobs view of the conversation will have a different ack level
+  contact_email
+  |> should.equal(bob_email)
+
+  alice_contact.thread.acknowledged
+  |> should.equal(1)
+  assert Some(latest) = alice_contact.thread.latest
+  latest.content
+  |> should.equal(memo)
+  latest.position
+  |> should.equal(1)
+
+  assert Ok([bob_contact]) = conversation.all_participating(bob_id)
+  bob_contact.thread.acknowledged
+  |> should.equal(0)
+  bob_contact.identifier
+  |> should.equal(alice)
+  bob_contact.thread.latest
+  |> should.equal(alice_contact.thread.latest)
 }
 
-pub fn create_a_group_test() {
-  assert Ok(Personal(identifier_id, ..)) =
-    support.generate_identifier("sendmemo.test")
-  let name = "Memo Team"
-  let first_member = support.generate_email_address("example.test")
-  assert Ok(first_membership) =
-    group.create_visible_group(name, identifier_id, first_member)
-  // If your logged in as the team address then it should be unaccepted on the first member
-  let second_member = support.generate_email_address("example.test")
-  assert Ok(second_membership) =
-    group.add_member(first_membership.group_id, second_member)
-  second_membership.group_id
-  |> should.equal(first_membership.group_id)
+pub fn answering_an_identifier_greeting_test() {
+  let alice = support.generate_personal_identifier("alice.test")
+  assert Personal(id: alice_id, ..) = alice
 
-  assert Ok(groups) = group.load_all(second_membership.identifier_id)
-  io.debug(groups)
-  assert Ok(threads) =
-    conversation.all_participating(second_membership.identifier_id)
-  // After accepting invitation to a group you need all the groups you are a member of
-  // Separate permission from participation, participation is the accepted blah blah
-  todo("create visible group with first member")
+  let clive = support.generate_personal_identifier("clive.test")
+  assert Personal(id: clive_id, email_address: clive_email, ..) = clive
+
+  let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
+  assert Ok(contact) = conversation.start_direct(alice_id, clive_email, memo)
+
+  assert Ok([alice_contact]) = conversation.all_participating(alice_id)
+  assert Personal(id: clive_id, email_address: contact_email, ..) =
+    alice_contact.identifier
+  assert Ok(clive) = identifier.fetch_by_id(clive_id)
+
+  contact_email
+  |> should.equal(clive_email)
+
+  alice_contact.thread.acknowledged
+  |> should.equal(1)
+  assert Some(latest) = alice_contact.thread.latest
+  latest.content
+  |> should.equal(memo)
+  latest.position
+  |> should.equal(1)
+
+  assert Ok([clive_contact]) = conversation.all_participating(clive_id)
+  clive_contact.thread.acknowledged
+  |> should.equal(0)
+  clive_contact.identifier
+  |> should.equal(alice)
+  clive_contact.thread.latest
+  |> should.equal(alice_contact.thread.latest)
 }
+// pub fn create_a_group_test() {
+//   assert Ok(Personal(identifier_id, ..)) =
+//     support.generate_personal_identifier("sendmemo.test")
+//   let name = "Memo Team"
+//   let first_member = support.generate_email_address("example.test")
+//   assert Ok(first_membership) =
+//     group.create_visible_group(name, identifier_id, first_member)
+//   // If your logged in as the team address then it should be unaccepted on the first member
+//   let second_member = support.generate_email_address("example.test")
+//   assert Ok(second_membership) =
+//     group.add_member(first_membership.group_id, second_member)
+//   second_membership.group_id
+//   |> should.equal(first_membership.group_id)
+//   assert Ok(groups) = group.load_all(second_membership.identifier_id)
+//   io.debug(groups)
+//   assert Ok(threads) =
+//     conversation.all_participating(second_membership.identifier_id)
+//   // After accepting invitation to a group you need all the groups you are a member of
+//   // Separate permission from participation, participation is the accepted blah blah
+//   todo("create visible group with first member")
+// }
 // invite someone peter@sendmemo.app
 // Create a group then link it to a public address
 // post memo to accept membership
