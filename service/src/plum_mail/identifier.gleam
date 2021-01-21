@@ -94,3 +94,17 @@ pub fn fetch_by_id(id) {
   run_sql.single(db_result)
   |> Ok
 }
+
+pub fn shared_identifiers(identifier) {
+  // Groups shouldn't be members
+  assert Personal(identifier_id, ..) = identifier
+  let sql =
+    "
+  SELECT identifiers.id, identifiers.email_address, identifiers.greeting, identifiers.group_id
+  FROM identifiers
+  JOIN invitations ON invitations.group_id = identifiers.group_id
+  WHERE invitations.identifier_id = $1
+  "
+  let args = [pgo.int(identifier_id)]
+  run_sql.execute(sql, args, row_to_identifier)
+}

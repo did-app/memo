@@ -15,6 +15,7 @@ function mapData<D, T>(response: Response<D>, mapper: (_: D) => T): Response<T> 
 
 export type IdentifierDTO = {
   id: number,
+  type: "personal" | "shared",
   email_address: string,
   greeting: Block[] | null,
 }
@@ -26,18 +27,20 @@ function identifierFromDTO(data: IdentifierDTO): Identifier {
 
 // Authentication
 
-export async function authenticateByCode(code: string): Call<Identifier> {
+export async function authenticateByCode(code: string): Call<{ identifier: Identifier, shared: Identifier[] }> {
   const path = "/authenticate/code"
   const params = { code }
-  let response: Response<IdentifierDTO> = await post(path, params)
-  return mapData(response, identifierFromDTO)
+  let response: Response<{ identifier: IdentifierDTO, shared: IdentifierDTO[] }> = await post(path, params)
+  return mapData(response, function ({ identifier, shared }) {
+    return { identifier: identifierFromDTO(identifier), shared: shared.map(identifierFromDTO) }
+  })
 }
 
-export async function authenticateBySession(): Call<Identifier | null> {
+export async function authenticateBySession(): Call<{ identifier: Identifier, shared: Identifier[] } | null> {
   const path = "/authenticate/session"
-  let response: Response<IdentifierDTO | null> = await get(path)
+  let response: Response<{ identifier: IdentifierDTO, shared: IdentifierDTO[] } | null> = await get(path)
   return mapData(response, function (data) {
-    return data && identifierFromDTO(data)
+    return data && { identifier: identifierFromDTO(data.identifier), shared: data.shared.map(identifierFromDTO) }
   })
 }
 
@@ -48,11 +51,13 @@ export async function authenticateByEmail(emailAddress: string) {
   return response
 }
 
-export async function authenticateByPassword(emailAddress: string, password: string): Call<Identifier> {
+export async function authenticateByPassword(emailAddress: string, password: string): Call<{ identifier: Identifier, shared: Identifier[] }> {
   const path = "/authenticate/password"
   const params = { email_address: emailAddress, password }
-  let response: Response<IdentifierDTO> = await post(path, params);
-  return mapData(response, identifierFromDTO)
+  let response: Response<{ identifier: IdentifierDTO, shared: IdentifierDTO[] }> = await post(path, params);
+  return mapData(response, function ({ identifier, shared }) {
+    return { identifier: identifierFromDTO(identifier), shared: shared.map(identifierFromDTO) }
+  })
 }
 
 

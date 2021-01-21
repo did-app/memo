@@ -39,7 +39,7 @@ async function start(): Promise<State> {
     if ("error" in authResponse) {
       return { ...initial, loading: false, error: authResponse.error }
     }
-    me = authResponse.data
+    me = authResponse.data.identifier
   } else {
     let authResponse = await API.authenticateBySession()
     if ('data' in authResponse) {
@@ -47,7 +47,8 @@ async function start(): Promise<State> {
       if (data === null) {
         return { ...initial, loading: false }
       } else {
-        me = data
+        me = data.identifier
+
       }
     } else {
       return { ...initial, loading: false, error: authResponse.error }
@@ -92,7 +93,7 @@ export async function authenticateByPassword(emailAddress: string, password: str
   if ("error" in authResponse) {
     return authResponse.error
   }
-  let me = authResponse.data
+  let me = authResponse.data.identifier
   let inboxResponse = await API.fetchContacts();
   if ("error" in inboxResponse) {
     throw "some error we aint fixed yet";

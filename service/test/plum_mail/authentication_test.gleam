@@ -14,8 +14,8 @@ import gleam/should
 
 // Fails to authenticate with invalid selector format or validator
 pub fn authenticate_with_link_token_test() {
-  assert Ok(Personal(identifier_id, ..) as identifier) =
-    support.generate_identifier("example.test")
+  assert Ok(identifier) = support.generate_identifier("example.test")
+  let Personal(identifier_id, ..) = identifier
   assert Ok(link_token) = authentication.generate_link_token(identifier_id)
 
   authentication.validate_link_token(link_token)

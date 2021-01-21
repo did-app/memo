@@ -70,8 +70,12 @@ fn authentication_token(identifier, request, config) {
 
 fn successful_authentication(identifier, request, config) {
   let token = authentication_token(identifier, request, config)
+  try shared = identifier.shared_identifiers(identifier)
   http.response(200)
-  |> web.set_resp_json(identifier.to_json(identifier))
+  |> web.set_resp_json(json.object([
+    tuple("identifier", identifier.to_json(identifier)),
+    tuple("shared", json.list(list.map(shared, identifier.to_json))),
+  ]))
   |> http.set_resp_cookie("token", token, token_cookie_settings(request))
   |> Ok
 }
@@ -126,8 +130,12 @@ pub fn route(
         Some(identifier_id) -> {
           try Some(identifier) = identifier.fetch_by_id(identifier_id)
           // This one doesn't set a session as it already has one
+          try shared = identifier.shared_identifiers(identifier)
           http.response(200)
-          |> web.set_resp_json(identifier.to_json(identifier))
+          |> web.set_resp_json(json.object([
+            tuple("identifier", identifier.to_json(identifier)),
+            tuple("shared", json.list(list.map(shared, identifier.to_json))),
+          ]))
           |> Ok
         }
         None -> no_content()
