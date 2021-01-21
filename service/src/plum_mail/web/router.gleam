@@ -194,7 +194,8 @@ pub fn route(
       try client_state = web.identify_client(request, config)
       try session = web.require_authenticated(client_state)
       assert Ok(identifier_id) = int.parse(identifier_id)
-      assert True = session == identifier_id
+      // TODO instate this check against groups
+      // assert True = session == identifier_id
       try conversations = conversation.all_participating(identifier_id)
       let data = json.list(list.map(conversations, conversation.to_json))
       http.response(200)

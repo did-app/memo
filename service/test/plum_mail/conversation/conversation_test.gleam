@@ -79,27 +79,31 @@ pub fn answering_an_identifier_greeting_test() {
   clive_contact.thread.latest
   |> should.equal(alice_contact.thread.latest)
 }
-// pub fn create_a_group_test() {
-//   assert Ok(Personal(identifier_id, ..)) =
-//     support.generate_personal_identifier("sendmemo.test")
-//   let name = "Memo Team"
-//   let first_member = support.generate_email_address("example.test")
-//   assert Ok(first_membership) =
-//     group.create_visible_group(name, identifier_id, first_member)
-//   // If your logged in as the team address then it should be unaccepted on the first member
-//   let second_member = support.generate_email_address("example.test")
-//   assert Ok(second_membership) =
-//     group.add_member(first_membership.group_id, second_member)
-//   second_membership.group_id
-//   |> should.equal(first_membership.group_id)
-//   assert Ok(groups) = group.load_all(second_membership.identifier_id)
-//   io.debug(groups)
-//   assert Ok(threads) =
-//     conversation.all_participating(second_membership.identifier_id)
-//   // After accepting invitation to a group you need all the groups you are a member of
-//   // Separate permission from participation, participation is the accepted blah blah
-//   todo("create visible group with first member")
-// }
+
+pub fn create_a_group_test() {
+  // Every identifier start off as a Personal identifier
+  assert Personal(identifier_id, ..) =
+    support.generate_personal_identifier("sendmemo.test")
+
+  let name = "Memo Team"
+  let first_member = support.generate_email_address("example.test")
+
+  assert Ok(first_membership) =
+    group.create_visible_group(name, identifier_id, first_member)
+  // If your logged in as the team address then it should be unaccepted on the first member
+  let second_member = support.generate_email_address("example.test")
+  assert Ok(second_membership) =
+    group.add_member(first_membership.group_id, second_member)
+  second_membership.group_id
+  |> should.equal(first_membership.group_id)
+  assert Ok(groups) = group.load_all(second_membership.identifier_id)
+  io.debug(groups)
+  assert Ok(threads) =
+    conversation.all_participating(second_membership.identifier_id)
+  // After accepting invitation to a group you need all the groups you are a member of
+  // Separate permission from participation, participation is the accepted blah blah
+  todo("create visible group with first member")
+}
 // invite someone peter@sendmemo.app
 // Create a group then link it to a public address
 // post memo to accept membership

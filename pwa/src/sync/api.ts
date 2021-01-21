@@ -115,12 +115,10 @@ function contactFromDTO(data: ContactDTO): Contact {
 function contactsFromDTO(data: ContactDTO[]): Contact[] {
   return data.map(contactFromDTO)
 }
-export async function fetchContacts(): Call<Contact[]> {
-  // const path = "/contacts"
-  // let response: Response<ContactDTO[]> = await get(path)
-  // return mapData(response, contactsFromDTO)
-  // TODO fix this to look up conversations instead
-  return { data: [] }
+export async function fetchContacts(identifierId: number): Call<Contact[]> {
+  const path = "/identifiers/" + identifierId + "/conversations"
+  let response: Response<ContactDTO[]> = await get(path)
+  return mapData(response, contactsFromDTO)
 }
 
 export async function startDirectConversation(identifierId: number, emailAddress: string, content: Block[]): Call<Contact> {

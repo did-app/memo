@@ -3,14 +3,29 @@
   import * as Conversation from "../conversation";
   import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
-  import type { State } from "../sync";
+  import type { State, Authenticated } from "../sync";
   import SpanComponent from "../components/Span.svelte";
+  import { identity } from "svelte/internal";
 
   export let state: State;
+  // This definetly needs renaming to Role TODO
+  export let selected: string;
   let contactEmailAddress = "";
 
   function findContact() {
     router.redirect(emailAddressToPath(contactEmailAddress));
+  }
+
+  function activeContacts(state: Authenticated, selected: string) {
+    if (selected === state.me.emailAddress) {
+      return state.contacts;
+    } else {
+      return (
+        state.shared.find(function ({ identifier }) {
+          return identifier.emailAddress === selected;
+        })?.contacts || []
+      );
+    }
   }
 </script>
 
@@ -61,9 +76,9 @@
         </p>
       </article>
     {/if}
-    <h1 class="text-2xl py-4">Your Contacts</h1>
+    <h1 class="text-2xl py-4">Your Conversations as {selected}</h1>
     <ol>
-      {#each state.contacts as { identifier, thread }}
+      {#each activeContacts(state, selected) as { identifier, thread }}
         <li>
           <a
             class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-gray-400 hover:border-gray-800 focus:shadow-xl"

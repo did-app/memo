@@ -20,7 +20,14 @@ export type Task = { message: "" }
 
 export type Loading = { loading: true, flash: Flash[], tasks: Task[], me: undefined, error: Failure | undefined }
 export type Unauthenticated = { loading: false, flash: Flash[], tasks: Task[], me: undefined, error: Failure | undefined }
-export type Authenticated = { loading: false, flash: Flash[], tasks: Task[], me: Identifier, contacts: Contact[], error: Failure | undefined }
+export type Authenticated = {
+  loading: false,
+  flash: Flash[],
+  tasks: Task[],
+  me: Identifier, contacts: Contact[],
+  shared: { identifier: Identifier, contacts: Contact[] }[],
+  error: Failure | undefined
+}
 export type State = Loading | Unauthenticated | Authenticated
 
 const initial: State = { loading: true, flash: [], tasks: [], me: undefined, error: undefined }
@@ -33,6 +40,7 @@ const code = params.get("code");
 // Put the promise on the loading key
 async function start(): Promise<State> {
   let me: Identifier
+  let sharedInboxes: Identifier[]
   if (code !== null) {
     window.location.hash = "#";
     let authResponse = await API.authenticateByCode(code)
@@ -40,14 +48,17 @@ async function start(): Promise<State> {
       return { ...initial, loading: false, error: authResponse.error }
     }
     me = authResponse.data.identifier
+    sharedInboxes = authResponse.data.shared
   } else {
     let authResponse = await API.authenticateBySession()
+
     if ('data' in authResponse) {
       let data = authResponse.data
       if (data === null) {
         return { ...initial, loading: false }
       } else {
         me = data.identifier
+        sharedInboxes = data.shared
 
       }
     } else {
@@ -55,11 +66,23 @@ async function start(): Promise<State> {
     }
   }
 
-  let inboxResponse = await API.fetchContacts();
+  let inboxResponse = await API.fetchContacts(me.id);
   if ("error" in inboxResponse) {
     return { ...initial, loading: false, error: inboxResponse.error }
   }
-  return { loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, error: undefined }
+
+  let shared = await Promise.all(sharedInboxes.map(async function (identifier) {
+    let inboxResponse = await API.fetchContacts(identifier.id);
+    if ('error' in inboxResponse) {
+      throw "failed"
+    }
+
+    return { identifier, contacts: inboxResponse.data }
+  }))
+  console.log(shared);
+
+
+  return { loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, shared, error: undefined }
 }
 start().then(set).then(function () {
   startInstall(window).then(function (installPrompt) {
@@ -94,11 +117,17 @@ export async function authenticateByPassword(emailAddress: string, password: str
     return authResponse.error
   }
   let me = authResponse.data.identifier
-  let inboxResponse = await API.fetchContacts();
+  let inboxResponse = await API.fetchContacts(me.id);
   if ("error" in inboxResponse) {
     throw "some error we aint fixed yet";
   }
-  set({ loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, error: undefined })
+  let sharedInboxes = authResponse.data.shared
+  let shared = sharedInboxes.map(function (identifier) {
+    // TODO fetch contacts
+    const contacts: Contact[] = [];
+    return { identifier, contacts }
+  })
+  set({ loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, shared, error: undefined })
   return authResponse
 }
 

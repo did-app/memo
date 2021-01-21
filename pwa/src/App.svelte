@@ -25,13 +25,13 @@
   router.start();
 </script>
 
-<Layout let:state>
-  {#if route === 'contact'}
+<Layout let:state let:selected>
+  {#if route === "contact"}
     <Contact {emailAddress} stateAll={state} />
-  {:else if route === 'profile'}
+  {:else if route === "profile"}
     <Profile {state} />
-  {:else if route === 'home'}
-    <Home {state} />
+  {:else if route === "home"}
+    <Home {state} {selected} />
   {:else}
     <p>no route {JSON.stringify(route)}</p>
   {/if}
