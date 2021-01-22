@@ -93,7 +93,11 @@
     Will also show loading
   {/if}
 {:else if route === "profile"}
-  <Profile {state} />
+  {#if inbox}
+    <Profile identifier={inbox.identifier} />
+  {:else}
+    Can't show
+  {/if}
 {:else if route === "home"}
   <Home {inbox} />
 {:else}
