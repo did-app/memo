@@ -1,4 +1,5 @@
 <script lang="typescript">
+  import type { Conversation } from "./conversation";
   import type { State, Inbox } from "./sync";
   import * as Sync from "./sync";
   import Layout from "./routes/_Layout.svelte";
@@ -8,7 +9,7 @@
   import router from "page";
 
   let route: string;
-  let emailAddress: string;
+  let params: { emailAddress: string } | { group: number };
   router("/profile", (_) => {
     route = "profile";
   });
@@ -17,11 +18,13 @@
   });
   router("/:handle", (context) => {
     route = "contact";
-    emailAddress = context.params.handle + "@plummail.co";
+    let emailAddress = context.params.handle + "@plummail.co";
+    params = { emailAddress };
   });
   router("/:domain/:username", (context) => {
     route = "contact";
-    emailAddress = context.params.username + "@" + context.params.domain;
+    let emailAddress = context.params.username + "@" + context.params.domain;
+    params = { emailAddress };
   });
 
   router.start();
@@ -70,16 +73,56 @@
       return null;
     }
   }
+
+  function selectedConversation(state: State, params: any) {
+    let inbox = selectedInbox(state);
+    // TODO pull real one
+    return inbox?.conversations[0] || null;
+  }
+  let inbox: Inbox | null;
+  $: inbox = selectedInbox(state);
+  // let identifier = Identifier | null
+
+  let conversation: Conversation | null;
+  $: conversation = selectedConversation(state, params);
+
+  // At the top they could just be called notices.
+  // type proccessing, failure, success, notification
+  function acknowledge() {
+    let { updated, counter } = Sync.startTask(state, "Acknowledging task");
+    state = updated;
+    router.redirect("/");
+    setTimeout(() => {
+      state = Sync.resolveTask(state, counter);
+    }, 2000);
+  }
+  function postMemo() {
+    let { updated, counter } = Sync.startTask(state, "Posting memo");
+    state = updated;
+    router.redirect("/");
+    setTimeout(() => {
+      state = Sync.resolveTask(state, counter);
+    }, 2000);
+  }
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
-<!-- {JSON.stringify(state)} -->
+{JSON.stringify(state.tasks)}
 {#if route === "contact"}
-  <Contact {emailAddress} stateAll={state} />
+  {#if conversation && inbox}
+    <Contact
+      {conversation}
+      identifier={inbox?.identifier}
+      {acknowledge}
+      {postMemo}
+    />
+  {:else}
+    Will also show loading
+  {/if}
 {:else if route === "profile"}
   <Profile {state} />
 {:else if route === "home"}
-  <Home inbox={selectedInbox(state)} />
+  <Home {inbox} />
 {:else}
   <p>no route {JSON.stringify(route)}</p>
 {/if}

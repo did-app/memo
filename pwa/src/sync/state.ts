@@ -13,6 +13,7 @@ export type Inbox = {
 // Loading can be task 0 is running if we fancy
 export type Task = {
   counter: number,
+  message: string
 }
 
 // In the future a selected inbox Flag will be left in localstorage
@@ -34,6 +35,21 @@ export function initial(): State {
     taskCounter: 0,
     tasks: []
   }
+}
+
+export function startTask({ tasks, taskCounter, ...rest }: State, message: string) {
+  let task = { message, counter: taskCounter }
+  tasks = [task, ...tasks]
+  taskCounter += 1
+  let updated: State = { ...rest, tasks, taskCounter }
+  return { updated, counter: task.counter }
+}
+
+export function resolveTask({ tasks, ...rest }: State, counter: number) {
+  tasks = tasks.filter(function (t) {
+    return t.counter !== counter
+  })
+  return { ...rest, tasks }
 }
 
 // need a task counter what if delte the last

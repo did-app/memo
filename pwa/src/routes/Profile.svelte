@@ -4,7 +4,6 @@
   import * as Sync from "../sync";
   import type { Block, Range } from "../writing";
   import * as Writing from "../writing";
-  import { emailAddressToPath } from "../social";
 
   import Composer from "../components/Composer.svelte";
   // import SpanComponent from "../components/Span.svelte";
@@ -36,10 +35,6 @@
   }
 </script>
 
-<svelte:head>
-  <title>Memo Profile</title>
-</svelte:head>
-
 {#if "me" in state && state.me}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
     <article
@@ -47,8 +42,8 @@
     >
       <h2 class="font-bold">Welcome {state.me.emailAddress}</h2>
       <p class="my-4">
-        Set up your public greeting that explains how people should get in
-        touch with you.
+        Set up your public greeting that explains how people should get in touch
+        with you.
       </p>
       <p class="my-4">
         Share your contact page using this link:
@@ -63,7 +58,9 @@
         >
       </p>
       <p class="my-4">
-       Only new contacts will see your greeting, anyone you already communicate with using Memo will see your message history when they visit your contact page.
+        Only new contacts will see your greeting, anyone you already communicate
+        with using Memo will see your message history when they visit your
+        contact page.
       </p>
     </article>
     <article

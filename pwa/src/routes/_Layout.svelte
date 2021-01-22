@@ -14,11 +14,6 @@
 
 <!-- $store.attribute does not get properly collapsed types with typescript -->
 
-<svelte:head>
-  <slot name="head">
-    <title>Better Conversations</title>
-  </slot>
-</svelte:head>
 <header class="px-6">
   <nav class="mx-auto flex flex-wrap items-center">
     <span class="my-1 flex-grow">

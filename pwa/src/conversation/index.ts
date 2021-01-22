@@ -4,7 +4,7 @@ import type { Memo } from "./memo"
 export type { Reference } from "./reference";
 
 export type { Thread } from "./thread";
-// export { currentPosition, isOutstanding, followReference, makeSuggestions, gatherPrompts } from "./thread"
+export { currentPosition, followReference, makeSuggestions, gatherPrompts } from "./thread"
 
 export type { Pin } from "./pin";
 export { findPinnable } from "./pin"
@@ -34,6 +34,7 @@ export type Group = {
 }
 
 
+// Social was a good name for the contact bit but no outstanding pin finding etc
 export type Conversation = {
   contact: Group | Identifier,
   participation: Participation

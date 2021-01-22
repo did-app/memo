@@ -2,7 +2,6 @@
   import router from "page";
   import * as Conversation from "../conversation";
   import * as Writing from "../writing";
-  import { emailAddressToPath } from "../social";
   import type { Inbox } from "../sync";
   import SpanComponent from "../components/Span.svelte";
 
@@ -10,13 +9,9 @@
   let contactEmailAddress = "";
 
   function findContact() {
-    router.redirect(emailAddressToPath(contactEmailAddress));
+    router.redirect(Conversation.emailAddressToPath(contactEmailAddress));
   }
 </script>
-
-<svelte:head>
-  <title>Better Conversations</title>
-</svelte:head>
 
 {#if inbox !== null}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">

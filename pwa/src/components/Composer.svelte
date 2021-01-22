@@ -7,7 +7,9 @@
   import * as Icons from "../icons";
 
   export let previous: Memo[];
-  export let blocks: Block[];
+  export let blocks: Block[] = [
+    { type: "paragraph", spans: [{ type: "text", text: "" }] },
+  ];
   export let position: number;
   export let selected: Range | null;
 

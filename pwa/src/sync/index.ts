@@ -1,6 +1,7 @@
 export type { Inbox, State } from "./state"
+import type { Memo } from "../conversation"
 import type { Inbox, State } from "./state"
-export { initial } from "./state"
+export { initial, startTask, resolveTask } from "./state"
 
 type TaskSpec = () => string
 // could have a list of running/exectued, performing from a task specification
@@ -117,6 +118,24 @@ export async function authenticateBySession() {
   return inboxes
 }
 
+export async function fetchMemos(): Promise<Memo[]> {
+  await sleep(1000)
+  return [
+    {
+      author: "Jimmy",
+      postedAt: new Date,
+      position: 1,
+      content: [{ type: 'paragraph', spans: [{ type: 'text', text: "Hello" }] }]
+    },
+    {
+      author: "Bobby",
+      postedAt: new Date,
+      position: 2,
+      content: [{ type: 'paragraph', spans: [{ type: 'text', text: "And back" }] }]
+    }
+
+  ]
+}
 
 // import { writable } from "svelte/store"
 // import type { Writable } from "svelte/store"
