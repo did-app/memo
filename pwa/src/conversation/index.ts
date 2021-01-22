@@ -1,5 +1,4 @@
 export type { Memo } from "./memo"
-import type { IdentifierDTO } from "src/sync/api";
 import type { Memo } from "./memo"
 export type { Reference } from "./reference";
 
@@ -8,6 +7,7 @@ export { currentPosition, followReference, makeSuggestions, gatherPrompts } from
 
 export type { Pin } from "./pin";
 export { findPinnable } from "./pin"
+import type { Block } from "../writing"
 
 // export { getReference } from "../writing/view"
 
@@ -17,11 +17,13 @@ export type Participation = {
   latest: Memo | null
 }
 export type Shared = {
+  type: "shared"
   id: number,
   emailAddress: string,
   greeting: Block[] | null
 }
 export type Personal = {
+  type: "personal",
   id: number,
   emailAddress: string,
   greeting: Block[] | null
@@ -32,6 +34,8 @@ export type Group = {
   id: number,
   name: string,
 }
+
+// Contact is Group | Direct(Identifier)
 
 
 // Social was a good name for the contact bit but no outstanding pin finding etc

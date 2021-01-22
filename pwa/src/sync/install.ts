@@ -28,7 +28,7 @@ async function installPrompt({ addEventListener }: Window): Promise<InstallPromp
   });
 }
 
-export default async function startInstall(window: Window) {
+export async function startInstall(window: Window) {
   // load doesn't fire multiple times, need a smarter wait for load function
   // console.log("waiting to start install");
   // await onLoad(window);
