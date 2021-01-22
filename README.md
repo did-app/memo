@@ -54,6 +54,10 @@ heroku stack:set -a plum-mail container
 - A **Point** in a thread consists of a memo position and a point in that memo
 - Each memo has a **Position** in a thread, starting at 1 and increasing from there.
 
+Contact might be a Bad term because of groups and direct.
+Your close contacts are people you have direct conversations with but you can contact anyone in a group
+
+
 Notes
 
 - *Threads where originally called conversations but a conversation is a less defined term and could potentially cross threads.*
