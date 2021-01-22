@@ -3,69 +3,24 @@
   import * as Conversation from "../conversation";
   import * as Writing from "../writing";
   import { emailAddressToPath } from "../social";
-  import type { State, Authenticated } from "../sync";
+  import type { Inbox } from "../sync";
   import SpanComponent from "../components/Span.svelte";
-  import { identity } from "svelte/internal";
 
-  export let state: State;
-  // This definetly needs renaming to Role TODO
-  export let selected: string;
+  export let inbox: Inbox | null;
   let contactEmailAddress = "";
 
   function findContact() {
     router.redirect(emailAddressToPath(contactEmailAddress));
-  }
-
-  function activeContacts(state: Authenticated, selected: string) {
-    if (selected === state.me.emailAddress) {
-      return state.contacts;
-    } else {
-      return (
-        state.shared.find(function ({ identifier }) {
-          return identifier.emailAddress === selected;
-        })?.contacts || []
-      );
-    }
   }
 </script>
 
 <svelte:head>
   <title>Better Conversations</title>
 </svelte:head>
-{#if "me" in state && state.me}
+
+{#if inbox !== null}
   <main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
-    {#each state.flash as f}
-      <article
-        class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
-      >
-        {#if f.type === "acknowledged"}
-          <h2 class="font-bold">Acknowledged</h2>
-          <p>
-            You have no outstanding messages with {f.contact.identifier
-              .emailAddress}
-          </p>
-        {:else if f.type === "install_available"}
-          <h2 class="font-bold">Web-app available to install</h2>
-          <p>
-            Install Memo's web-app on your computer, tablet or smartphone for
-            faster access.
-          </p>
-          <button
-            on:click={f.prompt}
-            class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white">
-            <!-- <span class="w-5 mr-2 inline-block">
-                      <Icons.ReplyAll />
-                    </span> -->
-            <span class="py-1"> Install </span>
-          </button>
-        {:else if f.type === "profile_saved"}
-          <h2 class="font-bold">Profile successfully updated</h2>
-        {:else}
-          {JSON.stringify(f)}
-        {/if}
-      </article>
-    {/each}
-    {#if state.me.greeting === null}
+    {#if inbox.identifier.greeting === null}
       <article
         class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
       >
@@ -76,33 +31,35 @@
         </p>
       </article>
     {/if}
-    <h1 class="text-2xl py-4">Your Conversations as {selected}</h1>
+    <h1 class="text-2xl py-4">
+      Your Conversations as {inbox.identifier.emailAddress}
+    </h1>
     <ol>
-      {#each activeContacts(state, selected) as { identifier, thread }}
+      {#each inbox.conversations as { contact, participation }}
         <li>
           <a
             class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:text-gray-900 focus:border-gray-400 hover:border-gray-800 focus:shadow-xl"
-            href={emailAddressToPath(identifier.emailAddress) +
-              "#" +
-              thread.acknowledged}>
-            <span class="font-bold text-base">{identifier.emailAddress}</span>
+            href={Conversation.url(contact) + "#" + participation.acknowledged}>
+            <span class="font-bold text-base"
+              >{Conversation.subject(contact)}</span
+            >
 
-            {#if Conversation.isOutstanding(thread)}
+            {#if Conversation.isOutstanding(participation)}
               New message
             {:else}All caught up{/if}
-            {#if thread.latest}
-              {thread.latest.posted_at.toLocaleDateString()}
+            {#if participation.latest}
+              {participation.latest.postedAt.toLocaleDateString()}
 
               <br />
               <p class="mt-2 truncate">
-                {#each Writing.summary(thread.latest.content) as span}
+                <!-- {#each Writing.summary(thread.latest.content) as span}
                   <SpanComponent
                     {span}
                     offset={0}
                     unfurled={false}
                     placeholder={null}
                   />
-                {/each}
+                {/each} -->
               </p>
             {/if}
           </a>

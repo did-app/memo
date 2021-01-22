@@ -1,14 +1,15 @@
 <script lang="typescript">
-  import { sync } from "../sync";
-  import type { State } from "../sync";
-  import Loading from "../components/Loading.svelte";
-  import SignIn from "../components/SignIn.svelte";
-  let state: State;
-  $: state = $sync;
+  import type { Inbox } from "../sync";
 
   const API_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
+  export let inboxes: Inbox[];
+  export let inboxSelection: number | null = 0;
 
-  let selected: string | undefined;
+  function emailAddresses(inboxes: Inbox[]): string[] {
+    return inboxes.map(function ({ identifier }) {
+      return identifier.emailAddress;
+    });
+  }
 </script>
 
 <!-- $store.attribute does not get properly collapsed types with typescript -->
@@ -55,32 +56,16 @@
         </svg>
         memo
       </a>
-      {#if state.loading === false && state.me}
-        {#if state.shared.length === 0}
-          <a class="ml-4 text-gray-500" href="/profile">
-            {state.me.emailAddress}
-          </a>
-        {:else}
-          <select bind:value={selected}>
-            {#each [state.me, ...state.shared.map((s) => {
-                return s.identifier;
-              })] as { emailAddress }, i}
-              <option value={emailAddress}>
-                {emailAddress}
-              </option>
-            {/each}
-          </select>
-        {/if}
-      {/if}
+      <select bind:value={inboxSelection}>
+        {#each emailAddresses(inboxes) as emailAddress, index}
+          <option value={index}>
+            {emailAddress}
+          </option>
+        {/each}
+      </select>
     </span>
     <span class="my-1 ml-4">
-      {#if state.loading}
-        loading
-      {:else if state.me === undefined}
-        <!-- <a
-          href="https://auth.did.app"
-          class="bg-gray-800 text-white ml-auto rounded px-2 py-1 ml-2">Sign in</a> -->
-      {:else}
+      {#if true}
         <!-- explicitly set target so page.js ignores it -->
         <a
           target="_self"
@@ -115,23 +100,9 @@
           >
           <span> Sign out </span>
         </a>
+      {:else}
+        sign in
       {/if}
     </span>
   </nav>
 </header>
-<main class="w-full md:px-2">
-  {#if state.loading}
-    <Loading />
-  {:else if state.me === undefined}
-    {#if state.error !== undefined}
-      <article
-        class="bg-gray-800 border-l-8 border-r-8 md:px-12 my-4 p-4 rounded shadow-md text-white border-red-700"
-      >
-        {state.error.detail}
-      </article>
-    {/if}
-    <SignIn />
-  {:else}
-    <slot {state} {selected} />
-  {/if}
-</main>

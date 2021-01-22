@@ -1,38 +1,19 @@
 // All errors are task Failure
+import type { Participation, Conversation, Identifier } from "../conversation"
 
-export type Shared = {}
-export type Personal = {
-  id: number,
-  emailAddress: string,
-  greeting: Block[] | null
-}
-export type Identifier = Personal | Shared
 
-export type Group {
-  name: string,
-}
-
-export type Participation = {
-  threadId: number,
-  acknowledged: number,
-  latest: Memo | null
-}
-export type DirectConversation = {
-  contact: Identifier,
-  participation: Participation
-}
-export type GroupConversation = {
-  group: Group,
-  participation: Participation
-}
-export type Conversation = DirectConversation | GroupConversation
 
 export type Inbox = {
-  conversations: Conversation,
+  conversations: Conversation[],
   identifier: Identifier
 }
 
-export type Task = {}
+// Task can have a show working, show done or show error status
+// I think all should have a show errored status
+// Loading can be task 0 is running if we fancy
+export type Task = {
+  counter: number,
+}
 
 // In the future a selected inbox Flag will be left in localstorage
 // therefore we don't have a loading state.
@@ -42,14 +23,21 @@ export type Task = {}
 export type State = {
   inboxes: Inbox[],
   inboxSelection: number | null,
+  taskCounter: number,
   tasks: Task[]
 }
 
 export function initial(): State {
-  return { inboxes: [], inboxSelection: null, tasks: [] }
+  return {
+    inboxes: [],
+    inboxSelection: null,
+    taskCounter: 0,
+    tasks: []
+  }
 }
 
+// need a task counter what if delte the last
 // See above, inboxSelection never null after authentication
-export function authenticated({ inboxSelection }: State): boolean {
-  return inboxSelection != null
-}
+// export function authenticated({ inboxSelection }: State): boolean {
+//   return inboxSelection != null
+// }
