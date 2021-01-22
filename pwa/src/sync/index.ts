@@ -2,19 +2,7 @@ export type { Inbox, State } from "./state"
 import type { Memo } from "../conversation"
 import type { Inbox, State } from "./state"
 export { initial, startTask, resolveTask } from "./state"
-
-type TaskSpec = () => string
-// could have a list of running/exectued, performing from a task specification
-// or many tasks from a process or spec
-export function run({ tasks, ...state }: State, spec: TaskSpec) {
-  // let counter = tasks[tasks.length - 1]?.counter || 0
-  let { message, promise } = spec()
-  tasks = [...tasks, { message, promise, counter }]
-  return { ...state, tasks }
-  // TODO needs to line up handing the finished task.
-  // Is there an actory way to do that. 
-  // If the task has been cancelled then no remaining effect
-}
+export { startInstall } from "./install"
 
 function sleep(milliseconds: number) {
   return new Promise(function (resolve) {
@@ -137,8 +125,6 @@ export async function fetchMemos(): Promise<Memo[]> {
   ]
 }
 
-// import { writable } from "svelte/store"
-// import type { Writable } from "svelte/store"
 // import type { Memo, Thread } from "../conversation"
 // import type { Block } from "../writing"
 // import type { Call, Failure } from "./client"
@@ -150,79 +136,27 @@ export async function fetchMemos(): Promise<Memo[]> {
 
 // export type { Response, Call } from "./client"
 
-// export type MemoAcknowledged = { type: "acknowledged", contact: Contact }
-// export type InstallAvailable = { type: "install_available", prompt: InstallPrompt }
-// export type ProfileSaved = { type: 'profile_saved' }
-// export type Flash = MemoAcknowledged | InstallAvailable | ProfileSaved
 
-// export type Task = { message: "" }
+function popAuthenticationCode(): string | null {
+  const fragment = window.location.hash.substring(1);
+  const params = new URLSearchParams(fragment);
+  const code = params.get("code");
+  if (code !== null) {
+    window.location.hash = "#";
+  }
+  return code
+}
+// Put the promise on the loading key
+// Type script doesn't have an error type Hmm
+export async function authenticate(): Promise<Inbox[]> {
+  const code = popAuthenticationCode()
+  if (code) {
+    return await API.authenticateByCode(code)
+  } else {
+    return await authenticateBySession()
+  }
+}
 
-// export type Loading = { loading: true, flash: Flash[], tasks: Task[], me: undefined, error: Failure | undefined }
-// export type Unauthenticated = { loading: false, flash: Flash[], tasks: Task[], me: undefined, error: Failure | undefined }
-// export type Authenticated = {
-//   loading: false,
-//   flash: Flash[],
-//   tasks: Task[],
-//   me: Identifier, contacts: Contact[],
-//   shared: { identifier: Identifier, contacts: Contact[] }[],
-//   error: Failure | undefined
-// }
-// export type State = Loading | Unauthenticated | Authenticated
-
-// const initial: State = { loading: true, flash: [], tasks: [], me: undefined, error: undefined }
-// const store: Writable<State> = writable(initial);
-// const { subscribe, set, update } = store
-
-// const fragment = window.location.hash.substring(1);
-// const params = new URLSearchParams(fragment);
-// const code = params.get("code");
-// // Put the promise on the loading key
-// async function start(): Promise<State> {
-//   let me: Identifier
-//   let sharedInboxes: Identifier[]
-//   if (code !== null) {
-//     window.location.hash = "#";
-//     let authResponse = await API.authenticateByCode(code)
-//     if ("error" in authResponse) {
-//       return { ...initial, loading: false, error: authResponse.error }
-//     }
-//     me = authResponse.data.identifier
-//     sharedInboxes = authResponse.data.shared
-//   } else {
-//     let authResponse = await API.authenticateBySession()
-
-//     if ('data' in authResponse) {
-//       let data = authResponse.data
-//       if (data === null) {
-//         return { ...initial, loading: false }
-//       } else {
-//         me = data.identifier
-//         sharedInboxes = data.shared
-
-//       }
-//     } else {
-//       return { ...initial, loading: false, error: authResponse.error }
-//     }
-//   }
-
-//   let inboxResponse = await API.fetchContacts(me.id);
-//   if ("error" in inboxResponse) {
-//     return { ...initial, loading: false, error: inboxResponse.error }
-//   }
-
-//   let shared = await Promise.all(sharedInboxes.map(async function (identifier) {
-//     let inboxResponse = await API.fetchContacts(identifier.id);
-//     if ('error' in inboxResponse) {
-//       throw "failed"
-//     }
-
-//     return { identifier, contacts: inboxResponse.data }
-//   }))
-//   console.log(shared);
-
-
-//   return { loading: false, flash: [], tasks: [], me, contacts: inboxResponse.data, shared, error: undefined }
-// }
 // start().then(set).then(function () {
 //   startInstall(window).then(function (installPrompt) {
 //     update(function ({ flash, ...unchanged }) {
@@ -246,9 +180,6 @@ export async function fetchMemos(): Promise<Memo[]> {
 // // Needs single function to handle auth response and fetch contacts
 // // fetch contacts is separate so it can be updated periodically
 
-// export const sync = {
-//   subscribe
-// }
 
 // export async function authenticateByPassword(emailAddress: string, password: string) {
 //   let authResponse = await API.authenticateByPassword(emailAddress, password);

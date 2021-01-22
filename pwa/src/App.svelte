@@ -30,42 +30,16 @@
   router.start();
 
   let state = Sync.initial();
-  state = start(state);
 
-  function start({ taskCounter, tasks, ...current }: State) {
-    tasks = [...tasks, { counter: taskCounter }];
-    taskCounter += 1;
-    Sync.authenticateBySession().then(function (inboxes: Inbox[]) {
-      let { tasks, ...current } = state;
-      let inboxSelection = 0;
-      // TODO clear task ID
-      state = { ...current, tasks: [], inboxes, inboxSelection };
-    });
-    return { taskCounter, tasks, ...current };
+  async function initialize() {
+    let inboxes = await Sync.authenticate();
+    state = { ...state, inboxes, inboxSelection: 0 };
+    let installPrompt = await Sync.startInstall();
+    console.log(installPrompt);
   }
-  // Sync.run(state, function () {
-  //   console.log(state);
-  //   setTimeout(function () {
-  //     console.log("later");
-  //   }, 300);
-  //   return { message: "foo", promise: "TODO" };
-  // });
-  // Can we pass Just run to the child processes
-  // Perhaps even without a promise in cases where theres no later effect
-  // Same option could have tasks return tasks?
 
-  // // This is the stateful
-  // // initialise a state
-  // //
-  // let emailAddresses = ["ab", "cd"];
-  // $: inbox = emailAddresses[inboxSelection];
+  initialize();
 
-  // // common things, i.e. tasks can be split out and passed in.
-  // // In reality tasks should be on the App/Layout
-  // // facade to things that components can do?
-  // function inboxAddresses(inboxes) {
-  //   return;
-  // }
   function selectedInbox({ inboxSelection, inboxes }: State): Inbox | null {
     if (inboxSelection !== null) {
       return inboxes[inboxSelection] || null;
@@ -81,7 +55,6 @@
   }
   let inbox: Inbox | null;
   $: inbox = selectedInbox(state);
-  // let identifier = Identifier | null
 
   let conversation: Conversation | null;
   $: conversation = selectedConversation(state, params);

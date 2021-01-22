@@ -1,10 +1,10 @@
-function onLoad({ addEventListener }: Window): Promise<null> {
-  return new Promise(function (resolve) {
-    addEventListener('load', function () {
-      resolve(null)
-    })
-  })
-}
+// function onLoad({ addEventListener }: Window): Promise<null> {
+//   return new Promise(function (resolve) {
+//     addEventListener('load', function () {
+//       resolve(null)
+//     })
+//   })
+// }
 
 async function registerServiceWorker({ navigator }: Window): Promise<null> {
   if ('serviceWorker' in navigator) {
