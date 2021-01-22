@@ -113,12 +113,14 @@ pub fn shared_identifiers(identifier) {
 pub fn update_greeting(identifier_id, greeting) {
   let sql =
     "
-        UPDATE identifiers 
-        SET greeting = $2 
-        WHERE id = $1
-        "
+    UPDATE identifiers 
+    SET greeting = $2 
+    WHERE id = $1
+    RETURNING *
+    "
   let args = [pgo.int(identifier_id), greeting]
-  try [identifier] = run_sql.execute(sql, args, fn(x) { io.debug(x) })
-  identifier
+  try db_result = run_sql.execute(sql, args, fn(x) { x })
+  db_result
+  |> run_sql.single()
   |> Ok
 }

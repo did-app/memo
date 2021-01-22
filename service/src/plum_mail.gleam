@@ -1,4 +1,6 @@
 import gleam/dynamic
+import gleam/option.{None, Some}
+import gleam/string
 import gleam/pgo
 import plum_mail/email_address
 import plum_mail/run_sql
@@ -15,9 +17,13 @@ pub fn find_or_create(email_address) {
 pub fn upgrade_to_shared(identifier_id, name, first_member) {
   assert Ok(identifier_id) = dynamic.int(identifier_id)
   assert Ok(name) = dynamic.string(name)
-    assert Ok(first_member) = dynamic.string(first_member)
+  let maybe_name = case string.trim(name) {
+    "" -> None
+    name -> Some(name)
+  }
+  assert Ok(first_member) = dynamic.string(first_member)
   assert Ok(first_member) = email_address.validate(first_member)
-  group.create_visible_group(name, identifier_id, first_member)
+  group.create_visible_group(maybe_name, identifier_id, first_member)
 }
 
 pub fn generate_link_token(identifier_id) {

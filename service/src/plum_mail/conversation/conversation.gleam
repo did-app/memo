@@ -8,60 +8,81 @@ import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier, Personal, Shared}
 import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
+import plum_mail/conversation/group.{Group}
 
-pub type Thread {
-  Thread(id: Int, acknowledged: Int, latest: Option(Memo))
+pub type Participation {
+  Participation(thread_id: Int, acknowledged: Int, latest: Option(Memo))
 }
 
-fn thread_to_json(thread) {
-  let Thread(id, acknowledged, latest) = thread
+fn participation_to_json(participation) {
+  let Participation(thread_id, acknowledged, latest) = participation
+
   let latest_json = case latest {
     None -> json.null()
     Some(memo) -> thread.memo_to_json(memo)
   }
+
   json.object([
-    tuple("id", json.int(id)),
+    tuple("thread_id", json.int(thread_id)),
     tuple("acknowledged", json.int(acknowledged)),
     tuple("latest", latest_json),
   ])
 }
 
-pub type Contact {
-  Contact(
-    // direct or group
-    identifier: Identifier,
-    thread: Thread,
-  )
+// Conversation = Connection + Thread
+// Connection can be Direct or Group
+pub type Conversation {
+  DirectConversation(contact: Identifier, participation: Participation)
+  // This is just a name to avoid a GroupConversation being amonst a group
+  GroupConversation(group: Group, participation: Participation)
 }
 
 pub fn to_json(conversation) {
-  let Contact(thread: thread, identifier: identifier) = conversation
-  json.object([
-    tuple("identifier", identifier.to_json(identifier)),
-    tuple("thread", thread_to_json(thread)),
-  ])
+  case conversation {
+    DirectConversation(contact, participation) ->
+      json.object([
+        tuple("contact", identifier.to_json(contact)),
+        tuple("participation", participation_to_json(participation)),
+      ])
+    GroupConversation(group, participation) ->
+      json.object([
+        tuple("group", group.to_json(group)),
+        tuple("participation", participation_to_json(participation)),
+      ])
+  }
 }
 
 pub fn start_direct(identifier_id, email_address, content) {
-  try Contact(identifier, thread) =
+  try DirectConversation(contact, participation) =
     new_direct_contact(identifier_id, email_address)
 
   // load up greeting, write ack but the recipient won't have already accepted.
   // write message requires a participation object
   // This is greeting for the other person, it needs writing in the thread
-  let tuple(recipient_id, greeting) = case identifier {
+  let tuple(recipient_id, greeting) = case contact {
     Personal(id: id, greeting: greeting, ..) -> tuple(id, greeting)
     Shared(id: id, greeting: greeting, ..) -> tuple(id, greeting)
   }
-  try position = case greeting {
+
+  try next_position = case greeting {
     Some(greeting) -> {
-      assert Ok(_) = thread.post_memo(thread.id, 1, recipient_id, greeting)
-      Ok(0)
+      assert Ok(_) =
+        thread.post_memo(participation.thread_id, 1, recipient_id, greeting)
+      Ok(2)
     }
     None -> Ok(1)
   }
-  try memo = thread.post_memo(thread.id, position, identifier_id, content)
-  Contact(identifier, thread: Thread(..thread, latest: Some(memo)))
+  try memo =
+    thread.post_memo(
+      participation.thread_id,
+      next_position,
+      identifier_id,
+      content,
+    )
+  DirectConversation(
+    contact,
+    Participation(..participation, latest: Some(memo)),
+  )
   |> Ok
 }
 
@@ -108,8 +129,8 @@ fn new_direct_contact(identifier_id, email_address) {
         assert Ok(thread_id) = dynamic.int(thread_id)
 
         let contact = identifier.row_to_identifier(row, 1)
-        let thread = Thread(thread_id, 0, None)
-        Contact(thread: thread, identifier: contact)
+        let participation = Participation(thread_id, 0, None)
+        DirectConversation(contact, participation)
       },
     )
   participation
@@ -167,7 +188,7 @@ pub fn all_participating(identifier_id) {
     sql,
     args,
     fn(row) {
-      io.debug(row)
+      // io.debug(row)
       assert Ok(thread_id) = dynamic.element(row, 0)
       assert Ok(thread_id) = dynamic.int(thread_id)
       assert Ok(acknowledged) = dynamic.element(row, 1)
@@ -184,9 +205,9 @@ pub fn all_participating(identifier_id) {
           Some(Memo(posted_at, content, position))
         None, None -> None
       }
-      let thread = Thread(thread_id, acknowledged, latest)
-      let identifier = identifier.row_to_identifier(row, 5)
-      Contact(thread: thread, identifier: identifier)
+      let participation = Participation(thread_id, acknowledged, latest)
+      let contact = identifier.row_to_identifier(row, 5)
+      DirectConversation(contact, participation)
     },
   )
 }
