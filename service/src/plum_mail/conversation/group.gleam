@@ -53,7 +53,7 @@ RETURNING group_id, identifier_id;
 pub fn create_group(maybe_name, first_member) {
   let EmailAddress(first_member) = first_member
 
-  let args = [pgo.nullable(maybe_name, pgo.text), pgo.text(first_member)]
+  let args = [pgo.nullable(maybe_name, pgo.text), pgo.null(), pgo.text(first_member)]
   try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
   membership
   |> Ok
