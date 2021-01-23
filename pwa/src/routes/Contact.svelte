@@ -1,37 +1,88 @@
 <script lang="typescript">
-  import type { Identifier, Memo, Conversation } from "../conversation";
-  import * as conversation_module from "../conversation";
+  import type { Memo, Conversation } from "../conversation";
+  import type { Inbox } from "../sync";
+  import * as API from "../sync/api";
   import type { Block } from "../writing";
   import ConversationComponent from "../components/Conversation.svelte";
-  export let conversation: Conversation | null;
-  export let identifier: Identifier;
+  import LoadingComponent from "../components/Loading.Svelte";
 
-  export let acknowledge: () => void;
-  export let postMemo: (content: Block[]) => void;
-  let loadingMemos: Promise<Memo[]> = Promise.resolve([]);
+  export let conversation: Conversation | null;
+  export let contactEmailAddress: string;
+  export let inbox: Inbox;
+
+  export let acknowledge: (threadId: number, position: number) => void;
+  export let postMemo: (
+    threadId: number,
+    position: number,
+    content: Block[]
+  ) => void;
+  export let startDirectConversation: (
+    authorId: number,
+    contact: string,
+    content: Block[]
+  ) => void;
+
+  async function pullMemos(conversation: Conversation | null) {
+    if (conversation) {
+      let response = await API.pullMemos(conversation.participation.threadId);
+      if ("error" in response) {
+        throw "TODO, this error needs to be passed up the component tree";
+      }
+      return response.data;
+    } else {
+      console.warn("TODO, look up profile");
+      return Promise.resolve([]);
+    }
+  }
+
+  function acknowledgeFactory({ participation }: Conversation) {
+    let current = participation.latest?.position || 0;
+    let outstanding = current > participation.acknowledged;
+    if (outstanding) {
+      return function () {
+        acknowledge(participation.threadId, current);
+      };
+    }
+  }
+
+  function authorId() {
+    if (inbox.role.type == "personal") {
+      return inbox.identifier.id;
+    } else {
+      return inbox.role.identifier.id;
+    }
+  }
+  function postMemoFactory(conversation: Conversation) {
+    let currentPosition = conversation.participation.latest?.position || 0;
+    return function (content: Block[]) {
+      postMemo(authorId(), currentPosition + 1, content);
+    };
+  }
+
+  function startConversationFactory(contactEmailAddress: string) {
+    return function (content: Block[]) {
+      startDirectConversation(authorId(), contactEmailAddress, content);
+    };
+  }
 </script>
 
 <div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
-  {#await loadingMemos then memos}
+  {#await pullMemos(conversation)}
+    <LoadingComponent />
+  {:then memos}
     {#if conversation}
       <ConversationComponent
         acknowledged={conversation.participation.acknowledged}
-        outstanding={conversation_module.isOutstanding(
-          conversation.participation
-        )}
         {memos}
-        {identifier}
-        {acknowledge}
-        {postMemo}
+        acknowledge={acknowledgeFactory(conversation)}
+        dispatchMemo={postMemoFactory(conversation)}
       />
     {:else}
       <ConversationComponent
         acknowledged={0}
-        outstanding={false}
-        {identifier}
         {memos}
-        {acknowledge}
-        {postMemo}
+        acknowledge={undefined}
+        dispatchMemo={startConversationFactory(contactEmailAddress)}
       />
     {/if}
   {/await}

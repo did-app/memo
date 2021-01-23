@@ -133,11 +133,16 @@ pub fn route(
       try client = web.identify_client(request, config)
       case client {
         Some(identifier_id) -> {
-          try Some(identifier) = identifier.fetch_by_id(identifier_id)
+          try lookup = identifier.fetch_by_id(identifier_id)
+          case lookup {
+            Some(identifier) -> {
           // This one doesn't set a session as it already has one
           try shared = identifier.shared_identifiers(identifier)
           successful_authentication(identifier, request, config)
           |> Ok
+            }
+          None -> no_content()
+          }
         }
         None -> no_content()
       }

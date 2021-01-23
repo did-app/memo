@@ -13,6 +13,7 @@ export type Inbox = {
 // I think all should have a show errored status
 // Loading can be task 0 is running if we fancy
 export type Task = {
+  type: "running" | "success" | "failure",
   counter: number,
   message: string
 }
@@ -41,26 +42,59 @@ export function initial(): State {
 }
 
 export function startTask({ tasks, taskCounter, ...rest }: State, message: string) {
-  let task = { message, counter: taskCounter }
+  let task: Task = { type: "running", message, counter: taskCounter }
   tasks = [task, ...tasks]
   taskCounter += 1
   let updated: State = { ...rest, tasks, taskCounter }
   return { updated, counter: task.counter }
 }
 
-export function resolveTask({ tasks, ...rest }: State, counter: number) {
+export function resolveTask({ tasks, ...rest }: State, counter: number, message: string) {
+  tasks = tasks.map(function (t): Task {
+    if (t.counter === counter) {
+      return { type: 'success', message, counter }
+    } else {
+      return t
+    }
+  })
+  return { ...rest, tasks }
+
+}
+
+export function removeTask({ tasks, ...rest }: State, counter: number) {
   tasks = tasks.filter(function (t) {
     return t.counter !== counter
   })
   return { ...rest, tasks }
 }
 
-export function reportFailure(state: State, failure: Failure) {
-  throw "TODO report failure"
-  return state
+export function reportFailure({ tasks, taskCounter, ...rest }: State, failure: Failure): State {
+  let task: Task = { type: "failure", message: failure.detail, counter: taskCounter }
+  tasks = [task, ...tasks]
+  taskCounter += 1
+  return { ...rest, tasks, taskCounter }
 }
-// need a task counter what if delte the last
-// See above, inboxSelection never null after authentication
-// export function authenticated({ inboxSelection }: State): boolean {
-//   return inboxSelection != null
-// }
+
+export function selectedInbox({ inboxSelection, inboxes }: State): Inbox | null {
+  if (inboxSelection !== null) {
+    return inboxes[inboxSelection] || null;
+  } else {
+    return null;
+  }
+}
+
+
+export function selectedConversation(inbox: Inbox, params: { emailAddress: string } | { group: number } | undefined): Conversation | null {
+  if (params && 'emailAddress' in params) {
+    return inbox.conversations.find(function ({ contact }) {
+      return ('emailAddress' in contact) && contact.emailAddress == params.emailAddress
+    }) || null
+  } else if (params) {
+
+    throw "need to look up group"
+    // // TODO pull real one
+    // return inbox.conversations[0] || null;
+  } else {
+    null
+  }
+}

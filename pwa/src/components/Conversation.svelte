@@ -13,12 +13,13 @@
 
   import * as Icons from "../icons";
 
-  export let identifier: Identifier;
+  // Only need the reader id for pulling out questions
+  // export let identifier: Identifier;
   export let acknowledged: number;
-  export let outstanding: boolean;
   export let memos: Memo[];
-  export let acknowledge: () => void;
-  export let postMemo: (content: Block[]) => void;
+  // Might make sense to pass these in as a slot
+  export let acknowledge: (() => void) | undefined;
+  export let dispatchMemo: (content: Block[]) => void;
 
   let composer: Composer__SvelteComponent_;
 
@@ -95,15 +96,15 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  let references = conversation_module.gatherPrompts(
-    memos || [],
-    identifier.emailAddress
-  );
+  // let references = conversation_module.gatherPrompts(
+  //   memos || [],
+  //   identifier.emailAddress
+  // );
 
-  references.map(function (reference) {
-    composer.addAnnotation(reference);
-  });
-  console.log(references);
+  // references.map(function (reference) {
+  //   composer.addAnnotation(reference);
+  // });
+  // console.log(references);
 
   // let x = tick().then(function () {
   //   // Tick seems to now work with the composer getting rendered.
@@ -156,7 +157,7 @@
             <span class="py-1">Back</span>
           </button>
           <button
-            on:click={() => postMemo(blocks)}
+            on:click={() => dispatchMemo(blocks)}
             class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
             <span class="w-5 mr-2 inline-block">
               <Icons.Send />
@@ -203,7 +204,7 @@
             <span class="py-1">Quote in Reply</span>
           </button>
         {:else}
-          {#if outstanding}
+          {#if acknowledge}
             <button
               on:click={acknowledge}
               class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">

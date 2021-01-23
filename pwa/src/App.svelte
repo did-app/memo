@@ -2,6 +2,8 @@
   import type { Conversation } from "./conversation";
   import type { State, Inbox } from "./sync";
   import * as Sync from "./sync";
+  import * as API from "./sync/api";
+  import type { Block } from "./writing";
   import Layout from "./routes/_Layout.svelte";
   import Contact from "./routes/Contact.svelte";
   import Home from "./routes/Home.svelte";
@@ -10,7 +12,7 @@
   import router from "page";
 
   let route: string;
-  let params: { emailAddress: string } | { group: number };
+  let params: { emailAddress: string } | { group: number } | undefined;
   router("/profile", (_) => {
     route = "profile";
   });
@@ -28,14 +30,15 @@
     params = { emailAddress };
   });
 
-  router.start();
-
+  let inbox: Inbox | null;
+  let conversation: Conversation | null;
   let state = Sync.initial();
 
-  // // Requires taking current state as argument
-  // function update(mapper: (state: State) => State) {
-  //   state = mapper(state);
-  // }
+  $: inbox = Sync.selectedInbox(state);
+  $: conversation = inbox && Sync.selectedConversation(inbox, params);
+
+  initialize();
+  router.start();
 
   async function initialize() {
     let response = await Sync.authenticate();
@@ -54,59 +57,95 @@
     console.log(installPrompt);
   }
 
-  initialize();
-
-  function selectedInbox({ inboxSelection, inboxes }: State): Inbox | null {
-    if (inboxSelection !== null) {
-      return inboxes[inboxSelection] || null;
-    } else {
-      return null;
-    }
-  }
-
-  function selectedConversation(state: State, params: any) {
-    let inbox = selectedInbox(state);
-    // TODO pull real one
-    return inbox?.conversations[0] || null;
-  }
-  let inbox: Inbox | null;
-  $: inbox = selectedInbox(state);
-
-  let conversation: Conversation | null;
-  $: conversation = selectedConversation(state, params);
-
-  // At the top they could just be called notices.
-  // type proccessing, failure, success, notification
-  function acknowledge() {
+  async function acknowledge(threadId: number, position: number) {
     let { updated, counter } = Sync.startTask(state, "Acknowledging task");
     state = updated;
     router.redirect("/");
-    setTimeout(() => {
-      state = Sync.resolveTask(state, counter);
-    }, 2000);
+    let response = await API.acknowledge(threadId, position);
+    if ("error" in response) {
+      throw "Well this should be handled";
+    } else {
+      state = Sync.resolveTask(state, counter, "Conversation acknowledged");
+    }
   }
-  function postMemo() {
+
+  async function postMemo(
+    threadId: number,
+    position: number,
+    content: Block[]
+  ) {
     let { updated, counter } = Sync.startTask(state, "Posting memo");
     state = updated;
     router.redirect("/");
-    setTimeout(() => {
-      state = Sync.resolveTask(state, counter);
-    }, 2000);
+    let response = await API.postMemo(threadId, position, content);
+    if ("error" in response) {
+      throw "Well this should be handled";
+    } else {
+      state = Sync.resolveTask(state, counter, "Memo posted");
+    }
+  }
+
+  async function startDirectConversation(
+    authorId: number,
+    emailAddress: string,
+    content: Block[]
+  ) {
+    let message = "Starting conversation with " + emailAddress;
+    let { updated, counter } = Sync.startTask(state, message);
+    state = updated;
+    router.redirect("/");
+    let response = await API.startDirectConversation(
+      authorId,
+      emailAddress,
+      content
+    );
+    if ("error" in response) {
+      throw "Well this should be handled";
+    } else {
+      state = Sync.resolveTask(state, counter, "conversation started");
+    }
   }
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
-{JSON.stringify(state.tasks)}
-{#if route === "contact"}
+<div class="w-full max-w-3xl mx-auto">
+  {#each state.tasks as task}
+    {#if task.type === "failure"}
+      <article
+        on:click={() => (state = Sync.removeTask(state, task.counter))}
+        class="bg-gray-800 border-l-8 border-r-8 border-red-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+      >
+        <h2 class="font-bold">{task.message}</h2>
+        <p>We are working to fix this issue as soon as possible.</p>
+      </article>
+    {:else}
+      <article
+        on:click={() => (state = Sync.removeTask(state, task.counter))}
+        class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+      >
+        <h2 class="font-bold">
+          {task.type === "running" ? "Running" : "Success"}
+        </h2>
+        <p>{task.message}</p>
+      </article>
+    {/if}
+  {/each}
+</div>
+{#if route === "home"}
   {#if inbox}
-    <!-- An async block means that the if statements above can change by the time it resolves -->
-
-    <!-- Think we want a massive conversation component -->
+    <Home {inbox} />
+  {:else if state.loading === false}
+    <SignIn />
+  {/if}
+{:else if route === "contact"}
+  {#if inbox}
     <Contact
       {conversation}
+      contactEmailAddress={params?.emailAddress || "There should be an email"}
+      {inbox}
       {acknowledge}
       {postMemo}
-      identifier={inbox.identifier}
+      {startDirectConversation}
     />
   {:else}
     Will also show loading
@@ -116,12 +155,6 @@
     <Profile identifier={inbox.identifier} />
   {:else}
     Can't show
-  {/if}
-{:else if route === "home"}
-  {#if inbox}
-    <Home {inbox} />
-  {:else if state.loading === false}
-    <SignIn />
   {/if}
 {:else}
   <p>no route {JSON.stringify(route)}</p>

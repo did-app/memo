@@ -47,6 +47,19 @@ function contactFromDTO(contact: IdentifierDTO | GroupDTO): Identifier | Group {
   }
 }
 
+export type MemoDTO = {
+  author: string,
+  content: Block[]
+  // NOTE string is human string
+  posted_at: string,
+  position: number,
+}
+
+function memoFromDTO(data: MemoDTO): Memo {
+  let { author, content, posted_at: postedAt, position } = data
+  return { author, content, postedAt: new Date(postedAt), position }
+}
+
 
 type ParticipationDTO = {
   thread_id: number,
@@ -114,132 +127,7 @@ export async function authenticateBySession(): Call<Inbox[] | null> {
     return data?.inboxes.map(inboxFromDTO) || null
   })
 }
-function sleep(milliseconds: number) {
-  return new Promise(function (resolve) {
-    setTimeout(() => {
-      resolve(true)
-    }, milliseconds);
-  })
-}
 
-// There is a process without the Flask/Task messaging that happens
-// export async function authenticateBySession(): Promise<Inbox[]> {
-//   // update((s) => return addTask(s, ))
-//   await sleep(200)
-//   let inboxes: Inbox[] = [
-//     {
-//       identifier: {
-//         type: 'personal',
-//         id: 1,
-//         emailAddress: "peter@sendmemo.app",
-//         greeting: null,
-//       },
-//       conversations: [
-//         {
-//           contact: {
-//             type: 'personal',
-//             id: 2,
-//             emailAddress: "richard@plummail.co",
-//             greeting: null,
-//           },
-//           participation: {
-//             threadId: 1,
-//             acknowledged: 1,
-//             latest: {
-//               position: 2,
-//               author: "TODO",
-//               content: [],
-//               postedAt: new Date()
-//             },
-//           },
-//         },
-//         {
-//           contact: {
-//             type: 'shared',
-//             id: 2,
-//             emailAddress: "team@superservice.co",
-//             greeting: null,
-//           },
-//           participation: {
-//             threadId: 1,
-//             acknowledged: 2,
-//             latest: {
-//               position: 2,
-//               author: "TODO",
-//               content: [],
-//               postedAt: new Date()
-//             },
-//           },
-//         },
-//         {
-//           contact: {
-//             id: 32,
-//             name: "Ski Buddies"
-//           },
-//           participation: {
-//             threadId: 1,
-//             acknowledged: 1,
-//             latest: {
-//               position: 2,
-//               author: "TODO",
-//               content: [],
-//               postedAt: new Date()
-//             },
-//           },
-//         },
-//       ],
-//     },
-//     {
-//       identifier: {
-//         type: 'shared',
-//         id: 3,
-//         emailAddress: "team@sendmemo.app",
-//         greeting: null,
-//       },
-//       conversations: [
-//         {
-//           contact: {
-//             type: 'personal',
-//             id: 2,
-//             emailAddress: "richard@plummail.co",
-//             greeting: null,
-//           },
-//           participation: {
-//             threadId: 1,
-//             acknowledged: 1,
-//             latest: {
-//               position: 2,
-//               author: "TODO",
-//               content: [],
-//               postedAt: new Date()
-//             },
-//           },
-//         },
-//       ],
-//     },
-//   ];
-//   return inboxes
-// }
-
-
-export async function fetchMemos(): Promise<Memo[]> {
-  await sleep(1000)
-  return [
-    {
-      author: "Jimmy",
-      postedAt: new Date,
-      position: 1,
-      content: [{ type: 'paragraph', spans: [{ type: 'text', text: "Hello" }] }]
-    },
-    {
-      author: "Bobby",
-      postedAt: new Date,
-      position: 2,
-      content: [{ type: 'paragraph', spans: [{ type: 'text', text: "And back" }] }]
-    }
-
-  ]
-}
 
 export async function authenticateByEmail(emailAddress: string) {
   const path = "/authenticate/email"
@@ -268,43 +156,10 @@ export function saveGreeting(blocks: Block[] | null): Call<unknown> {
 
 // identifier discovery
 
-export type MemoDTO = {
-  author: string,
-  content: Block[]
-  // NOTE string is human string
-  posted_at: string,
-  position: number,
-}
-
-function memoFromDTO(data: MemoDTO): Memo {
-  let { author, content, posted_at: postedAt, position } = data
-  return { author, content, postedAt: new Date(postedAt), position }
-}
-
-
-
-export async function fetchProfile(emailAddress: string): Call<Identifier | null> {
-  const path = "/identifiers/" + emailAddress
-  let response: Response<IdentifierDTO> = await get(path);
-  return mapData(response, identifierFromDTO)
-}
-
-// export function fetchContact(emailAddress: string): Call<{ identifier: IdentifierDTO | undefined, thread: Thread | undefined }> {
-//   const path = "/relationship/" + emailAddress
-//   return get(path)
-// }
-
-// function contactFromDTO(data: ContactDTO): Contact {
-//   const { identifier, thread } = data
-//   return { identifier: identifierFromDTO(identifier), thread: threadFromDTO(thread) }
-// }
-// function contactsFromDTO(data: ContactDTO[]): Contact[] {
-//   return data.map(contactFromDTO)
-// }
-// export async function fetchContacts(identifierId: number): Call<Contact[]> {
-//   const path = "/identifiers/" + identifierId + "/conversations"
-//   let response: Response<ContactDTO[]> = await get(path)
-//   return mapData(response, contactsFromDTO)
+// export async function fetchProfile(emailAddress: string): Call<Identifier | null> {
+//   const path = "/identifiers/" + emailAddress
+//   let response: Response<IdentifierDTO> = await get(path);
+//   return mapData(response, identifierFromDTO)
 // }
 
 export async function startDirectConversation(identifierId: number, emailAddress: string, content: Block[]): Call<Conversation> {
@@ -315,7 +170,9 @@ export async function startDirectConversation(identifierId: number, emailAddress
   throw "TODO"
 }
 
-export async function loadMemos(threadId: number): Call<Memo[]> {
+// Thread API endpoints
+
+export async function pullMemos(threadId: number): Call<Memo[]> {
   const path = "/threads/" + threadId + "/memos"
   let response: Response<MemoDTO[]> = await get(path);
   return mapData(response, (dto) => { return dto.map(memoFromDTO) })

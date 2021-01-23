@@ -31,6 +31,7 @@ export type Personal = {
 export type Identifier = Personal | Shared
 
 export type Group = {
+  type: 'group',
   id: number,
   name: string,
 }

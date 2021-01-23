@@ -1,7 +1,15 @@
 export type { Inbox, State } from "./state"
 import type { Memo } from "../conversation"
 import type { Inbox, State } from "./state"
-export { initial, startTask, resolveTask, reportFailure } from "./state"
+export {
+  initial,
+  startTask,
+  resolveTask,
+  removeTask,
+  reportFailure,
+  selectedInbox,
+  selectedConversation
+} from "./state"
 export { startInstall } from "./install"
 
 import * as API from "./api"
@@ -31,36 +39,6 @@ export async function fetchMemos() {
   return []
 }
 
-// export function updateContact(contact: Contact) {
-//   update(function (state: State) {
-//     if ('me' in state && state.me) {
-//       const index = state.contacts.findIndex(({ identifier: { emailAddress } }) => contact.identifier.emailAddress === emailAddress)
-//       const contacts = index === -1 ? [...state.contacts, contact] : [...state.contacts.slice(0, index), contact, ...state.contacts.slice(index + 1)]
-
-//       state.contacts = contacts
-//     }
-//     return state
-//   })
-// }
-
-// export async function saveGreeting(blocks: Block[]): Call<null> {
-//   let task = await API.saveGreeting(blocks)
-//   if ('error' in task) {
-//     throw "Failed to save greeting"
-//   }
-//   update(function (state) {
-//     if ('me' in state && state.me !== undefined) {
-//       let me = { ...state.me, greeting: blocks }
-//       let flash: Flash[] = [{ type: 'profile_saved' }]
-//       state = { ...state, me, flash }
-//     }
-//     return state
-//   })
-//   return { data: null }
-// }
-
-// export { loadMemos } from "./api"
-
 // export async function postMemo(me: number, contact: Relationship, blocks: Block[], position: number): Call<null> {
 //   let task: Call<Contact>
 //   if (contact.thread) {
@@ -88,24 +66,3 @@ export async function fetchMemos() {
 //   return { data: null }
 // }
 
-// export async function acknowledge(contact: Contact, position: number): Call<null> {
-//   update(function (state) {
-//     if ('contacts' in state) {
-//       let { flash, contacts, ...unchanged } = state
-//       contacts = contacts.map(function (each: Contact) {
-//         if (each.thread.id === contact.thread.id) {
-//           let acknowledged = Math.max(position, each.thread.acknowledged)
-//           let thread = { ...each.thread, acknowledged }
-//           return { ...each, thread }
-//         } else {
-//           return each
-//         }
-//       })
-//       flash = [{ type: 'acknowledged', contact }]
-//       return { flash, contacts, ...unchanged }
-//     } else {
-//       return state
-//     }
-//   })
-//   return await API.acknowledge(contact.thread.id, position)
-// }
