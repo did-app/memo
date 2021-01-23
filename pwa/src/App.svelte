@@ -6,6 +6,7 @@
   import Contact from "./routes/Contact.svelte";
   import Home from "./routes/Home.svelte";
   import Profile from "./routes/Profile.svelte";
+  import SignIn from "./components/SignIn.svelte";
   import router from "page";
 
   let route: string;
@@ -31,10 +32,10 @@
 
   let state = Sync.initial();
 
-  // Requires taking current state as argument
-  function update(mapper: (state: State) => State) {
-    state = mapper(state);
-  }
+  // // Requires taking current state as argument
+  // function update(mapper: (state: State) => State) {
+  //   state = mapper(state);
+  // }
 
   async function initialize() {
     let response = await Sync.authenticate();
@@ -97,12 +98,15 @@
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
 {JSON.stringify(state.tasks)}
 {#if route === "contact"}
-  {#if conversation && inbox}
+  {#if inbox}
+    <!-- An async block means that the if statements above can change by the time it resolves -->
+
+    <!-- Think we want a massive conversation component -->
     <Contact
       {conversation}
-      identifier={inbox?.identifier}
       {acknowledge}
       {postMemo}
+      identifier={inbox.identifier}
     />
   {:else}
     Will also show loading
@@ -114,7 +118,11 @@
     Can't show
   {/if}
 {:else if route === "home"}
-  <Home {inbox} />
+  {#if inbox}
+    <Home {inbox} />
+  {:else if state.loading === false}
+    <SignIn />
+  {/if}
 {:else}
   <p>no route {JSON.stringify(route)}</p>
 {/if}

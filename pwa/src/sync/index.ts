@@ -27,6 +27,9 @@ export async function authenticate(): Call<Inbox[] | null> {
   }
 }
 
+export async function fetchMemos() {
+  return []
+}
 
 // export function updateContact(contact: Contact) {
 //   update(function (state: State) {
