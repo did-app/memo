@@ -21,19 +21,7 @@
     contact: string,
     content: Block[]
   ) => void;
-
-  async function pullMemos(conversation: Conversation | null) {
-    if (conversation) {
-      let response = await API.pullMemos(conversation.participation.threadId);
-      if ("error" in response) {
-        throw "TODO, this error needs to be passed up the component tree";
-      }
-      return response.data;
-    } else {
-      console.warn("TODO, look up profile");
-      return Promise.resolve([]);
-    }
-  }
+  export let pullMemos: (conversation: Conversation | null) => Promise<Memo[]>;
 
   function acknowledgeFactory({ participation }: Conversation) {
     let current = participation.latest?.position || 0;

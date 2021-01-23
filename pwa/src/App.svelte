@@ -7,15 +7,12 @@
   import Layout from "./routes/_Layout.svelte";
   import Contact from "./routes/Contact.svelte";
   import Home from "./routes/Home.svelte";
-  import Profile from "./routes/Profile.svelte";
+  import UnderConstruction from "./components/UnderConstruction.svelte";
   import SignIn from "./components/SignIn.svelte";
   import router from "page";
 
   let route: string;
   let params: { emailAddress: string } | { group: number } | undefined;
-  router("/profile", (_) => {
-    route = "profile";
-  });
   router("/", (_) => {
     route = "home";
   });
@@ -56,7 +53,18 @@
     let installPrompt = await Sync.startInstall(window);
     console.log(installPrompt);
   }
-
+  async function pullMemos(conversation: Conversation | null) {
+    if (conversation) {
+      let response = await API.pullMemos(conversation.participation.threadId);
+      if ("error" in response) {
+        throw "TODO, this error needs to be passed up the component tree";
+      }
+      return response.data;
+    } else {
+      console.warn("TODO, look up profile");
+      return Promise.resolve([]);
+    }
+  }
   async function acknowledge(threadId: number, position: number) {
     let { updated, counter } = Sync.startTask(state, "Acknowledging task");
     state = updated;
@@ -138,23 +146,27 @@
     <SignIn />
   {/if}
 {:else if route === "contact"}
-  {#if inbox}
-    <Contact
-      {conversation}
-      contactEmailAddress={params?.emailAddress || "There should be an email"}
-      {inbox}
-      {acknowledge}
-      {postMemo}
-      {startDirectConversation}
-    />
+  <!-- There should always be params on this route -->
+  {#if inbox && params}
+    {#if inbox.identifier.emailAddress === params.emailAddress}
+      <!-- <Profile identifier={inbox.identifier} /> -->
+      <UnderConstruction>
+        <p>We are working on new features here.</p>
+        <p>Thank you for your patience</p>
+      </UnderConstruction>
+    {:else}
+      <Contact
+        {conversation}
+        contactEmailAddress={params?.emailAddress || "There should be an email"}
+        {inbox}
+        {pullMemos}
+        {acknowledge}
+        {postMemo}
+        {startDirectConversation}
+      />
+    {/if}
   {:else}
     Will also show loading
-  {/if}
-{:else if route === "profile"}
-  {#if inbox}
-    <Profile identifier={inbox.identifier} />
-  {:else}
-    Can't show
   {/if}
 {:else}
   <p>no route {JSON.stringify(route)}</p>
