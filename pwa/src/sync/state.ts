@@ -1,11 +1,12 @@
 // All errors are task Failure
 import type { Participation, Conversation, Identifier } from "../conversation"
-
+import type { Failure } from "./client"
 
 
 export type Inbox = {
   conversations: Conversation[],
-  identifier: Identifier
+  identifier: Identifier,
+  role: { type: 'personal' } | { type: 'member', identifier: Identifier }
 }
 
 // Task can have a show working, show done or show error status
@@ -22,6 +23,7 @@ export type Task = {
 // If the selected inbox can't be loaded due to out of date session and errored task will prompt to reauthenticate.
 
 export type State = {
+  loading: boolean,
   inboxes: Inbox[],
   inboxSelection: number | null,
   taskCounter: number,
@@ -30,6 +32,7 @@ export type State = {
 
 export function initial(): State {
   return {
+    loading: true,
     inboxes: [],
     inboxSelection: null,
     taskCounter: 0,
@@ -52,6 +55,10 @@ export function resolveTask({ tasks, ...rest }: State, counter: number) {
   return { ...rest, tasks }
 }
 
+export function reportFailure(state: State, failure: Failure) {
+  throw "TODO report failure"
+  return state
+}
 // need a task counter what if delte the last
 // See above, inboxSelection never null after authentication
 // export function authenticated({ inboxSelection }: State): boolean {

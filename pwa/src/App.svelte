@@ -31,10 +31,25 @@
 
   let state = Sync.initial();
 
+  // Requires taking current state as argument
+  function update(mapper: (state: State) => State) {
+    state = mapper(state);
+  }
+
   async function initialize() {
-    let inboxes = await Sync.authenticate();
-    state = { ...state, inboxes, inboxSelection: 0 };
-    let installPrompt = await Sync.startInstall();
+    let response = await Sync.authenticate();
+    state = { ...state, loading: false };
+    if ("error" in response) {
+      return (state = Sync.reportFailure(state, response.error));
+    }
+    let inboxes = response.data;
+    if (inboxes) {
+      state = { ...state, inboxes, inboxSelection: 0 };
+    } else {
+      return state;
+    }
+
+    let installPrompt = await Sync.startInstall(window);
     console.log(installPrompt);
   }
 

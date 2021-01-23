@@ -1,11 +1,11 @@
-import type { Memo, Thread } from "../conversation"
+import type { Group, Memo, Participation } from "../conversation"
 import type { Conversation, Identifier } from "../conversation"
 import type { Block } from "../writing"
 import { get, post } from "./client"
-import type { Call, Failure } from "./client"
+import type { Call, Response } from "./client"
 import type { Inbox } from "./state"
 
-type Response<T> = { data: T } | { error: Failure }
+
 function mapData<D, T>(response: Response<D>, mapper: (_: D) => T): Response<T> {
   if ('error' in response) {
     return response
@@ -31,46 +31,87 @@ export type PersonalDTO = {
   email_address: string,
   greeting: Block[] | null
 }
-export type IdentifierDTO = PersonalDTO | SharedDTO
+type IdentifierDTO = PersonalDTO | SharedDTO
 
-export type GroupDTO = {
+type GroupDTO = {
+  type: 'group',
   id: number,
   name: string,
 }
 
-export type ParticipationDTO = {
+function contactFromDTO(contact: IdentifierDTO | GroupDTO): Identifier | Group {
+  if (contact.type === 'group') {
+    return contact
+  } else {
+    return identifierFromDTO(contact)
+  }
+}
+
+
+type ParticipationDTO = {
   thread_id: number,
   acknowledged: number,
   latest: MemoDTO | null
 }
 
-export type ConversationDTO = {
-  identifier: IdentifierDTO | GroupDTO,
+function participationFromDTO(data: ParticipationDTO): Participation {
+  let { thread_id: threadId, latest, acknowledged } = data
+  return { threadId, latest: latest && memoFromDTO(latest), acknowledged }
+}
+
+type ConversationDTO = {
+  contact: IdentifierDTO | GroupDTO,
   participation: ParticipationDTO
 }
 
-export type InboxDTO = {
-  conversations: ConversationDTO,
-  identifier: IdentifierDTO
-  role: { type: 'personal' } | IdentifierDTO
+function conversationFromDTO({ contact, participation }: ConversationDTO): Conversation {
+  return {
+    contact: contactFromDTO(contact),
+    participation: participationFromDTO(participation)
+  }
+}
+
+type roleDTO = { type: 'personal' } | { type: 'member', identifier: IdentifierDTO }
+type InboxDTO = {
+  conversations: ConversationDTO[],
+  identifier: IdentifierDTO,
+  role: roleDTO
+}
+
+function roleFromDTO(role: roleDTO): { type: 'personal' } | { type: 'member', identifier: Identifier } {
+  if ('type' in role && role.type === 'personal') {
+    return { type: 'personal' }
+  } else {
+    return { type: 'member', identifier: identifierFromDTO(role.identifier) }
+  }
+}
+
+function inboxFromDTO(data: InboxDTO): Inbox {
+  const { conversations, identifier, role } = data
+
+  return {
+    conversations: conversations.map(conversationFromDTO),
+    identifier: identifierFromDTO(identifier),
+    role: roleFromDTO(role)
+  }
 }
 
 // Authentication
 
-export async function authenticateByCode(code: string): Promise<Inbox[]> {
+export async function authenticateByCode(code: string): Call<Inbox[]> {
   const path = "/authenticate/code"
   const params = { code }
-  let response: Response<{ identifier: IdentifierDTO, shared: IdentifierDTO[] }> = await post(path, params)
-  return mapData(response, function ({ identifier, shared }) {
-    return { identifier: identifierFromDTO(identifier), shared: shared.map(identifierFromDTO) }
+  let response: Response<{ inboxes: InboxDTO[] }> = await post(path, params)
+  return mapData(response, function ({ inboxes }) {
+    return inboxes.map(inboxFromDTO)
   })
 }
 
-export async function authenticateBySession(): Promise<Inbox[] | null> {
+export async function authenticateBySession(): Call<Inbox[] | null> {
   const path = "/authenticate/session"
-  let response: Response<{ InboxDTO | null > = await get(path)
+  let response: Response<{ inboxes: InboxDTO[] } | null> = await get(path)
   return mapData(response, function (data) {
-    return data && { identifier: identifierFromDTO(data.identifier), shared: data.shared.map(identifierFromDTO) }
+    return data?.inboxes.map(inboxFromDTO) || null
   })
 }
 function sleep(milliseconds: number) {
@@ -240,10 +281,7 @@ function memoFromDTO(data: MemoDTO): Memo {
   return { author, content, postedAt: new Date(postedAt), position }
 }
 
-function threadFromDTO(data: ThreadDTO): Thread {
-  let { id, latest, acknowledged } = data
-  return { id, latest: latest && memoFromDTO(latest), acknowledged }
-}
+
 
 export async function fetchProfile(emailAddress: string): Call<Identifier | null> {
   const path = "/identifiers/" + emailAddress

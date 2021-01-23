@@ -1,10 +1,11 @@
 export type { Inbox, State } from "./state"
 import type { Memo } from "../conversation"
 import type { Inbox, State } from "./state"
-export { initial, startTask, resolveTask } from "./state"
+export { initial, startTask, resolveTask, reportFailure } from "./state"
 export { startInstall } from "./install"
 
 import * as API from "./api"
+import type { Call } from "./client"
 
 function popAuthenticationCode(): string | null {
   const fragment = window.location.hash.substring(1);
@@ -17,7 +18,7 @@ function popAuthenticationCode(): string | null {
 }
 // Put the promise on the loading key
 // Type script doesn't have an error type Hmm
-export async function authenticate(): Promise<Inbox[]> {
+export async function authenticate(): Call<Inbox[] | null> {
   const code = popAuthenticationCode()
   if (code) {
     return await API.authenticateByCode(code)

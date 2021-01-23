@@ -3,10 +3,10 @@ export type Failure = {
   detail: string
 }
 
-export type Call<T> = Promise<{ data: T } | { error: Failure }>
+export type Response<T> = { data: T, } | { error: Failure }
+export type Call<T> = Promise<Response<T>>
 const Call = Promise
 // https://github.com/microsoft/TypeScript/issues/32574
-export type Response<T> = T | Failure
 
 export async function get(path: string): Call<any> {
   let options = {
@@ -55,7 +55,7 @@ async function doFetch(path: string, options: any): Call<any> {
   }
 }
 
-async function parseJSON(response: Response<any>): Call<{ data: any }> {
+async function parseJSON(response: globalThis.Response): Call<{ data: any }> {
   try {
     const data = await response.json();
     return { data };

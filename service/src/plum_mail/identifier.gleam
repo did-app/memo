@@ -24,6 +24,13 @@ pub type Identifier {
   Shared(id: Int, email_address: EmailAddress, greeting: Option(Json))
 }
 
+pub fn id(identifier) {
+  case identifier {
+    Personal(id, ..) -> id
+    Shared(id, ..) -> id
+  }
+}
+
 pub fn to_json(identifier: Identifier) {
   let tuple(identifier_type, id, email_address, greeting) = case identifier {
     Personal(id, email_address, greeting) -> tuple(

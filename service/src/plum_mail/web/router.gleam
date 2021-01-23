@@ -68,15 +68,24 @@ fn authentication_token(identifier, request, config) {
 }
 
 fn successful_authentication(identifier, request, config) {
-  let token = authentication_token(identifier, request, config)
-  try shared = identifier.shared_identifiers(identifier)
+  assert Ok(shared) = identifier.shared_identifiers(identifier)
+  let identifier_id = identifier.id(identifier)
+  assert Ok(conversations) = conversation.all_participating(identifier_id)
+  let conversations_data =
+    json.list(list.map(conversations, conversation.to_json))
   http.response(200)
   |> web.set_resp_json(json.object([
-    tuple("identifier", identifier.to_json(identifier)),
-    tuple("shared", json.list(list.map(shared, identifier.to_json))),
+    tuple(
+      "inboxes",
+      json.list([
+        json.object([
+          tuple("identifier", identifier.to_json(identifier)),
+          tuple("conversations", conversations_data),
+          tuple("role", json.object([tuple("type", json.string("personal"))])),
+        ]),
+      ]),
+    ),
   ]))
-  |> http.set_resp_cookie("token", token, token_cookie_settings(request))
-  |> Ok
 }
 
 fn no_content() {
@@ -96,7 +105,10 @@ pub fn route(
       try raw = acl.parse_json(request)
       try params = authenticate_by_password.params(raw)
       try identifier = authenticate_by_password.run(params)
+      let token = authentication_token(identifier, request, config)
       successful_authentication(identifier, request, config)
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
+      |> Ok
     }
     // Note cookies wont get set on the ajax auth step
     ["sign_in"] -> {
@@ -112,7 +124,10 @@ pub fn route(
       try raw = acl.parse_json(request)
       try params = authenticate_by_code.params(raw)
       try identifier = authenticate_by_code.run(params)
+      let token = authentication_token(identifier, request, config)
       successful_authentication(identifier, request, config)
+      |> http.set_resp_cookie("token", token, token_cookie_settings(request))
+      |> Ok
     }
     ["authenticate", "session"] -> {
       try client = web.identify_client(request, config)
@@ -121,11 +136,7 @@ pub fn route(
           try Some(identifier) = identifier.fetch_by_id(identifier_id)
           // This one doesn't set a session as it already has one
           try shared = identifier.shared_identifiers(identifier)
-          http.response(200)
-          |> web.set_resp_json(json.object([
-            tuple("identifier", identifier.to_json(identifier)),
-            tuple("shared", json.list(list.map(shared, identifier.to_json))),
-          ]))
+          successful_authentication(identifier, request, config)
           |> Ok
         }
         None -> no_content()
