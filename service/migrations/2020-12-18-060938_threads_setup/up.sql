@@ -109,8 +109,10 @@ CREATE TABLE participations (
   thread_id INT REFERENCES threads(id) NOT NULL,
   PRIMARY KEY (identifier_id, thread_id),
   acknowledged INT NOT NULL,
+  CHECK (acknowledged > 0),
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
 
 SELECT diesel_manage_updated_at('participations');
