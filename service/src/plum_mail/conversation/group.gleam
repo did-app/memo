@@ -15,7 +15,9 @@ pub type Group {
 
 pub fn to_json(group) {
   let Group(id, name) = group
-  json.object([tuple("id", json.int(id)), tuple("name", json.string(name))])
+  json.object([
+    tuple("type", json.string("group")),
+    tuple("id", json.int(id)), tuple("name", json.string(name))])
 }
 
 const create_group_sql = "
@@ -50,10 +52,10 @@ RETURNING group_id, identifier_id;
 "
 
 // Uses the same SQL by setting the identifier ($2) to null no identifier is affected in the group identifier clause
-pub fn create_group(maybe_name, first_member) {
+pub fn create_group(name, first_member) {
   let EmailAddress(first_member) = first_member
 
-  let args = [pgo.nullable(maybe_name, pgo.text), pgo.null(), pgo.text(first_member)]
+  let args = [pgo.text(name), pgo.null(), pgo.text(first_member)]
   try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
   membership
   |> Ok

@@ -170,6 +170,14 @@ export async function startDirectConversation(identifierId: number, emailAddress
   throw "TODO"
 }
 
+export async function createGroup(groupName: string): Call<Conversation> {
+  const path = "/groups/create"
+  const params = { name: groupName }
+  let response: Response<Conversation> = await post(path, params)
+  console.log(response);
+  return response
+}
+
 // Thread API endpoints
 
 export async function pullMemos(threadId: number): Call<Memo[]> {

@@ -46,7 +46,7 @@ pub fn to_json(conversation) {
       ])
     GroupConversation(group, participation) ->
       json.object([
-        tuple("group", group.to_json(group)),
+        tuple("contact", group.to_json(group)),
         tuple("participation", participation_to_json(participation)),
       ])
   }
@@ -159,13 +159,13 @@ pub fn all_participating(identifier_id) {
     JOIN invitations ON invitations.group_id = groups.id
     WHERE identifier_id = $1
   ), my_conversations AS (
-    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id
+    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, NULL as name
     FROM my_contacts
     JOIN identifiers AS i ON i.id = my_contacts.contact_id
     
     UNION ALL
 
-    SELECT thread_id, 'GROUP', NULL, NULL, NULL, NULL
+    SELECT thread_id, 'GROUP', NULL, NULL, NULL, NULL, my_groups.id as participating_group_id, my_groups.name
     FROM my_groups
   )
   SELECT 
@@ -177,18 +177,20 @@ pub fn all_participating(identifier_id) {
     my_conversations.contact_id,
     my_conversations.email_address,
     my_conversations.greeting,
-    my_conversations.group_id
+    my_conversations.group_id,
+    my_conversations.participating_group_id,
+    my_conversations.name
   FROM my_conversations
   LEFT JOIN latest ON latest.thread_id = my_conversations.thread_id
   LEFT JOIN participations ON participations.thread_id = my_conversations.thread_id
   WHERE participations.identifier_id = $1
+  OR participations.identifier_id IS NULL
   "
   let args = [pgo.int(identifier_id)]
   run_sql.execute(
     sql,
     args,
     fn(row) {
-      // io.debug(row)
       assert Ok(thread_id) = dynamic.element(row, 0)
       assert Ok(thread_id) = dynamic.int(thread_id)
       assert Ok(acknowledged) = dynamic.element(row, 1)
@@ -196,8 +198,10 @@ pub fn all_participating(identifier_id) {
       assert Ok(inserted_at) = dynamic.element(row, 2)
       assert Ok(inserted_at) =
         run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
+        
       assert Ok(content) = dynamic.element(row, 3)
       let content: json.Json = dynamic.unsafe_coerce(content)
+      
       assert Ok(position) = dynamic.element(row, 4)
       assert Ok(position) = run_sql.dynamic_option(position, dynamic.int)
       let latest = case inserted_at, position {
@@ -206,8 +210,23 @@ pub fn all_participating(identifier_id) {
         None, None -> None
       }
       let participation = Participation(thread_id, acknowledged, latest)
+      let null_atom = dynamic.from(pgo.null())
+      case dynamic.element(row, 5) {
+        Ok(null) if null == null_atom -> {
+                assert Ok(group_id) = dynamic.element(row, 9)
+                
+      assert Ok(group_id) = dynamic.int(group_id)
+            assert Ok(group_name) = dynamic.element(row, 10)
+      assert Ok(group_name) = dynamic.string(group_name)
+      let group = Group(group_id, group_name)
+      GroupConversation(group: group, participation: participation)
+        }
+        _ -> {
+
       let contact = identifier.row_to_identifier(row, 5)
       DirectConversation(contact, participation)
+        }
+      }
     },
   )
 }

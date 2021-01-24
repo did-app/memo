@@ -82,7 +82,7 @@ pub fn validate_link_token(token_string) {
   try Token(selector, secret) = parse_token(token_string)
   let sql =
     "
-      SELECT i.id, i.email_address, i.greeting, validator, selector, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
+      SELECT i.id, i.email_address, i.greeting, i.group_id, validator, selector, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
       FROM link_tokens AS lt
       JOIN identifiers AS i ON i.id = lt.identifier_id
       WHERE selector = $1
@@ -90,11 +90,11 @@ pub fn validate_link_token(token_string) {
   let args = [pgo.text(selector)]
   let mapper = fn(row) {
     let identifier = identifier.row_to_identifier(row, 0)
-    assert Ok(validator) = dynamic.element(row, 3)
+    assert Ok(validator) = dynamic.element(row, 4)
     assert Ok(validator) = dynamic.string(validator)
-    assert Ok(link_token_selector) = dynamic.element(row, 4)
+    assert Ok(link_token_selector) = dynamic.element(row, 5)
     assert Ok(link_token_selector) = dynamic.string(link_token_selector)
-    assert Ok(current) = dynamic.element(row, 5)
+    assert Ok(current) = dynamic.element(row, 6)
     assert Ok(current) = dynamic.bool(current)
     tuple(identifier, validator, link_token_selector, current)
   }

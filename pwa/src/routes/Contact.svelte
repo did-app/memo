@@ -40,10 +40,16 @@
       return inbox.role.identifier.id;
     }
   }
+
   function postMemoFactory(conversation: Conversation) {
     let currentPosition = conversation.participation.latest?.position || 0;
+
     return function (content: Block[]) {
-      postMemo(authorId(), currentPosition + 1, content);
+      postMemo(
+        conversation.participation.threadId,
+        currentPosition + 1,
+        content
+      );
     };
   }
 

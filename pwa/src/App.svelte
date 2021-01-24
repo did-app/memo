@@ -12,9 +12,15 @@
   import router from "page";
 
   let route: string;
-  let params: { emailAddress: string } | { group: number } | undefined;
+  let params: { emailAddress: string } | { groupId: number } | undefined;
   router("/", (_) => {
     route = "home";
+  });
+  router("/groups/:groupId", (context) => {
+    route = "contact";
+
+    let groupId = parseInt(context.params.groupId);
+    params = { groupId };
   });
   router("/:handle", (context) => {
     route = "contact";
@@ -49,6 +55,7 @@
     } else {
       return state;
     }
+    console.log(state);
 
     let installPrompt = await Sync.startInstall(window);
     console.log(installPrompt);
@@ -113,6 +120,14 @@
       state = Sync.resolveTask(state, counter, "conversation started");
     }
   }
+
+  let groupName = "";
+  async function createGroup() {
+    let response = await API.createGroup(groupName);
+    console.log(response);
+
+    // router.redirect;
+  }
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
@@ -171,3 +186,7 @@
 {:else}
   <p>no route {JSON.stringify(route)}</p>
 {/if}
+<form on:submit|preventDefault={createGroup}>
+  <input type="text" bind:value={groupName} />
+  <button>Create group</button>
+</form>

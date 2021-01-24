@@ -218,6 +218,17 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
+    ["groups", "create"] -> {
+            try params = acl.parse_json(request)
+      try name = acl.required(params, "name", acl.as_string)
+      try client_state = web.identify_client(request, config)
+      try identifier_id = web.require_authenticated(client_state)
+
+      assert Ok(Some(identifier)) = identifier.fetch_by_id(identifier_id)
+      assert Ok(membership) = group.create_group(name, identifier.email_address(identifier))
+      io.debug(membership)
+      no_content()
+    }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
       try memos = thread.load_memos(thread_id)

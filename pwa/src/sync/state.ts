@@ -84,16 +84,15 @@ export function selectedInbox({ inboxSelection, inboxes }: State): Inbox | null 
 }
 
 
-export function selectedConversation(inbox: Inbox, params: { emailAddress: string } | { group: number } | undefined): Conversation | null {
+export function selectedConversation(inbox: Inbox, params: { emailAddress: string } | { groupId: number } | undefined): Conversation | null {
   if (params && 'emailAddress' in params) {
     return inbox.conversations.find(function ({ contact }) {
       return ('emailAddress' in contact) && contact.emailAddress == params.emailAddress
     }) || null
   } else if (params) {
-
-    throw "need to look up group"
-    // // TODO pull real one
-    // return inbox.conversations[0] || null;
+    return inbox.conversations.find(function ({ contact }) {
+      return contact.type === 'group' && contact.id == params.groupId
+    }) || null
   } else {
     null
   }
