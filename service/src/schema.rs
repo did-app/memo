@@ -1,8 +1,8 @@
 table! {
     groups (id) {
-        id -> Int4,
+        id -> Uuid,
         name -> Varchar,
-        thread_id -> Int4,
+        thread_id -> Uuid,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -13,15 +13,15 @@ table! {
         id -> Uuid,
         email_address -> Varchar,
         greeting -> Nullable<Jsonb>,
+        group_id -> Nullable<Uuid>,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
-        group_id -> Nullable<Int4>,
     }
 }
 
 table! {
     invitations (group_id, identifier_id) {
-        group_id -> Int4,
+        group_id -> Uuid,
         identifier_id -> Uuid,
         invited_by -> Nullable<Uuid>,
         inserted_at -> Timestamp,
@@ -41,7 +41,7 @@ table! {
 table! {
     memo_notifications (id) {
         id -> Int4,
-        thread_id -> Int4,
+        thread_id -> Uuid,
         position -> Int4,
         recipient_id -> Uuid,
         success -> Bool,
@@ -51,7 +51,7 @@ table! {
 
 table! {
     memos (thread_id, position) {
-        thread_id -> Int4,
+        thread_id -> Uuid,
         position -> Int4,
         content -> Jsonb,
         authored_by -> Uuid,
@@ -64,14 +64,14 @@ table! {
     pairs (lower_identifier_id, upper_identifier_id) {
         lower_identifier_id -> Uuid,
         upper_identifier_id -> Uuid,
-        thread_id -> Int4,
+        thread_id -> Uuid,
     }
 }
 
 table! {
     participations (identifier_id, thread_id) {
         identifier_id -> Uuid,
-        thread_id -> Int4,
+        thread_id -> Uuid,
         acknowledged -> Int4,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
@@ -80,12 +80,13 @@ table! {
 
 table! {
     threads (id) {
-        id -> Int4,
+        id -> Uuid,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
 }
 
+joinable!(groups -> threads (thread_id));
 joinable!(identifiers -> groups (group_id));
 joinable!(invitations -> groups (group_id));
 joinable!(link_tokens -> identifiers (identifier_id));

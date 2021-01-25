@@ -4,24 +4,24 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleam/json.{Json}
 import gleam/pgo
+import gleam_uuid.{UUID}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/run_sql
 
-pub type Membership {
-  Membership(group_id: Int, identifier_id: Int)
-}
-
 pub type Group {
-  Group(id: Int, name: String, thread_id: Int, participants: List(String))
+  Group(id: UUID, name: String, thread_id: UUID, participants: List(String))
 }
 
 pub fn from_row(row, offset, participants) {
   assert Ok(id) = dynamic.element(row, offset + 0)
-  assert Ok(id) = dynamic.int(id)
+  assert Ok(id) = dynamic.bit_string(id)
+  assert id = run_sql.binary_to_uuid4(id)
+
   assert Ok(name) = dynamic.element(row, offset + 1)
   assert Ok(name) = dynamic.string(name)
   assert Ok(thread_id) = dynamic.element(row, offset + 2)
-  assert Ok(thread_id) = dynamic.int(thread_id)
+  assert Ok(thread_id) = dynamic.bit_string(thread_id)
+  assert thread_id = run_sql.binary_to_uuid4(thread_id)
   case participants {
     Some(participants) -> Group(id, name, thread_id, participants)
     None -> {
@@ -45,7 +45,7 @@ pub fn to_json(group) {
   io.debug(participants)
   json.object([
     tuple("type", json.string("group")),
-    tuple("id", json.int(id)),
+    tuple("id", json.string(gleam_uuid.to_string(id))),
     tuple("name", json.string(name)),
     tuple("participants", json.list(list.map(participants, json.string))),
   ])
@@ -87,28 +87,20 @@ pub fn create_group(name, identifier_id) {
 
 // Turns an existing personal identifier (checks group_id currently NULL) into a group identifier with a first member.
 pub fn create_visible_group(maybe_name, identifier_id, first_member) {
-  let EmailAddress(first_member) = first_member
-
-  // log in as individual will see unconfirmed memberships and be able to cancel as need be
-  // So to create a visible group you need to be logged in as the address
-  // create group, attach profile
-  // let args = [pgo.nullable(name, pgo.text)]
-  let args = [
-    pgo.nullable(maybe_name, pgo.text),
-    run_sql.uuid(identifier_id),
-    pgo.text(first_member),
-  ]
-  try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
-  membership
-  |> Ok
-}
-
-fn row_to_membership(row) {
-  assert Ok(group_id) = dynamic.element(row, 0)
-  assert Ok(group_id) = dynamic.int(group_id)
-  assert Ok(identifier_id) = dynamic.element(row, 1)
-  assert Ok(identifier_id) = dynamic.int(identifier_id)
-  Membership(group_id, identifier_id)
+  todo("create a visible")
+  // let EmailAddress(first_member) = first_member
+  // // log in as individual will see unconfirmed memberships and be able to cancel as need be
+  // // So to create a visible group you need to be logged in as the address
+  // // create group, attach profile
+  // // let args = [pgo.nullable(name, pgo.text)]
+  // let args = [
+  //   pgo.nullable(maybe_name, pgo.text),
+  //   run_sql.uuid(identifier_id),
+  //   pgo.text(first_member),
+  // ]
+  // try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
+  // membership
+  // |> Ok
 }
 
 pub fn invite_member(group_id, invited_id, inviting_id) {
@@ -142,7 +134,7 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
     JOIN participant_lists ON participant_lists.group_id = this_group.id;
     "
   let args = [
-    pgo.int(group_id),
+    run_sql.uuid(group_id),
     run_sql.uuid(invited_id),
     run_sql.uuid(inviting_id),
   ]

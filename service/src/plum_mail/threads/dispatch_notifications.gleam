@@ -70,7 +70,8 @@ pub fn run() {
         assert Ok(topic) = dynamic.element(row, 2)
         assert Ok(topic) = dynamic.string(topic)
         assert Ok(thread_id) = dynamic.element(row, 3)
-        assert Ok(thread_id) = dynamic.int(thread_id)
+        assert Ok(thread_id) = dynamic.bit_string(thread_id)
+        assert thread_id = run_sql.binary_to_uuid4(thread_id)
 
         assert Ok(topic) = email_address.validate(topic)
         assert Ok(content) = dynamic.element(row, 4)
@@ -216,7 +217,7 @@ pub fn record_result(thread_id, position, recipient_id, success) {
     RETURNING *
     "
   let args = [
-    pgo.int(thread_id),
+    run_sql.uuid(thread_id),
     pgo.int(position),
     run_sql.uuid(recipient_id),
     pgo.bool(success),

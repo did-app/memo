@@ -228,7 +228,7 @@ pub fn route(
       |> Ok
     }
     ["threads", thread_id, "memos"] -> {
-      assert Ok(thread_id) = int.parse(thread_id)
+      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
       try memos = conversation.load_memos(thread_id, identifier_id)
@@ -238,7 +238,7 @@ pub fn route(
       |> Ok
     }
     ["threads", thread_id, "post"] -> {
-      assert Ok(thread_id) = int.parse(thread_id)
+      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try raw = acl.parse_json(request)
       try position = acl.required(raw, "position", acl.as_int)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))

@@ -6,6 +6,7 @@ import gleam/result
 import datetime.{DateTime}
 import gleam/json.{Json}
 import gleam/pgo
+import gleam_uuid.{UUID}
 import plum_mail/error
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier, Personal, Shared}
@@ -69,7 +70,7 @@ fn check_permission(thread_id, identifier_id) {
   WHERE pairs.thread_id = $1
   AND pairs.upper_identifier_id = $2
   "
-  let args = [pgo.int(thread_id), run_sql.uuid(identifier_id)]
+  let args = [run_sql.uuid(thread_id), run_sql.uuid(identifier_id)]
   try db_response = run_sql.execute(sql, args, fn(x) { x })
   case db_response {
     [_] -> Ok(Nil)
@@ -78,7 +79,7 @@ fn check_permission(thread_id, identifier_id) {
 }
 
 pub type Participation {
-  Participation(thread_id: Int, acknowledged: Int, latest: Option(Memo))
+  Participation(thread_id: UUID, acknowledged: Int, latest: Option(Memo))
 }
 
 fn participation_to_json(participation) {
@@ -90,7 +91,7 @@ fn participation_to_json(participation) {
   }
 
   json.object([
-    tuple("thread_id", json.int(thread_id)),
+    tuple("thread_id", json.string(gleam_uuid.to_string(thread_id))),
     tuple("acknowledged", json.int(acknowledged)),
     tuple("latest", latest_json),
   ])
@@ -197,7 +198,8 @@ fn new_direct_contact(identifier_id, email_address) {
       args,
       fn(row) {
         assert Ok(thread_id) = dynamic.element(row, 0)
-        assert Ok(thread_id) = dynamic.int(thread_id)
+        assert Ok(thread_id) = dynamic.bit_string(thread_id)
+        assert thread_id = run_sql.binary_to_uuid4(thread_id)
 
         let contact = identifier.row_to_identifier(row, 1)
         let participation = Participation(thread_id, 0, None)
@@ -276,7 +278,8 @@ pub fn all_participating(identifier_id) {
     args,
     fn(row) {
       assert Ok(thread_id) = dynamic.element(row, 0)
-      assert Ok(thread_id) = dynamic.int(thread_id)
+      assert Ok(thread_id) = dynamic.bit_string(thread_id)
+      assert thread_id = run_sql.binary_to_uuid4(thread_id)
       assert Ok(acknowledged) = dynamic.element(row, 1)
       assert Ok(acknowledged) = dynamic.int(acknowledged)
       assert Ok(inserted_at) = dynamic.element(row, 2)
@@ -297,11 +300,6 @@ pub fn all_participating(identifier_id) {
       let null_atom = dynamic.from(pgo.null())
       case dynamic.element(row, 5) {
         Ok(null) if null == null_atom -> {
-          assert Ok(group_id) = dynamic.element(row, 9)
-          assert Ok(group_id) = dynamic.int(group_id)
-          assert Ok(group_name) = dynamic.element(row, 10)
-          assert Ok(group_name) = dynamic.string(group_name)
-          // let group = Group(group_id, group_name, thread_id)
           let group = group.from_row(row, 9, None)
           GroupConversation(group: group, participation: participation)
         }

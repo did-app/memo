@@ -12,19 +12,19 @@ import type { Block } from "../writing"
 // export { getReference } from "../writing/view"
 
 export type Participation = {
-  threadId: number,
+  threadId: string,
   acknowledged: number,
   latest: Memo | null
 }
 export type Shared = {
   type: "shared"
-  id: number,
+  id: string,
   emailAddress: string,
   greeting: Block[] | null
 }
 export type Personal = {
   type: "personal",
-  id: number,
+  id: string,
   emailAddress: string,
   greeting: Block[] | null
 }
@@ -32,7 +32,7 @@ export type Identifier = Personal | Shared
 
 export type Group = {
   type: 'group',
-  id: number,
+  id: string,
   name: string,
   participants: string[]
 }

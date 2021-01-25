@@ -13,7 +13,7 @@
   import router from "page";
 
   let route: string;
-  let params: { emailAddress: string } | { groupId: number } | undefined;
+  let params: { emailAddress: string } | { groupId: string } | undefined;
   router("/", (_) => {
     route = "home";
   });
@@ -24,7 +24,7 @@
   router("/groups/:groupId", (context) => {
     route = "contact";
 
-    let groupId = parseInt(context.params.groupId);
+    let groupId = context.params.groupId;
     params = { groupId };
   });
   router("/:handle", (context) => {

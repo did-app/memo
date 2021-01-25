@@ -76,7 +76,14 @@ pub fn row_to_identifier(row, offset) {
   assert Ok(greeting): Result(Option(Json), Nil) =
     run_sql.dynamic_option(greeting, fn(x) { Ok(dynamic.unsafe_coerce(x)) })
   assert Ok(group_id) = dynamic.element(row, offset + 3)
-  assert Ok(group_id) = run_sql.dynamic_option(group_id, dynamic.int)
+  assert Ok(group_id) =
+    run_sql.dynamic_option(
+      group_id,
+      fn(id) {
+        try id = dynamic.bit_string(id)
+        Ok(run_sql.binary_to_uuid4(id))
+      },
+    )
 
   case group_id {
     Some(_) -> Shared(id, email_address, greeting)

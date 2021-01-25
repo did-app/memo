@@ -84,7 +84,7 @@ export function selectedInbox({ inboxSelection, inboxes }: State): Inbox | null 
 }
 
 
-export function selectedConversation(inbox: Inbox, params: { emailAddress: string } | { groupId: number } | undefined): Conversation | null {
+export function selectedConversation(inbox: Inbox, params: { emailAddress: string } | { groupId: string } | undefined): Conversation | null {
   if (params && 'emailAddress' in params) {
     return inbox.conversations.find(function ({ contact }) {
       return ('emailAddress' in contact) && contact.emailAddress == params.emailAddress

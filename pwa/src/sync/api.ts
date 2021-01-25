@@ -21,13 +21,13 @@ function identifierFromDTO(data: IdentifierDTO): Identifier {
 
 export type SharedDTO = {
   type: "shared"
-  id: number,
+  id: string,
   email_address: string,
   greeting: Block[] | null
 }
 export type PersonalDTO = {
   type: "personal",
-  id: number,
+  id: string,
   email_address: string,
   greeting: Block[] | null
 }
@@ -35,7 +35,7 @@ type IdentifierDTO = PersonalDTO | SharedDTO
 
 type GroupDTO = {
   type: 'group',
-  id: number,
+  id: string,
   name: string,
   participants: string[]
 }
@@ -63,7 +63,7 @@ function memoFromDTO(data: MemoDTO): Memo {
 
 
 type ParticipationDTO = {
-  thread_id: number,
+  thread_id: string,
   acknowledged: number,
   latest: MemoDTO | null
 }

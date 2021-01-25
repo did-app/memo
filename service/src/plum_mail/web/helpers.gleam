@@ -5,7 +5,7 @@ import gleam/dynamic
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{None, Some, Option}
+import gleam/option.{None, Option, Some}
 import gleam/order
 import gleam/os
 import gleam/result

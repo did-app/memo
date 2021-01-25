@@ -24,11 +24,16 @@
 ### Features available in a thread
 - [x] Acknowledge the latest memo
 - [x] Quote content in previous messages
+- [ ] View attachments, links etc
 
-- switch to UUID
+### Set up a greeting
+- [ ] See your profile editing page 
+- [ ] Save a new greeting
+- [ ] update a greeting
+- [ ] strangers see the greeting on their contact page
+
 - Set up a team inbox
 
-### Set up a greeting page (Next week update)
 
 
 # Later

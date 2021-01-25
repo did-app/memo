@@ -1,15 +1,16 @@
 import gleam/dynamic.{Dynamic}
 import gleam/int
 import gleam/pgo
+import gleam_uuid.{UUID}
 import plum_mail/acl
 import plum_mail/run_sql
 
 pub type Params {
-  Params(thread_id: Int, position: Int)
+  Params(thread_id: UUID, position: Int)
 }
 
 pub fn params(raw: Dynamic, thread_id: String) {
-  assert Ok(thread_id) = int.parse(thread_id)
+  assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
   try position = acl.required(raw, "position", dynamic.int)
   Params(thread_id, position)
   |> Ok()
@@ -31,7 +32,7 @@ pub fn execute(params, identifier_id) {
     RETURNING *
     "
   let args = [
-    pgo.int(thread_id),
+    run_sql.uuid(thread_id),
     run_sql.uuid(identifier_id),
     pgo.int(position),
   ]

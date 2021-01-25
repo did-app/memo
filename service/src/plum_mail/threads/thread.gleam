@@ -35,7 +35,7 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
     FROM new_memo
     "
   let args = [
-    pgo.int(thread_id),
+    run_sql.uuid(thread_id),
     pgo.int(position),
     run_sql.uuid(author_id),
     dynamic.unsafe_coerce(dynamic.from(content)),
@@ -68,7 +68,7 @@ pub fn load_memos(thread_id) {
     WHERE n.thread_id = $1
     ORDER BY n.position ASC
     "
-  let args = [pgo.int(thread_id)]
+  let args = [run_sql.uuid(thread_id)]
   let mapper = fn(row) {
     assert Ok(position) = dynamic.element(row, 0)
     assert Ok(position) = dynamic.int(position)
