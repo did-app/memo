@@ -34,7 +34,14 @@
 - [x] strangers see the greeting on their contact page
 - [ ] strangers see any questions in the greeting
 
-- Set up a team inbox
+### Set up a team inbox
+- [ ] Backend greate a group with an identifier id
+- [ ] start direct conversation as the shared identity
+- [ ] post a memo in the shared thread
+- [ ] acknowledge should be on the whole team identifier
+
+### Saving draft
+- [ ] Save a draft for a thread.
 
 
 

@@ -12,7 +12,7 @@
   let composerRange: Range | null = null;
 </script>
 
-<main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
+<main class="w-full mx-auto md:max-w-3xl px-1 md:px-2">
   <article
     class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
   >

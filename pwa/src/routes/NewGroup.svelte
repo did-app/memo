@@ -22,7 +22,7 @@
   let working = false;
 </script>
 
-<main class="w-full max-w-md mx-auto md:max-w-3xl px-1 md:px-2">
+<main class="w-full mx-auto md:max-w-3xl px-1 md:px-2">
   <h1>New group</h1>
   <form
     on:submit|preventDefault|once={() =>

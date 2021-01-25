@@ -89,6 +89,7 @@
   {:then memos}
     {#if conversation}
       <ConversationComponent
+        emailAddress={inbox.identifier.emailAddress}
         acknowledged={conversation.participation.acknowledged}
         {memos}
         acknowledge={acknowledgeFactory(conversation)}
@@ -96,6 +97,7 @@
       />
     {:else}
       <ConversationComponent
+        emailAddress={inbox.identifier.emailAddress}
         acknowledged={0}
         {memos}
         acknowledge={undefined}

@@ -15,6 +15,7 @@
 
   // Only need the reader id for pulling out questions
   // export let identifier: Identifier;
+  export let emailAddress: string;
   export let acknowledged: number;
   export let memos: Memo[];
   // Might make sense to pass these in as a slot
@@ -62,8 +63,6 @@
     let selection: Selection = (Writing as any).getSelection();
     let result = Writing.rangeFromDom(selection.getRangeAt(0));
 
-    console.log("selection change", result, currentPosition);
-
     if (result && result[1] <= currentPosition) {
       const [range, memoPosition] = result;
 
@@ -98,21 +97,13 @@
       document.removeEventListener("selectionchange", handleSelectionChange);
   });
 
-  // let references = conversation_module.gatherPrompts(
-  //   memos || [],
-  //   identifier.emailAddress
-  // );
+  let references = conversation_module.gatherPrompts(memos, emailAddress);
 
-  // references.map(function (reference) {
-  //   composer.addAnnotation(reference);
-  // });
-  // console.log(references);
-
-  // let x = tick().then(function () {
-  //   // Tick seems to now work with the composer getting rendered.
-  //   setTimeout(function name() {
-  //   }, 100)
-  //   );
+  tick().then(function () {
+    references.map(function (reference) {
+      composer.addAnnotation(reference);
+    });
+  });
 
   function quoteInReply() {
     if (focusSnapshot === null) {
