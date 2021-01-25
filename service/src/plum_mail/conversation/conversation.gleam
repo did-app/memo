@@ -131,7 +131,11 @@ pub fn start_direct(identifier_id, email_address, content) {
     )
   DirectConversation(
     contact,
-    Participation(..participation, latest: Some(memo)),
+    Participation(
+      ..participation,
+      latest: Some(memo),
+      acknowledged: next_position,
+    ),
   )
   |> Ok
 }

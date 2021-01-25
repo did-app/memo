@@ -7,9 +7,7 @@ import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal}
 import plum_mail/support
 import plum_mail/conversation/group
-import plum_mail/conversation/conversation.{
-  DirectConversation,
-}
+import plum_mail/conversation/conversation.{DirectConversation}
 import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
 import gleam/should
@@ -23,8 +21,10 @@ pub fn talking_to_a_unknown_identifier_test() {
   assert Ok(new_conversation) =
     conversation.start_direct(alice_id, bob_email, memo)
 
-  assert Ok([DirectConversation(alice_contact, alice_participation)]) =
-    conversation.all_participating(alice_id)
+  assert Ok([conversation]) = conversation.all_participating(alice_id)
+  conversation
+  |> should.equal(new_conversation)
+  assert DirectConversation(alice_contact, alice_participation) = conversation
   assert Personal(id: bob_id, email_address: contact_email, ..) = alice_contact
   assert Ok(bob) = identifier.fetch_by_id(bob_id)
 
