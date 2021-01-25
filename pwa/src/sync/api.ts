@@ -37,6 +37,7 @@ type GroupDTO = {
   type: 'group',
   id: number,
   name: string,
+  participants: string[]
 }
 
 function contactFromDTO(contact: IdentifierDTO | GroupDTO): Identifier | Group {

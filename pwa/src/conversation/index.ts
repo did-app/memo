@@ -34,6 +34,7 @@ export type Group = {
   type: 'group',
   id: number,
   name: string,
+  participants: string[]
 }
 
 // Contact is Group | Direct(Identifier)
@@ -53,11 +54,11 @@ export function isOutstanding(participation: Participation): boolean {
   }
 }
 
-export function subject(contact: Group | Identifier): string {
+export function subject(contact: Group | Identifier): [string, string] {
   if ('name' in contact) {
-    return contact.name
+    return [contact.name, contact.participants.join(", ")]
   } else {
-    return contact.emailAddress
+    return [contact.emailAddress, ""]
   }
 }
 

@@ -53,9 +53,13 @@
               "#" +
               participation.acknowledged}>
             <span class="font-bold text-base"
-              >{conversation_module.subject(contact)}</span
+              >{conversation_module.subject(contact)[0]}</span
             >
-
+            <!-- could be My group <5 participants> whatsapp doesnot show members very much -->
+            <br />
+            <p>
+              {conversation_module.subject(contact)[1]}
+            </p>
             {#if conversation_module.isOutstanding(participation)}
               New message
             {:else}All caught up{/if}
@@ -91,9 +95,13 @@
               "#" +
               participation.acknowledged}>
             <span class="font-bold text-base"
-              >{conversation_module.subject(contact)}</span
+              >{conversation_module.subject(contact)[0]}</span
             >
-
+            <!-- could be My group <5 participants> whatsapp doesnot show members very much -->
+            <br />
+            <p>
+              {conversation_module.subject(contact)[1]}
+            </p>
             {#if conversation_module.isOutstanding(participation)}
               New message
             {:else}All caught up{/if}

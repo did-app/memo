@@ -225,19 +225,29 @@ pub fn all_participating(identifier_id) {
     SELECT upper_identifier_id AS contact_id, thread_id
     FROM pairs
     WHERE pairs.lower_identifier_id = $1
+  ), participant_lists AS (
+    -- Could be a view
+    SELECT invitations.group_id, json_agg(json_build_object(
+      'identifier_id', invitations.identifier_id,
+      'email_address', identifiers.email_address
+    )) as participants
+    FROM invitations
+    JOIN identifiers ON identifiers.id = invitations.identifier_id
+    GROUP BY (invitations.group_id)
   ), my_groups AS (
-    SELECT * FROM groups
+    SELECT groups.* FROM groups
     JOIN invitations ON invitations.group_id = groups.id
     WHERE identifier_id = $1
   ), my_conversations AS (
-    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, NULL as name
+    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, NULL as name, NULL as participants
     FROM my_contacts
     JOIN identifiers AS i ON i.id = my_contacts.contact_id
     
     UNION ALL
 
-    SELECT thread_id, 'GROUP', NULL, NULL, NULL, NULL, my_groups.id as participating_group_id, my_groups.name
+    SELECT thread_id, 'GROUP', NULL, NULL, NULL, NULL, my_groups.id as participating_group_id, my_groups.name, participants
     FROM my_groups
+    JOIN participant_lists ON participant_lists.group_id = my_groups.id
   )
   SELECT 
     my_conversations.thread_id,
@@ -250,7 +260,9 @@ pub fn all_participating(identifier_id) {
     my_conversations.greeting,
     my_conversations.group_id,
     my_conversations.participating_group_id,
-    my_conversations.name
+    my_conversations.name,
+    my_conversations.thread_id,
+    my_conversations.participants
   FROM my_conversations
   LEFT JOIN latest ON latest.thread_id = my_conversations.thread_id
   LEFT JOIN participations ON participations.thread_id = my_conversations.thread_id
@@ -289,7 +301,8 @@ pub fn all_participating(identifier_id) {
           assert Ok(group_id) = dynamic.int(group_id)
           assert Ok(group_name) = dynamic.element(row, 10)
           assert Ok(group_name) = dynamic.string(group_name)
-          let group = Group(group_id, group_name, thread_id)
+          // let group = Group(group_id, group_name, thread_id)
+          let group = group.from_row(row, 9, None)
           GroupConversation(group: group, participation: participation)
         }
         _ -> {

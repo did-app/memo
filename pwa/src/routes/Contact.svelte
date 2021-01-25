@@ -1,5 +1,6 @@
 <script lang="typescript">
   import type { Memo, Conversation } from "../conversation";
+  import { subject } from "../conversation";
   import type { Inbox } from "../sync";
   import * as API from "../sync/api";
   import type { Block } from "../writing";
@@ -43,22 +44,6 @@
     }
   }
 
-  function conversationTopic({ contact }: Conversation): string {
-    if (contact.type === "group") {
-      return contact.name;
-    } else {
-      return contact.emailAddress;
-    }
-  }
-
-  function conversationParticipants({ contact }: Conversation): string {
-    if (contact.type === "group") {
-      return "participants";
-    } else {
-      return "";
-    }
-  }
-
   function postMemoFactory(conversation: Conversation) {
     let currentPosition = conversation.participation.latest?.position || 0;
 
@@ -87,8 +72,8 @@
 <div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
   {#if conversation}
     <div class="text-center my-4">
-      <h1 class="text-2xl">{conversationTopic(conversation)}</h1>
-      <h2 class="text-gray-500">{conversationParticipants(conversation)}</h2>
+      <h1 class="text-2xl">{subject(conversation.contact)[0]}</h1>
+      <h2 class="text-gray-500">{subject(conversation.contact)[1]}</h2>
     </div>
   {:else}
     {JSON.stringify(conversation)}

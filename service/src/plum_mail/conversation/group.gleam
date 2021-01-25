@@ -1,5 +1,7 @@
 import gleam/dynamic
 import gleam/io
+import gleam/list
+import gleam/option.{None, Some}
 import gleam/json.{Json}
 import gleam/pgo
 import plum_mail/email_address.{EmailAddress}
@@ -10,25 +12,42 @@ pub type Membership {
 }
 
 pub type Group {
-  Group(id: Int, name: String, thread_id: Int)
+  Group(id: Int, name: String, thread_id: Int, participants: List(String))
 }
 
-pub fn from_row(row, offset) {
+pub fn from_row(row, offset, participants) {
   assert Ok(id) = dynamic.element(row, offset + 0)
   assert Ok(id) = dynamic.int(id)
   assert Ok(name) = dynamic.element(row, offset + 1)
   assert Ok(name) = dynamic.string(name)
   assert Ok(thread_id) = dynamic.element(row, offset + 2)
   assert Ok(thread_id) = dynamic.int(thread_id)
-  Group(id, name, thread_id)
+  case participants {
+    Some(participants) -> Group(id, name, thread_id, participants)
+    None -> {
+      assert Ok(participants) = dynamic.element(row, offset + 3)
+      assert Ok(participants) =
+        dynamic.typed_list(
+          participants,
+          fn(raw) {
+            assert Ok(email_address) = dynamic.field(raw, "email_address")
+            assert Ok(email_address) = dynamic.string(email_address)
+            Ok(email_address)
+          },
+        )
+      Group(id, name, thread_id, participants)
+    }
+  }
 }
 
 pub fn to_json(group) {
-  let Group(id, name, ..) = group
+  let Group(id, name, participants: participants ..) = group
+  io.debug(participants)
   json.object([
     tuple("type", json.string("group")),
     tuple("id", json.int(id)),
     tuple("name", json.string(name)),
+    tuple("participants", json.list(list.map(participants, json.string)))
   ])
 }
 
@@ -61,7 +80,8 @@ SELECT id, name, thread_id FROM new_group;
 // Uses the same SQL by setting the identifier ($2) to null no identifier is affected in the group identifier clause
 pub fn create_group(name, identifier_id) {
   let args = [pgo.text(name), pgo.null(), pgo.int(identifier_id)]
-  try [group] = run_sql.execute(create_group_sql, args, from_row(_, 0))
+  try [group] =
+    run_sql.execute(create_group_sql, args, from_row(_, 0, Some([])))
   Ok(group)
 }
 
@@ -108,11 +128,21 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
     ), new_participation AS (
       INSERT INTO participations(thread_id, identifier_id, acknowledged)
       VALUES ((SELECT thread_id FROM this_group), $2, 0)
+    ), participant_lists AS (
+      -- Could be a view
+      SELECT invitations.group_id, json_agg(json_build_object(
+        'identifier_id', invitations.identifier_id,
+        'email_address', identifiers.email_address
+      )) as participants
+      FROM invitations
+      JOIN identifiers ON identifiers.id = invitations.identifier_id
+      GROUP BY (invitations.group_id)
     )
-    SELECT id, name, thread_id FROM this_group;
+    SELECT id, name, thread_id, participants FROM this_group
+    JOIN participant_lists ON participant_lists.group_id = this_group.id;
     "
   let args = [pgo.int(group_id), pgo.int(invited_id), pgo.int(inviting_id)]
-  try [group] = run_sql.execute(sql, args, from_row(_, 0))
+  try [group] = run_sql.execute(sql, args, from_row(_, 0, None))
   Ok(group)
 }
 // pub fn load_all(identifier_id) {

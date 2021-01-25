@@ -12,8 +12,9 @@
 ### Group conversations
 - [x] Create a new group
   - [x] Send invitations
-- [ ] View the group page 
-  - [ ] post memo
+- [x] View the group page
+  - [x] See participant information 
+  - [x] post memo
 
 ### From the homepage see conversations that you are participating in
 - [x] See direct conversations
@@ -21,7 +22,7 @@
 - [x] See outstanding conversations first, ordered by oldest. 
 
 ### Features available in a thread
-- [ ] Send a reply memo
+- [ ] Acknowledge the latest memo
 - [ ] Quote content in previous messages
 
 - switch to UUID
