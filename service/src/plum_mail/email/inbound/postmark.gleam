@@ -24,7 +24,6 @@ pub fn handle(params, config) {
   assert Ok([to_full]) = dynamic.list(to_full)
   try to_hash = acl.required(to_full, "MailboxHash", acl.as_string)
   try to_email_address = acl.required(to_full, "Email", acl.as_email)
-  try to_name = acl.required(to_full, "Name", acl.as_string)
 
   try from_email_address = acl.required(params, "From", acl.as_email)
 
@@ -62,7 +61,7 @@ pub fn handle(params, config) {
           body,
           postmark_api_token,
         )
-        |> result.map_error(fn(x) { todo("post mark error not handled") })
+        |> result.map_error(fn(_) { todo("postmark error not handled") })
       http.response(200)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok

@@ -139,11 +139,5 @@ pub fn error_response(reason) {
         "unprocessable",
         string.append("Could not process with invalid field ", field),
       )
-    error.UnknownIdentifier(email_address) ->
-      make_response(
-        422,
-        "unknown_identifier",
-        "There is email address requires an invitation to access Plum Mail",
-      )
   }
 }

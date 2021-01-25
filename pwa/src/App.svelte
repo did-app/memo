@@ -80,6 +80,8 @@
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
+      // TODO update the contact
+      // conversation updated func
       state = Sync.resolveTask(state, counter, "Conversation acknowledged");
     }
   }

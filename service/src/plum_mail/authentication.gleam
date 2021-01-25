@@ -71,7 +71,7 @@ pub fn generate_link_token(identifier_id) {
     pgo.text(hash_string(secret)),
     pgo.int(identifier_id),
   ]
-  let mapper = fn(row) { Nil }
+  let mapper = fn(_row) { Nil }
   try [Nil] = run_sql.execute(sql, args, mapper)
   Token(selector, secret)
   |> serialize_token()
@@ -82,7 +82,7 @@ pub fn validate_link_token(token_string) {
   try Token(selector, secret) = parse_token(token_string)
   let sql =
     "
-      SELECT i.id, i.email_address, i.greeting, i.group_id, validator, selector, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
+      SELECT i.id, i.email_address, i.greeting, i.group_id, validator, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
       FROM link_tokens AS lt
       JOIN identifiers AS i ON i.id = lt.identifier_id
       WHERE selector = $1
@@ -92,18 +92,16 @@ pub fn validate_link_token(token_string) {
     let identifier = identifier.row_to_identifier(row, 0)
     assert Ok(validator) = dynamic.element(row, 4)
     assert Ok(validator) = dynamic.string(validator)
-    assert Ok(link_token_selector) = dynamic.element(row, 5)
-    assert Ok(link_token_selector) = dynamic.string(link_token_selector)
-    assert Ok(current) = dynamic.element(row, 6)
+    assert Ok(current) = dynamic.element(row, 5)
     assert Ok(current) = dynamic.bool(current)
-    tuple(identifier, validator, link_token_selector, current)
+    tuple(identifier, validator, current)
   }
   try challenge_tokens =
     run_sql.execute(sql, args, mapper)
-    |> result.map_error(fn(x) { todo("map error when validating link token") })
+    |> result.map_error(fn(_) { todo("map error when validating link token") })
   case challenge_tokens {
     [] -> todo
-    [tuple(identifier, validator, link_token_selector, current)] -> {
+    [tuple(identifier, validator, current)] -> {
       try _ = validate(secret, validator)
       case current {
         True -> Ok(identifier)

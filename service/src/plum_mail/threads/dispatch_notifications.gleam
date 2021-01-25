@@ -163,7 +163,7 @@ fn dispatch_to_identifier(record, config) {
     recipient_email_address,
     topic,
     thread_id,
-    content,
+    _content,
     position,
   ) = record
   let link = contact_link(client_origin, topic, recipient_id)
@@ -185,16 +185,11 @@ fn dispatch_to_identifier(record, config) {
     "peter@plummail.co" -> "Peter Saxton <peter@plummail.co>"
     _ -> "memo <memo@sendmemo.app>"
   }
-  let reply_to = "noreply@sendmemo.app"
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
-  io.debug(tuple("ssdsdsdsdsd", response))
   case response {
     Ok(Nil) -> {
-      io.debug("dfdfd")
-      assert Ok(_) =
-        record_sent(thread_id, position, recipient_id)
-        |> io.debug()
+      assert Ok(_) = record_sent(thread_id, position, recipient_id)
       Ok(Nil)
     }
     // why was that, handle case of bad email addresses
@@ -203,14 +198,6 @@ fn dispatch_to_identifier(record, config) {
       record_failed(thread_id, position, recipient_id)
       Ok(Nil)
     }
-  }
-}
-
-fn send(request, postmark_api_token) {
-  case postmark_api_token {
-    _ ->
-      httpc.send(request)
-      |> io.debug()
   }
 }
 

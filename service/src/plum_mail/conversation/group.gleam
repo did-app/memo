@@ -17,7 +17,9 @@ pub fn to_json(group) {
   let Group(id, name) = group
   json.object([
     tuple("type", json.string("group")),
-    tuple("id", json.int(id)), tuple("name", json.string(name))])
+    tuple("id", json.int(id)),
+    tuple("name", json.string(name)),
+  ])
 }
 
 const create_group_sql = "

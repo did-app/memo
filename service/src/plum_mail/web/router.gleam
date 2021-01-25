@@ -67,8 +67,7 @@ fn authentication_token(identifier, request, config) {
   web.auth_token(identifier_id, user_agent, secret)
 }
 
-fn successful_authentication(identifier, request, config) {
-  assert Ok(shared) = identifier.shared_identifiers(identifier)
+fn successful_authentication(identifier) {
   let identifier_id = identifier.id(identifier)
   assert Ok(conversations) = conversation.all_participating(identifier_id)
   let conversations_data =
@@ -106,7 +105,7 @@ pub fn route(
       try params = authenticate_by_password.params(raw)
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
-      successful_authentication(identifier, request, config)
+      successful_authentication(identifier)
       |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
     }
@@ -125,7 +124,7 @@ pub fn route(
       try params = authenticate_by_code.params(raw)
       try identifier = authenticate_by_code.run(params)
       let token = authentication_token(identifier, request, config)
-      successful_authentication(identifier, request, config)
+      successful_authentication(identifier)
       |> http.set_resp_cookie("token", token, token_cookie_settings(request))
       |> Ok
     }
@@ -135,13 +134,11 @@ pub fn route(
         Some(identifier_id) -> {
           try lookup = identifier.fetch_by_id(identifier_id)
           case lookup {
-            Some(identifier) -> {
-          // This one doesn't set a session as it already has one
-          try shared = identifier.shared_identifiers(identifier)
-          successful_authentication(identifier, request, config)
-          |> Ok
-            }
-          None -> no_content()
+            Some(identifier) ->
+              // This one doesn't set a session as it already has one
+              successful_authentication(identifier)
+              |> Ok
+            None -> no_content()
           }
         }
         None -> no_content()
@@ -177,12 +174,12 @@ pub fn route(
     // TODO this should become identifiers identifiers_id greeting
     ["me", "greeting"] -> {
       try client_state = web.identify_client(request, config)
-      try user_id = web.require_authenticated(client_state)
+      try _user_id = web.require_authenticated(client_state)
       try raw = acl.parse_json(request)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
       // casts from json to pg type
-      let blocks = dynamic.unsafe_coerce(blocks)
-      let identifier = identifier.update_greeting(user_id, blocks)
+      let _blocks = dynamic.unsafe_coerce(blocks)
+      // let identifier = identifier.update_greeting(user_id, blocks)
       let identifier = todo("finis mapping")
       http.response(200)
       |> web.set_resp_json(identifier.to_json(identifier))
@@ -208,9 +205,9 @@ pub fn route(
     }
     ["identifiers", identifier_id, "conversations"] -> {
       try client_state = web.identify_client(request, config)
-      try session = web.require_authenticated(client_state)
+      try _session = web.require_authenticated(client_state)
       assert Ok(identifier_id) = int.parse(identifier_id)
-      // TODO instate this check against groups
+      // TODO instate this check against groups load permissions
       // assert True = session == identifier_id
       try conversations = conversation.all_participating(identifier_id)
       let data = json.list(list.map(conversations, conversation.to_json))
@@ -219,13 +216,13 @@ pub fn route(
       |> Ok
     }
     ["groups", "create"] -> {
-            try params = acl.parse_json(request)
+      try params = acl.parse_json(request)
       try name = acl.required(params, "name", acl.as_string)
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
-
       assert Ok(Some(identifier)) = identifier.fetch_by_id(identifier_id)
-      assert Ok(membership) = group.create_group(name, identifier.email_address(identifier))
+      assert Ok(membership) =
+        group.create_group(name, identifier.email_address(identifier))
       io.debug(membership)
       no_content()
     }

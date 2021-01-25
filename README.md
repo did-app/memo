@@ -1,5 +1,22 @@
 # plum mail
 
+- Clean up warnings, 
+- switch to UUID
+
+### From the homepage see conversations that you are participating in
+- [ ] See direct conversations
+- [ ] See group conversations
+- [ ] See outstanding conversations first, ordered by oldest. 
+
+### Participate in a conversation
+- [ ] Send a reply memo
+- [ ] Quote content in previous messages
+
+# Later
+### Set up a greeting page
+### Set up a team inbox
+### See which contact has invited you to a group
+
 ### Local Development
 
 Change to the correct directory and run.

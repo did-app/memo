@@ -4,7 +4,7 @@ defmodule PlumMail.Application do
   use Application
 
   def start_cowboy(config) do
-    case :gleam@http@cowboy.start(&:plum_mail@web@router.handle(&1, config), port) do
+    case :gleam@http@cowboy.start(&:plum_mail@web@router.handle(&1, config), port()) do
       {:ok, {:sender, pid, _other}} -> {:ok, pid}
       {:error, reason} -> {:error, reason}
     end
@@ -12,7 +12,6 @@ defmodule PlumMail.Application do
 
   def start(_type, _args) do
     :ok = Application.put_env(:pg_types, :json_config, {:jsone, [], [{:keys, :binary}]})
-    port = port()
     {:ok, db_config} = :gleam@pgo.url_config(System.get_env("DATABASE_URL"))
     db_ssl = System.get_env("DATABASE_SSL") != "FALSE"
     db_config = [{:ssl, db_ssl} | db_config]

@@ -198,10 +198,10 @@ pub fn all_participating(identifier_id) {
       assert Ok(inserted_at) = dynamic.element(row, 2)
       assert Ok(inserted_at) =
         run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
-        
+
       assert Ok(content) = dynamic.element(row, 3)
       let content: json.Json = dynamic.unsafe_coerce(content)
-      
+
       assert Ok(position) = dynamic.element(row, 4)
       assert Ok(position) = run_sql.dynamic_option(position, dynamic.int)
       let latest = case inserted_at, position {
@@ -213,18 +213,16 @@ pub fn all_participating(identifier_id) {
       let null_atom = dynamic.from(pgo.null())
       case dynamic.element(row, 5) {
         Ok(null) if null == null_atom -> {
-                assert Ok(group_id) = dynamic.element(row, 9)
-                
-      assert Ok(group_id) = dynamic.int(group_id)
-            assert Ok(group_name) = dynamic.element(row, 10)
-      assert Ok(group_name) = dynamic.string(group_name)
-      let group = Group(group_id, group_name)
-      GroupConversation(group: group, participation: participation)
+          assert Ok(group_id) = dynamic.element(row, 9)
+          assert Ok(group_id) = dynamic.int(group_id)
+          assert Ok(group_name) = dynamic.element(row, 10)
+          assert Ok(group_name) = dynamic.string(group_name)
+          let group = Group(group_id, group_name)
+          GroupConversation(group: group, participation: participation)
         }
         _ -> {
-
-      let contact = identifier.row_to_identifier(row, 5)
-      DirectConversation(contact, participation)
+          let contact = identifier.row_to_identifier(row, 5)
+          DirectConversation(contact, participation)
         }
       }
     },

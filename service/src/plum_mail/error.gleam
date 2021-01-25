@@ -9,7 +9,4 @@ pub type Reason {
   Unauthenticated
   Forbidden
   InternalServerError(detail: String)
-
-  // specific
-  UnknownIdentifier(email_address: String)
 }
