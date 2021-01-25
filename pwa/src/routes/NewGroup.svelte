@@ -3,7 +3,7 @@
   import type { Inbox } from "../sync";
   export let inbox: Inbox;
   export let createGroup: (
-    inboxId: number,
+    inboxId: string,
     name: string,
     invitees: number[]
   ) => void;

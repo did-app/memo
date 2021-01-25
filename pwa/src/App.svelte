@@ -79,8 +79,8 @@
   }
 
   async function acknowledge(
-    inboxId: number,
-    threadId: number,
+    inboxId: string,
+    threadId: string,
     position: number
   ) {
     let { updated, counter } = Sync.startTask(state, "Acknowledging task");
@@ -105,7 +105,7 @@
 
   function updateInbox(
     state: State,
-    inboxId: number,
+    inboxId: string,
     update: (i: Inbox) => Inbox
   ): State {
     let inboxes = state.inboxes;
@@ -126,7 +126,7 @@
 
   function updateConversation(
     inbox: Inbox,
-    threadId: number,
+    threadId: string,
     update: (c: Conversation) => Conversation
   ) {
     let conversations = inbox.conversations;
@@ -146,8 +146,8 @@
   }
 
   async function postMemo(
-    inboxId: number,
-    threadId: number,
+    inboxId: string,
+    threadId: string,
     position: number,
     content: Block[]
   ) {
@@ -174,7 +174,7 @@
   }
 
   async function createGroup(
-    inboxId: number,
+    inboxId: string,
     name: string,
     invitees: number[]
   ) {
@@ -193,8 +193,8 @@
   }
 
   async function startDirectConversation(
-    inboxId: number,
-    authorId: number,
+    inboxId: string,
+    authorId: string,
     emailAddress: string,
     content: Block[]
   ) {

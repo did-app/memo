@@ -12,19 +12,19 @@
   export let inbox: Inbox;
 
   export let acknowledge: (
-    inboxId: number,
-    threadId: number,
+    inboxId: string,
+    threadId: string,
     position: number
   ) => void;
   export let postMemo: (
-    inboxId: number,
-    threadId: number,
+    inboxId: string,
+    threadId: string,
     position: number,
     content: Block[]
   ) => void;
   export let startDirectConversation: (
-    inboxId: number,
-    authorId: number,
+    inboxId: string,
+    authorId: string,
     contact: string,
     content: Block[]
   ) => void;

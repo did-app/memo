@@ -163,7 +163,7 @@ export function saveGreeting(blocks: Block[] | null): Call<unknown> {
 //   return mapData(response, identifierFromDTO)
 // }
 
-export async function startDirectConversation(identifierId: number, emailAddress: string, content: Block[]): Call<Conversation> {
+export async function startDirectConversation(identifierId: string, emailAddress: string, content: Block[]): Call<Conversation> {
   const path = "/identifiers/" + identifierId + "/start_direct"
   const params = { email_address: emailAddress, content }
   let response: Response<ConversationDTO> = await post(path, params)
@@ -179,20 +179,20 @@ export async function createGroup(groupName: string, invitees: number[]): Call<C
 
 // Thread API endpoints
 
-export async function pullMemos(threadId: number): Call<Memo[]> {
+export async function pullMemos(threadId: string): Call<Memo[]> {
   const path = "/threads/" + threadId + "/memos"
   let response: Response<MemoDTO[]> = await get(path);
   return mapData(response, (dto) => { return dto.map(memoFromDTO) })
 }
 
-export async function postMemo(threadId: number, position: number, content: Block[]): Call<Memo> {
+export async function postMemo(threadId: string, position: number, content: Block[]): Call<Memo> {
   const path = "/threads/" + threadId + "/post"
   const params = { position, content }
   let response: Response<MemoDTO> = await post(path, params);
   return mapData(response, memoFromDTO)
 }
 
-export async function acknowledge(threadId: number, position: number): Call<null> {
+export async function acknowledge(threadId: string, position: number): Call<null> {
   const path = "/threads/" + threadId + "/acknowledge"
   const params = { position }
   let response: Response<null> = await post(path, params);
