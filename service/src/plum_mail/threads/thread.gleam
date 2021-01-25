@@ -37,7 +37,7 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
   let args = [
     pgo.int(thread_id),
     pgo.int(position),
-    pgo.int(author_id),
+    run_sql.uuid(author_id),
     dynamic.unsafe_coerce(dynamic.from(content)),
   ]
   try [memo] =

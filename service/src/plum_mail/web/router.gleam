@@ -14,6 +14,7 @@ import gleam/http.{Request, Response}
 import gleam/httpc
 import gleam/json.{Json}
 import gleam/pgo
+import gleam_uuid
 // Web/utils let session = utils.extractsession
 import datetime
 import plum_mail
@@ -192,7 +193,7 @@ pub fn route(
       assert Ok(content) = dynamic.field(params, dynamic.from("content"))
       try client_state = web.identify_client(request, config)
       try session = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = int.parse(identifier_id)
+      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
       assert True = session == identifier_id
       let content: Json = dynamic.unsafe_coerce(content)
       try conversation =
@@ -204,7 +205,7 @@ pub fn route(
     ["identifiers", identifier_id, "conversations"] -> {
       try client_state = web.identify_client(request, config)
       try _session = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = int.parse(identifier_id)
+      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
       // TODO instate this check against groups load permissions
       // assert True = session == identifier_id
       try conversations = conversation.all_participating(identifier_id)
@@ -217,7 +218,7 @@ pub fn route(
       try params = acl.parse_json(request)
       try name = acl.required(params, "name", acl.as_string)
       try invitees =
-        acl.required(params, "invitees", acl.as_list(_, acl.as_int))
+        acl.required(params, "invitees", acl.as_list(_, acl.as_uuid))
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
       assert Ok(conversation) =

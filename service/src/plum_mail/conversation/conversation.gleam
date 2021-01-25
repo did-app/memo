@@ -69,7 +69,7 @@ fn check_permission(thread_id, identifier_id) {
   WHERE pairs.thread_id = $1
   AND pairs.upper_identifier_id = $2
   "
-  let args = [pgo.int(thread_id), pgo.int(identifier_id)]
+  let args = [pgo.int(thread_id), run_sql.uuid(identifier_id)]
   try db_response = run_sql.execute(sql, args, fn(x) { x })
   case db_response {
     [_] -> Ok(Nil)
@@ -190,7 +190,7 @@ fn new_direct_contact(identifier_id, email_address) {
   )
   SELECT (SELECT thread_id FROM new_pair), id, email_address, greeting, group_id FROM invited
   "
-  let args = [pgo.int(identifier_id), pgo.text(email_address)]
+  let args = [run_sql.uuid(identifier_id), pgo.text(email_address)]
   try [participation] =
     run_sql.execute(
       sql,
@@ -270,7 +270,7 @@ pub fn all_participating(identifier_id) {
   OR participations.identifier_id IS NULL
   ORDER BY latest.inserted_at DESC
   "
-  let args = [pgo.int(identifier_id)]
+  let args = [run_sql.uuid(identifier_id)]
   run_sql.execute(
     sql,
     args,

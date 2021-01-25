@@ -10,7 +10,7 @@ table! {
 
 table! {
     identifiers (id) {
-        id -> Int4,
+        id -> Uuid,
         email_address -> Varchar,
         greeting -> Nullable<Jsonb>,
         inserted_at -> Timestamp,
@@ -22,8 +22,8 @@ table! {
 table! {
     invitations (group_id, identifier_id) {
         group_id -> Int4,
-        identifier_id -> Int4,
-        invited_by -> Nullable<Int4>,
+        identifier_id -> Uuid,
+        invited_by -> Nullable<Uuid>,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -33,7 +33,7 @@ table! {
     link_tokens (selector) {
         selector -> Varchar,
         validator -> Varchar,
-        identifier_id -> Int4,
+        identifier_id -> Uuid,
         inserted_at -> Timestamp,
     }
 }
@@ -43,7 +43,7 @@ table! {
         id -> Int4,
         thread_id -> Int4,
         position -> Int4,
-        recipient_id -> Int4,
+        recipient_id -> Uuid,
         success -> Bool,
         inserted_at -> Timestamp,
     }
@@ -54,7 +54,7 @@ table! {
         thread_id -> Int4,
         position -> Int4,
         content -> Jsonb,
-        authored_by -> Int4,
+        authored_by -> Uuid,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -62,15 +62,15 @@ table! {
 
 table! {
     pairs (lower_identifier_id, upper_identifier_id) {
-        lower_identifier_id -> Int4,
-        upper_identifier_id -> Int4,
+        lower_identifier_id -> Uuid,
+        upper_identifier_id -> Uuid,
         thread_id -> Int4,
     }
 }
 
 table! {
     participations (identifier_id, thread_id) {
-        identifier_id -> Int4,
+        identifier_id -> Uuid,
         thread_id -> Int4,
         acknowledged -> Int4,
         inserted_at -> Timestamp,

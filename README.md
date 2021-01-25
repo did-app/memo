@@ -26,6 +26,7 @@
 - [x] Quote content in previous messages
 
 - switch to UUID
+- Set up a team inbox
 
 ### Set up a greeting page (Next week update)
 
@@ -33,7 +34,6 @@
 # Later
 - Add member to an existing group
 - Leave a group
-- Set up a team inbox
 - See which contact has invited you to a group
 
 ### Local Development

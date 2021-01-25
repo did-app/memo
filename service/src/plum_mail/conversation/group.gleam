@@ -41,13 +41,13 @@ pub fn from_row(row, offset, participants) {
 }
 
 pub fn to_json(group) {
-  let Group(id, name, participants: participants ..) = group
+  let Group(id, name, participants: participants, ..) = group
   io.debug(participants)
   json.object([
     tuple("type", json.string("group")),
     tuple("id", json.int(id)),
     tuple("name", json.string(name)),
-    tuple("participants", json.list(list.map(participants, json.string)))
+    tuple("participants", json.list(list.map(participants, json.string))),
   ])
 }
 
@@ -79,7 +79,7 @@ SELECT id, name, thread_id FROM new_group;
 
 // Uses the same SQL by setting the identifier ($2) to null no identifier is affected in the group identifier clause
 pub fn create_group(name, identifier_id) {
-  let args = [pgo.text(name), pgo.null(), pgo.int(identifier_id)]
+  let args = [pgo.text(name), pgo.null(), run_sql.uuid(identifier_id)]
   try [group] =
     run_sql.execute(create_group_sql, args, from_row(_, 0, Some([])))
   Ok(group)
@@ -95,7 +95,7 @@ pub fn create_visible_group(maybe_name, identifier_id, first_member) {
   // let args = [pgo.nullable(name, pgo.text)]
   let args = [
     pgo.nullable(maybe_name, pgo.text),
-    pgo.int(identifier_id),
+    run_sql.uuid(identifier_id),
     pgo.text(first_member),
   ]
   try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
@@ -141,7 +141,11 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
     SELECT id, name, thread_id, participants FROM this_group
     JOIN participant_lists ON participant_lists.group_id = this_group.id;
     "
-  let args = [pgo.int(group_id), pgo.int(invited_id), pgo.int(inviting_id)]
+  let args = [
+    pgo.int(group_id),
+    run_sql.uuid(invited_id),
+    run_sql.uuid(inviting_id),
+  ]
   try [group] = run_sql.execute(sql, args, from_row(_, 0, None))
   Ok(group)
 }
@@ -159,6 +163,6 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
 //   JOIN invitations ON invitations.group_id = groups.id
 //   WHERE identifier_id = $1
 //   "
-//   let args = [pgo.int(identifier_id)]
+//   let args = [run_sql.uuid(identifier_id)]
 //   run_sql.execute(sql, args, )
 // }

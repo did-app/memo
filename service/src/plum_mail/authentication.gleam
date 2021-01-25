@@ -69,7 +69,7 @@ pub fn generate_link_token(identifier_id) {
   let args = [
     pgo.text(selector),
     pgo.text(hash_string(secret)),
-    pgo.int(identifier_id),
+    run_sql.uuid(identifier_id),
   ]
   let mapper = fn(_row) { Nil }
   try [Nil] = run_sql.execute(sql, args, mapper)

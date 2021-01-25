@@ -5,13 +5,14 @@ import gleam/dynamic
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{None, Some, Option}
 import gleam/order
 import gleam/os
 import gleam/result
 import gleam/string
 import gleam/http.{Response}
 import gleam/json
+import gleam_uuid.{UUID}
 import midas/signed_message
 import plum_mail/config.{Config}
 import plum_mail/error
@@ -68,7 +69,7 @@ pub fn auth_token(identifier_id, user_agent, secret) {
   signed_message.encode(data, secret)
 }
 
-fn do_identify_client(request, config, now) {
+fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try Nil = case http.get_req_origin(request) {
     Some(from) if from == client_origin -> Ok(Nil)

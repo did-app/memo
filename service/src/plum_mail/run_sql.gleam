@@ -6,6 +6,7 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
 import gleam/pgo
+import gleam_uuid.{UUID}
 import datetime
 import plum_mail/error.{InternalServerError}
 
@@ -15,6 +16,21 @@ pub fn dynamic_option(raw, cast) {
     True -> Ok(None)
     False -> result.map(cast(raw), Some)
   }
+}
+
+pub fn uuid(uuid: UUID) -> pgo.PgType {
+  assert Ok(bits) =
+    uuid
+    |> dynamic.from
+    |> dynamic.element(1)
+  dynamic.unsafe_coerce(bits)
+}
+
+pub fn binary_to_uuid4(bits: BitString) -> UUID {
+  dynamic.unsafe_coerce(dynamic.from(tuple(
+    atom.create_from_string("uuid"),
+    bits,
+  )))
 }
 
 pub fn cast_datetime(raw: Dynamic) {

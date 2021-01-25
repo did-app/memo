@@ -11,6 +11,7 @@ import gleam/string
 import gleam/uri
 import gleam/http.{Request}
 import gleam/json
+import gleam_uuid
 import plum_mail/error
 import plum_mail/authentication
 import plum_mail/email_address
@@ -96,6 +97,14 @@ pub fn as_int(raw) {
   case dynamic.int(raw) {
     Ok(value) -> Ok(value)
     Error(reason) -> Error(reason)
+  }
+}
+
+pub fn as_uuid(raw) {
+  try raw = as_string(raw)
+  case gleam_uuid.from_string(raw) {
+    Ok(value) -> Ok(value)
+    Error(Nil) -> Error("Expected a UUID ")
   }
 }
 

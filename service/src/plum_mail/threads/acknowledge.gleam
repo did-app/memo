@@ -30,7 +30,11 @@ pub fn execute(params, identifier_id) {
     AND identifier_id = $2
     RETURNING *
     "
-  let args = [pgo.int(thread_id), pgo.int(identifier_id), pgo.int(position)]
+  let args = [
+    pgo.int(thread_id),
+    run_sql.uuid(identifier_id),
+    pgo.int(position),
+  ]
   try [_] = run_sql.execute(sql, args, fn(x) { x })
   Ok(Nil)
 }

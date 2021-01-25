@@ -35,7 +35,8 @@ defmodule PlumMail.MixProject do
       {:gleam_http, "~> 1.6"},
       {:gleam_httpc, "~> 0.1.1"},
       {:gleam_json, "~> 0.1.0"},
-      {:gleam_pgo, "~> 0.1.0"}
+      {:gleam_pgo, "~> 0.1.0"},
+      {:gleam_uuid, "~> 0.1.1"}
     ]
   end
 end

@@ -2,6 +2,7 @@ import gleam/dynamic
 import gleam/option.{None, Some}
 import gleam/string
 import gleam/pgo
+import gleam_uuid
 import plum_mail/email_address
 import plum_mail/run_sql
 import plum_mail/authentication
@@ -15,7 +16,8 @@ pub fn find_or_create(email_address) {
 }
 
 pub fn upgrade_to_shared(identifier_id, name, first_member) {
-  assert Ok(identifier_id) = dynamic.int(identifier_id)
+  assert Ok(identifier_id) = dynamic.string(identifier_id)
+  assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
   assert Ok(name) = dynamic.string(name)
   let maybe_name = case string.trim(name) {
     "" -> None
@@ -27,7 +29,8 @@ pub fn upgrade_to_shared(identifier_id, name, first_member) {
 }
 
 pub fn generate_link_token(identifier_id) {
-  assert Ok(identifier_id) = dynamic.int(identifier_id)
+  assert Ok(identifier_id) = dynamic.string(identifier_id)
+  assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
   authentication.generate_link_token(identifier_id)
 }
 

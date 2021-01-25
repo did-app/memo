@@ -59,7 +59,8 @@ pub fn run() {
       [],
       fn(row) {
         assert Ok(recipient_id) = dynamic.element(row, 0)
-        assert Ok(recipient_id) = dynamic.int(recipient_id)
+        assert Ok(recipient_id) = dynamic.bit_string(recipient_id)
+        let recipient_id = run_sql.binary_to_uuid4(recipient_id)
         assert Ok(recipient_email_address) = dynamic.element(row, 1)
         assert Ok(recipient_email_address) =
           dynamic.string(recipient_email_address)
@@ -217,7 +218,7 @@ pub fn record_result(thread_id, position, recipient_id, success) {
   let args = [
     pgo.int(thread_id),
     pgo.int(position),
-    pgo.int(recipient_id),
+    run_sql.uuid(recipient_id),
     pgo.bool(success),
   ]
   let mapper = fn(x) { x }
