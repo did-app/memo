@@ -26,7 +26,12 @@
       >
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
-    <Fragment blocks={memo.content} position={memo.position} {peers} />
+    <Fragment
+      blocks={memo.content}
+      position={memo.position}
+      {peers}
+      active={true}
+    />
     <footer class="border-t-2 flex md:ml-12 ml-6 mt-4">
       <p class="my-1 min-w-0 w-full text-xs text-gray-400">
         Received: <span class="ml-auto"

@@ -127,7 +127,7 @@
     {/each}
   </div>
   <article
-    class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
+    class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top max-w-2xl"
   >
     <div class:hidden={!reply}>
       <Composer
@@ -143,7 +143,7 @@
             on:click={() => {
               reply = false;
             }}
-            class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+            class="flex items-center rounded px-2 inline-block border-gray-500 border-2">
             <span class="w-5 mr-2 inline-block">
               <Icons.ReplyAll />
             </span>
@@ -172,6 +172,7 @@
               peers={memos || []}
               truncate={false}
               placeholder={null}
+              active={false}
             />
           {/each}
         </div>
@@ -182,7 +183,7 @@
             on:click={() => {
               userFocus = null;
             }}
-            class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+            class="flex items-center rounded px-2 inline-block border-gray-500 border-2">
             <span class="py-1">Clear</span>
           </button>
           <button

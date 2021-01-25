@@ -7,6 +7,7 @@
   export let blocks: Block[];
   export let peers: Memo[];
   export let position: number;
+  export let active: boolean;
 </script>
 
 {#each blocks as block, index}
@@ -15,6 +16,8 @@
       {block}
       {index}
       {peers}
-      placeholder={index === 0 ? 'message' : null} />
+      placeholder={index === 0 ? "message" : null}
+      {active}
+    />
   </div>
 {/each}

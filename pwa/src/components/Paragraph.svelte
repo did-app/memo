@@ -6,6 +6,7 @@
   export let index: number;
   export let truncate: boolean;
   export let placeholder: "answer" | "message" | null;
+  export let active: boolean;
 
   let unfurled: boolean;
   $: unfurled = spans.length <= 1;
@@ -39,7 +40,7 @@
       {offset}
       {unfurled}
       placeholder={index === 0 ? placeholder : null}
-      active={true}
+      {active}
     />
   {/each}
 </p>

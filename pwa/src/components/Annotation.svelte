@@ -20,14 +20,18 @@
 </script>
 
 <!-- The horizontal rule at the bottom of here was able to be a content editable target, could not fix -->
-<div
-  class="my-4 w-full"
-  data-block-index={index}>
+<div class="my-4 w-full" data-block-index={index}>
   <blockquote class="font-bold border-l-8 pb-1" contenteditable="false">
     <div class="px-4">
       {#each Conversation.followReference(annotation.reference, peers) as block, index}
         <div class="-mb-2">
-          <BlockComponent {block} {index} {peers} placeholder={null} />
+          <BlockComponent
+            {block}
+            {index}
+            {peers}
+            placeholder={null}
+            active={false}
+          />
         </div>
       {/each}
     </div>
@@ -38,7 +42,9 @@
         {block}
         {index}
         {peers}
-        placeholder={index === 0 ? 'answer' : null} />
+        placeholder={index === 0 ? "answer" : null}
+        active={true}
+      />
     {/each}
   </div>
 </div>

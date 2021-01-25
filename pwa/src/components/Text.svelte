@@ -16,7 +16,9 @@
 </script>
 
 {#if text === ""}
-  <span class={placeholder} data-span-offset={printOffset}>{printText}</span>
+  <span class={placeholder || ""} data-span-offset={printOffset}
+    >{printText}</span
+  >
 {:else}
   <span class="" data-span-offset={printOffset}>{printText}</span>
 {/if}

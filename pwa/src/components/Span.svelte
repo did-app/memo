@@ -27,6 +27,6 @@
       </span>
     {/if}
   {:else}
-    <span class="">{span.title || span.url}</span>
+    <span class="underline">{span.title || span.url}</span>
   {/if}
 {:else if span.type === "softbreak"}<br />{/if}

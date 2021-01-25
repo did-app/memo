@@ -171,6 +171,7 @@
           {index}
           peers={previous}
           placeholder={index === 0 ? "message" : null}
+          active={true}
         />
       </div>
     {:else}
@@ -179,6 +180,7 @@
         index={0}
         peers={previous}
         placeholder={"message"}
+        active={true}
       />
     {/each}
   </div>
