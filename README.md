@@ -6,8 +6,8 @@
   - [x] Update conversation state in client for the new contact
 - [x] View the contact page for a direct conversation you are participating in
   - [x] See contact information
-  - [ ] Send futher memo
-  - [ ] Update conversation state in client with sent memo
+  - [x] Send futher memo
+  - [x] Update conversation state in client with sent memo
 
 
 ### From the homepage see conversations that you are participating in

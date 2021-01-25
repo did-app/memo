@@ -94,6 +94,6 @@ export function selectedConversation(inbox: Inbox, params: { emailAddress: strin
       return contact.type === 'group' && contact.id == params.groupId
     }) || null
   } else {
-    null
+    return null
   }
 }

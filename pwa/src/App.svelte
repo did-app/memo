@@ -86,7 +86,29 @@
     }
   }
 
+  function updateInbox(
+    state: State,
+    inboxId: number,
+    update: (i: Inbox) => Inbox
+  ): State {
+    let inboxes = state.inboxes;
+    let inboxIndex = inboxes.findIndex(function (inbox) {
+      return inbox.identifier.id == inboxId;
+    });
+    let inbox = inboxes[inboxIndex];
+    if (!inbox) {
+      throw "There should always be an inbox at this point";
+    }
+    inbox = update(inbox);
+    inboxes = inboxes
+      .slice(0, inboxIndex)
+      .concat(inbox)
+      .concat(inboxes.slice(inboxIndex + 1));
+    return { ...state, inboxes };
+  }
+
   async function postMemo(
+    inboxId: number,
     threadId: number,
     position: number,
     content: Block[]
@@ -98,7 +120,27 @@
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
-      state = Sync.resolveTask(state, counter, "Memo posted");
+      let s = Sync.resolveTask(state, counter, "Memo posted");
+      let latest = response.data;
+      state = updateInbox(s, inboxId, function (inbox) {
+        console.log(inbox, "----II");
+
+        let conversations = inbox.conversations.map(function (conversation) {
+          console.log(conversation, threadId);
+
+          if (conversation.participation.threadId === threadId) {
+            let participation = {
+              ...conversation.participation,
+              acknowledged: latest.position,
+              latest: latest,
+            };
+            return { ...conversation, participation };
+          } else {
+            return conversation;
+          }
+        });
+        return { ...inbox, conversations };
+      });
     }
   }
 
@@ -122,21 +164,11 @@
       throw "Well this should be handled";
     } else {
       let s = Sync.resolveTask(state, counter, "conversation started");
-      let inboxes = s.inboxes;
-      let inboxIndex = inboxes.findIndex(function (inbox) {
-        return inbox.identifier.id == inboxId;
+      let data = response.data;
+      state = updateInbox(s, inboxId, function (inbox) {
+        let conversations = [...inbox.conversations, data];
+        return { ...inbox, conversations };
       });
-      let inbox = inboxes[inboxIndex];
-      if (!inbox) {
-        throw "There should always be an inbox at this point";
-      }
-      let conversations = [...inbox.conversations, response.data];
-      inbox = { ...inbox, conversations };
-      inboxes = inboxes
-        .slice(0, inboxIndex)
-        .concat(inbox)
-        .concat(inboxes.slice(inboxIndex + 1));
-      state = { ...s, inboxes };
     }
   }
 

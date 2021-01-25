@@ -12,6 +12,7 @@
 
   export let acknowledge: (threadId: number, position: number) => void;
   export let postMemo: (
+    inboxId: number,
     threadId: number,
     position: number,
     content: Block[]
@@ -63,6 +64,7 @@
 
     return function (content: Block[]) {
       postMemo(
+        inbox.identifier.id,
         conversation.participation.threadId,
         currentPosition + 1,
         content

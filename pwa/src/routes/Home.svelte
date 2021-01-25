@@ -47,14 +47,14 @@
 
               <br />
               <p class="mt-2 truncate">
-                <!-- {#each Writing.summary(thread.latest.content) as span}
+                {#each Writing.summary(participation.latest.content) as span}
                   <SpanComponent
                     {span}
                     offset={0}
                     unfurled={false}
                     placeholder={null}
                   />
-                {/each} -->
+                {/each}
               </p>
             {/if}
           </a>
