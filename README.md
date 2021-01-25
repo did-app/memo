@@ -24,7 +24,7 @@
 ### Features available in a thread
 - [x] Acknowledge the latest memo
 - [x] Quote content in previous messages
-- [ ] See questions from previous messages highlighted
+- [x] See questions from previous messages highlighted
 - [ ] View attachments, links etc
 
 ### Set up a greeting
@@ -32,7 +32,7 @@
 - [x] Save a new greeting
 - [x] update a greeting
 - [x] strangers see the greeting on their contact page
-- [ ] strangers see any questions in the greeting
+- [x] strangers see any questions in the greeting
 
 ### Set up a team inbox
 - [ ] Backend greate a group with an identifier id

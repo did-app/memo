@@ -14,12 +14,8 @@
   export let selected: Range | null;
 
   let composer: HTMLElement;
+  const supported = Writing.isBeforeInputEventAvailable();
 
-  if (!Writing.isBeforeInputEventAvailable()) {
-    alert(
-      "beforeInput event not supported on this browser, sorry the editor will not work."
-    );
-  }
   export function addAnnotation(reference: Reference) {
     let lastBlock = blocks[blocks.length - 1];
     let before: Block[];
@@ -45,15 +41,6 @@
 
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
-
-    // console.log(event);
-    // alert(
-    //   event.inputType +
-    //     " with the following composing " +
-    //     isComposing +
-    //     " data: " +
-    //     JSON.stringify(event.data)
-    // );
 
     let range: Range;
     if (domRange !== undefined) {
@@ -138,83 +125,98 @@
   let isComposing = false;
 </script>
 
-<div
-  bind:this={composer}
-  class="outline-none overflow-y-auto"
-  style="max-height: 60vh; caret-color: #6ab869;"
-  contenteditable
-  on:input={() => {
-    // This shouldn't be firing, it might on android
-    // alert(
-    //   "Input event fired but it should not have been, this seems to be an issue affecting Chrome on Android"
-
-    // );
-    // Prevent default on before input stops this mostly
-    return false;
-    // Disabled doesn't seem to do anything on content editable
-  }}
-  disabled
-  data-memo-position={position}
-  on:compositionstart={() => {
-    isComposing = true;
-  }}
-  on:compositionend={() => {
-    isComposing = false;
-  }}
-  on:beforeinput|preventDefault={handleInput}
->
-  {#each blocks as block, index}
-    <div
-      class="flex "
-      draggable="true"
-      on:dragstart={(event) => {
-        handleDragStart(event, index);
-      }}
-      on:dragend={handleDragEnd}
-      {ondragover}
-      on:drop={(event) => handleDrop(event, index)}
-    >
-      <!-- text return false on dragover works, function call doesn't? -->
-      <!-- -ml because padding on article is 2, probably should be dropped -->
+{#if supported}
+  <div
+    bind:this={composer}
+    class="outline-none overflow-y-auto"
+    style="max-height: 60vh; caret-color: #6ab869;"
+    contenteditable
+    on:input={() => {
+      // This shouldn't be firing, it might on android
+      // Prevent default on before input stops this mostly
+      // I think the extra bit comes in after this step
+      return false;
+    }}
+    disabled
+    data-memo-position={position}
+    on:compositionstart={() => {
+      isComposing = true;
+    }}
+    on:compositionend={() => {
+      isComposing = false;
+    }}
+    on:beforeinput|preventDefault={handleInput}
+  >
+    {#each blocks as block, index}
       <div
-        class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
-        contenteditable="false"
+        class="flex "
+        draggable="true"
+        on:dragstart={(event) => {
+          handleDragStart(event, index);
+        }}
+        on:dragend={handleDragEnd}
+        {ondragover}
+        on:drop={(event) => handleDrop(event, index)}
       >
-        <Icons.Drag />
+        <!-- text return false on dragover works, function call doesn't? -->
+        <!-- -ml because padding on article is 2, probably should be dropped -->
+        <div
+          class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+          contenteditable="false"
+        >
+          <Icons.Drag />
+        </div>
+        <BlockComponent
+          {block}
+          {index}
+          peers={previous}
+          placeholder={index === 0 ? "message" : null}
+        />
       </div>
+    {:else}
       <BlockComponent
-        {block}
-        {index}
+        block={{ type: "paragraph", spans: [] }}
+        index={0}
         peers={previous}
-        placeholder={index === 0 ? "message" : null}
+        placeholder={"message"}
       />
+    {/each}
+  </div>
+  {#if dragging}
+    <div class="mt-2 pl-6 md:pl-12 flex items-center">
+      <button
+        {ondragover}
+        on:drop={handleDragDelete}
+        class="bg-gray-100 flex inline-block items-center justify-center mx-auto px-2 rounded w-full binnable">
+        <span class="w-5 mr-2 inline-block">
+          <Icons.Bin />
+        </span>
+        <span class="py-1"> Bin </span>
+      </button>
     </div>
   {:else}
-    <BlockComponent
-      block={{ type: "paragraph", spans: [] }}
-      index={0}
-      peers={previous}
-      placeholder={"message"}
-    />
-  {/each}
-</div>
-{#if dragging}
-  <div class="mt-2 pl-6 md:pl-12 flex items-center">
-    <button
-      {ondragover}
-      on:drop={handleDragDelete}
-      class="bg-gray-100 flex inline-block items-center justify-center mx-auto px-2 rounded w-full binnable">
-      <span class="w-5 mr-2 inline-block">
-        <Icons.Bin />
-      </span>
-      <span class="py-1"> Bin </span>
-    </button>
-  </div>
+    <slot {blocks} />
+  {/if}
 {:else}
-  <slot {blocks} />
+  <h1 class="text-xl text-center font-bold my-4 ml-12">
+    Browser not supported
+  </h1>
+  <p class="my-2 ml-12">
+    Hi there, we can't offer Memo's message composing in this browser.
+  </p>
+  <p class="my-2 ml-12">
+    Our composer makes use of <a
+      class="underline"
+      href="https://caniuse.com/?search=beforeinput">beforeInput</a
+    > events which are available in most browsers, but not this one.
+  </p>
+  <p class="my-2 ml-12">
+    We're pleased to see you trying out Memo, to continue try Chrome, Safari or
+    Edge.
+  </p>
 {/if}
 <!-- <hr />
-<pre>
-
-  {JSON.stringify(blocks, null, 2)}
-</pre> -->
+  <pre>
+    
+    {JSON.stringify(blocks, null, 2)}
+  </pre> -->
