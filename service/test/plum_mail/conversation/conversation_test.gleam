@@ -70,7 +70,7 @@ pub fn answering_an_identifier_greeting_test() {
 
   let greeting =
     json.list([json.object([tuple("dummy", json.string("greeting "))])])
-  let greeting: pgo.PgType = dynamic.unsafe_coerce(dynamic.from(greeting))
+  let greeting: json.Json = dynamic.unsafe_coerce(dynamic.from(greeting))
   assert Ok(Some(_)) = identifier.update_greeting(clive_id, greeting)
 
   let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])

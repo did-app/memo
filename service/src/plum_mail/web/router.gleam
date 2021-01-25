@@ -156,7 +156,7 @@ pub fn route(
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
       let args = [pgo.text(email_address)]
-      let mapper = fn(row) {
+      let mapper = fn(row): Json {
         assert Ok(greeting) = dynamic.element(row, 0)
         dynamic.unsafe_coerce(greeting)
       }
@@ -170,19 +170,17 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok()
     }
-    // TODO this should become identifiers identifiers_id greeting
-    ["me", "greeting"] -> {
+    ["identifiers", identifier_id, "greeting"] -> {
       try client_state = web.identify_client(request, config)
-      try _user_id = web.require_authenticated(client_state)
+      try session = web.require_authenticated(client_state)
+      // TODO act on behalf of the group
+      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
+      assert True = session == identifier_id
       try raw = acl.parse_json(request)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
-      // casts from json to pg type
-      let _blocks = dynamic.unsafe_coerce(blocks)
-      // let identifier = identifier.update_greeting(user_id, blocks)
-      let identifier = todo("finis mapping")
-      http.response(200)
-      |> web.set_resp_json(identifier.to_json(identifier))
-      |> Ok
+      let blocks: json.Json = dynamic.unsafe_coerce(blocks)
+      let _ = identifier.update_greeting(identifier_id, blocks)
+      no_content()
     }
     // connect | start_direct
     // should return conversation

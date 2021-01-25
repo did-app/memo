@@ -122,7 +122,7 @@ pub fn fetch_by_id(id) {
   |> Ok
 }
 
-pub fn update_greeting(identifier_id, greeting) {
+pub fn update_greeting(identifier_id, greeting: Json) {
   let sql =
     "
     UPDATE identifiers 
@@ -130,7 +130,10 @@ pub fn update_greeting(identifier_id, greeting) {
     WHERE id = $1
     RETURNING *
     "
-  let args = [run_sql.uuid(identifier_id), greeting]
+  let args = [
+    run_sql.uuid(identifier_id),
+    dynamic.unsafe_coerce(dynamic.from(greeting)),
+  ]
   try db_result = run_sql.execute(sql, args, fn(x) { x })
   db_result
   |> run_sql.single()

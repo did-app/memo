@@ -1,5 +1,5 @@
 <script lang="typescript">
-  import type { Conversation } from "./conversation";
+  import type { Memo, Conversation } from "./conversation";
   import type { State, Inbox } from "./sync";
   import * as Sync from "./sync";
   import * as API from "./sync/api";
@@ -8,7 +8,7 @@
   import Contact from "./routes/Contact.svelte";
   import Home from "./routes/Home.svelte";
   import NewGroup from "./routes/NewGroup.svelte";
-  import UnderConstruction from "./components/UnderConstruction.svelte";
+  import Profile from "./routes/Profile.svelte";
   import SignIn from "./components/SignIn.svelte";
   import router from "page";
 
@@ -65,16 +65,34 @@
     let installPrompt = await Sync.startInstall(window);
     console.log(installPrompt);
   }
-  async function pullMemos(conversation: Conversation | null) {
-    if (conversation) {
+
+  async function pullMemos(
+    conversation: Conversation | { stranger: string }
+  ): Promise<Memo[]> {
+    if ("stranger" in conversation) {
+      let response = await API.fetchProfile(conversation.stranger);
+      if ("error" in response) {
+        throw "TODO, this error needs to be passed up the component tree for Prof ile";
+      }
+      let greeting = response.data.greeting;
+      if (greeting) {
+        return [
+          {
+            author: conversation.stranger,
+            position: 1,
+            content: greeting,
+            postedAt: new Date(),
+          },
+        ];
+      } else {
+        return [];
+      }
+    } else {
       let response = await API.pullMemos(conversation.participation.threadId);
       if ("error" in response) {
         throw "TODO, this error needs to be passed up the component tree";
       }
       return response.data;
-    } else {
-      console.warn("TODO, look up profile");
-      return Promise.resolve([]);
     }
   }
 
@@ -219,6 +237,23 @@
       });
     }
   }
+
+  async function saveGreeting(inboxId: string, greeting: Block[]) {
+    let message = "Saving your new greeting";
+    let { updated, counter } = Sync.startTask(state, message);
+    state = updated;
+    router.redirect("/");
+    let response = await API.saveGreeting(inboxId, greeting);
+    if ("error" in response) {
+      throw "Wonder what wen't wrong with the greeting";
+    } else {
+      let s = Sync.resolveTask(state, counter, "Greeting saved");
+      state = updateInbox(s, inboxId, function (inbox) {
+        let identifier = { ...inbox.identifier, greeting };
+        return { ...inbox, identifier };
+      });
+    }
+  }
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
@@ -253,17 +288,15 @@
   {/if}
 {:else if route === "contact"}
   <!-- There should always be params on this route -->
-  {#if inbox && params}
-    {#if inbox.identifier.emailAddress === params.emailAddress}
-      <!-- <Profile identifier={inbox.identifier} /> -->
-      <UnderConstruction>
-        <p>We are working on new features here.</p>
-        <p>Thank you for your patience</p>
-      </UnderConstruction>
+  {#if !inbox}
+    <SignIn />
+  {:else if params}
+    {#if "emailAddress" in params && inbox.identifier.emailAddress === params.emailAddress}
+      <Profile identifier={inbox.identifier} {saveGreeting} />
     {:else}
       <Contact
         {conversation}
-        contactEmailAddress={params?.emailAddress || "There should be an email"}
+        contactEmailAddress={"emailAddress" in params && params.emailAddress}
         {inbox}
         {pullMemos}
         {acknowledge}
@@ -272,6 +305,7 @@
       />
     {/if}
   {:else}
+    {JSON.stringify(params)} <br />
     Will also show loading
   {/if}
 {:else if route === "new_group"}

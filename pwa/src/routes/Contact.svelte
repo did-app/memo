@@ -2,13 +2,13 @@
   import type { Memo, Conversation } from "../conversation";
   import { subject } from "../conversation";
   import type { Inbox } from "../sync";
-  import * as API from "../sync/api";
   import type { Block } from "../writing";
   import ConversationComponent from "../components/Conversation.svelte";
   import LoadingComponent from "../components/Loading.svelte";
 
   export let conversation: Conversation | null;
-  export let contactEmailAddress: string;
+  // undefined if a group
+  export let contactEmailAddress: string | false;
   export let inbox: Inbox;
 
   export let acknowledge: (
@@ -28,7 +28,9 @@
     contact: string,
     content: Block[]
   ) => void;
-  export let pullMemos: (conversation: Conversation | null) => Promise<Memo[]>;
+  export let pullMemos: (
+    conversation: Conversation | { stranger: string }
+  ) => Promise<Memo[]>;
 
   function acknowledgeFactory({ participation }: Conversation) {
     let current = participation.latest?.position || 0;
@@ -82,7 +84,7 @@
   {:else}
     {JSON.stringify(conversation)}
   {/if}
-  {#await pullMemos(conversation)}
+  {#await pullMemos(conversation || { stranger: contactEmailAddress || "I think this should always be present" })}
     <LoadingComponent />
   {:then memos}
     {#if conversation}
@@ -97,7 +99,10 @@
         acknowledged={0}
         {memos}
         acknowledge={undefined}
-        dispatchMemo={startConversationFactory(contactEmailAddress)}
+        dispatchMemo={startConversationFactory(
+          contactEmailAddress ||
+            "NOTE SHOULD only start conversation when contact email address"
+        )}
       />
     {/if}
   {/await}

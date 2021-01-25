@@ -149,19 +149,20 @@ export async function authenticateByPassword(emailAddress: string, password: str
 
 // User Accont calls
 
-export function saveGreeting(blocks: Block[] | null): Call<unknown> {
-  const path = "/me/greeting"
+export async function saveGreeting(identifierId: string, blocks: Block[] | null): Call<null> {
+  const path = "/identifiers/" + identifierId + "/greeting"
   const params = { blocks }
-  return post(path, params)
+  let response: Response<null> = await post(path, params)
+  return response
 }
 
 // identifier discovery
 
-// export async function fetchProfile(emailAddress: string): Call<Identifier | null> {
-//   const path = "/identifiers/" + emailAddress
-//   let response: Response<IdentifierDTO> = await get(path);
-//   return mapData(response, identifierFromDTO)
-// }
+export async function fetchProfile(emailAddress: string): Call<{ greeting: Block[] | null }> {
+  const path = "/identifiers/" + emailAddress
+  let response: Response<{ greeting: Block[] | null }> = await get(path);
+  return response
+}
 
 export async function startDirectConversation(identifierId: string, emailAddress: string, content: Block[]): Call<Conversation> {
   const path = "/identifiers/" + identifierId + "/start_direct"

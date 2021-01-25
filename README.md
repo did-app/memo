@@ -24,13 +24,15 @@
 ### Features available in a thread
 - [x] Acknowledge the latest memo
 - [x] Quote content in previous messages
+- [ ] See questions from previous messages highlighted
 - [ ] View attachments, links etc
 
 ### Set up a greeting
-- [ ] See your profile editing page 
-- [ ] Save a new greeting
-- [ ] update a greeting
-- [ ] strangers see the greeting on their contact page
+- [x] See your profile editing page 
+- [x] Save a new greeting
+- [x] update a greeting
+- [x] strangers see the greeting on their contact page
+- [ ] strangers see any questions in the greeting
 
 - Set up a team inbox
 
