@@ -80,6 +80,10 @@
     </div>
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->
-    <a {href}>{text || href}</a>
+    <a class="underline text-green-400 hover:text-green-600" {href}
+      >{text || href}</a
+    >
   {/if}
-{:else}<a {href}>{text || href}</a>{/if}
+{:else}<a class="underline text-green-400 hover:text-green-600" {href}
+    >{text || href}</a
+  >{/if}
