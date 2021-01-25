@@ -8,7 +8,7 @@ import plum_mail/identifier.{Personal}
 import plum_mail/support
 import plum_mail/conversation/group
 import plum_mail/conversation/conversation.{
-  DirectConversation, GroupConversation,
+  DirectConversation,
 }
 import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql

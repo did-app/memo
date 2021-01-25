@@ -4,7 +4,7 @@
   import * as API from "../sync/api";
   import type { Block } from "../writing";
   import ConversationComponent from "../components/Conversation.svelte";
-  import LoadingComponent from "../components/Loading.Svelte";
+  import LoadingComponent from "../components/Loading.svelte";
 
   export let conversation: Conversation | null;
   export let contactEmailAddress: string;
@@ -17,6 +17,7 @@
     content: Block[]
   ) => void;
   export let startDirectConversation: (
+    inboxId: number,
     authorId: number,
     contact: string,
     content: Block[]
@@ -55,7 +56,12 @@
 
   function startConversationFactory(contactEmailAddress: string) {
     return function (content: Block[]) {
-      startDirectConversation(authorId(), contactEmailAddress, content);
+      startDirectConversation(
+        inbox.identifier.id,
+        authorId(),
+        contactEmailAddress,
+        content
+      );
     };
   }
 </script>

@@ -103,6 +103,7 @@
   }
 
   async function startDirectConversation(
+    inboxId: number,
     authorId: number,
     emailAddress: string,
     content: Block[]
@@ -116,10 +117,26 @@
       emailAddress,
       content
     );
+
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
-      state = Sync.resolveTask(state, counter, "conversation started");
+      let s = Sync.resolveTask(state, counter, "conversation started");
+      let inboxes = s.inboxes;
+      let inboxIndex = inboxes.findIndex(function (inbox) {
+        return inbox.identifier.id == inboxId;
+      });
+      let inbox = inboxes[inboxIndex];
+      if (!inbox) {
+        throw "There should always be an inbox at this point";
+      }
+      let conversations = [...inbox.conversations, response.data];
+      inbox = { ...inbox, conversations };
+      inboxes = inboxes
+        .slice(0, inboxIndex)
+        .concat(inbox)
+        .concat(inboxes.slice(inboxIndex + 1));
+      state = { ...s, inboxes };
     }
   }
 

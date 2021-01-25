@@ -1,11 +1,15 @@
 # plum mail
 
-- Clean up warnings, 
-- switch to UUID
+### Direct conversations
+- [x] View the contact page for a unknown identifier, 
+  - [ ] start conversation
+  - [ ] Update conversation state in client for the new contact
+- [ ] View the contact page for a direct conversation you are participating in
+
 
 ### From the homepage see conversations that you are participating in
 - [ ] See direct conversations
-- [ ] See group conversations
+- [x] See group conversations
 - [ ] See outstanding conversations first, ordered by oldest. 
 
 ### Participate in a conversation
@@ -17,6 +21,7 @@
 ### Set up a team inbox
 ### See which contact has invited you to a group
 
+- switch to UUID
 ### Local Development
 
 Change to the correct directory and run.

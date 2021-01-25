@@ -165,9 +165,8 @@ export function saveGreeting(blocks: Block[] | null): Call<unknown> {
 export async function startDirectConversation(identifierId: number, emailAddress: string, content: Block[]): Call<Conversation> {
   const path = "/identifiers/" + identifierId + "/start_direct"
   const params = { email_address: emailAddress, content }
-  let response: Response<Conversation> = await post(path, params)
-  // return mapData(response, contactFromDTO)
-  throw "TODO"
+  let response: Response<ConversationDTO> = await post(path, params)
+  return mapData(response, conversationFromDTO)
 }
 
 export async function createGroup(groupName: string): Call<Conversation> {
@@ -175,6 +174,7 @@ export async function createGroup(groupName: string): Call<Conversation> {
   const params = { name: groupName }
   let response: Response<Conversation> = await post(path, params)
   console.log(response);
+  throw "TODO, mapp the proper DTO"
   return response
 }
 
