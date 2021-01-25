@@ -12,7 +12,7 @@
 </script>
 
 {#if span.type === "text"}
-  <Text text={span.text} {offset} {placeholder} />
+  <Text text={span.text} {offset} {placeholder} {active} />
 {:else if span.type === "link"}
   {#if active}
     {#if unfurled}

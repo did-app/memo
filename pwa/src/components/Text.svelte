@@ -2,6 +2,7 @@
   export let text: string;
   export let offset: number;
   export let placeholder: "answer" | "message" | null;
+  export let active: boolean;
 
   let printText: string;
   let printOffset: number;
@@ -15,12 +16,17 @@
   }
 </script>
 
+<!-- whitespace-pre-wrap needed for typing but messes up collapsing -->
 {#if text === ""}
-  <span class={placeholder || ""} data-span-offset={printOffset}
-    >{printText}</span
+  <span
+    class="{active ? 'whitespace-pre-wrap' : ''} {placeholder}"
+    data-span-offset={printOffset}>{printText}</span
   >
 {:else}
-  <span class="" data-span-offset={printOffset}>{printText}</span>
+  <span
+    class={active ? "whitespace-pre-wrap" : ""}
+    data-span-offset={printOffset}>{printText}</span
+  >
 {/if}
 
 <style>
