@@ -25,7 +25,6 @@ import plum_mail/authentication
 import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
-import plum_mail/conversation/group
 import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal, Shared}
@@ -217,10 +216,15 @@ pub fn route(
     ["groups", "create"] -> {
       try params = acl.parse_json(request)
       try name = acl.required(params, "name", acl.as_string)
+      try invitees =
+        acl.required(params, "invitees", acl.as_list(_, acl.as_int))
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
-      assert Ok(membership) = group.create_group(name, identifier_id)
-      no_content()
+      assert Ok(conversation) =
+        conversation.create_group(name, identifier_id, invitees)
+      http.response(200)
+      |> web.set_resp_json(conversation.to_json(conversation))
+      |> Ok
     }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)

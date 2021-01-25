@@ -169,13 +169,11 @@ export async function startDirectConversation(identifierId: number, emailAddress
   return mapData(response, conversationFromDTO)
 }
 
-export async function createGroup(groupName: string): Call<Conversation> {
+export async function createGroup(groupName: string, invitees: number[]): Call<Conversation> {
   const path = "/groups/create"
-  const params = { name: groupName }
-  let response: Response<Conversation> = await post(path, params)
-  console.log(response);
-  throw "TODO, mapp the proper DTO"
-  return response
+  const params = { name: groupName, invitees }
+  let response: Response<ConversationDTO> = await post(path, params)
+  return mapData(response, conversationFromDTO)
 }
 
 // Thread API endpoints

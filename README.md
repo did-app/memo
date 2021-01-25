@@ -9,22 +9,32 @@
   - [x] Send futher memo
   - [x] Update conversation state in client with sent memo
 
+### Group conversations
+- [x] Create a new group
+  - [x] Send invitations
+- [ ] View the group page 
+  - [ ] post memo
 
 ### From the homepage see conversations that you are participating in
-- [ ] See direct conversations
+- [x] See direct conversations
 - [x] See group conversations
-- [ ] See outstanding conversations first, ordered by oldest. 
+- [x] See outstanding conversations first, ordered by oldest. 
 
-### Participate in a conversation
+### Features available in a thread
 - [ ] Send a reply memo
 - [ ] Quote content in previous messages
 
-# Later
-### Set up a greeting page
-### Set up a team inbox
-### See which contact has invited you to a group
-
 - switch to UUID
+
+### Set up a greeting page (Next week update)
+
+
+# Later
+- Add member to an existing group
+- Leave a group
+- Set up a team inbox
+- See which contact has invited you to a group
+
 ### Local Development
 
 Change to the correct directory and run.

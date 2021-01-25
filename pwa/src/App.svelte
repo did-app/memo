@@ -7,6 +7,7 @@
   import Layout from "./routes/_Layout.svelte";
   import Contact from "./routes/Contact.svelte";
   import Home from "./routes/Home.svelte";
+  import NewGroup from "./routes/NewGroup.svelte";
   import UnderConstruction from "./components/UnderConstruction.svelte";
   import SignIn from "./components/SignIn.svelte";
   import router from "page";
@@ -15,6 +16,10 @@
   let params: { emailAddress: string } | { groupId: number } | undefined;
   router("/", (_) => {
     route = "home";
+  });
+  router("/groups/new", (context) => {
+    route = "new_group";
+    params = undefined;
   });
   router("/groups/:groupId", (context) => {
     route = "contact";
@@ -123,24 +128,48 @@
       let s = Sync.resolveTask(state, counter, "Memo posted");
       let latest = response.data;
       state = updateInbox(s, inboxId, function (inbox) {
-        console.log(inbox, "----II");
-
-        let conversations = inbox.conversations.map(function (conversation) {
-          console.log(conversation, threadId);
-
-          if (conversation.participation.threadId === threadId) {
-            let participation = {
-              ...conversation.participation,
-              acknowledged: latest.position,
-              latest: latest,
-            };
-            return { ...conversation, participation };
-          } else {
-            return conversation;
-          }
+        let conversations = inbox.conversations;
+        let conversationIndex = conversations.findIndex(function (
+          conversation
+        ) {
+          return conversation.participation.threadId === threadId;
         });
+        let conversation = conversations[conversationIndex];
+        if (!conversation) {
+          throw "We should always have found a conversation";
+        }
+
+        let participation = {
+          ...conversation.participation,
+          acknowledged: latest.position,
+          latest: latest,
+        };
+        conversation = { ...conversation, participation };
+        conversations = [conversation]
+          .concat(conversations.slice(0, conversationIndex))
+          .concat(conversations.slice(conversationIndex + 1));
+
         return { ...inbox, conversations };
       });
+    }
+  }
+
+  async function createGroup(
+    inboxId: number,
+    name: string,
+    invitees: number[]
+  ) {
+    // Could use the notification interface but we aren't redirecting to the home page
+    let response = await API.createGroup(name, invitees);
+    if ("error" in response) {
+      throw "We need to show this error better";
+    } else {
+      let data = response.data;
+      state = updateInbox(state, inboxId, function (inbox) {
+        let conversations = [data, ...inbox.conversations];
+        return { ...inbox, conversations };
+      });
+      router.redirect("/groups/" + response.data.contact.id);
     }
   }
 
@@ -166,18 +195,10 @@
       let s = Sync.resolveTask(state, counter, "conversation started");
       let data = response.data;
       state = updateInbox(s, inboxId, function (inbox) {
-        let conversations = [...inbox.conversations, data];
+        let conversations = [data, ...inbox.conversations];
         return { ...inbox, conversations };
       });
     }
-  }
-
-  let groupName = "";
-  async function createGroup() {
-    let response = await API.createGroup(groupName);
-    console.log(response);
-
-    // router.redirect;
   }
 </script>
 
@@ -234,10 +255,10 @@
   {:else}
     Will also show loading
   {/if}
+{:else if route === "new_group"}
+  {#if inbox}
+    <NewGroup {inbox} {createGroup} />
+  {/if}
 {:else}
   <p>no route {JSON.stringify(route)}</p>
 {/if}
-<form on:submit|preventDefault={createGroup}>
-  <input type="text" bind:value={groupName} />
-  <button>Create group</button>
-</form>

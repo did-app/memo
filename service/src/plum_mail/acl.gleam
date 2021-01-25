@@ -81,6 +81,10 @@ pub fn optional(raw, key, cast) {
   }
 }
 
+pub fn as_list(raw, cast) {
+  dynamic.typed_list(raw, cast)
+}
+
 pub fn as_string(raw) {
   case dynamic.string(raw) {
     Ok(value) -> Ok(value)

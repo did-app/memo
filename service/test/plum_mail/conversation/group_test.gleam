@@ -14,7 +14,9 @@ pub fn participating_in_a_group_conversation_test() {
   let eve = support.generate_personal_identifier("eve.test")
   let eve_id = identifier.id(eve)
 
-  assert Ok(group) = conversation.create_group("My Group", identifier.id(alice))
+  assert Ok(conversation) =
+    conversation.create_group("My Group", alice_id, [bob_id])
+  assert GroupConversation(group: group, ..) = conversation
   let thread_id = group.thread_id
 
   // Eve can't view the thread or add_members
@@ -23,7 +25,7 @@ pub fn participating_in_a_group_conversation_test() {
     conversation.post_memo(thread_id, 1, eve_id, json.list([]))
   assert Error(Forbidden) = conversation.load_memos(thread_id, eve_id)
 
-  assert Ok(_) = conversation.invite_member(group.id, bob_id, alice_id)
+  // assert Ok(_) = conversation.invite_member(group.id, bob_id, alice_id)
   assert Ok(_) = conversation.post_memo(thread_id, 1, alice_id, json.list([]))
 
   // This memo might helpfully be the same as latest later in the test

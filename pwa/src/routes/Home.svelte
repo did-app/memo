@@ -1,6 +1,7 @@
 <script lang="typescript">
   import router from "page";
-  import * as Conversation from "../conversation";
+  import type { Conversation } from "../conversation";
+  import * as conversation_module from "../conversation";
   import * as Writing from "../writing";
   import type { Inbox } from "../sync";
   import SpanComponent from "../components/Span.svelte";
@@ -9,7 +10,21 @@
   let contactEmailAddress = "";
 
   function findContact() {
-    router.redirect(Conversation.emailAddressToPath(contactEmailAddress));
+    router.redirect(
+      conversation_module.emailAddressToPath(contactEmailAddress)
+    );
+  }
+
+  function outstanding(conversations: Conversation[]) {
+    return conversations.filter(function (conversation) {
+      return conversation_module.isOutstanding(conversation.participation);
+    });
+  }
+
+  function older(conversations: Conversation[]) {
+    return conversations.filter(function (conversation) {
+      return !conversation_module.isOutstanding(conversation.participation);
+    });
   }
 </script>
 
@@ -26,20 +41,60 @@
         </p>
       </article>
     {/if} -->
-    <h1 class="text-2xl py-4">
+    <!-- <h1 class="text-2xl py-4">
       Your Conversations as {inbox.identifier.emailAddress}
-    </h1>
+    </h1> -->
     <ol>
-      {#each inbox.conversations as { contact, participation }}
+      {#each outstanding(inbox.conversations).reverse() as { contact, participation }}
         <li>
           <a
             class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:border-gray-400 hover:border-gray-400 focus:shadow-xl hover:shadow-xl"
-            href={Conversation.url(contact) + "#" + participation.acknowledged}>
+            href={conversation_module.url(contact) +
+              "#" +
+              participation.acknowledged}>
             <span class="font-bold text-base"
-              >{Conversation.subject(contact)}</span
+              >{conversation_module.subject(contact)}</span
             >
 
-            {#if Conversation.isOutstanding(participation)}
+            {#if conversation_module.isOutstanding(participation)}
+              New message
+            {:else}All caught up{/if}
+            {#if participation.latest}
+              {participation.latest.postedAt.toLocaleDateString()}
+
+              <br />
+              <p class="mt-2 truncate">
+                {#each Writing.summary(participation.latest.content) as span}
+                  <SpanComponent
+                    {span}
+                    offset={0}
+                    unfurled={false}
+                    placeholder={null}
+                  />
+                {/each}
+              </p>
+            {/if}
+          </a>
+        </li>
+      {/each}
+      <li>
+        <hr />
+        <small class="text-center w-full block font-bold text-gray-500"
+          >archive</small
+        >
+      </li>
+      {#each older(inbox.conversations) as { contact, participation }}
+        <li>
+          <a
+            class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:border-gray-400 hover:border-gray-400 focus:shadow-xl hover:shadow-xl"
+            href={conversation_module.url(contact) +
+              "#" +
+              participation.acknowledged}>
+            <span class="font-bold text-base"
+              >{conversation_module.subject(contact)}</span
+            >
+
+            {#if conversation_module.isOutstanding(participation)}
               New message
             {:else}All caught up{/if}
             {#if participation.latest}

@@ -1,5 +1,6 @@
 import gleam/dynamic
 import gleam/io
+import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/result
 import datetime.{DateTime}
@@ -12,8 +13,14 @@ import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
 import plum_mail/conversation/group.{Group}
 
-pub fn create_group(name, identifier_id) {
-  group.create_group(name, identifier_id)
+pub fn create_group(name, identifier_id, invitees) {
+  try group = group.create_group(name, identifier_id)
+  // should assert on return from invite member, even upgrade to transaction
+  list.each(invitees, invite_member(group.id, _, identifier_id))
+  Ok(GroupConversation(
+    group,
+    Participation(thread_id: group.thread_id, acknowledged: 0, latest: None),
+  ))
 }
 
 pub fn invite_member(group_id, invited_id, inviting_id) {
@@ -54,7 +61,13 @@ fn check_permission(thread_id, identifier_id) {
   FROM pairs
   WHERE pairs.thread_id = $1
   AND pairs.lower_identifier_id = $2
-  OR pairs.upper_identifier_id = $2
+
+  UNION ALL
+  
+  SELECT 'direct'
+  FROM pairs
+  WHERE pairs.thread_id = $1
+  AND pairs.upper_identifier_id = $2
   "
   let args = [pgo.int(thread_id), pgo.int(identifier_id)]
   try db_response = run_sql.execute(sql, args, fn(x) { x })
@@ -243,6 +256,7 @@ pub fn all_participating(identifier_id) {
   LEFT JOIN participations ON participations.thread_id = my_conversations.thread_id
   WHERE participations.identifier_id = $1
   OR participations.identifier_id IS NULL
+  ORDER BY latest.inserted_at DESC
   "
   let args = [pgo.int(identifier_id)]
   run_sql.execute(
