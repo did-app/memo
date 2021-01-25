@@ -21,9 +21,13 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
 }
 
 pub fn post_memo(thread_id, position, author_id, content) {
-  // The first try is correctly talking to the database.
-  try permission = check_permission(thread_id, author_id)
+  try _ = check_permission(thread_id, author_id)
   thread.post_memo(thread_id, position, author_id, content)
+}
+
+pub fn load_memos(thread_id, identifier_id) {
+  try _ = check_permission(thread_id, identifier_id)
+  thread.load_memos(thread_id)
 }
 
 type Permission {
@@ -49,7 +53,7 @@ fn check_permission(thread_id, identifier_id) {
   OR pairs.upper_identifier_id = $2
   "
   let args = [pgo.int(thread_id), pgo.int(identifier_id)]
-  try db_response = run_sql.execute(sql, args, io.debug)
+  try db_response = run_sql.execute(sql, args, fn(x) { x })
   case db_response {
     [_] -> Ok(Nil)
     [] -> Error(error.Forbidden)
@@ -263,7 +267,7 @@ pub fn all_participating(identifier_id) {
           assert Ok(group_id) = dynamic.int(group_id)
           assert Ok(group_name) = dynamic.element(row, 10)
           assert Ok(group_name) = dynamic.string(group_name)
-          let group = Group(group_id, group_name, todo("in eere"))
+          let group = Group(group_id, group_name, thread_id)
           GroupConversation(group: group, participation: participation)
         }
         _ -> {

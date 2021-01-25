@@ -1,8 +1,9 @@
 import gleam/io
 import gleam/json
-import plum_mail/error
-import plum_mail/conversation/conversation
+import plum_mail/error.{Forbidden}
+import plum_mail/conversation/conversation.{GroupConversation}
 import plum_mail/identifier
+import gleam/should
 import plum_mail/support
 
 pub fn participating_in_a_group_conversation_test() {
@@ -14,19 +15,33 @@ pub fn participating_in_a_group_conversation_test() {
   let eve_id = identifier.id(eve)
 
   assert Ok(group) = conversation.create_group("My Group", identifier.id(alice))
+  let thread_id = group.thread_id
 
-  // Bob can't view the thread or add_members
+  // Eve can't view the thread or add_members
   assert Error(error) = conversation.invite_member(group.id, bob_id, eve_id)
-  assert Error(error.Forbidden) =
-    conversation.post_memo(group.thread_id, 1, eve_id, json.list([]))
+  assert Error(Forbidden) =
+    conversation.post_memo(thread_id, 1, eve_id, json.list([]))
+  assert Error(Forbidden) = conversation.load_memos(thread_id, eve_id)
 
-  // TODO check viewing thread
   assert Ok(_) = conversation.invite_member(group.id, bob_id, alice_id)
-  // This calls the participation code
-  assert Ok(_) =
-    conversation.post_memo(group.thread_id, 1, alice_id, json.list([]))
+  assert Ok(_) = conversation.post_memo(thread_id, 1, alice_id, json.list([]))
 
-  todo("group test")
+  // This memo might helpfully be the same as latest later in the test
+  // Alice sees an up to date conversation
+  assert Ok([conversation]) = conversation.all_participating(alice_id)
+  assert GroupConversation(group: g, participation: p) = conversation
+  g.name
+  |> should.equal("My Group")
+  p.acknowledged
+  |> should.equal(1)
+
+  // Bob sees an outstanding conversation
+  assert Ok([conversation]) = conversation.all_participating(bob_id)
+  assert GroupConversation(group: g, participation: p) = conversation
+  g.name
+  |> should.equal("My Group")
+  p.acknowledged
+  |> should.equal(0)
 }
 // pub fn create_a_group_test() {
 //   // Every identifier start off as a Personal identifier

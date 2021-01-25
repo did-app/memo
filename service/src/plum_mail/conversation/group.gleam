@@ -115,21 +115,20 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
   try [group] = run_sql.execute(sql, args, from_row(_, 0))
   Ok(group)
 }
-
-pub fn load_all(identifier_id) {
-  // Might want a view for all threads showing latest message
-  let sql =
-    "
-  WITH latest AS (
-    SELECT DISTINCT ON(thread_id) * FROM memos
-    ORDER BY thread_id DESC, inserted_at DESC
-  )
-  SELECT name, groups.thread_id, latest.inserted_at, latest.content, latest.position
-  FROM groups
-  LEFT JOIN latest ON latest.thread_id = groups.thread_id
-  JOIN invitations ON invitations.group_id = groups.id
-  WHERE identifier_id = $1
-  "
-  let args = [pgo.int(identifier_id)]
-  run_sql.execute(sql, args, io.debug)
-}
+// pub fn load_all(identifier_id) {
+//   // Might want a view for all threads showing latest message
+//   let sql =
+//     "
+//   WITH latest AS (
+//     SELECT DISTINCT ON(thread_id) * FROM memos
+//     ORDER BY thread_id DESC, inserted_at DESC
+//   )
+//   SELECT name, groups.thread_id, latest.inserted_at, latest.content, latest.position
+//   FROM groups
+//   LEFT JOIN latest ON latest.thread_id = groups.thread_id
+//   JOIN invitations ON invitations.group_id = groups.id
+//   WHERE identifier_id = $1
+//   "
+//   let args = [pgo.int(identifier_id)]
+//   run_sql.execute(sql, args, )
+// }

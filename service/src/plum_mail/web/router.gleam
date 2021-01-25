@@ -221,7 +221,6 @@ pub fn route(
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
       assert Ok(membership) = group.create_group(name, identifier_id)
-      io.debug(membership)
       no_content()
     }
     ["threads", thread_id, "memos"] -> {
@@ -274,7 +273,6 @@ pub fn handle(
   config: config.Config,
 ) -> Response(BitBuilder) {
   // Would be helpful if stdlib had an unwrap_or(route, error_response)
-  // io.debug(request)
   let response = case request.method {
     http.Options ->
       http.response(200)
@@ -305,5 +303,4 @@ pub fn handle(
         "content-type, sentry-trace",
       )
   }
-  // |> io.debug()
 }
