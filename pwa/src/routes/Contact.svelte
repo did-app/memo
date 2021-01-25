@@ -11,7 +11,11 @@
   export let contactEmailAddress: string;
   export let inbox: Inbox;
 
-  export let acknowledge: (threadId: number, position: number) => void;
+  export let acknowledge: (
+    inboxId: number,
+    threadId: number,
+    position: number
+  ) => void;
   export let postMemo: (
     inboxId: number,
     threadId: number,
@@ -31,7 +35,7 @@
     let outstanding = current > participation.acknowledged;
     if (outstanding) {
       return function () {
-        acknowledge(participation.threadId, current);
+        acknowledge(inbox.identifier.id, participation.threadId, current);
       };
     }
   }

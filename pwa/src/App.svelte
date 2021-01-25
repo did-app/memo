@@ -11,6 +11,7 @@
   import UnderConstruction from "./components/UnderConstruction.svelte";
   import SignIn from "./components/SignIn.svelte";
   import router from "page";
+  import Conversation from "./components/Conversation.svelte";
 
   let route: string;
   let params: { emailAddress: string } | { groupId: number } | undefined;
@@ -77,7 +78,12 @@
       return Promise.resolve([]);
     }
   }
-  async function acknowledge(threadId: number, position: number) {
+
+  async function acknowledge(
+    inboxId: number,
+    threadId: number,
+    position: number
+  ) {
     let { updated, counter } = Sync.startTask(state, "Acknowledging task");
     state = updated;
     router.redirect("/");
@@ -85,9 +91,16 @@
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
-      // TODO update the contact
-      // conversation updated func
-      state = Sync.resolveTask(state, counter, "Conversation acknowledged");
+      let s = Sync.resolveTask(state, counter, "Conversation acknowledged");
+      state = updateInbox(s, inboxId, function (inbox) {
+        return updateConversation(inbox, threadId, function (conversation) {
+          let participation = {
+            ...conversation.participation,
+            acknowledged: position,
+          };
+          return { ...conversation, participation };
+        });
+      });
     }
   }
 
@@ -112,6 +125,27 @@
     return { ...state, inboxes };
   }
 
+  function updateConversation(
+    inbox: Inbox,
+    threadId: number,
+    update: (c: Conversation) => Conversation
+  ) {
+    let conversations = inbox.conversations;
+    let conversationIndex = conversations.findIndex(function (conversation) {
+      return conversation.participation.threadId === threadId;
+    });
+    let conversation = conversations[conversationIndex];
+    if (!conversation) {
+      throw "We should always have found a conversation";
+    }
+    conversation = update(conversation);
+    conversations = [conversation]
+      .concat(conversations.slice(0, conversationIndex))
+      .concat(conversations.slice(conversationIndex + 1));
+
+    return { ...inbox, conversations };
+  }
+
   async function postMemo(
     inboxId: number,
     threadId: number,
@@ -128,28 +162,14 @@
       let s = Sync.resolveTask(state, counter, "Memo posted");
       let latest = response.data;
       state = updateInbox(s, inboxId, function (inbox) {
-        let conversations = inbox.conversations;
-        let conversationIndex = conversations.findIndex(function (
-          conversation
-        ) {
-          return conversation.participation.threadId === threadId;
+        return updateConversation(inbox, threadId, function (conversation) {
+          let participation = {
+            ...conversation.participation,
+            acknowledged: latest.position,
+            latest: latest,
+          };
+          return { ...conversation, participation };
         });
-        let conversation = conversations[conversationIndex];
-        if (!conversation) {
-          throw "We should always have found a conversation";
-        }
-
-        let participation = {
-          ...conversation.participation,
-          acknowledged: latest.position,
-          latest: latest,
-        };
-        conversation = { ...conversation, participation };
-        conversations = [conversation]
-          .concat(conversations.slice(0, conversationIndex))
-          .concat(conversations.slice(conversationIndex + 1));
-
-        return { ...inbox, conversations };
       });
     }
   }
