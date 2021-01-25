@@ -3,6 +3,7 @@ import gleam/io
 import gleam/option.{None, Some}
 import gleam/json
 import gleam/pgo
+import plum_mail/error.{Forbidden}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal}
 import plum_mail/support
@@ -45,6 +46,20 @@ pub fn talking_to_a_unknown_identifier_test() {
   |> should.equal(alice)
   bob_participation.latest
   |> should.equal(alice_participation.latest)
+
+  let thread_id = alice_participation.thread_id
+  let content = json.list([])
+
+  assert Ok(_) = conversation.post_memo(thread_id, 2, bob_id, content)
+  assert Ok([_, _]) = conversation.load_memos(thread_id, bob_id)
+
+  let eve = support.generate_personal_identifier("eve.test")
+  let eve_id = identifier.id(eve)
+
+  conversation.post_memo(thread_id, 3, eve_id, content)
+  |> should.equal(Error(Forbidden))
+  conversation.load_memos(thread_id, eve_id)
+  |> should.equal(Error(Forbidden))
 }
 
 pub fn answering_an_identifier_greeting_test() {

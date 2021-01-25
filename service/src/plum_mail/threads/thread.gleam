@@ -87,12 +87,3 @@ pub fn load_memos(thread_id) {
   }
   run_sql.execute(sql, args, mapper)
 }
-
-pub fn to_json(thread) {
-  let tuple(thread_id, ack, memos) = thread
-  json.object([
-    tuple("id", json.int(thread_id)),
-    tuple("ack", json.int(ack)),
-    tuple("memos", json.list(memos)),
-  ])
-}

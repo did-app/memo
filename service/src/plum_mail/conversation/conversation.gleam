@@ -30,6 +30,10 @@ pub fn load_memos(thread_id, identifier_id) {
   thread.load_memos(thread_id)
 }
 
+pub fn memo_to_json(memo) {
+  thread.memo_to_json(memo)
+}
+
 type Permission {
   Direct
   Invited

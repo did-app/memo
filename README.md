@@ -2,8 +2,8 @@
 
 ### Direct conversations
 - [x] View the contact page for a unknown identifier, 
-  - [ ] start conversation
-  - [ ] Update conversation state in client for the new contact
+  - [x] start conversation
+  - [x] Update conversation state in client for the new contact
 - [ ] View the contact page for a direct conversation you are participating in
 
 

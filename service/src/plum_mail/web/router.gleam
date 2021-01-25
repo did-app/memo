@@ -30,7 +30,6 @@ import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal, Shared}
 import plum_mail/web/helpers as web
-import plum_mail/threads/thread
 import plum_mail/threads/acknowledge
 import plum_mail/email/inbound/postmark
 
@@ -225,7 +224,9 @@ pub fn route(
     }
     ["threads", thread_id, "memos"] -> {
       assert Ok(thread_id) = int.parse(thread_id)
-      try memos = thread.load_memos(thread_id)
+      try client_state = web.identify_client(request, config)
+      try identifier_id = web.require_authenticated(client_state)
+      try memos = conversation.load_memos(thread_id, identifier_id)
       let data = json.list(memos)
       http.response(200)
       |> web.set_resp_json(data)
@@ -241,8 +242,9 @@ pub fn route(
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
       // // Needs a participation thing again
-      try latest = thread.post_memo(thread_id, position, author_id, blocks)
-      let data = thread.memo_to_json(latest)
+      try latest =
+        conversation.post_memo(thread_id, position, author_id, blocks)
+      let data = conversation.memo_to_json(latest)
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok
@@ -252,6 +254,7 @@ pub fn route(
       try params = acknowledge.params(raw, thread_id)
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
+      // TODO this needs to be on the conversation level
       try _ = acknowledge.execute(params, identifier_id)
       no_content()
     }
