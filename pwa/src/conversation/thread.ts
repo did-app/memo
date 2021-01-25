@@ -10,14 +10,6 @@ export type Thread = {
   acknowledged: number
 }
 
-export function currentPosition(thread: Thread | null): number {
-  if (thread && thread.latest) {
-    return thread.latest.position
-  } else {
-    return 0
-  }
-}
-
 export function isOutstanding(thread: Thread): boolean {
   const { latest, acknowledged } = thread
   if (latest) {

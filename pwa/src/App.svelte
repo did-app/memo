@@ -11,7 +11,6 @@
   import UnderConstruction from "./components/UnderConstruction.svelte";
   import SignIn from "./components/SignIn.svelte";
   import router from "page";
-  import Conversation from "./components/Conversation.svelte";
 
   let route: string;
   let params: { emailAddress: string } | { groupId: number } | undefined;

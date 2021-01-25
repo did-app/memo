@@ -22,8 +22,8 @@
 - [x] See outstanding conversations first, ordered by oldest. 
 
 ### Features available in a thread
-- [ ] Acknowledge the latest memo
-- [ ] Quote content in previous messages
+- [x] Acknowledge the latest memo
+- [x] Quote content in previous messages
 
 - switch to UUID
 

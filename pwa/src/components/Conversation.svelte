@@ -55,12 +55,14 @@
 
   let userFocus: Reference | null = null;
   let focusSnapshot: Reference | null = null;
-  let currentPosition: number = 0;
+  let currentPosition: number = memos[memos.length - 1]?.position || 0;
   let composerRange: Range | null = null;
 
   function handleSelectionChange() {
     let selection: Selection = (Writing as any).getSelection();
     let result = Writing.rangeFromDom(selection.getRangeAt(0));
+
+    console.log("selection change", result, currentPosition);
 
     if (result && result[1] <= currentPosition) {
       const [range, memoPosition] = result;
