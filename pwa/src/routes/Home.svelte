@@ -74,6 +74,7 @@
                     offset={0}
                     unfurled={false}
                     placeholder={null}
+                    active={false}
                   />
                 {/each}
               </p>
@@ -116,6 +117,7 @@
                     offset={0}
                     unfurled={false}
                     placeholder={null}
+                    active={false}
                   />
                 {/each}
               </p>

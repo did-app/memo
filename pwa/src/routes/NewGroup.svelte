@@ -41,17 +41,11 @@
     {#if working}
       <button
         class="ml-auto flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
-        <!-- <span class="w-5 mr-2 inline-block">
-            <Icons.Send />
-          </span> -->
         <span class="py-1"> Creating Group </span>
       </button>
     {:else}
       <button
         class="ml-auto flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
-        <!-- <span class="w-5 mr-2 inline-block">
-                <Icons.Send />
-              </span> -->
         <span class="py-1"> Create group </span>
       </button>
     {/if}

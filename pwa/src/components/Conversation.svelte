@@ -165,9 +165,6 @@
         <div
           class="truncate ml-6 md:ml-12 border-gray-600 border-l-4 px-2 text-gray-600"
         >
-          <!-- {#each Writing.summary(conversation_module.followReference(userFocus, response.data)) as span, index}
-      <SpanComponent {span} {index} unfurled={false} />
-      {/each} -->
           {#each conversation_module.followReference(userFocus, memos || []) as block, index}
             <BlockComponent
               {index}

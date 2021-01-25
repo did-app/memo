@@ -33,14 +33,13 @@
 </script>
 
 <p class="my-2 min-w-0 w-full" data-block-index={index} class:truncate>
-  <!-- others will need to render empty paragraph i.e. annotation -->
-  <!-- {JSON.stringify(render(spans))} -->
   {#each render(spans) as { span, offset }, index}
     <SpanComponent
       {span}
       {offset}
       {unfurled}
       placeholder={index === 0 ? placeholder : null}
+      active={true}
     />
   {/each}
 </p>

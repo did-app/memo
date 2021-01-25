@@ -8,21 +8,25 @@
   export let offset: number;
   export let unfurled: boolean;
   export let placeholder: "answer" | "message" | null;
+  export let active: boolean;
 </script>
 
 {#if span.type === "text"}
   <Text text={span.text} {offset} {placeholder} />
 {:else if span.type === "link"}
-  <!-- Need to wrap to get an offset -->
-  {#if unfurled}
-    <span contenteditable="false">
-      <Glance href={span.url} text={span.title} />
-    </span>
+  {#if active}
+    {#if unfurled}
+      <span contenteditable="false">
+        <Glance href={span.url} text={span.title} />
+      </span>
+    {:else}
+      <span
+        class="border-b hover:border-purple-700 whitespace-no-wrap"
+        contenteditable="false">
+        <Link url={span.url} title={span.title} {offset} />
+      </span>
+    {/if}
   {:else}
-    <span
-      class="border-b hover:border-purple-700 whitespace-no-wrap"
-      contenteditable="false">
-      <Link url={span.url} title={span.title} {offset} />
-    </span>
+    <span class="">{span.title || span.url}</span>
   {/if}
 {:else if span.type === "softbreak"}<br />{/if}

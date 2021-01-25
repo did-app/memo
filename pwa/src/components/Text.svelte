@@ -15,6 +15,12 @@
   }
 </script>
 
+{#if text === ""}
+  <span class={placeholder} data-span-offset={printOffset}>{printText}</span>
+{:else}
+  <span class="" data-span-offset={printOffset}>{printText}</span>
+{/if}
+
 <style>
   span::after {
     color: #a6a6a6;
@@ -26,13 +32,3 @@
     content: "Write message ...";
   }
 </style>
-
-{#if text === ''}
-  <span
-    class="whitespace-pre-wrap {placeholder}"
-    data-span-offset={printOffset}>{printText}</span>
-{:else}
-  <span
-    class="whitespace-pre-wrap"
-    data-span-offset={printOffset}>{printText}</span>
-{/if}
