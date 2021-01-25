@@ -101,15 +101,20 @@ CREATE TABLE invitations (
   group_id INT REFERENCES groups(id) NOT NULL,
   identifier_id INT NOT NULL,
   PRIMARY KEY (group_id, identifier_id),
-  FOREIGN KEY (identifier_id) REFERENCES identifiers(id)
+  FOREIGN KEY (identifier_id) REFERENCES identifiers(id),
+  invited_by INT REFERENCES identifiers(id),
+  inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+SELECT diesel_manage_updated_at('invitations');
 
 CREATE TABLE participations (
   identifier_id INT REFERENCES identifiers(id) NOT NULL,
   thread_id INT REFERENCES threads(id) NOT NULL,
   PRIMARY KEY (identifier_id, thread_id),
   acknowledged INT NOT NULL,
-  CHECK (acknowledged > 0),
+  CHECK (acknowledged >= 0),
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

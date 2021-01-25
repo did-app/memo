@@ -1,14 +1,60 @@
 import gleam/dynamic
 import gleam/io
 import gleam/option.{None, Option, Some}
+import gleam/result
 import datetime.{DateTime}
 import gleam/json.{Json}
 import gleam/pgo
+import plum_mail/error
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier, Personal, Shared}
 import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql
 import plum_mail/conversation/group.{Group}
+
+pub fn create_group(name, identifier_id) {
+  group.create_group(name, identifier_id)
+}
+
+pub fn invite_member(group_id, invited_id, inviting_id) {
+  group.invite_member(group_id, invited_id, inviting_id)
+}
+
+pub fn post_memo(thread_id, position, author_id, content) {
+  // The first try is correctly talking to the database.
+  try permission = check_permission(thread_id, author_id)
+  thread.post_memo(thread_id, position, author_id, content)
+}
+
+type Permission {
+  Direct
+  Invited
+}
+
+fn check_permission(thread_id, identifier_id) {
+  let sql =
+    "
+  SELECT 'invited' 
+  FROM invitations
+  JOIN groups ON groups.id = invitations.group_id
+  WHERE groups.thread_id = $1
+  AND invitations.identifier_id = $2
+
+  UNION ALL
+
+  SELECT 'direct'
+  FROM pairs
+  WHERE pairs.thread_id = $1
+  AND pairs.lower_identifier_id = $2
+  OR pairs.upper_identifier_id = $2
+  "
+  let args = [pgo.int(thread_id), pgo.int(identifier_id)]
+  try db_response = run_sql.execute(sql, args, io.debug)
+  case db_response {
+    [_] -> Ok(Nil)
+    [] -> Error(error.Forbidden)
+  }
+}
 
 pub type Participation {
   Participation(thread_id: Int, acknowledged: Int, latest: Option(Memo))
@@ -217,7 +263,7 @@ pub fn all_participating(identifier_id) {
           assert Ok(group_id) = dynamic.int(group_id)
           assert Ok(group_name) = dynamic.element(row, 10)
           assert Ok(group_name) = dynamic.string(group_name)
-          let group = Group(group_id, group_name)
+          let group = Group(group_id, group_name, todo("in eere"))
           GroupConversation(group: group, participation: participation)
         }
         _ -> {

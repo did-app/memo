@@ -10,11 +10,21 @@ pub type Membership {
 }
 
 pub type Group {
-  Group(id: Int, name: String)
+  Group(id: Int, name: String, thread_id: Int)
+}
+
+pub fn from_row(row, offset) {
+  assert Ok(id) = dynamic.element(row, offset + 0)
+  assert Ok(id) = dynamic.int(id)
+  assert Ok(name) = dynamic.element(row, offset + 1)
+  assert Ok(name) = dynamic.string(name)
+  assert Ok(thread_id) = dynamic.element(row, offset + 2)
+  assert Ok(thread_id) = dynamic.int(thread_id)
+  Group(id, name, thread_id)
 }
 
 pub fn to_json(group) {
-  let Group(id, name) = group
+  let Group(id, name, ..) = group
   json.object([
     tuple("type", json.string("group")),
     tuple("id", json.int(id)),
@@ -30,37 +40,29 @@ WITH new_thread AS (
 ), new_group AS (
   INSERT INTO groups (name, thread_id)
   VALUES ($1, (SELECT id FROM new_thread))
-  RETURNING id, name
+  RETURNING *
 ), group_identifier AS (
+  -- This is a no-op when $2 is NULL
   UPDATE identifiers
   SET group_id = (SELECT id FROM new_group)
   WHERE id = $2
   AND group_id IS NULL
-), new_individual AS (
-  INSERT INTO identifiers (email_address)
-  VALUES ($3)
-  ON CONFLICT DO NOTHING
+), new_invitation AS (
+  INSERT INTO invitations(group_id, identifier_id)
+  VALUES ((SELECT id FROM new_group), $3)
   RETURNING *
-), invited AS (
-    SELECT id FROM new_individual
-  UNION ALL
-    SELECT id FROM identifiers 
-    WHERE email_address = $3
+), new_participation AS (
+  INSERT INTO participations(thread_id, identifier_id, acknowledged)
+  VALUES ((SELECT thread_id FROM new_group), $3, 0)
 )
-
-INSERT INTO invitations(group_id, identifier_id)
-VALUES ((SELECT id FROM new_group), (SELECT id FROM invited))
-RETURNING group_id, identifier_id;
+SELECT id, name, thread_id FROM new_group;
 "
 
 // Uses the same SQL by setting the identifier ($2) to null no identifier is affected in the group identifier clause
-pub fn create_group(name, first_member) {
-  let EmailAddress(first_member) = first_member
-
-  let args = [pgo.text(name), pgo.null(), pgo.text(first_member)]
-  try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
-  membership
-  |> Ok
+pub fn create_group(name, identifier_id) {
+  let args = [pgo.text(name), pgo.null(), pgo.int(identifier_id)]
+  try [group] = run_sql.execute(create_group_sql, args, from_row(_, 0))
+  Ok(group)
 }
 
 // Turns an existing personal identifier (checks group_id currently NULL) into a group identifier with a first member.
@@ -89,30 +91,29 @@ fn row_to_membership(row) {
   Membership(group_id, identifier_id)
 }
 
-pub fn add_member(group_id, new_member) {
-  let EmailAddress(new_member) = new_member
-
+pub fn invite_member(group_id, invited_id, inviting_id) {
   let sql =
     "
-    WITH new_individual AS (
-      INSERT INTO identifiers (email_address)
-      VALUES ($2)
-      ON CONFLICT DO NOTHING
+    -- group is a SQL keyword
+    WITH this_group AS (
+      SELECT * 
+      FROM groups 
+      -- This checks the inviting_id has already been invited
+      JOIN invitations AS i ON i.group_id = groups.id AND i.identifier_id = $3
+      WHERE id = $1
+    ), new_invitation AS (
+      INSERT INTO invitations(group_id, identifier_id, invited_by)
+      VALUES ($1, $2, $3)
       RETURNING *
-    ), invited AS (
-        SELECT id FROM new_individual
-      UNION ALL
-        SELECT id FROM identifiers 
-        WHERE email_address = $2
+    ), new_participation AS (
+      INSERT INTO participations(thread_id, identifier_id, acknowledged)
+      VALUES ((SELECT thread_id FROM this_group), $2, 0)
     )
-    INSERT INTO invitations(group_id, identifier_id)
-    VALUES ($1, (SELECT id FROM invited))
-    RETURNING group_id, identifier_id;
+    SELECT id, name, thread_id FROM this_group;
     "
-  let args = [pgo.int(group_id), pgo.text(new_member)]
-  try [membership] = run_sql.execute(sql, args, row_to_membership)
-  membership
-  |> Ok
+  let args = [pgo.int(group_id), pgo.int(invited_id), pgo.int(inviting_id)]
+  try [group] = run_sql.execute(sql, args, from_row(_, 0))
+  Ok(group)
 }
 
 pub fn load_all(identifier_id) {

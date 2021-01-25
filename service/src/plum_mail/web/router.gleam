@@ -220,9 +220,7 @@ pub fn route(
       try name = acl.required(params, "name", acl.as_string)
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
-      assert Ok(Some(identifier)) = identifier.fetch_by_id(identifier_id)
-      assert Ok(membership) =
-        group.create_group(name, identifier.email_address(identifier))
+      assert Ok(membership) = group.create_group(name, identifier_id)
       io.debug(membership)
       no_content()
     }

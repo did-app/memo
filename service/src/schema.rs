@@ -23,6 +23,9 @@ table! {
     invitations (group_id, identifier_id) {
         group_id -> Int4,
         identifier_id -> Int4,
+        invited_by -> Nullable<Int4>,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -85,7 +88,6 @@ table! {
 
 joinable!(identifiers -> groups (group_id));
 joinable!(invitations -> groups (group_id));
-joinable!(invitations -> identifiers (identifier_id));
 joinable!(link_tokens -> identifiers (identifier_id));
 joinable!(memo_notifications -> identifiers (recipient_id));
 joinable!(memos -> identifiers (authored_by));
