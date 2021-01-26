@@ -1,0 +1,4 @@
+[context.beta.environment]
+  ENVIRONMENT = "beta"
+  SNOWPACK_PUBLIC_API_ORIGIN = "https://send-memo-beta.herokuapp.com
+  SNOWPACK_PUBLIC_GLANCE_ORIGIN = "https://glance.sendmemo.app
