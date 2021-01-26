@@ -29,6 +29,7 @@
     content: Block[]
   ) => void;
   export let pullMemos: (
+    identifierId: string,
     conversation: Conversation | { stranger: string }
   ) => Promise<Memo[]>;
 
@@ -64,6 +65,8 @@
   }
 
   function startConversationFactory(contactEmailAddress: string) {
+    console.log("factory", inbox);
+
     return function (content: Block[]) {
       startDirectConversation(
         inbox.identifier.id,
@@ -75,6 +78,7 @@
   }
 </script>
 
+{JSON.stringify(inbox)}
 <div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
   {#if conversation}
     <div class="text-center my-4">
@@ -84,7 +88,7 @@
   {:else}
     {JSON.stringify(conversation)}
   {/if}
-  {#await pullMemos(conversation || { stranger: contactEmailAddress || "I think this should always be present" })}
+  {#await pullMemos(inbox.identifier.id, conversation || { stranger: contactEmailAddress || "I think this should always be present" })}
     <LoadingComponent />
   {:then memos}
     {#if conversation}

@@ -180,8 +180,8 @@ export async function createGroup(groupName: string, invitees: number[]): Call<C
 
 // Thread API endpoints
 
-export async function pullMemos(threadId: string): Call<Memo[]> {
-  const path = "/threads/" + threadId + "/memos"
+export async function pullMemos(identifierId: string, threadId: string): Call<Memo[]> {
+  const path = "/identifiers/" + identifierId + "/threads/" + threadId + "/memos"
   let response: Response<MemoDTO[]> = await get(path);
   return mapData(response, (dto) => { return dto.map(memoFromDTO) })
 }

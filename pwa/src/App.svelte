@@ -67,6 +67,7 @@
   }
 
   async function pullMemos(
+    identifierId: string,
     conversation: Conversation | { stranger: string }
   ): Promise<Memo[]> {
     if ("stranger" in conversation) {
@@ -88,7 +89,10 @@
         return [];
       }
     } else {
-      let response = await API.pullMemos(conversation.participation.threadId);
+      let response = await API.pullMemos(
+        identifierId,
+        conversation.participation.threadId
+      );
       if ("error" in response) {
         throw "TODO, this error needs to be passed up the component tree";
       }
@@ -220,8 +224,9 @@
     let { updated, counter } = Sync.startTask(state, message);
     state = updated;
     router.redirect("/");
+    // NOTE The author id is pulled from the session could be done as arg from role instead
     let response = await API.startDirectConversation(
-      authorId,
+      inboxId,
       emailAddress,
       content
     );
@@ -257,6 +262,7 @@
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
+{JSON.stringify(inbox?.identifier.id)}
 <div class="w-full max-w-3xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}

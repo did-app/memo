@@ -39,30 +39,4 @@ export async function fetchMemos() {
   return []
 }
 
-// export async function postMemo(me: number, contact: Relationship, blocks: Block[], position: number): Call<null> {
-//   let task: Call<Contact>
-//   if (contact.thread) {
-//     let thread: Thread = contact.thread;
-//     task = API.postMemo(thread.id, position, blocks).then(function (response) {
-//       if ('data' in response) {
-//         let latest = response.data
-//         thread = { ...thread, latest, acknowledged: latest.position }
-//         return { data: { identifier: contact.identifier, thread } }
-//       } else {
-//         return response
-//       }
-//     })
-//   } else {
-//     task = API.startDirectConversation(me, contact.identifier.emailAddress, blocks);
-
-//   }
-//   let response = await task
-
-//   if ('data' in response) {
-//     updateContact(response.data)
-//   } else {
-
-//   }
-//   return { data: null }
-// }
 

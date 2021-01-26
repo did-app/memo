@@ -38,8 +38,9 @@ pub fn post_memo(thread_id, position, identifier_id, author_id, content) {
   thread.post_memo(thread_id, position, author_id, content, identifier_id)
 }
 
-pub fn load_memos(thread_id, identifier_id) {
+pub fn load_memos(thread_id, identifier_id, author_id) {
   try _ = check_permission(thread_id, identifier_id)
+  try Nil = check_role(identifier_id, author_id)
   thread.load_memos(thread_id)
 }
 

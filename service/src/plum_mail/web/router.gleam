@@ -68,22 +68,33 @@ fn authentication_token(identifier, request, config) {
 
 fn successful_authentication(identifier) {
   let identifier_id = identifier.id(identifier)
-  assert Ok(conversations) = conversation.all_participating(identifier_id)
-  let conversations_data =
-    json.list(list.map(conversations, conversation.to_json))
-  http.response(200)
-  |> web.set_resp_json(json.object([
-    tuple(
-      "inboxes",
-      json.list([
+  assert Ok(inboxs) = conversation.all_inboxes(identifier_id)
+  let inboxs_data =
+    json.list(list.map(
+      inboxs,
+      fn(inbox) {
+        let tuple(identifier, role, conversations) = inbox
+        let role = case role {
+          None -> json.object([tuple("type", json.string("personal"))])
+          Some(author) ->
+            json.object([
+              tuple("type", json.string("member")),
+              tuple("identifier", identifier.to_json(author)),
+            ])
+        }
+
         json.object([
           tuple("identifier", identifier.to_json(identifier)),
-          tuple("conversations", conversations_data),
-          tuple("role", json.object([tuple("type", json.string("personal"))])),
-        ]),
-      ]),
-    ),
-  ]))
+          tuple(
+            "conversations",
+            json.list(list.map(conversations, conversation.to_json)),
+          ),
+          tuple("role", role),
+        ])
+      },
+    ))
+  http.response(200)
+  |> web.set_resp_json(json.object([tuple("inboxes", inboxs_data)]))
 }
 
 fn no_content() {
@@ -217,11 +228,13 @@ pub fn route(
       |> web.set_resp_json(conversation.to_json(conversation))
       |> Ok
     }
-    ["threads", thread_id, "memos"] -> {
+    // Don't just look up if user is member of group. this allows an individual to talk to group. If ever needed. maybe integrations
+    ["identifiers", identifier_id, "threads", thread_id, "memos"] -> {
+      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try client_state = web.identify_client(request, config)
-      try identifier_id = web.require_authenticated(client_state)
-      try memos = conversation.load_memos(thread_id, identifier_id)
+      try user_id = web.require_authenticated(client_state)
+      try memos = conversation.load_memos(thread_id, identifier_id, user_id)
       let data = json.list(memos)
       http.response(200)
       |> web.set_resp_json(data)

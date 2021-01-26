@@ -23,7 +23,8 @@ pub fn participating_in_a_group_conversation_test() {
   assert Error(error) = conversation.invite_member(group.id, bob_id, eve_id)
   assert Error(Forbidden) =
     conversation.post_memo(thread_id, 1, eve_id, eve_id, json.list([]))
-  assert Error(Forbidden) = conversation.load_memos(thread_id, eve_id)
+  assert Error(Forbidden) = conversation.load_memos(thread_id, eve_id, eve_id)
+  assert Error(Forbidden) = conversation.load_memos(thread_id, bob_id, eve_id)
 
   // assert Ok(_) = conversation.invite_member(group.id, bob_id, alice_id)
   assert Ok(_) =

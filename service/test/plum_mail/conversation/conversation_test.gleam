@@ -46,14 +46,14 @@ pub fn talking_to_a_unknown_identifier_test() {
   let content = json.list([])
 
   assert Ok(_) = conversation.post_memo(thread_id, 2, bob_id, bob_id, content)
-  assert Ok([_, _]) = conversation.load_memos(thread_id, bob_id)
+  assert Ok([_, _]) = conversation.load_memos(thread_id, bob_id, bob_id)
 
   let eve = support.generate_personal_identifier("eve.test")
   let eve_id = identifier.id(eve)
 
   conversation.post_memo(thread_id, 3, eve_id, eve_id, content)
   |> should.equal(Error(Forbidden))
-  conversation.load_memos(thread_id, eve_id)
+  conversation.load_memos(thread_id, eve_id, eve_id)
   |> should.equal(Error(Forbidden))
 }
 
