@@ -1,8 +1,8 @@
 {
   "name": "Memo (beta)",
   "short_name": "Memo (beta)",
-  "theme_color": "#fff",
-  "background_color": "#fff",
+  "theme_color": "#1f2937",
+  "background_color": "#1f2937",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
