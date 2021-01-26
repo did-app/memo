@@ -16,6 +16,7 @@ import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
+import plum_mail/writing/writing
 
 pub fn run() {
   let config = config.from_env()
@@ -24,12 +25,12 @@ pub fn run() {
     // Bit weird to call an email address a topic but it is the analogue for a thread
     "
   WITH participants AS (
-    SELECT lower_identifier_id AS identifier_id, recipient.email_address, lower_identifier_ack AS ack, thread_id, contact.email_address AS topic
+    SELECT lower_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
     JOIN identifiers AS recipient ON lower_identifier_id = recipient.id
     JOIN identifiers AS contact ON upper_identifier_id = contact.id
     UNION ALL
-    SELECT upper_identifier_id AS identifier_id, recipient.email_address, upper_identifier_ack AS ack, thread_id, contact.email_address AS topic
+    SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
         JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
     JOIN identifiers AS contact ON lower_identifier_id = contact.id
@@ -49,7 +50,9 @@ pub fn run() {
     AND notifications.position = memos.position
     AND notifications.recipient_id = participants.identifier_id
   WHERE notifications IS NULL
-  AND memos.position > participants.ack
+  -- TODO fix on new participation also load up groups
+  -- Switch to loading all participations that are behind the thread
+  -- AND memos.position > participants.ack
   AND participants.email_address <> 'peter@plummail.co'
   AND participants.email_address <> 'richard@plummail.co'
   "
@@ -75,7 +78,8 @@ pub fn run() {
 
         assert Ok(topic) = email_address.validate(topic)
         assert Ok(content) = dynamic.element(row, 4)
-        assert Ok(content) = dynamic.typed_list(content, block_from_dynamic)
+        assert Ok(content) =
+          dynamic.typed_list(content, writing.block_from_dynamic)
         assert Ok(position) = dynamic.element(row, 5)
         assert Ok(position) = dynamic.int(position)
 
@@ -93,67 +97,6 @@ pub fn run() {
   |> list.each(dispatch_to_identifier(_, config))
 }
 
-fn block_from_dynamic(raw) {
-  assert Ok(block_type) = dynamic.field(raw, "type")
-  assert Ok(block_type) = dynamic.string(block_type)
-  case block_type {
-    "paragraph" -> {
-      assert Ok(spans) = dynamic.field(raw, "spans")
-      assert Ok(spans) = dynamic.typed_list(spans, span_from_dynamic)
-      Ok(Paragraph(spans))
-    }
-    "annotation" -> {
-      assert Ok(blocks) = dynamic.field(raw, "blocks")
-      assert Ok(blocks) = dynamic.typed_list(blocks, block_from_dynamic)
-      let reference = RangeReference
-      Ok(Annotation(reference, blocks))
-    }
-    "prompt" -> {
-      let reference = RangeReference
-      Ok(Prompt(reference))
-    }
-  }
-}
-
-fn span_from_dynamic(raw) {
-  assert Ok(span_type) = dynamic.field(raw, "type")
-  assert Ok(span_type) = dynamic.string(span_type)
-  case span_type {
-    "text" -> {
-      assert Ok(text) = dynamic.field(raw, "text")
-      assert Ok(text) = dynamic.string(text)
-      Ok(Text(text))
-    }
-    "link" -> {
-      assert Ok(url) = dynamic.field(raw, "url")
-      assert Ok(url) = dynamic.string(url)
-      let title =
-        dynamic.field(raw, "title")
-        |> result.then(dynamic.string)
-        |> option.from_result()
-      Ok(Link(title, url))
-    }
-    "softbreak" -> Ok(Softbreak)
-  }
-}
-
-pub type Reference {
-  SectionReference(note_index: Int, block_index: Int)
-  RangeReference
-}
-
-pub type Span {
-  Text(text: String)
-  Link(title: Option(String), url: String)
-  Softbreak
-}
-
-pub type Block {
-  Paragraph(spans: List(Span))
-  Annotation(reference: Reference, blocks: List(Block))
-  Prompt(reference: Reference)
-}
-
 fn dispatch_to_identifier(record, config) {
   let Config(
     postmark_api_token: postmark_api_token,
@@ -165,7 +108,7 @@ fn dispatch_to_identifier(record, config) {
     recipient_email_address,
     topic,
     thread_id,
-    _content,
+    content,
     position,
   ) = record
   let link = contact_link(client_origin, topic, recipient_id)
@@ -187,6 +130,10 @@ fn dispatch_to_identifier(record, config) {
     "peter@plummail.co" -> "Peter Saxton <peter@plummail.co>"
     _ -> "memo <memo@sendmemo.app>"
   }
+  io.debug(content)
+  let rendered = writing.render(content)
+  io.debug(rendered)
+  todo("throw here")
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
   case response {

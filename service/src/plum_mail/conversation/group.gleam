@@ -42,7 +42,6 @@ pub fn from_row(row, offset, participants) {
 
 pub fn to_json(group) {
   let Group(id, name, participants: participants, ..) = group
-  io.debug(participants)
   json.object([
     tuple("type", json.string("group")),
     tuple("id", json.string(gleam_uuid.to_string(id))),
