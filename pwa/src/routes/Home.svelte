@@ -81,6 +81,12 @@
             {/if}
           </a>
         </li>
+      {:else}
+        <li>
+          <span class="text-center w-full block font-bold mb-3"
+            >No outstanding messages</span
+          >
+        </li>
       {/each}
       <li>
         <hr />

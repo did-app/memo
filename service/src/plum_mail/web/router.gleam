@@ -190,26 +190,18 @@ pub fn route(
       try email_address = acl.required(params, "email_address", acl.as_email)
       assert Ok(content) = dynamic.field(params, dynamic.from("content"))
       try client_state = web.identify_client(request, config)
-      try session = web.require_authenticated(client_state)
+      try author_id = web.require_authenticated(client_state)
       assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert True = session == identifier_id
       let content: Json = dynamic.unsafe_coerce(content)
       try conversation =
-        conversation.start_direct(identifier_id, email_address, content)
+        conversation.start_direct(
+          identifier_id,
+          author_id,
+          email_address,
+          content,
+        )
       http.response(200)
       |> web.set_resp_json(conversation.to_json(conversation))
-      |> Ok
-    }
-    ["identifiers", identifier_id, "conversations"] -> {
-      try client_state = web.identify_client(request, config)
-      try _session = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      // TODO instate this check against groups load permissions
-      // assert True = session == identifier_id
-      try conversations = conversation.all_participating(identifier_id)
-      let data = json.list(list.map(conversations, conversation.to_json))
-      http.response(200)
-      |> web.set_resp_json(data)
       |> Ok
     }
     ["groups", "create"] -> {
@@ -239,6 +231,7 @@ pub fn route(
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try raw = acl.parse_json(request)
       try position = acl.required(raw, "position", acl.as_int)
+      try identifier_id = acl.required(raw, "identifier_id", acl.as_uuid)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
@@ -246,7 +239,13 @@ pub fn route(
       try author_id = web.require_authenticated(client_state)
       // // Needs a participation thing again
       try latest =
-        conversation.post_memo(thread_id, position, author_id, blocks)
+        conversation.post_memo(
+          thread_id,
+          position,
+          identifier_id,
+          author_id,
+          blocks,
+        )
       let data = conversation.memo_to_json(latest)
       http.response(200)
       |> web.set_resp_json(data)

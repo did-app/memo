@@ -86,21 +86,15 @@ pub fn create_group(name, identifier_id) {
 }
 
 // Turns an existing personal identifier (checks group_id currently NULL) into a group identifier with a first member.
-pub fn create_visible_group(maybe_name, identifier_id, first_member) {
-  todo("create a visible")
-  // let EmailAddress(first_member) = first_member
-  // // log in as individual will see unconfirmed memberships and be able to cancel as need be
-  // // So to create a visible group you need to be logged in as the address
-  // // create group, attach profile
-  // // let args = [pgo.nullable(name, pgo.text)]
-  // let args = [
-  //   pgo.nullable(maybe_name, pgo.text),
-  //   run_sql.uuid(identifier_id),
-  //   pgo.text(first_member),
-  // ]
-  // try [membership] = run_sql.execute(create_group_sql, args, row_to_membership)
-  // membership
-  // |> Ok
+pub fn create_visible_group(name, shared_identifier_id, first_member_id) {
+  let args = [
+    pgo.text(name),
+    run_sql.uuid(shared_identifier_id),
+    run_sql.uuid(first_member_id),
+  ]
+  try [group] =
+    run_sql.execute(create_group_sql, args, from_row(_, 0, Some([])))
+  Ok(group)
 }
 
 pub fn invite_member(group_id, invited_id, inviting_id) {
@@ -141,20 +135,3 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
   try [group] = run_sql.execute(sql, args, from_row(_, 0, None))
   Ok(group)
 }
-// pub fn load_all(identifier_id) {
-//   // Might want a view for all threads showing latest message
-//   let sql =
-//     "
-//   WITH latest AS (
-//     SELECT DISTINCT ON(thread_id) * FROM memos
-//     ORDER BY thread_id DESC, inserted_at DESC
-//   )
-//   SELECT name, groups.thread_id, latest.inserted_at, latest.content, latest.position
-//   FROM groups
-//   LEFT JOIN latest ON latest.thread_id = groups.thread_id
-//   JOIN invitations ON invitations.group_id = groups.id
-//   WHERE identifier_id = $1
-//   "
-//   let args = [run_sql.uuid(identifier_id)]
-//   run_sql.execute(sql, args, )
-// }

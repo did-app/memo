@@ -22,11 +22,12 @@ pub fn participating_in_a_group_conversation_test() {
   // Eve can't view the thread or add_members
   assert Error(error) = conversation.invite_member(group.id, bob_id, eve_id)
   assert Error(Forbidden) =
-    conversation.post_memo(thread_id, 1, eve_id, json.list([]))
+    conversation.post_memo(thread_id, 1, eve_id, eve_id, json.list([]))
   assert Error(Forbidden) = conversation.load_memos(thread_id, eve_id)
 
   // assert Ok(_) = conversation.invite_member(group.id, bob_id, alice_id)
-  assert Ok(_) = conversation.post_memo(thread_id, 1, alice_id, json.list([]))
+  assert Ok(_) =
+    conversation.post_memo(thread_id, 1, alice_id, alice_id, json.list([]))
 
   // This memo might helpfully be the same as latest later in the test
   // Alice sees an up to date conversation

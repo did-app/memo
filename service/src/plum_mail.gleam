@@ -1,4 +1,5 @@
 import gleam/dynamic
+import gleam/io
 import gleam/option.{None, Some}
 import gleam/string
 import gleam/pgo
@@ -15,17 +16,14 @@ pub fn find_or_create(email_address) {
   identifier.find_or_create(email_address)
 }
 
-pub fn upgrade_to_shared(identifier_id, name, first_member) {
-  assert Ok(identifier_id) = dynamic.string(identifier_id)
-  assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
+pub fn create_shared_inbox(name, shared_id, member_id) {
   assert Ok(name) = dynamic.string(name)
-  let maybe_name = case string.trim(name) {
-    "" -> None
-    name -> Some(name)
-  }
-  assert Ok(first_member) = dynamic.string(first_member)
-  assert Ok(first_member) = email_address.validate(first_member)
-  group.create_visible_group(maybe_name, identifier_id, first_member)
+  assert Ok(shared_id) = dynamic.string(shared_id)
+  assert Ok(shared_id) = gleam_uuid.from_string(shared_id)
+  assert Ok(member_id) = dynamic.string(member_id)
+  assert Ok(member_id) = gleam_uuid.from_string(member_id)
+
+  group.create_visible_group(name, shared_id, member_id)
 }
 
 pub fn generate_link_token(identifier_id) {

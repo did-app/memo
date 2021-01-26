@@ -18,7 +18,14 @@ pub fn memo_to_json(memo) {
   ])
 }
 
-pub fn post_memo(thread_id, position, author_id, content: json.Json) {
+// The identifier id tracks the participation, the author is attached to the memo
+pub fn post_memo(
+  thread_id,
+  position,
+  author_id,
+  content: json.Json,
+  identifier_id,
+) {
   let sql =
     "
     WITH new_memo AS (
@@ -29,7 +36,7 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
       UPDATE participations
       SET acknowledged = $2
       WHERE thread_id = $1
-      AND identifier_id = $3
+      AND identifier_id = $5
     )
     SELECT content, inserted_at, position 
     FROM new_memo
@@ -39,6 +46,7 @@ pub fn post_memo(thread_id, position, author_id, content: json.Json) {
     pgo.int(position),
     run_sql.uuid(author_id),
     dynamic.unsafe_coerce(dynamic.from(content)),
+    run_sql.uuid(identifier_id),
   ]
   try [memo] =
     run_sql.execute(

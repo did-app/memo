@@ -28,9 +28,14 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
   group.invite_member(group_id, invited_id, inviting_id)
 }
 
-pub fn post_memo(thread_id, position, author_id, content) {
-  try _ = check_permission(thread_id, author_id)
-  thread.post_memo(thread_id, position, author_id, content)
+pub fn post_memo(thread_id, position, identifier_id, author_id, content) {
+  // This check permissions checks that the author_id is a member of the group that the thread belongs to
+  // Not that the thread belongs to a direct pairing where one of the pairings is a group.
+  // check that identifier id has permission for the thread
+  // the check that author has permision for role
+  try _ = check_permission(thread_id, identifier_id)
+  try Nil = check_role(identifier_id, author_id)
+  thread.post_memo(thread_id, position, author_id, content, identifier_id)
 }
 
 pub fn load_memos(thread_id, identifier_id) {
@@ -43,8 +48,8 @@ pub fn memo_to_json(memo) {
 }
 
 type Permission {
-  Direct
-  Invited
+  Direct(identifier_id: UUID)
+  Invited(identifier_id: UUID, author_id: UUID)
 }
 
 fn check_permission(thread_id, identifier_id) {
@@ -120,7 +125,38 @@ pub fn to_json(conversation) {
   }
 }
 
-pub fn start_direct(identifier_id, email_address, content) {
+fn check_role(identifier_id, author_id) {
+  case identifier_id == author_id {
+    True -> {
+      assert Ok(Some(identifier)) = identifier.fetch_by_id(identifier_id)
+      case identifier {
+        Personal(..) -> Ok(Nil)
+        Shared(..) -> Error(todo("error type"))
+      }
+    }
+    False -> {
+      let sql =
+        "
+      SELECT * 
+      FROM invitations 
+      JOIN groups ON groups.id = invitations.group_id
+      JOIN identifiers ON identifiers.group_id = groups.id
+      WHERE identifiers.id = $1
+      AND invitations.identifier_id = $2
+      "
+      let args = [run_sql.uuid(identifier_id), run_sql.uuid(author_id)]
+      try db_result = run_sql.execute(sql, args, fn(x) { x })
+      case db_result {
+        [_] -> Ok(Nil)
+        [] -> Error(error.Forbidden)
+      }
+    }
+  }
+}
+
+pub fn start_direct(identifier_id, author_id, email_address, content) {
+  try Nil = check_role(identifier_id, author_id)
+
   try DirectConversation(contact, participation) =
     new_direct_contact(identifier_id, email_address)
 
@@ -134,18 +170,29 @@ pub fn start_direct(identifier_id, email_address, content) {
 
   try next_position = case greeting {
     Some(greeting) -> {
+      // check that identifier id has permission for the thread
+      // the check that author has permision for role
       assert Ok(_) =
-        thread.post_memo(participation.thread_id, 1, recipient_id, greeting)
+        thread.post_memo(
+          participation.thread_id,
+          1,
+          recipient_id,
+          greeting,
+          recipient_id,
+        )
       Ok(2)
     }
     None -> Ok(1)
   }
+  // check that identifier id has permission for the thread
+  // the check that author has permision for role
   try memo =
     thread.post_memo(
       participation.thread_id,
       next_position,
-      identifier_id,
+      author_id,
       content,
+      author_id,
     )
   DirectConversation(
     contact,
@@ -210,9 +257,40 @@ fn new_direct_contact(identifier_id, email_address) {
   |> Ok
 }
 
+fn all_shared_inboxes(personal_id) {
+  let sql =
+    "
+  SELECT identifiers.id, identifiers.email_address, identifiers.greeting, identifiers.group_id
+  FROM identifiers
+  JOIN groups ON groups.id = identifiers.group_id
+  JOIN invitations ON invitations.group_id = groups.id
+  WHERE invitations.identifier_id = $1
+  "
+  let args = [run_sql.uuid(personal_id)]
+  run_sql.execute(sql, args, identifier.row_to_identifier(_, 0))
+}
+
 // thread_latest
 // Have a view for participants based on participation etc
 // WITH conversations where conversations becomes the view
+// NOTE this needs to be private or check identifier + member
+pub fn all_inboxes(personal_id) {
+  try Some(personal) = identifier.fetch_by_id(personal_id)
+  assert Personal(..) = personal
+  try shared = all_shared_inboxes(personal_id)
+  list.try_map(
+    [personal, ..shared],
+    fn(identifier) {
+      try conversations = all_participating(identifier.id(identifier))
+      let role = case identifier == personal {
+        True -> None
+        False -> Some(personal)
+      }
+      Ok(tuple(identifier, role, conversations))
+    },
+  )
+}
+
 pub fn all_participating(identifier_id) {
   let sql =
     "

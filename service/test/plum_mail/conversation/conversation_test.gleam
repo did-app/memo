@@ -16,7 +16,7 @@ pub fn talking_to_a_unknown_identifier_test() {
 
   let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
   assert Ok(new_conversation) =
-    conversation.start_direct(alice_id, bob_email, memo)
+    conversation.start_direct(alice_id, alice_id, bob_email, memo)
 
   assert Ok([conversation]) = conversation.all_participating(alice_id)
   conversation
@@ -45,13 +45,13 @@ pub fn talking_to_a_unknown_identifier_test() {
   let thread_id = alice_participation.thread_id
   let content = json.list([])
 
-  assert Ok(_) = conversation.post_memo(thread_id, 2, bob_id, content)
+  assert Ok(_) = conversation.post_memo(thread_id, 2, bob_id, bob_id, content)
   assert Ok([_, _]) = conversation.load_memos(thread_id, bob_id)
 
   let eve = support.generate_personal_identifier("eve.test")
   let eve_id = identifier.id(eve)
 
-  conversation.post_memo(thread_id, 3, eve_id, content)
+  conversation.post_memo(thread_id, 3, eve_id, eve_id, content)
   |> should.equal(Error(Forbidden))
   conversation.load_memos(thread_id, eve_id)
   |> should.equal(Error(Forbidden))
@@ -70,7 +70,7 @@ pub fn answering_an_identifier_greeting_test() {
 
   let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
   assert Ok(new_conversation) =
-    conversation.start_direct(alice_id, clive_email, memo)
+    conversation.start_direct(alice_id, alice_id, clive_email, memo)
 
   assert Ok([conversation]) = conversation.all_participating(alice_id)
   conversation
