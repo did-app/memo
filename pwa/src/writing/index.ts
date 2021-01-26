@@ -4,7 +4,7 @@ export { equal as equalPoints } from "./point"
 export type { Range } from "./range"
 export { isCollapsed } from "./range"
 
-export { extractBlocks, summary, lineLength, spanFromOffset, getLine } from "./tree"
+export { extractBlocks, summary, lineLength, spanFromOffset, getLine, elementAtPoint } from "./tree"
 export { parse } from "./parser"
 export { toString } from "./serializer"
 

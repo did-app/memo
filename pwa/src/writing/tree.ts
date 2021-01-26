@@ -126,15 +126,16 @@ export function summary(blocks: Block[]): Span[] {
   return spans
 }
 
-// function followPath(fragment: Block, path: number[]): Block | null {
-//   const [index, ...rest] = path
-//   if (index === undefined) {
-//     return fragment
-//   } else {
-//     let child = 'blocks' in fragment && fragment.blocks[index]
-//     return child ? followPath(child, rest) : null
-//   }
-// }
+export function elementAtPoint(blocks: Block[], point: Point) {
+  try {
+    let line = getLine(blocks, point.path)
+    let [index] = spanFromOffset(line, point.offset)
+    return line[index]
+  } catch (error) {
+    console.warn(error)
+  }
+}
+
 export function extractBlocks(blocks: Block[], range: Range): [Block[], Block[], Block[]] {
   const [start, end] = range_module.edges(range)
   const [tempBlocks, postBlocks] = splitBlocks(blocks, end)

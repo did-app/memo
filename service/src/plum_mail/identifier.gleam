@@ -18,7 +18,7 @@ import plum_mail/run_sql
 // acquaintance contacts
 // relationships is direct or group membership
 // a contact is my view of a connection
-// TODO is inbox a better name for this? it identifies an inbox
+// is inbox a better name for this? it identifies an inbox
 // identifier is Individual or Shared
 // "a single human being as distinct from a group."
 // "of or for a particular person."

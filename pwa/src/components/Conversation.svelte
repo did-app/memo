@@ -138,7 +138,12 @@
         let:blocks
       >
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
-          {JSON.stringify(composerRange)}
+          {#if composerRange}
+            {JSON.stringify(
+              Writing.elementAtPoint(blocks, composerRange.anchor)
+            )}
+          {/if}
+          <!-- {JSON.stringify(composerRange)} -->
           <div class="flex flex-1" />
           <button
             on:click={() => {
