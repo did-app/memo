@@ -35,10 +35,10 @@
 - [x] strangers see any questions in the greeting
 
 ### Set up a team inbox
-- [ ] Backend greate a group with an identifier id
-- [ ] start direct conversation as the shared identity
-- [ ] post a memo in the shared thread
-- [ ] acknowledge should be on the whole team identifier
+- [x] Backend greate a group with an identifier id
+- [x] start direct conversation as the shared identity
+- [x] post a memo in the shared thread
+- [x] acknowledge should be on the whole team identifier
 
 ### Saving draft
 - [ ] Save a draft for a thread.
