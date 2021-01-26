@@ -108,7 +108,7 @@
     let { updated, counter } = Sync.startTask(state, "Acknowledging task");
     state = updated;
     router.redirect("/");
-    let response = await API.acknowledge(threadId, position);
+    let response = await API.acknowledge(inboxId, threadId, position);
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
@@ -176,7 +176,7 @@
     let { updated, counter } = Sync.startTask(state, "Posting memo");
     state = updated;
     router.redirect("/");
-    let response = await API.postMemo(threadId, position, content);
+    let response = await API.postMemo(inboxId, threadId, position, content);
     if ("error" in response) {
       throw "Well this should be handled";
     } else {

@@ -186,15 +186,15 @@ export async function pullMemos(identifierId: string, threadId: string): Call<Me
   return mapData(response, (dto) => { return dto.map(memoFromDTO) })
 }
 
-export async function postMemo(threadId: string, position: number, content: Block[]): Call<Memo> {
-  const path = "/threads/" + threadId + "/post"
+export async function postMemo(identifierId: string, threadId: string, position: number, content: Block[]): Call<Memo> {
+  const path = "/identifiers/" + identifierId + "/threads/" + threadId + "/post"
   const params = { position, content }
   let response: Response<MemoDTO> = await post(path, params);
   return mapData(response, memoFromDTO)
 }
 
-export async function acknowledge(threadId: string, position: number): Call<null> {
-  const path = "/threads/" + threadId + "/acknowledge"
+export async function acknowledge(identifierId: string, threadId: string, position: number): Call<null> {
+  const path = "/identifiers/" + identifierId + "/threads/" + threadId + "/acknowledge"
   const params = { position }
   let response: Response<null> = await post(path, params);
   return response

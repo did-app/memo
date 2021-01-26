@@ -30,7 +30,6 @@ import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal, Shared}
 import plum_mail/web/helpers as web
-import plum_mail/threads/acknowledge
 import plum_mail/email/inbound/postmark
 
 fn token_cookie_settings(request) {
@@ -240,11 +239,11 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
-    ["threads", thread_id, "post"] -> {
+    ["identifiers", identifier_id, "threads", thread_id, "post"] -> {
+      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try raw = acl.parse_json(request)
       try position = acl.required(raw, "position", acl.as_int)
-      try identifier_id = acl.required(raw, "identifier_id", acl.as_uuid)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
@@ -264,13 +263,16 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok
     }
-    ["threads", thread_id, "acknowledge"] -> {
+    ["identifiers", identifier_id, "threads", thread_id, "acknowledge"] -> {
+      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
+      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try raw = acl.parse_json(request)
-      try params = acknowledge.params(raw, thread_id)
+      try position = acl.required(raw, "position", acl.as_int)
       try client_state = web.identify_client(request, config)
-      try identifier_id = web.require_authenticated(client_state)
+      try user_id = web.require_authenticated(client_state)
       // TODO this needs to be on the conversation level
-      try _ = acknowledge.execute(params, identifier_id)
+      try _ =
+        conversation.acknowledge(identifier_id, user_id, thread_id, position)
       no_content()
     }
 

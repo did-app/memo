@@ -95,3 +95,26 @@ pub fn load_memos(thread_id) {
   }
   run_sql.execute(sql, args, mapper)
 }
+
+pub fn acknowledge(identifier_id, thread_id, position) {
+  let sql =
+    "
+    WITH maybe_new AS (
+      INSERT INTO participations (thread_id, identifier_id, acknowledged)
+      VALUES ($1, $2, $3)
+      ON CONFLICT DO NOTHING
+    )
+    UPDATE participations 
+    SET acknowledged = $3
+    WHERE thread_id = $1
+    AND identifier_id = $2
+    RETURNING *
+    "
+  let args = [
+    run_sql.uuid(thread_id),
+    run_sql.uuid(identifier_id),
+    pgo.int(position),
+  ]
+  try [_] = run_sql.execute(sql, args, fn(x) { x })
+  Ok(Nil)
+}
