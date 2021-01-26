@@ -18,6 +18,9 @@
   export let emailAddress: string;
   export let acknowledged: number;
   export let memos: Memo[];
+  export let sharedParams:
+    | { title: string | null; text: string | null; url: string | null }
+    | undefined;
   // Might make sense to pass these in as a slot
   export let acknowledge: (() => void) | undefined;
   export let dispatchMemo: (content: Block[]) => void;
@@ -103,6 +106,19 @@
     references.map(function (reference) {
       composer.addAnnotation(reference);
     });
+    if (sharedParams) {
+      composer.addBlock({
+        type: "paragraph",
+        spans: [
+          {
+            type: "link",
+            title: sharedParams.title || undefined,
+            // NOTE BBC sets the url as the text share parameter.
+            url: sharedParams.url || sharedParams.text || "TODO",
+          },
+        ],
+      });
+    }
   });
 
   function quoteInReply() {

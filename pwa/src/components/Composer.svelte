@@ -39,6 +39,21 @@
     ];
   }
 
+  export function addBlock(block: Block) {
+    let lastBlock = blocks[blocks.length - 1];
+    let before: Block[];
+    if (
+      lastBlock &&
+      "spans" in lastBlock &&
+      Writing.lineLength(lastBlock.spans) === 0
+    ) {
+      before = blocks.slice(0, -1);
+    } else {
+      before = blocks;
+    }
+    blocks = [...before, block];
+  }
+
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];
 

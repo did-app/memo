@@ -14,9 +14,17 @@
 
   let route: string;
   let params: { emailAddress: string } | { groupId: string } | undefined;
+  let sharedParams:
+    | { title: string | null; text: string | null; url: string | null }
+    | undefined;
   router("/", (_) => {
     route = "home";
   });
+  router("/share", (_) => {
+    sharedParams = readShareParams();
+    router.replace("/");
+  });
+
   router("/groups/new", (context) => {
     route = "new_group";
     params = undefined;
@@ -41,6 +49,10 @@
   let inbox: Inbox | null;
   let conversation: Conversation | null;
   let state = Sync.initial();
+  let installPrompt: () => Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }> | null;
 
   $: inbox = Sync.selectedInbox(state);
   $: conversation = inbox && Sync.selectedConversation(inbox, params);
@@ -60,10 +72,8 @@
     } else {
       return state;
     }
-    console.log(state);
 
-    let installPrompt = await Sync.startInstall(window);
-    console.log(installPrompt);
+    installPrompt = await Sync.startInstall(window);
   }
 
   async function pullMemos(
@@ -259,6 +269,17 @@
       });
     }
   }
+  function readShareParams() {
+    const parsedUrl = new URL(window.location.toString());
+
+    // searchParams.get() will properly handle decoding the values.
+    let title = parsedUrl.searchParams.get("title");
+    let text = parsedUrl.searchParams.get("text");
+    let url = parsedUrl.searchParams.get("url");
+    if (title || text || url) {
+      return { title, text, url };
+    }
+  }
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
@@ -285,6 +306,32 @@
       </article>
     {/if}
   {/each}
+  {#if installPrompt}
+    <article
+      class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+    >
+      <h2 class="font-bold">Web-app available to install</h2>
+      <p>
+        Install Memo's web-app on your computer, tablet or smartphone for faster
+        access.
+      </p>
+      <button
+        on:click={installPrompt}
+        class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white">
+        <span class="py-1"> Install </span>
+      </button>
+    </article>
+  {/if}
+  {#if sharedParams}
+    <article
+      class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+    >
+      <h2 class="font-bold">Select a conversation to share the following</h2>
+      <p>
+        {sharedParams.title || sharedParams.text}
+      </p>
+    </article>
+  {/if}
 </div>
 {#if route === "home"}
   {#if inbox}
@@ -302,6 +349,7 @@
     {:else}
       <Contact
         {conversation}
+        {sharedParams}
         contactEmailAddress={"emailAddress" in params && params.emailAddress}
         {inbox}
         {pullMemos}

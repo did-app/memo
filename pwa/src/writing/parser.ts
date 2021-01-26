@@ -37,7 +37,6 @@ export function parse(draft: string): null | Block[] {
   if (draft.length === 0) {
     return null
   }
-  // TODO remove any
   const { doc, node } = draft.split(/\n/).reduce(function ({ doc, node, offset }: any, line) {
     if (line.trim() == "") {
       // close node

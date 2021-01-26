@@ -10,6 +10,9 @@
   // undefined if a group
   export let contactEmailAddress: string | false;
   export let inbox: Inbox;
+  export let sharedParams:
+    | { title: string | null; text: string | null; url: string | null }
+    | undefined;
 
   export let acknowledge: (
     inboxId: string,
@@ -78,16 +81,13 @@
   }
 </script>
 
-{JSON.stringify(inbox)}
 <div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
   {#if conversation}
     <div class="text-center my-4">
       <h1 class="text-2xl">{subject(conversation.contact)[0]}</h1>
       <h2 class="text-gray-500">{subject(conversation.contact)[1]}</h2>
     </div>
-  {:else}
-    {JSON.stringify(conversation)}
-  {/if}
+  {:else}{/if}
   {#await pullMemos(inbox.identifier.id, conversation || { stranger: contactEmailAddress || "I think this should always be present" })}
     <LoadingComponent />
   {:then memos}
@@ -96,6 +96,7 @@
         emailAddress={inbox.identifier.emailAddress}
         acknowledged={conversation.participation.acknowledged}
         {memos}
+        {sharedParams}
         acknowledge={acknowledgeFactory(conversation)}
         dispatchMemo={postMemoFactory(conversation)}
       />
@@ -104,6 +105,7 @@
         emailAddress={inbox.identifier.emailAddress}
         acknowledged={0}
         {memos}
+        {sharedParams}
         acknowledge={undefined}
         dispatchMemo={startConversationFactory(
           contactEmailAddress ||
