@@ -192,7 +192,7 @@ pub fn start_direct(identifier_id, author_id, email_address, content) {
       next_position,
       author_id,
       content,
-      author_id,
+      identifier_id,
     )
   DirectConversation(
     contact,

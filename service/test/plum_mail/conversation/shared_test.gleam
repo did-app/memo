@@ -40,6 +40,4 @@ pub fn direct_conversation_from_shared_inbox_test() {
   |> should.equal(Some(member))
   shared_inbox.2
   |> should.equal([new_conversation])
-
-  todo("direct")
 }
