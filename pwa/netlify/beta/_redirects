@@ -1,0 +1,2 @@
+/api/*  https://send-memo-beta.herokuapp.com/:splat 200
+/*   /index.html   200
