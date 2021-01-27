@@ -140,11 +140,11 @@
         placeholder="Email address"
       />
       <button
-        class="px-6 py-2 border bg-gray-400 hover:bg-gray-800 text-white rounded"
+        class="px-6 py-2 border bg-gray-800 hover:bg-gray-600 text-white rounded"
         type="submit">Add Contact</button
       >
     </form>
-    <a class="px-6 py-2 border bg-gray-400 hover:bg-gray-800 text-white rounded" href="/groups/new">
+    <a class="px-6 py-2 border bg-gray-800 hover:bg-gray-600 text-white rounded" href="/groups/new">
       Create Group
     </a>
   </main>
