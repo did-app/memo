@@ -18,6 +18,7 @@
   export let emailAddress: string;
   export let acknowledged: number;
   export let memos: Memo[];
+  export let reply: boolean;
   export let sharedParams:
     | { title: string | null; text: string | null; url: string | null }
     | undefined;
@@ -50,10 +51,6 @@
       false
     );
   });
-
-  // acknowledge not an option if no thread
-  // let reply: boolean = threadId === undefined;
-  let reply: boolean = false;
 
   let root: HTMLElement;
 
