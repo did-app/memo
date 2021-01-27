@@ -132,17 +132,20 @@
         </li>
       {/each}
     </ol>
-    <form on:submit|preventDefault={findContact}>
+    <form on:submit|preventDefault={findContact} class="mb-8">
       <input
         class="border border-gray-400 focus:border-2 focus:border-gray-800 mt-8 p-2 rounded w-3/6"
         type="email"
         bind:value={contactEmailAddress}
-        placeholder="Search Contacts"
+        placeholder="Email address"
       />
       <button
         class="px-6 py-2 border bg-gray-400 hover:bg-gray-800 text-white rounded"
-        type="submit">Search</button
+        type="submit">Add Contact</button
       >
     </form>
+    <a class="px-6 py-2 border bg-gray-400 hover:bg-gray-800 text-white rounded" href="/groups/new">
+      Create Group
+    </a>
   </main>
 {/if}
