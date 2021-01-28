@@ -115,7 +115,11 @@ pub fn route(
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> http.set_resp_cookie("authentication", token, token_cookie_settings(request))
+      |> http.set_resp_cookie(
+        "authentication",
+        token,
+        token_cookie_settings(request),
+      )
       |> Ok
     }
     // Note cookies wont get set on the ajax auth step
@@ -125,7 +129,11 @@ pub fn route(
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.set_resp_cookie("authentication", token, token_cookie_settings(request))
+      |> http.set_resp_cookie(
+        "authentication",
+        token,
+        token_cookie_settings(request),
+      )
       |> Ok
     }
     ["authenticate", "code"] -> {
@@ -134,7 +142,11 @@ pub fn route(
       try identifier = authenticate_by_code.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> http.set_resp_cookie("authentication", token, token_cookie_settings(request))
+      |> http.set_resp_cookie(
+        "authentication",
+        token,
+        token_cookie_settings(request),
+      )
       |> Ok
     }
     ["authenticate", "session"] -> {
@@ -161,7 +173,10 @@ pub fn route(
     }
     ["sign_out"] ->
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.expire_resp_cookie("authentication", token_cookie_settings(request))
+      |> http.expire_resp_cookie(
+        "authentication",
+        token_cookie_settings(request),
+      )
       |> Ok
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"

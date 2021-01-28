@@ -1,5 +1,6 @@
 import gleam/dynamic
 import gleam/io
+import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
 import gleam/pgo
@@ -24,6 +25,36 @@ pub fn create_shared_inbox(name, shared_id, member_id) {
   assert Ok(member_id) = gleam_uuid.from_string(member_id)
 
   group.create_visible_group(name, shared_id, member_id)
+}
+
+pub fn quick_team(name, email_address, members) {
+  assert Ok(name) = dynamic.string(name)
+  assert Ok(email_address) = dynamic.string(email_address)
+  assert Ok(email_address) = email_address.validate(email_address)
+
+  assert Ok([first, ..rest]) = dynamic.typed_list(members, dynamic.string)
+
+  assert Ok(shared) = identifier.find_or_create(email_address)
+  assert identifier.Personal(id: shared_id, ..) = shared
+
+  assert Ok(first) = email_address.validate(first)
+  assert Ok(first) = identifier.find_or_create(first)
+  assert Ok(group.Group(id: group_id, ..)) =
+    group.create_visible_group(name, shared_id, identifier.id(first))
+  list.each(
+    rest,
+    fn(member) {
+      assert Ok(member) = email_address.validate(member)
+      assert Ok(member) = identifier.find_or_create(member)
+      assert Ok(_) =
+        group.invite_member(
+          group_id,
+          identifier.id(member),
+          identifier.id(first),
+        )
+      Nil
+    },
+  )
 }
 
 pub fn generate_link_token(identifier_id) {
