@@ -24,12 +24,12 @@ pub fn run() {
     // Bit weird to call an email address a topic but it is the analogue for a thread
     "
   WITH participants AS (
-    SELECT lower_identifier_id AS identifier_id, recipient.email_address, lower_identifier_ack AS ack, thread_id, contact.email_address AS topic
+    SELECT lower_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
     JOIN identifiers AS recipient ON lower_identifier_id = recipient.id
     JOIN identifiers AS contact ON upper_identifier_id = contact.id
     UNION ALL
-    SELECT upper_identifier_id AS identifier_id, recipient.email_address, upper_identifier_ack AS ack, thread_id, contact.email_address AS topic
+    SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
         JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
     JOIN identifiers AS contact ON lower_identifier_id = contact.id
@@ -49,7 +49,6 @@ pub fn run() {
     AND notifications.position = memos.position
     AND notifications.recipient_id = participants.identifier_id
   WHERE notifications IS NULL
-  AND memos.position > participants.ack
   AND participants.email_address <> 'peter@sendmemo.app'
   AND participants.email_address <> 'richard@sendmemo.app'
   "
