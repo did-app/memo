@@ -20,10 +20,10 @@
 //     \"Name\": \"Postmarkapp Support\",
 //     \"MailboxHash\": \"\"
 //   },
-//   \"To\": \"\\\"Peter\\\" <peter@plummail.co>\",
+//   \"To\": \"\\\"Peter\\\" <peter@sendmemo.app>\",
 //   \"ToFull\": [
 //     {
-//       \"Email\": \"peter@plummail.co\",
+//       \"Email\": \"peter@sendmemo.app\",
 //       \"Name\": \"Peter\",
 //       \"MailboxHash\": \"\"
 //     }
@@ -54,12 +54,12 @@
 //     \"Name\": \"Postmarkapp Support\",
 //     \"MailboxHash\": \"\"
 //   },
-//   \"To\": \"\\\"Peter\\\" <peter@plummail.co>\",
+//   \"To\": \"\\\"Peter\\\" <peter@sendmemo.app>\",
 //   \"ToFull\": [
 //     {
 //       \"Email\": \"c+":utf8,
 //       int.to_string(conversation.id):utf8,
-//       "@reply.plummail.co\",
+//       "@reply.sendmemo.app\",
 //       \"Name\": \"\",
 //       \"MailboxHash\": \"":utf8,
 //       int.to_string(conversation.id):utf8,

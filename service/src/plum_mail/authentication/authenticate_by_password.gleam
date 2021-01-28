@@ -30,14 +30,14 @@ pub fn run(params) {
   // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
   let Params(email_address, password) = params
   assert Ok(email_address) = case email_address.value {
-    "peter@plummail.co" -> {
+    "peter@sendmemo.app" -> {
       let True = password == "onion"
-      assert Ok(email_address) = email_address.validate("peter@plummail.co")
+      assert Ok(email_address) = email_address.validate("peter@sendmemo.app")
       Ok(email_address)
     }
-    "richard@plummail.co" -> {
+    "richard@sendmemo.app" -> {
       let True = password == "sprout"
-      assert Ok(email_address) = email_address.validate("richard@plummail.co")
+      assert Ok(email_address) = email_address.validate("richard@sendmemo.app")
       Ok(email_address)
     }
   }

@@ -50,8 +50,8 @@ pub fn run() {
     AND notifications.recipient_id = participants.identifier_id
   WHERE notifications IS NULL
   AND memos.position > participants.ack
-  AND participants.email_address <> 'peter@plummail.co'
-  AND participants.email_address <> 'richard@plummail.co'
+  AND participants.email_address <> 'peter@sendmemo.app'
+  AND participants.email_address <> 'richard@sendmemo.app'
   "
   assert Ok(deliveries) =
     run_sql.execute(
@@ -183,8 +183,8 @@ fn dispatch_to_identifier(record, config) {
   let subject = string.concat([topic.value, " sent you a memo"])
   let to = recipient_email_address.value
   let from = case topic.value {
-    "richard@plummail.co" -> "Richard Shepherd <richard@plummail.co>"
-    "peter@plummail.co" -> "Peter Saxton <peter@plummail.co>"
+    "richard@sendmemo.app" -> "Richard Shepherd <richard@sendmemo.app>"
+    "peter@sendmemo.app" -> "Peter Saxton <peter@sendmemo.app>"
     _ -> "memo <memo@sendmemo.app>"
   }
   let response =

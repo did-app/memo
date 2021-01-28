@@ -72,7 +72,7 @@ export function url(contact: Group | Identifier): string {
 
 export function emailAddressToPath(emailAddress: string) {
   let [username, domain] = emailAddress.split("@");
-  if (domain === "plummail.co") {
+  if (domain === "sendmemo.app") {
     return "/" + username;
   } else {
     return "/" + domain + "/" + username;

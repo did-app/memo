@@ -37,7 +37,7 @@
   });
   router("/:handle", (context) => {
     route = "contact";
-    let emailAddress = context.params.handle + "@plummail.co";
+    let emailAddress = context.params.handle + "@sendmemo.app";
     params = { emailAddress };
   });
   router("/:domain/:username", (context) => {
@@ -317,7 +317,8 @@
       </p>
       <button
         on:click={installPrompt}
-        class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white">
+        class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white"
+      >
         <span class="py-1"> Install </span>
       </button>
     </article>
