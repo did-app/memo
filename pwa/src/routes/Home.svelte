@@ -48,7 +48,7 @@
       {#each outstanding(inbox.conversations).reverse() as { contact, participation }}
         <li>
           <a
-            class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:border-gray-400 hover:border-gray-400 focus:shadow-xl hover:shadow-xl"
+            class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none border-gray-800 focus:border-gray-800 hover:border-green-500 focus:shadow-xl hover:shadow-xl"
             href={conversation_module.url(contact) +
               "#" +
               participation.acknowledged}>
