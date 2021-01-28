@@ -76,7 +76,7 @@ fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
     _ -> Error(Nil)
   }
   let cookies = http.get_req_cookies(request)
-  case list.key_find(cookies, "token") {
+  case list.key_find(cookies, "authentication") {
     Ok(token) -> {
       try data = signed_message.decode(token, secret)
       assert Ok(term) = beam.binary_to_term(data)
