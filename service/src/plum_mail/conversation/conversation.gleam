@@ -329,7 +329,9 @@ pub fn all_participating(identifier_id) {
   ), my_groups AS (
     SELECT groups.* FROM groups
     JOIN invitations ON invitations.group_id = groups.id
+    LEFT JOIN identifiers ON identifiers.group_id = groups.id
     WHERE identifier_id = $1
+    AND identifiers.id IS NULL
   ), my_conversations AS (
     SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, NULL as name, NULL as participants
     FROM my_contacts
