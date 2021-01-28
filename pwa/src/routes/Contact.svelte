@@ -99,6 +99,7 @@
         {sharedParams}
         acknowledge={acknowledgeFactory(conversation)}
         dispatchMemo={postMemoFactory(conversation)}
+        reply={false}
       />
     {:else}
       <ConversationComponent
@@ -111,6 +112,7 @@
           contactEmailAddress ||
             "NOTE SHOULD only start conversation when contact email address"
         )}
+        reply={true}                     
       />
     {/if}
   {/await}
