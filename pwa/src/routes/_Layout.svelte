@@ -53,13 +53,13 @@
         </svg>
         memo
       </a>
-      <select
+      <select class="bg-transparent px-2 text-gray-800 outline-none"
         bind:value={inboxSelection}
         on:change={() => router.redirect("/")}
       >
         {#each emailAddresses(inboxes) as emailAddress, index}
-          <option value={index}>
-            {emailAddress}
+          <option style="background:#F9F5F1;" value={index}>
+              {emailAddress}         
           </option>
         {/each}
       </select>
