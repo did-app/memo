@@ -1,4 +1,5 @@
 <script lang="typescript">
+  import router from "page";
   import type { Inbox } from "../sync";
 
   const API_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
@@ -28,7 +29,8 @@
           y="0px"
           viewBox="0 0 301.4 356.4"
           enable-background="new 0 0 301.4 356.4"
-          xml:space="preserve">
+          xml:space="preserve"
+        >
           <g>
             <g>
               <path
@@ -51,7 +53,10 @@
         </svg>
         memo
       </a>
-      <select bind:value={inboxSelection}>
+      <select
+        bind:value={inboxSelection}
+        on:change={() => router.redirect("/")}
+      >
         {#each emailAddresses(inboxes) as emailAddress, index}
           <option value={index}>
             {emailAddress}
@@ -65,7 +70,8 @@
         <a
           target="_self"
           class="ml-auto ml-2 text-xs"
-          href="{API_ORIGIN}/sign_out">
+          href="{API_ORIGIN}/sign_out"
+        >
           <svg
             class="mx-auto mt-2 w-4"
             enable-background="new 0 0 24 24"
