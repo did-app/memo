@@ -85,7 +85,7 @@ You can open the terminal where you are running the backend "service" and copy t
 This app uses the container stack.
 
 ```
-heroku stack:set -a plum-mail container
+heroku stack:set -a send-memo container
 ```
 
 ## Naming

@@ -31,12 +31,12 @@ pub fn run(params) {
   let Params(email_address, password) = params
   assert Ok(email_address) = case email_address.value {
     "peter@sendmemo.app" -> {
-      let True = password == "onion"
+      let True = password == "OnionLightningSea"
       assert Ok(email_address) = email_address.validate("peter@sendmemo.app")
       Ok(email_address)
     }
     "richard@sendmemo.app" -> {
-      let True = password == "sprout"
+      let True = password == "SproutGlitterWednesday"
       assert Ok(email_address) = email_address.validate("richard@sendmemo.app")
       Ok(email_address)
     }

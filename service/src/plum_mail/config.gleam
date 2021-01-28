@@ -4,6 +4,7 @@ import gleam/os
 pub type Config {
   Config(
     origin: String,
+    // Needs to be a single origin otherwise a lot of tracking for dispatch notification etc
     client_origin: String,
     postmark_api_token: String,
     secret: BitString,
