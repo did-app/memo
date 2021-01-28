@@ -1,4 +1,4 @@
-CREATE extension "uuid-ossp";
+CREATE extension IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE threads (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),

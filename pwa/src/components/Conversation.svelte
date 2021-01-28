@@ -154,18 +154,18 @@
         let:blocks
       >
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
-          {#if composerRange}
+          <!-- {#if composerRange}
             {JSON.stringify(
               Writing.elementAtPoint(blocks, composerRange.anchor)
             )}
-          {/if}
-          <!-- {JSON.stringify(composerRange)} -->
+          {/if} -->
           <div class="flex flex-1" />
           <button
             on:click={() => {
               reply = false;
             }}
-            class="flex items-center rounded px-2 inline-block border-gray-500 border-2">
+            class="flex items-center rounded px-2 inline-block border-gray-500 border-2"
+          >
             <span class="w-5 mr-2 inline-block">
               <Icons.ReplyAll />
             </span>
@@ -173,7 +173,8 @@
           </button>
           <button
             on:click={() => dispatchMemo(blocks)}
-            class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
+            class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2"
+          >
             <span class="w-5 mr-2 inline-block">
               <Icons.Send />
             </span>
@@ -205,12 +206,14 @@
             on:click={() => {
               userFocus = null;
             }}
-            class="flex items-center rounded px-2 inline-block border-gray-500 border-2">
+            class="flex items-center rounded px-2 inline-block border-gray-500 border-2"
+          >
             <span class="py-1">Clear</span>
           </button>
           <button
             on:click={quoteInReply}
-            class="flex items-center bg-gray-800 text-white ml-2 rounded px-2">
+            class="flex items-center bg-gray-800 text-white ml-2 rounded px-2"
+          >
             <span class="w-5 mr-2 inline-block">
               <Icons.Quote />
             </span>
@@ -220,7 +223,8 @@
           {#if acknowledge}
             <button
               on:click={acknowledge}
-              class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2">
+              class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2"
+            >
               <span class="w-5 mr-2 inline-block">
                 <Icons.Check />
               </span>
@@ -232,7 +236,8 @@
             on:click={() => {
               reply = true;
             }}
-            class="flex items-center bg-gray-800 text-white rounded px-2 ml-2">
+            class="flex items-center bg-gray-800 text-white rounded px-2 ml-2"
+          >
             <span class="w-5 mr-2 inline-block">
               <Icons.ReplyAll />
             </span>

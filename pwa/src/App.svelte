@@ -283,7 +283,6 @@
 </script>
 
 <Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
-{JSON.stringify(inbox?.identifier.id)}
 <div class="w-full max-w-3xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
