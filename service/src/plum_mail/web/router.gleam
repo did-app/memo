@@ -197,14 +197,12 @@ pub fn route(
     }
     ["identifiers", identifier_id, "greeting"] -> {
       try client_state = web.identify_client(request, config)
-      try session = web.require_authenticated(client_state)
-      // TODO act on behalf of the group
+      try user_id = web.require_authenticated(client_state)
       assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert True = session == identifier_id
       try raw = acl.parse_json(request)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
-      let _ = identifier.update_greeting(identifier_id, blocks)
+      let _ = conversation.update_greeting(identifier_id, user_id, blocks)
       no_content()
     }
     // connect | start_direct
