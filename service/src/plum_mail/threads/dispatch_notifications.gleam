@@ -28,12 +28,20 @@ pub fn run() {
     FROM pairs
     JOIN identifiers AS recipient ON lower_identifier_id = recipient.id
     JOIN identifiers AS contact ON upper_identifier_id = contact.id
+    
     UNION ALL
+    
     SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
         JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
     JOIN identifiers AS contact ON lower_identifier_id = contact.id
+    
+    UNION ALL
 
+    SELECT invitations.identifier_id, recipient.email_address, groups.thread_id, groups.name AS topic
+    FROM invitations
+    JOIN identifiers AS recipient ON recipient.id = invitations.identifier_id
+    JOIN groups ON groups.id = invitations.group_id 
   )
   SELECT 
     participants.identifier_id, 
@@ -51,6 +59,7 @@ pub fn run() {
   WHERE notifications IS NULL
   AND participants.email_address <> 'peter@sendmemo.app'
   AND participants.email_address <> 'richard@sendmemo.app'
+  AND participants.identifier_id <> memos.authored_by
   "
   assert Ok(deliveries) =
     run_sql.execute(
