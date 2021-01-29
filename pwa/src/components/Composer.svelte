@@ -5,8 +5,6 @@
   import * as Writing from "../writing";
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
-  import { writable } from "svelte/store";
-  import { update_keyed_each } from "svelte/internal";
 
   export let previous: Memo[];
   export let blocks: Block[] = [];
@@ -24,10 +22,6 @@
   let composer: HTMLElement;
   let composition: { updated: Block[]; cursor: Point } | null = null;
   const supported = Writing.isBeforeInputEventAvailable();
-
-  window.setBlocks = function (b: Block[]) {
-    blocks = b;
-  };
 
   function handleInput(event: InputEvent) {
     // console.log(event);
@@ -101,8 +95,6 @@
     }
   }
   let isComposing = false;
-  // $: console.log(blocks);
-  $: window.blocks = blocks;
   let doubleInput = false;
 </script>
 
@@ -117,6 +109,7 @@
       // Prevent default on before input stops this mostly
       // I think the extra bit comes in after this step
       // console.log("input always happens", blocks);
+      // https://svelte.dev/docs#key
       if (doubleInput) {
         const cursor = composition?.cursor;
         // Sometimes an input event is called twice.
