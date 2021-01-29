@@ -110,6 +110,7 @@
       // I think the extra bit comes in after this step
       // console.log("input always happens", blocks);
       // https://svelte.dev/docs#key
+      // you can do so, wait for a tick, then change the key to something (could be a timestamp even)
       if (doubleInput) {
         const cursor = composition?.cursor;
         // Sometimes an input event is called twice.
