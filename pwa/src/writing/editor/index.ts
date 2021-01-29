@@ -31,6 +31,20 @@ export function handleInput(blocks: Block[], range: Range, event: Event): [Block
     return insertParagraph(blocks, range)
   } else if (inputType === "insertLineBreak") {
     return insertParagraph(blocks, range)
+  } else if (inputType === "insertCompositionText") {
+    // This is rather simplistic, assumes composition text in format "stuff\r"
+    let text = data || ""
+    let newLine = false
+    if (text.slice(-1) === "\n") {
+      newLine = true
+      text = text.slice(0, -1)
+    }
+    let [updated, cursor] = insertText(blocks, range, text)
+    if (newLine) {
+      return insertParagraph(updated, { anchor: cursor, focus: cursor })
+    } else {
+      return [updated, cursor]
+    }
   } else if (inputType === "deleteContent") {
     return insertText(blocks, range, "")
   } else if (inputType === "deleteContentBackward") {

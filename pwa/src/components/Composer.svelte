@@ -1,10 +1,12 @@
 <script lang="typescript">
   import { tick } from "svelte";
   import type { Reference, Memo } from "../conversation";
-  import type { Block, InputEvent, Range } from "../writing";
+  import type { Block, InputEvent, Range, Point } from "../writing";
   import * as Writing from "../writing";
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
+  import { writable } from "svelte/store";
+  import { update_keyed_each } from "svelte/internal";
 
   export let previous: Memo[];
   export let blocks: Block[] = [];
@@ -20,38 +22,45 @@
   }
 
   let composer: HTMLElement;
+  let composition: { updated: Block[]; cursor: Point } | null = null;
   const supported = Writing.isBeforeInputEventAvailable();
 
+  window.setBlocks = function (b: Block[]) {
+    blocks = b;
+  };
+
   function handleInput(event: InputEvent) {
-    const domRange = event.getTargetRanges()[0];
+    // console.log(event);
+    doubleInput = false;
 
-    let range: Range;
-    if (domRange !== undefined) {
+    if (event.isComposing === false) {
+      const domRange = event.getTargetRanges()[0];
+      if (domRange === undefined) {
+        throw "Should have a target range";
+      }
       const result = Writing.rangeFromDom(domRange);
-
       if (result === null) {
-        throw "There should always be a range";
+        throw "There should always be a range for a domRange";
       }
-      range = result[0];
+      const range = result[0];
+      const [updated, cursor] = Writing.handleInput(blocks, range, event);
+      blocks = updated;
+      tick().then(function () {
+        Writing.placeCursor(composer, updated, cursor);
+      });
     } else {
-      // domRange SHOULD NOT be undefined however on chrome for android this often seems to be the case.
-      // This fix doesn't tackle moving the range for collapsed delete events
-      if (selected === null) {
-        // We still to this point on chrome on android when we press Space or new line
-        if (isComposing) {
-          return null;
-        }
-        throw "How did we get input";
-      } else {
-        range = selected;
+      const domRange = window.getSelection()?.getRangeAt(0);
+      if (domRange === undefined) {
+        throw "Should have a current selection";
       }
+      const result = Writing.rangeFromDom(domRange);
+      if (result === null) {
+        throw "There should always be a range for composition event";
+      }
+      const range = result[0];
+      const [updated, cursor] = Writing.handleInput(blocks, range, event);
+      composition = { updated, cursor };
     }
-    const [updated, cursor] = Writing.handleInput(blocks, range, event);
-
-    blocks = updated;
-    tick().then(function () {
-      Writing.placeCursor(composer, updated, cursor);
-    });
   }
 
   let dragging = false;
@@ -92,6 +101,9 @@
     }
   }
   let isComposing = false;
+  // $: console.log(blocks);
+  $: window.blocks = blocks;
+  let doubleInput = false;
 </script>
 
 {#if supported}
@@ -100,10 +112,34 @@
     class="outline-none overflow-y-auto"
     style="max-height: 60vh; caret-color: #6ab869;"
     contenteditable
-    on:input={() => {
+    on:input={(event) => {
       // This shouldn't be firing, it might on android
       // Prevent default on before input stops this mostly
       // I think the extra bit comes in after this step
+      // console.log("input always happens", blocks);
+      if (doubleInput) {
+        const cursor = composition?.cursor;
+        // Sometimes an input event is called twice.
+        // This is tracked with the double Input variable
+        // blocks are not updated at this point and TICK, doesn't seem to help
+        setTimeout(function () {
+          let tmp = blocks;
+          blocks = [];
+          // flash the blocks
+          tick().then(function () {
+            blocks = tmp;
+            tick().then(function () {
+              if (cursor) {
+                Writing.placeCursor(composer, tmp, cursor);
+              } else {
+                throw "By this point we should definetly have a cursor";
+              }
+            });
+          });
+        }, 0);
+      } else {
+        doubleInput = true;
+      }
       return false;
     }}
     disabled
@@ -113,6 +149,18 @@
     }}
     on:compositionend={() => {
       isComposing = false;
+
+      if (composition) {
+        let { updated, cursor } = composition;
+        blocks = updated;
+        composition = null;
+        tick().then(() => {
+          blocks = blocks;
+          Writing.placeCursor(composer, updated, cursor);
+        });
+      } else {
+        console.warn("composition end");
+      }
     }}
     on:beforeinput|preventDefault={handleInput}
   >
@@ -139,7 +187,7 @@
           {block}
           {index}
           peers={previous}
-          placeholder={index === 0 ? "message" : null}
+          placeholder={blocks.length === 1 && !isComposing ? "message" : null}
           active={true}
         />
       </div>
@@ -155,7 +203,7 @@
           block={{ type: "paragraph", spans: [] }}
           index={0}
           peers={previous}
-          placeholder={"message"}
+          placeholder={isComposing ? null : "message"}
           active={true}
         />
       </div>
