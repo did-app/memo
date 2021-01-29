@@ -56,26 +56,12 @@ export function handleInput(blocks: Block[], range: Range, event: Event): [Block
 }
 
 export function addAnnotation(blocks: Block[], reference: Reference): Block[] {
-  let lastBlock = blocks[blocks.length - 1];
-  let before: Block[];
-  if (
-    lastBlock &&
-    "spans" in lastBlock &&
-    lineLength(lastBlock.spans) === 0
-  ) {
-    before = blocks.slice(0, -1);
-  } else {
-    before = blocks;
-  }
-  return [
-    ...before,
-    {
-      type: "annotation",
-      reference,
-      blocks: [{ type: "paragraph", spans: [{ type: "text", text: "" }] }],
-    },
-    { type: "paragraph", spans: [{ type: "text", text: "" }] },
-  ];
+  return addBlock(blocks, {
+    type: "annotation",
+    reference,
+    // This can probably be removed when fragment is collected to handle empty blocks
+    blocks: [{ type: "paragraph", spans: [] }],
+  })
 }
 
 export function addBlock(blocks: Block[], block: Block): Block[] {
