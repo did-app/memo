@@ -1,6 +1,8 @@
+import type { Block } from "../elements"
 import type { Path } from "../path"
 import type { Point } from "../point"
 import type { Range as ModelRange } from "../range"
+import { getLine, spanFromOffset } from "../tree"
 
 export function isBeforeInputEventAvailable() {
   return window.InputEvent && typeof (InputEvent.prototype as any).getTargetRanges === "function";
@@ -11,7 +13,8 @@ export type InputEvent = {
   getTargetRanges: () => StaticRange[]
   inputType: string,
   data: string | null,
-  dataTransfer: DataTransfer | null
+  dataTransfer: DataTransfer | null,
+  isComposing: boolean
 }
 
 export function getSelection(): Selection {
@@ -113,4 +116,22 @@ export function nodeFromPath(root: HTMLElement, path: number[]) {
     // Search needs to be breadth first
     // return element.querySelector(`[data-sveditor-index="${idx}"]`)
   }, root)
-} 
+}
+
+export function placeCursor(root: HTMLElement, updated: Block[], cursor: Point) {
+  let paragraph = nodeFromPath(root, cursor.path);
+  let line = getLine(updated, cursor.path);
+  let [spanIndex, offset] = spanFromOffset(line, cursor.offset);
+  let span = paragraph.children[spanIndex] as HTMLElement;
+  let textNode = span.childNodes[0] as Node;
+
+  // This is why slate has it's weak Map
+
+  let selection = window.getSelection();
+  const domRange = selection?.getRangeAt(0);
+  if (selection && domRange) {
+    domRange.setStart(textNode, offset);
+    domRange.setEnd(textNode, offset);
+    selection.addRange(domRange);
+  }
+}
