@@ -181,11 +181,11 @@ fn dispatch_to_identifier(record, config) {
   let body =
     string.concat([
       topic.value,
-      " sent you a memo using Plum Mail.\r\n\r\n",
+      " sent you a memo.\r\n\r\n",
       "Use this link ",
       link,
       " to read more\r\n\r\n",
-      "Regards, the Plum Mail team",
+      "Regards, the memo team",
     ])
 
   let subject = string.concat([topic.value, " sent you a memo"])
