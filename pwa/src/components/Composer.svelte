@@ -7,9 +7,7 @@
   import * as Icons from "../icons";
 
   export let previous: Memo[];
-  export let blocks: Block[] = [
-    { type: "paragraph", spans: [{ type: "text", text: "" }] },
-  ];
+  export let blocks: Block[] = [];
   export let position: number;
   export let selected: Range | null;
 
@@ -176,13 +174,21 @@
         />
       </div>
     {:else}
-      <BlockComponent
-        block={{ type: "paragraph", spans: [] }}
-        index={0}
-        peers={previous}
-        placeholder={"message"}
-        active={true}
-      />
+      <div class="flex">
+        <div
+          class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+          contenteditable="false"
+        >
+          <Icons.Drag />
+        </div>
+        <BlockComponent
+          block={{ type: "paragraph", spans: [] }}
+          index={0}
+          peers={previous}
+          placeholder={"message"}
+          active={true}
+        />
+      </div>
     {/each}
   </div>
   {#if dragging}

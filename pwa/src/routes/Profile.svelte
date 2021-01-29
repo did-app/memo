@@ -36,12 +36,9 @@
   <article
     class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
   >
-    <!-- TODO remove the default blocks here -->
     <Composer
       previous={[]}
-      blocks={identifier.greeting || [
-        { type: "paragraph", spans: [{ type: "text", text: "" }] },
-      ]}
+      blocks={identifier.greeting || []}
       position={1}
       selected={composerRange}
       let:blocks
@@ -52,7 +49,8 @@
           on:click={() => {
             blocks = [];
           }}
-          class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2">
+          class="flex items-center rounded px-2 inline-block ml-auto border-gray-500 border-2"
+        >
           <span class="w-5 mr-2 inline-block">
             <Icons.Bin />
           </span>
@@ -60,7 +58,8 @@
         </button>
         <button
           on:click={() => saveGreeting(identifier.id, blocks)}
-          class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2">
+          class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2"
+        >
           <span class="w-5 mr-2 inline-block">
             <Icons.Send />
           </span>
