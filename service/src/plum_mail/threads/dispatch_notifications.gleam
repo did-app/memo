@@ -24,21 +24,21 @@ pub fn run() {
     // Bit weird to call an email address a topic but it is the analogue for a thread
     "
   WITH participants AS (
-    SELECT lower_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic, NULL as group_id
+    SELECT lower_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
     JOIN identifiers AS recipient ON lower_identifier_id = recipient.id
     JOIN identifiers AS contact ON upper_identifier_id = contact.id
     
     UNION ALL
     
-    SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic, NULL
+    SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
     FROM pairs
         JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
     JOIN identifiers AS contact ON lower_identifier_id = contact.id
     
     UNION ALL
 
-    SELECT invitations.identifier_id, recipient.email_address, groups.thread_id, groups.name, groups.id
+    SELECT invitations.identifier_id, recipient.email_address, groups.thread_id, groups.name AS topic
     FROM invitations
     JOIN identifiers AS recipient ON recipient.id = invitations.identifier_id
     JOIN groups ON groups.id = invitations.group_id 
@@ -47,7 +47,6 @@ pub fn run() {
     participants.identifier_id, 
     participants.email_address,
     participants.topic,
-    participants.group_id,
     participants.thread_id,
     memos.content,
     memos.position
@@ -76,36 +75,22 @@ pub fn run() {
         assert Ok(recipient_email_address) =
           email_address.validate(recipient_email_address)
 
-        // This is the contact email address
         assert Ok(topic) = dynamic.element(row, 2)
         assert Ok(topic) = dynamic.string(topic)
-        assert Ok(group_id) = dynamic.element(row, 3)
-        assert Ok(group_id) = run_sql.dynamic_option(group_id, dynamic.string)
-        let tuple(path, topic) = case group_id {
-          Some(group_id) -> {
-            let path = string.concat(["groups", group_id])
-            tuple(path, topic)
-          }
-          None -> {
-            assert Ok(topic) = email_address.validate(topic)
-            let path = email_address.to_path(topic)
-            tuple(path, topic.value)
-          }
-        }
-        assert Ok(thread_id) = dynamic.element(row, 4)
+        assert Ok(thread_id) = dynamic.element(row, 3)
         assert Ok(thread_id) = dynamic.bit_string(thread_id)
         assert thread_id = run_sql.binary_to_uuid4(thread_id)
 
-        assert Ok(content) = dynamic.element(row, 5)
+        assert Ok(topic) = email_address.validate(topic)
+        assert Ok(content) = dynamic.element(row, 4)
         assert Ok(content) = dynamic.typed_list(content, block_from_dynamic)
-        assert Ok(position) = dynamic.element(row, 6)
+        assert Ok(position) = dynamic.element(row, 5)
         assert Ok(position) = dynamic.int(position)
 
         tuple(
           recipient_id,
           recipient_email_address,
           topic,
-          path,
           thread_id,
           content,
           position,
@@ -187,16 +172,15 @@ fn dispatch_to_identifier(record, config) {
     recipient_id,
     recipient_email_address,
     topic,
-    path,
     thread_id,
     _content,
     position,
   ) = record
-  let link = contact_link(client_origin, path, recipient_id)
+  let link = contact_link(client_origin, topic, recipient_id)
 
   let body =
     string.concat([
-      topic,
+      topic.value,
       " sent you a memo using Plum Mail.\r\n\r\n",
       "Use this link ",
       link,
@@ -204,10 +188,9 @@ fn dispatch_to_identifier(record, config) {
       "Regards, the Plum Mail team",
     ])
 
-  let subject = string.concat([topic, " sent you a memo"])
+  let subject = string.concat([topic.value, " sent you a memo"])
   let to = recipient_email_address.value
-  // TODO fix sending with proper from
-  let from = case topic {
+  let from = case topic.value {
     "richard@sendmemo.app" -> "Richard Shepherd <richard@sendmemo.app>"
     "peter@sendmemo.app" -> "Peter Saxton <peter@sendmemo.app>"
     _ -> "memo <memo@sendmemo.app>"
@@ -228,9 +211,9 @@ fn dispatch_to_identifier(record, config) {
   }
 }
 
-fn contact_link(origin, path, recipient_id) {
+fn contact_link(origin, contact, recipient_id) {
   assert Ok(code) = authentication.generate_link_token(recipient_id)
-  [origin, path, "#code=", code]
+  [origin, email_address.to_path(contact), "#code=", code]
   |> string.join("")
 }
 
