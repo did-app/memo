@@ -11,46 +11,16 @@
   export let position: number;
   export let selected: Range | null;
 
-  let composer: HTMLElement;
-  const supported = Writing.isBeforeInputEventAvailable();
-
   export function addAnnotation(reference: Reference) {
-    let lastBlock = blocks[blocks.length - 1];
-    let before: Block[];
-    if (
-      lastBlock &&
-      "spans" in lastBlock &&
-      Writing.lineLength(lastBlock.spans) === 0
-    ) {
-      before = blocks.slice(0, -1);
-    } else {
-      before = blocks;
-    }
-    blocks = [
-      ...before,
-      {
-        type: "annotation",
-        reference,
-        blocks: [{ type: "paragraph", spans: [{ type: "text", text: "" }] }],
-      },
-      { type: "paragraph", spans: [{ type: "text", text: "" }] },
-    ];
+    blocks = Writing.addAnnotation(blocks, reference);
   }
 
   export function addBlock(block: Block) {
-    let lastBlock = blocks[blocks.length - 1];
-    let before: Block[];
-    if (
-      lastBlock &&
-      "spans" in lastBlock &&
-      Writing.lineLength(lastBlock.spans) === 0
-    ) {
-      before = blocks.slice(0, -1);
-    } else {
-      before = blocks;
-    }
-    blocks = [...before, block];
+    blocks = Writing.addBlock(blocks, block);
   }
+
+  let composer: HTMLElement;
+  const supported = Writing.isBeforeInputEventAvailable();
 
   function handleInput(event: InputEvent) {
     const domRange = event.getTargetRanges()[0];

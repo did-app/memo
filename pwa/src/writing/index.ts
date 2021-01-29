@@ -10,4 +10,4 @@ export { toString } from "./serializer"
 
 export type { InputEvent } from "./view"
 export { rangeFromDom, nodeFromPath, getSelection, isBeforeInputEventAvailable, placeCursor } from "./view"
-export { handleInput } from "./editor"
+export { handleInput, addAnnotation, addBlock } from "./editor"
