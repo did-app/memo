@@ -49,10 +49,12 @@
   let inbox: Inbox | null;
   let conversation: Conversation | null;
   let state = Sync.initial();
-  let installPrompt: () => Promise<{
-    outcome: "accepted" | "dismissed";
-    platform: string;
-  }> | null;
+  let installPrompt:
+    | (() => Promise<{
+        outcome: "accepted" | "dismissed";
+        platform: string;
+      }>)
+    | null;
 
   $: inbox = Sync.selectedInbox(state);
   $: conversation = inbox && Sync.selectedConversation(inbox, params);
@@ -307,6 +309,7 @@
   {/each}
   {#if installPrompt}
     <article
+      on:click={() => (installPrompt = null)}
       class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
     >
       <h2 class="font-bold">Web-app available to install</h2>
