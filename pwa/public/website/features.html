@@ -10,7 +10,7 @@
   <meta name="description" content="Web site created using create-snowpack-app" />
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 
-  <title>Better Conversations</title>
+  <title>Memo's Features</title>
   <link rel="manifest" href="/manifest.json">
 
 </head>
@@ -46,7 +46,7 @@
   </header>
   <header class="mb-6">
     <h1 class="text-center text-3xl">Features</h1>
-    <p class="text-center mt-4">Showing all of Memo's published features. For upcoming features, see <a class="text-underline text-green-500" href="">roadmap</a>.</p>
+    <p class="text-center mt-4">Showing current features. For more, see <a class="text-underline text-green-500" href="">roadmap</a>.</p>
   </header>
   <div class="z-20 w-full mx-auto max-w-3xl px-16 text-gray-800 flex text-center">
     <a href="/features" class="flex-1 py-2 px-4 hover:bg-green-500 hover:text-white transform duration-200 border-gray-500 border-r border-l">Features</a>
@@ -139,6 +139,40 @@
       <div class="w-1/2">
         <img src="https://via.placeholder.com/650x450/09f/fff.png">
       </div>
+    </section>
+    <style>
+      .overlay {
+        background:rgba(229,231,235,0.7);
+      }
+      .drag-and-drop+label {
+        display: none;
+      }
+
+      .drag-and-drop:checked+label {
+        display: block;
+      }
+
+    </style>
+    <section class="flex gap-6 mb-12 border-b pb-12">
+      <div class="w-1/2">
+        <h3 class="mb-4 font-bold text-xl">Drag &amp; drop content</h3>
+        <p class="my-4">
+          Grab paragraphs with your clicker and drag them to reorder while you're writing your message.
+        </p>
+        <p class="my-4">
+          Text-editing should be hassle-free, drag and drop replaces awkwardly copy/pasting words to shuffle things around.
+        </p>
+      </div>
+      <div class="w-1/2">
+        <label for="drag-and-drop">
+          <img class="border rounded hover:shadow-md cursor-pointer" src="file:///C:/Users/richa/Desktop/gif-325x225/drag-and-drop.gif">
+        </label>
+      </div>
+      <input type="checkbox" id="drag-and-drop" class="drag-and-drop" style="display:none;">
+        <label for="drag-and-drop" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+          <p class="text-center text-xl mt-4 mb-2 font-bold">Drag and drop content</p>
+          <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/Desktop/gifs-975x675/drag-and-drop.gif">
+        </label>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
