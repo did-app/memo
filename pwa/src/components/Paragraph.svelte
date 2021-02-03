@@ -32,8 +32,14 @@
     return output;
   }
 </script>
+<style>
+  p {
+    -webkit-user-select:text;
+    user-select: text;
+  }
+</style>
 
-<p class="my-2 min-w-0 w-full" data-block-index={index} class:truncate>
+<p class="py-2 min-w-0 w-full" data-block-index={index} class:truncate>
   {#each render(spans) as { span, offset }, index}
     <SpanComponent
       {span}

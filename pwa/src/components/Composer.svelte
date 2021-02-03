@@ -26,7 +26,7 @@
   function handleInput(event: InputEvent) {
     // console.log(event);
     doubleInput = false;
-
+    //in Safari isComposing is absent rather than set to false
     if (event.isComposing !== true) {
       const domRange = event.getTargetRanges()[0];
       if (domRange === undefined) {
