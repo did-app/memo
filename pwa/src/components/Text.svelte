@@ -30,6 +30,10 @@
 {/if}
 
 <style>
+  span {
+    -webkit-user-select: text;
+    user-select: text;
+  }
   span::after {
     color: #a6a6a6;
   }
