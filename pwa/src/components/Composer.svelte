@@ -27,7 +27,7 @@
     // console.log(event);
     doubleInput = false;
 
-    if (event.isComposing === false) {
+    if (event.isComposing !== true) {
       const domRange = event.getTargetRanges()[0];
       if (domRange === undefined) {
         throw "Should have a target range";
