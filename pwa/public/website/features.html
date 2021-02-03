@@ -14,8 +14,60 @@
   <link rel="manifest" href="/manifest.json">
   <style>
     .overlay {
-        background:rgba(229,231,235,0.7);
-      }
+      background: rgba(229, 231, 235, 0.7);
+    }
+
+    .highlighted-questions+label {
+      display: none;
+    }
+
+    .highlighted-questions:checked+label {
+      display: block;
+    }
+
+    .drag-and-drop+label {
+      display: none;
+    }
+
+    .drag-and-drop:checked+label {
+      display: block;
+    }
+    .quote-in-reply+label {
+      display: none;
+    }
+
+    .quote-in-reply:checked+label {
+      display: block;
+    }
+    .live-attachments+label {
+      display: none;
+    }
+
+    .live-attachments:checked+label {
+      display: block;
+    }
+    .rich-email-content+label {
+      display: none;
+    }
+
+    .rich-email-content:checked+label {
+      display: block;
+    }
+    .personal-contact-page+label {
+      display: none;
+    }
+
+    .personal-contact-page:checked+label {
+      display: block;
+    }
+    .easy-groups+label {
+      display: none;
+    }
+
+    .easy-groups:checked+label {
+      display: block;
+    }   
+
   </style>
 </head>
 
@@ -60,13 +112,10 @@
   </div>
   <div class="z-20 w-full mx-auto max-w-3xl bg-white shadow-md rounded my-6 py-10 border px-16 text-gray-800">
     <section class="flex gap-6 mb-12 border-b pb-12 pt-8 mt-8">
-      <div class="w-1/2">
+      <div class="w-2/3">
         <h3 class="mb-4 font-bold text-xl">Distraction free UI</h3>
         <p class="my-4">Focus mode is always on in Memo. We won't notify, ping, flash red or otherwise tempt you away from your focus.</p>
         <p class="my-4">This design philosophy is behind every part of Memo's UI.</p>
-      </div>
-      <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
       </div>
     </section>
 
@@ -77,19 +126,17 @@
         <p class="my-4">It helps filter out unwanted messages and gets the conversation off to a great start on your terms. For example try; <a class="text-underline text-green-500" href="https://sendmemo.app/richard">sendmemo.app/richard</a></p>
       </div>
       <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
+        <label for="personal-contact-page">
+          <img class="border rounded hover:shadow-lg cursor-pointer" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gif-325x225/personal-contact-page.gif">
+        </label>
       </div>
+      <input type="checkbox" id="personal-contact-page" class="personal-contact-page" style="display:none;">
+      <label for="personal-contact-page" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Personal Contact Page</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/personal-contact-page.gif">
+      </label>
     </section>
-    <style>
-      .highlighted-questions+label {
-        display: none;
-      }
-
-      .highlighted-questions:checked+label {
-        display: block;
-      }
-
-    </style>
+    
     <section class="flex gap-6 mb-12 border-b pb-12">
       <div class="w-1/2">
         <h3 class="mb-4 font-bold text-xl">Highlighted Questions</h3>
@@ -101,15 +148,15 @@
         </p>
       </div>
       <div class="w-1/2">
-        <label for="highlighted-questions" >
+        <label for="highlighted-questions">
           <img class="border rounded hover:shadow-lg cursor-pointer" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gif-325x225/highlighted-questions.gif">
         </label>
       </div>
       <input type="checkbox" id="highlighted-questions" class="highlighted-questions" style="display:none;">
-        <label for="highlighted-questions" class="overlay fixed h-screen left-0 top-0 w-full z-40">
-          <p class="text-center text-xl mt-4 mb-2 font-bold">Highlighted Questions</p>
-          <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/highlighted-questions.gif">
-        </label>
+      <label for="highlighted-questions" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Highlighted Questions</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/highlighted-questions.gif">
+      </label>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
@@ -123,8 +170,15 @@
         </p>
       </div>
       <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
+        <label for="quote-in-reply">
+          <img class="border rounded hover:shadow-lg cursor-pointer" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gif-325x225/quote-in-reply.gif">
+        </label>
       </div>
+      <input type="checkbox" id="quote-in-reply" class="quote-in-reply" style="display:none;">
+      <label for="quote-in-reply" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Quote in Reply</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/quote-in-reply.gif">
+      </label>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
@@ -139,8 +193,15 @@
         <p class="my-4">Memo also groups attachments by contact so you won't have to trawl through your emails looking for a long-lost PDF ever again.</p>
       </div>
       <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
+        <label for="live-attachments">
+          <img class="border rounded hover:shadow-lg cursor-pointer" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gif-325x225/live-attachments.gif">
+        </label>
       </div>
+      <input type="checkbox" id="live-attachments" class="live-attachments" style="display:none;">
+      <label for="live-attachments" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Live Attachments</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/live-attachments.gif">
+      </label>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
@@ -150,26 +211,27 @@
           Enrich your communication with media so readers can consume what you're sharing without getting distracted.
         </p>
         <p class="my-4">
+          Memo builds a rich link preview for every link shared but we have unique previews for Google Photos, YouTube, Loom, Vimeo and XKCD with more to come.
+        </p>
+        <!--<p class="my-4">
           You can also link to third party apps such as appointment bookers so readers can take action with fewer clicks.
         </p>
         <p class="my-4">
           Most messaging tools open new tabs to consume the media you share. Memo let's you do it distraction free right in the body of the message.
-        </p>
+        </p>-->
       </div>
       <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
+        <label for="rich-email-content">
+          <img class="border rounded hover:shadow-lg cursor-pointer" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gif-325x225/rich-email-content.gif">
+        </label>
       </div>
+      <input type="checkbox" id="rich-email-content" class="rich-email-content" style="display:none;">
+      <label for="rich-email-content" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Live Attachments</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/rich-email-content.gif">
+      </label>
     </section>
-    <style>
-      .drag-and-drop+label {
-        display: none;
-      }
-
-      .drag-and-drop:checked+label {
-        display: block;
-      }
-
-    </style>
+    
     <section class="flex gap-6 mb-12 border-b pb-12">
       <div class="w-1/2">
         <h3 class="mb-4 font-bold text-xl">Drag &amp; drop content</h3>
@@ -186,10 +248,10 @@
         </label>
       </div>
       <input type="checkbox" id="drag-and-drop" class="drag-and-drop" style="display:none;">
-        <label for="drag-and-drop" class="overlay fixed h-screen left-0 top-0 w-full z-40">
-          <p class="text-center text-xl mt-4 mb-2 font-bold">Drag and drop content</p>
-          <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/drag-and-drop.gif">
-        </label>
+      <label for="drag-and-drop" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Drag and drop content</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/drag-and-drop.gif">
+      </label>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
@@ -203,12 +265,19 @@
         </p>
       </div>
       <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
+        <label for="easy-groups">
+          <img class="border rounded hover:shadow-lg cursor-pointer" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gif-325x225/easy-groups.gif">
+        </label>
       </div>
+      <input type="checkbox" id="easy-groups" class="easy-groups" style="display:none;">
+      <label for="easy-groups" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Drag and drop content</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl" src="file:///C:/Users/richa/OneDrive/Documents/GitHub/memo/pwa/public/images/features/gifs-975x675/easy-groups.gif">
+      </label>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
-      <div class="w-1/2">
+      <div class="w-2/3">
         <h3 class="mb-4 font-bold text-xl">Shared team inbox</h3>
         <p class="my-4">
           Memo offers a super simple shared inbox for teams so multiple people can read and respond to support emails.
@@ -220,13 +289,10 @@
           Use your team inboxes alongside your contact page e.g. <a class="text-underline text-green-500" href="https://sendmemo.app/support">sendmemo.app/support</a>
         </p>
       </div>
-      <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
-      </div>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
-      <div class="w-1/2">
+      <div class="w-2/3">
         <h3 class="mb-4 font-bold text-xl">Outstanding</h3>
         <p class="my-4">
           Memo replaces 'unread email' with 'outstanding conversations'.
@@ -238,43 +304,19 @@
           Memo's outstanding message state helps you manage actions in your inbox with less effort.
         </p>
       </div>
-      <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
-      </div>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
-      <div class="w-1/2">
-        <h3 class="mb-4 font-bold text-xl">Outstanding</h3>
-        <p class="my-4">
-          Memo replaces 'unread email' with 'outstanding conversations'.
-        </p>
-        <p class="my-4">
-          Read things, leave then return when you're ready without ever having to 'mark things as unread'.
-        </p>
-        <p class="my-4">
-          Memo's outstanding message state helps you manage actions in your inbox with less effort.
-        </p>
-      </div>
-      <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
-      </div>
-    </section>
-
-    <section class="flex gap-6 mb-12 border-b pb-12">
-      <div class="w-1/2">
+      <div class="w-2/3">
         <h3 class="mb-4 font-bold text-xl">Conversation URLs</h3>
         <p class="my-4">
           Memo is a web-first app so every conversation has a unique URL. Use this to reference specific conversations.
         </p>
       </div>
-      <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
-      </div>
     </section>
 
     <section class="flex gap-6 mb-12 border-b pb-12">
-      <div class="w-1/2">
+      <div class="w-2/3">
         <h3 class="mb-4 font-bold text-xl">Contact first inbox</h3>
         <p class="my-4">
           Memo shows your new messages in the context of a contact. This helps reduce the size of your outstanding list by grouping messages by the sender.
@@ -282,9 +324,6 @@
         <p class="my-4">
           It's simpler to navigate and stops Amazon filling up your inbox with receipts.
         </p>
-      </div>
-      <div class="w-1/2">
-        <img src="https://via.placeholder.com/650x450/09f/fff.png">
       </div>
     </section>
 
