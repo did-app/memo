@@ -132,6 +132,7 @@ export function placeCursor(root: HTMLElement, updated: Block[], cursor: Point) 
   if (selection && domRange) {
     domRange.setStart(textNode, offset);
     domRange.setEnd(textNode, offset);
+    selection.removeAllRanges();
     selection.addRange(domRange);
   }
 }
