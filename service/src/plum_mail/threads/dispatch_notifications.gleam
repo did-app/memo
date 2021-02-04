@@ -10,6 +10,7 @@ import gleam/http
 import gleam/httpc
 import gleam/json
 import gleam/pgo
+import gleam_uuid
 import postmark/client as postmark
 import plum_mail/config.{Config}
 import plum_mail/run_sql
@@ -17,39 +18,39 @@ import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
 
-pub fn run() {
-  let config = config.from_env()
-
+pub fn load() {
   let sql =
     // Bit weird to call an email address a topic but it is the analogue for a thread
     "
   WITH participants AS (
-    SELECT lower_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
+    SELECT lower_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS contact, NULL as group_name, CAST(NULL AS uuid) AS group_id
     FROM pairs
     JOIN identifiers AS recipient ON lower_identifier_id = recipient.id
     JOIN identifiers AS contact ON upper_identifier_id = contact.id
     
     UNION ALL
     
-    SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS topic
+    SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS contact, NULL as group_name, CAST(NULL AS uuid) AS group_id
     FROM pairs
         JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
     JOIN identifiers AS contact ON lower_identifier_id = contact.id
     
-    -- UNION ALL
+    UNION ALL
 
-    -- SELECT invitations.identifier_id, recipient.email_address, groups.thread_id, groups.name AS topic
-    -- FROM invitations
-    -- JOIN identifiers AS recipient ON recipient.id = invitations.identifier_id
-    -- JOIN groups ON groups.id = invitations.group_id 
+    SELECT invitations.identifier_id, recipient.email_address, groups.thread_id, NULL, groups.name AS group_name, groups.id AS group_id
+    FROM invitations
+    JOIN identifiers AS recipient ON recipient.id = invitations.identifier_id
+    JOIN groups ON groups.id = invitations.group_id 
   )
   SELECT 
     participants.identifier_id, 
     participants.email_address,
-    participants.topic,
     participants.thread_id,
     memos.content,
-    memos.position
+    memos.position,
+    participants.contact,
+    participants.group_name,
+    participants.group_id
   FROM memos
   JOIN participants ON participants.thread_id = memos.thread_id
   LEFT JOIN memo_notifications AS notifications
@@ -60,6 +61,7 @@ pub fn run() {
   AND participants.email_address <> 'peter@sendmemo.app'
   AND participants.email_address <> 'richard@sendmemo.app'
   AND participants.identifier_id <> memos.authored_by
+  ORDER BY memos.inserted_at ASC
   "
   assert Ok(deliveries) =
     run_sql.execute(
@@ -74,30 +76,55 @@ pub fn run() {
           dynamic.string(recipient_email_address)
         assert Ok(recipient_email_address) =
           email_address.validate(recipient_email_address)
-
-        assert Ok(topic) = dynamic.element(row, 2)
-        assert Ok(topic) = dynamic.string(topic)
-        assert Ok(thread_id) = dynamic.element(row, 3)
+        assert Ok(thread_id) = dynamic.element(row, 2)
         assert Ok(thread_id) = dynamic.bit_string(thread_id)
         assert thread_id = run_sql.binary_to_uuid4(thread_id)
 
-        assert Ok(topic) = email_address.validate(topic)
-        assert Ok(content) = dynamic.element(row, 4)
-        assert Ok(content) = dynamic.typed_list(content, block_from_dynamic)
-        assert Ok(position) = dynamic.element(row, 5)
+        assert Ok(content) = dynamic.element(row, 3)
+        // assert Ok(content) = dynamic.typed_list(content, block_from_dynamic)
+        assert Ok(position) = dynamic.element(row, 4)
         assert Ok(position) = dynamic.int(position)
 
+        assert Ok(contact) = dynamic.element(row, 5)
+        assert Ok(contact) = run_sql.dynamic_option(contact, dynamic.string)
+        let contact =
+          option.map(
+            contact,
+            fn(contact) {
+              assert Ok(contact) = email_address.validate(contact)
+              contact
+            },
+          )
+
+        assert Ok(group_name) = dynamic.element(row, 6)
+        assert Ok(group_name) =
+          run_sql.dynamic_option(group_name, dynamic.string)
+        assert Ok(group_id) = dynamic.element(row, 7)
+        assert Ok(group_id) =
+          run_sql.dynamic_option(group_id, dynamic.bit_string)
+        let group_id =
+          option.map(group_id, fn(id) { run_sql.binary_to_uuid4(id) })
+
+        // io.debug(group_name)
         tuple(
           recipient_id,
           recipient_email_address,
-          topic,
+          contact,
           thread_id,
           content,
           position,
+          group_name,
+          group_id,
         )
       },
     )
   deliveries
+}
+
+pub fn run() {
+  let config = config.from_env()
+
+  load()
   |> list.each(dispatch_to_identifier(_, config))
 }
 
@@ -171,30 +198,46 @@ fn dispatch_to_identifier(record, config) {
   let tuple(
     recipient_id,
     recipient_email_address,
-    topic,
+    contact,
     thread_id,
     _content,
     position,
+    group_name,
+    group_id,
   ) = record
-  let link = contact_link(client_origin, topic, recipient_id)
+
+  let tuple(topic, path) = case contact, group_name, group_id {
+    Some(email_address), None, None -> tuple(
+      string.concat([email_address.value, " sent you a memo"]),
+      email_address.to_path(email_address),
+    )
+    None, Some(name), Some(group_id) -> tuple(
+      string.concat(["New memo in ", name]),
+      string.concat(["/groups/", gleam_uuid.to_string(group_id)]),
+    )
+  }
+  // contact link needs to handle adding position because it will be in a hash fragment.
+  let link = contact_link(client_origin, path, recipient_id)
 
   let body =
     string.concat([
-      topic.value,
-      " sent you a memo.\r\n\r\n",
+      topic,
+      "\r\n\r\n",
       "Use this link ",
       link,
       " to read more\r\n\r\n",
       "Regards, the memo team",
     ])
 
-  let subject = string.concat([topic.value, " sent you a memo"])
+  let subject = topic
   let to = recipient_email_address.value
-  let from = case topic.value {
-    "richard@sendmemo.app" -> "Richard Shepherd <richard@sendmemo.app>"
-    "peter@sendmemo.app" -> "Peter Saxton <peter@sendmemo.app>"
-    _ -> "memo <memo@sendmemo.app>"
-  }
+  // contact might be nill, we need to change this up to author
+  // let from = case topic.value {
+  //   "richard@sendmemo.app" -> "Richard Shepherd <richard@sendmemo.app>"
+  //   "peter@sendmemo.app" -> "Peter Saxton <peter@sendmemo.app>"
+  //   _ -> "memo <memo@sendmemo.app>"
+  // }
+  let from = "memo <memo@sendmemo.app>"
   let response =
     postmark.send_email(from, to, subject, body, postmark_api_token)
   case response {
@@ -211,9 +254,9 @@ fn dispatch_to_identifier(record, config) {
   }
 }
 
-fn contact_link(origin, contact, recipient_id) {
+fn contact_link(origin, path, recipient_id) {
   assert Ok(code) = authentication.generate_link_token(recipient_id)
-  [origin, email_address.to_path(contact), "#code=", code]
+  [origin, path, "#code=", code]
   |> string.join("")
 }
 
