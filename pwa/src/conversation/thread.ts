@@ -42,7 +42,7 @@ export function makeSuggestions(blocks: Block[], memoPosition: number): Referenc
     if (block.type === "paragraph" && block.spans.length > 0) {
       // always ends with softbreak
       const lastSpan = block.spans[block.spans.length - 1];
-      if (lastSpan && lastSpan.type === "text" && lastSpan.text.endsWith("?")) {
+      if (lastSpan && lastSpan.type === "text" && lastSpan.text.trimEnd().endsWith("?")) {
         output.push({ blockIndex, memoPosition });
       }
     }
