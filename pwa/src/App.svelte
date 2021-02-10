@@ -348,6 +348,7 @@
   {#if inbox}
     <Home {inbox} />
   {:else if state.loading === false}
+  <!-- TODO make a paper component option to say padded or not -->
     <Introduce contactEmailAddress={"team@sendmemo.app"} {pullMemos}></Introduce>
   {/if}
 {:else if route === "sign_in"}
