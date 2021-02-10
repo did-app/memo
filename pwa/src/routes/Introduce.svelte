@@ -26,10 +26,6 @@
 </script>
 
 <div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
-  <div class="text-center my-4">
-    <h1 class="text-2xl">{contactEmailAddress}</h1>
-    <h2 class="text-gray-500" />
-  </div>
   {#await pullMemos("", { stranger: contactEmailAddress })}
     <!-- Nought -->
     <!-- Note always only one memo -->

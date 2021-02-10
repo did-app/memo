@@ -358,6 +358,10 @@
   <!-- There should always be params on this route -->
   {#if !inbox}
     {#if params && "emailAddress" in params}
+      <div class="text-center my-4">
+        <h1 class="text-2xl">{params.emailAddress}</h1>
+        <h2 class="text-gray-500" />
+      </div>
       <Introduce contactEmailAddress={params.emailAddress} {pullMemos} />
     {:else}
       <SignIn />

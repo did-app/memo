@@ -70,7 +70,7 @@
       {#if loading}
         <!-- Nothing -->
       {:else if inboxes.length === 0}
-        <a href="/sign-in"> sign in </a>
+        <a href="/sign-in">Sign in</a>
       {:else}
         <!-- explicitly set target so page.js ignores it -->
         <a
