@@ -1,6 +1,7 @@
 import gleam/dynamic.{Dynamic}
 import gleam/io
 import gleam/option.{Option}
+import gleam/result
 import gleam/string
 import gleam/json
 import gleam/http
@@ -39,33 +40,21 @@ pub fn execute(params, config) {
   assert Ok(from) = email_address.validate("memo@sendmemo.app")
   let to = email_address
   let subject = "Welcome back to memo"
-  let body =
-    [
-      "Sign in to memo using the link below\r\n\r\n",
-      client_origin,
-      option.unwrap(target, "/"),
-      "#code=",
-      token,
-    ]
+  let authentication_url =
+    [client_origin, option.unwrap(target, "/"), "#code=", token]
     |> string.join("")
 
-  case postmark_api_token {
-    "POSTMARK_DUMMY_TOKEN" -> {
-      io.debug(body)
-      Ok(Nil)
-    }
-    _ -> {
-      try _ =
-        postmark.send_email(
-          from.value,
-          to.value,
-          subject,
-          body,
-          postmark_api_token,
-        )
-      Ok(Nil)
-    }
-  }
-
+  let model =
+    json.object([tuple("authentication_url", json.string(authentication_url))])
+  try _ =
+    postmark.send_email_with_template(
+      from.value,
+      to.value,
+      subject,
+      "sign-in",
+      model,
+      postmark_api_token,
+    )
+    |> result.map_error(fn(_) { todo("what is the send error here") })
   Ok(Nil)
 }
