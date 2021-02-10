@@ -21,6 +21,9 @@
       emailAddress,
       window.location.pathname
     );
+    if ("error" in response) {
+      throw "Bad email when going to public profile";
+    }
     emailSent = true;
   }
 </script>
