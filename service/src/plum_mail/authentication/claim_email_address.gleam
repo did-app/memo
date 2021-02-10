@@ -1,5 +1,6 @@
 import gleam/dynamic.{Dynamic}
 import gleam/io
+import gleam/option.{Option}
 import gleam/string
 import gleam/json
 import gleam/http
@@ -13,19 +14,20 @@ import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal}
 
 pub type Params {
-  Params(email_address: EmailAddress)
+  Params(email_address: EmailAddress, target: Option(String))
 }
 
 pub fn params(raw: Dynamic) {
   try email_address = acl.required(raw, "email_address", acl.as_email)
-  Params(email_address)
+  try target = acl.optional(raw, "target", acl.as_string)
+  Params(email_address, target)
   |> Ok
 }
 
 // some profiles e.g. founders@sendmemo.app have no authentication information
 // some accounts have more than one authentication id
 pub fn execute(params, config) {
-  let Params(email_address: email_address) = params
+  let Params(email_address: email_address, target: target) = params
   try Personal(identifier_id, ..) = identifier.find_or_create(email_address)
   assert Ok(token) = authentication.generate_link_token(identifier_id)
   let config.Config(
@@ -41,7 +43,8 @@ pub fn execute(params, config) {
     [
       "Sign in to memo using the link below\r\n\r\n",
       client_origin,
-      "/#code=",
+      option.unwrap(target, "/"),
+      "#code=",
       token,
     ]
     |> string.join("")
