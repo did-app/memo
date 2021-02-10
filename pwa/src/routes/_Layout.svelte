@@ -3,6 +3,7 @@
   import type { Inbox } from "../sync";
 
   const API_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
+  export let loading: boolean;
   export let inboxes: Inbox[];
   export let inboxSelection: number | null = 0;
 
@@ -65,7 +66,14 @@
       </select>
     </span>
     <span class="my-1 ml-4">
-      {#if true}
+      {#if loading}
+      <!-- Nothing -->
+      {:else if inboxes.length === 0}
+      <a href="/sign-in">
+
+        sign in
+      </a>
+      {:else}
         <!-- explicitly set target so page.js ignores it -->
           <a
             target="_self"
@@ -101,8 +109,6 @@
             >
             <span> Sign out </span>
           </a>
-      {:else}
-        sign in
       {/if}
     </span>
   </nav>

@@ -10,6 +10,7 @@
   import NewGroup from "./routes/NewGroup.svelte";
   import Profile from "./routes/Profile.svelte";
   import SignIn from "./components/SignIn.svelte";
+  import Introduce from "./routes/Introduce.svelte"
   import router from "page";
 
   let route: string;
@@ -19,7 +20,13 @@
     | undefined;
   router("/", (_) => {
     route = "home";
+    params = undefined;
+
   });
+  router("/sign-in", () => {
+    route = "sign_in"
+    params = undefined;
+  })
   router("/share", (_) => {
     sharedParams = readShareParams();
     router.replace("/");
@@ -282,9 +289,10 @@
       return { title, text, url };
     }
   }
+
 </script>
 
-<Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
+<Layout inboxes={state.inboxes} loading={state.loading} bind:inboxSelection={state.inboxSelection} />
 <div class="w-full max-w-3xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
@@ -340,12 +348,18 @@
   {#if inbox}
     <Home {inbox} />
   {:else if state.loading === false}
-    <SignIn />
+    <Introduce contactEmailAddress={"team@sendmemo.app"} {pullMemos}></Introduce>
   {/if}
+{:else if route === "sign_in"}
+  <SignIn></SignIn>
 {:else if route === "contact"}
   <!-- There should always be params on this route -->
   {#if !inbox}
-    <SignIn />
+    {#if params && 'emailAddress' in params}
+      <Introduce contactEmailAddress={params.emailAddress} {pullMemos}></Introduce>
+    {:else}
+    <SignIn></SignIn>
+    {/if}
   {:else if params}
     {#if "emailAddress" in params && inbox.identifier.emailAddress === params.emailAddress}
       <Profile identifier={inbox.identifier} {saveGreeting} />
