@@ -1,5 +1,7 @@
 <script lang="typescript">
   import type { Memo, Conversation } from "../conversation";
+  import * as conversation_module from "../conversation";
+
   import * as API from "../sync/api";
 
   import MemoComponent from "../components/Memo.svelte";
@@ -19,7 +21,7 @@
     event.preventDefault();
     let response = await API.authenticateByEmail(
       emailAddress,
-      window.location.pathname
+      conversation_module.emailAddressToPath(contactEmailAddress)
     );
     if ("error" in response) {
       throw "Bad email when going to public profile";
