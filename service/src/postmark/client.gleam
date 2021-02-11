@@ -101,9 +101,11 @@ pub fn dispatch(request) {
           Failure(retry: False)
           |> Error
         // Other error code retry
-        _ ->
+        _ -> {
+          io.debug(data)
           Failure(retry: True)
           |> Error
+        }
       }
     }
   }
