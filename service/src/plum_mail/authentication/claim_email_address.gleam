@@ -77,6 +77,7 @@ pub fn execute(params, config) {
       template_model,
       postmark_api_token,
     )
+    |> io.debug()
     |> result.map_error(fn(_) { todo("what is the send error here") })
   Ok(Nil)
 }
