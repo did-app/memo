@@ -1,6 +1,6 @@
 import gleam/dynamic.{Dynamic}
 import gleam/io
-import gleam/option.{Option}
+import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import gleam/json
@@ -40,19 +40,41 @@ pub fn execute(params, config) {
   assert Ok(from) = email_address.validate("memo@sendmemo.app")
   let to = email_address
   let subject = "Welcome back to memo"
+  let target = option.unwrap(target, "/")
   let authentication_url =
-    [client_origin, option.unwrap(target, "/"), "#code=", token]
+    [client_origin, target, "#code=", token]
     |> string.join("")
 
-  let model =
-    json.object([tuple("authentication_url", json.string(authentication_url))])
+  let tuple(template_alias, profile_email_address) = case string.split(
+    target,
+    "/",
+  ) {
+    ["", ""] -> tuple("sign-in", None)
+    ["", username] -> tuple(
+      "start-chatting",
+      Some(string.concat([username, "@sendmemo.app"])),
+    )
+    ["", domain, username] -> tuple(
+      "start-chatting",
+      Some(string.concat([username, "@", domain])),
+    )
+  }
+
+  let template_model =
+    json.object([
+      tuple("authentication_url", json.string(authentication_url)),
+      tuple(
+        "profile_email_address",
+        json.nullable(profile_email_address, json.string),
+      ),
+    ])
   try _ =
     postmark.send_email_with_template(
       from.value,
       to.value,
       subject,
-      "sign-in",
-      model,
+      template_alias,
+      template_model,
       postmark_api_token,
     )
     |> result.map_error(fn(_) { todo("what is the send error here") })
