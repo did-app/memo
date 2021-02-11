@@ -42,7 +42,6 @@ pub fn send_email(from, to, subject, text_body, api_token) {
 pub fn send_email_with_template(
   from,
   to,
-  subject,
   template_alias,
   template_model,
   api_token,
@@ -51,7 +50,6 @@ pub fn send_email_with_template(
     "POSTMARK_DUMMY_TOKEN" -> {
       io.debug(from)
       io.debug(to)
-      io.debug(subject)
       io.debug(template_alias)
       io.debug(template_model)
       Ok(Nil)
@@ -66,7 +64,6 @@ pub fn send_email_with_template(
         json.object([
           tuple("From", json.string(from_string)),
           tuple("To", json.string(to_string)),
-          tuple("Subject", json.string(subject)),
           tuple("TemplateAlias", json.string(template_alias)),
           tuple("TemplateModel", template_model),
         ])

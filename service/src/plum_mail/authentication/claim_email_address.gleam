@@ -39,7 +39,6 @@ pub fn execute(params, config) {
 
   assert Ok(from) = email_address.validate("memo@sendmemo.app")
   let to = email_address
-  let subject = "Welcome back to memo"
   let target = option.unwrap(target, "/")
   let authentication_url =
     [client_origin, target, "#code=", token]
@@ -72,7 +71,6 @@ pub fn execute(params, config) {
     postmark.send_email_with_template(
       from.value,
       to.value,
-      subject,
       template_alias,
       template_model,
       postmark_api_token,
