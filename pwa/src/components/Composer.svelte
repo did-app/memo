@@ -5,6 +5,7 @@
   import * as Writing from "../writing";
   import BlockComponent from "./Block.svelte";
   import * as Icons from "../icons";
+  import { element } from "svelte/internal";
 
   export let previous: Memo[];
   export let blocks: Block[] = [];
@@ -161,7 +162,6 @@
     {#each blocks as block, index}
       <div
         class="flex "
-        draggable="true"
         on:dragstart={(event) => {
           handleDragStart(event, index);
         }}
@@ -171,9 +171,24 @@
       >
         <!-- text return false on dragover works, function call doesn't? -->
         <!-- -ml because padding on article is 2, probably should be dropped -->
+        <!-- https://stackoverflow.com/questions/35817220/how-can-i-make-a-nested-element-not-draggable-in-a-draggable-container -->
+        <!-- use pl not ml so the drag target is easier -->
         <div
-          class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+          class="pl-0 md:pl-6 ml-1 w-6 md:w-12 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
           contenteditable="false"
+          on:mousedown={({ target }) => {
+            // https://stackoverflow.com/questions/28900077/why-is-event-target-not-element-in-typescript
+            if (target instanceof Element) {
+              target.closest("div")?.setAttribute("draggable", "true");
+            }
+          }}
+          on:mouseup={({ target }) => {
+            console.log("uppy");
+
+            if (target instanceof Element) {
+              target.closest("div")?.setAttribute("draggable", "false");
+            }
+          }}
         >
           <Icons.Drag />
         </div>
@@ -187,8 +202,9 @@
       </div>
     {:else}
       <div class="flex">
+        <!-- use pl not ml so the drag target is easier -->
         <div
-          class="ml-1 md:ml-7 w-5 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
+          class="pl-0 md:pl-6 ml-1 w-6 md:w-12 pt-2 text-gray-100 hover:text-gray-500 cursor-pointer "
           contenteditable="false"
         >
           <Icons.Drag />
