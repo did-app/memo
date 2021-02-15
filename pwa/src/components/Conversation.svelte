@@ -12,6 +12,7 @@
   import BlockComponent from "../components/Block.svelte";
 
   import * as Icons from "../icons";
+  import Block from "../components/Block.svelte";
 
   // Only need the reader id for pulling out questions
   // export let identifier: Identifier;
@@ -25,6 +26,14 @@
   // Might make sense to pass these in as a slot
   export let acknowledge: (() => void) | undefined;
   export let dispatchMemo: (content: Block[]) => void;
+
+  function doDispatchMemo(blocks: Block[]) {
+    if (blocks.length === 0) {
+      alert("Cannot send empty message");
+    } else {
+      dispatchMemo(blocks);
+    }
+  }
 
   let composer: Composer__SvelteComponent_;
 
@@ -171,15 +180,26 @@
             </span>
             <span class="py-1">Back</span>
           </button>
-          <button
-            on:click={() => dispatchMemo(Writing.clearEmpty(blocks))}
-            class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2"
-          >
-            <span class="w-5 mr-2 inline-block">
-              <Icons.Send />
-            </span>
-            <span class="py-1"> Send </span>
-          </button>
+          {#if blocks.length === 0}
+            <button
+              class="flex items-center bg-gray-400 border-2 border-gray-400 text-white rounded px-2 ml-2 cursor-not-allowed"
+            >
+              <span class="w-5 mr-2 inline-block">
+                <Icons.Send />
+              </span>
+              <span class="py-1"> Send </span>
+            </button>
+          {:else}
+            <button
+              on:click={() => doDispatchMemo(blocks)}
+              class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2"
+            >
+              <span class="w-5 mr-2 inline-block">
+                <Icons.Send />
+              </span>
+              <span class="py-1"> Send </span>
+            </button>
+          {/if}
         </div>
       </Composer>
     </div>

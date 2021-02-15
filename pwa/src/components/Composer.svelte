@@ -217,7 +217,7 @@
       </button>
     </div>
   {:else}
-    <slot {blocks} />
+    <slot blocks={Writing.clearEmpty(blocks)} />
   {/if}
 {:else}
   <h1 class="text-xl text-center font-bold my-4 ml-12">
