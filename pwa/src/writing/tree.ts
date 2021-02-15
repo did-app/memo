@@ -286,3 +286,26 @@ export function popLine(blocks: Block[]): [Span[], Block[]] {
     }
   }
 }
+
+// Ruby calls this compact
+export function clearEmpty(blocks: Block[]): Block[] {
+  const output: Block[] = []
+  blocks.forEach(function (block) {
+    if ('blocks' in block) {
+      let children = clearEmpty(block.blocks)
+      if (children.length !== 0) {
+        block = { ...block, blocks: children }
+        output.push(block)
+      }
+    } else {
+      let empty = block.spans.every(function (span) {
+        // Any non zero span makes this not empty
+        return 'text' in span && span.text.length === 0
+      })
+      if (!empty) {
+        output.push(block)
+      }
+    }
+  })
+  return output
+}

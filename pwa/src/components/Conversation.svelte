@@ -172,7 +172,7 @@
             <span class="py-1">Back</span>
           </button>
           <button
-            on:click={() => dispatchMemo(blocks)}
+            on:click={() => dispatchMemo(Writing.clearEmpty(blocks))}
             class="flex items-center bg-gray-800 border-2 border-gray-800 text-white rounded px-2 ml-2"
           >
             <span class="w-5 mr-2 inline-block">
