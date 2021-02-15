@@ -262,6 +262,7 @@ fn dispatch_to_identifier(record, config) {
   // }
   let from = "memo <memo@sendmemo.app>"
 
+io.debug(preview)
   let template_alias = "memo-notification"
   let template_model =
     json.object([
