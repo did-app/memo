@@ -12,7 +12,6 @@
   import BlockComponent from "../components/Block.svelte";
 
   import * as Icons from "../icons";
-  import Block from "../components/Block.svelte";
 
   // Only need the reader id for pulling out questions
   // export let identifier: Identifier;
