@@ -1,9 +1,10 @@
-import type { Range } from "../writing"
+import type { Range, Path } from "../writing"
 import { equalPoints } from "../writing"
 // could become position + section/index
 export type SectionReference = { memoPosition: number, blockIndex: number }
+export type BlockReference = { memoPosition: number, path: Path }
 export type RangeReference = { memoPosition: number, range: Range }
-export type Reference = RangeReference | SectionReference
+export type Reference = RangeReference | BlockReference | SectionReference
 
 export function equal(r1: Reference, r2: Reference): boolean {
   if ('blockIndex' in r1 && 'blockIndex' in r2) {

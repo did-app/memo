@@ -67,10 +67,18 @@
       const [range, memoPosition] = result;
 
       if (Writing.isCollapsed(range)) {
-        userFocus = {
-          memoPosition,
-          blockIndex: range.anchor.path[0] as number,
-        };
+        let anchorPath = range.anchor.path;
+        if (anchorPath.length === 1) {
+          userFocus = {
+            memoPosition,
+            blockIndex: anchorPath[0] as number,
+          };
+        } else {
+          userFocus = {
+            memoPosition,
+            path: range.anchor.path,
+          };
+        }
       } else {
         userFocus = { memoPosition, range };
       }
@@ -151,11 +159,6 @@
         let:blocks
       >
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
-          <!-- {#if composerRange}
-            {JSON.stringify(
-              Writing.elementAtPoint(blocks, composerRange.anchor)
-            )}
-          {/if} -->
           <div class="flex flex-1" />
           <button
             on:click={() => {

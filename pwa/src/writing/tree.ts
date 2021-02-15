@@ -126,15 +126,15 @@ export function summary(blocks: Block[]): Span[] {
   return spans
 }
 
-export function elementAtPoint(blocks: Block[], point: Point) {
-  try {
-    let line = getLine(blocks, point.path)
-    let [index] = spanFromOffset(line, point.offset)
-    return line[index]
-  } catch (error) {
-    console.warn(error)
-  }
-}
+// export function elementAtPoint(blocks: Block[], point: Point) {
+//   try {
+//     let line = getLine(blocks, point.path)
+//     let [index] = spanFromOffset(line, point.offset)
+//     return line[index]
+//   } catch (error) {
+//     console.warn(error)
+//   }
+// }
 
 export function extractBlocks(blocks: Block[], range: Range): [Block[], Block[], Block[]] {
   const [start, end] = range_module.edges(range)
@@ -237,6 +237,26 @@ export function getLine(blocks: Block[], path: Path): Span[] {
     return block.spans
   } else {
     return getLine(block.blocks, rest)
+  }
+}
+
+export function getBlock(blocks: Block[], path: Path): Block {
+  const [index, ...rest] = path
+  if (index === undefined) {
+    throw "Could not get block"
+  }
+  let block = blocks[index]
+  if (!block) {
+    throw "invalid path"
+  }
+  if (rest.length === 0) {
+    return block
+  } else {
+    if ('blocks' in block) {
+      return getBlock(block.blocks, rest)
+    } else {
+      throw "path has too many steps"
+    }
   }
 }
 
