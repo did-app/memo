@@ -21,8 +21,9 @@
       </span>
     {:else}
       <span
-        class="border-b hover:border-purple-700 whitespace-no-wrap"
-        contenteditable="false">
+        class="border-b hover:border-green-700 whitespace-no-wrap"
+        contenteditable="false"
+      >
         <Link url={span.url} title={span.title} {offset} />
       </span>
     {/if}

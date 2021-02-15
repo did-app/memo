@@ -10,6 +10,7 @@
   import NewGroup from "./routes/NewGroup.svelte";
   import Profile from "./routes/Profile.svelte";
   import SignIn from "./components/SignIn.svelte";
+  import Introduce from "./routes/Introduce.svelte";
   import router from "page";
 
   let route: string;
@@ -19,6 +20,11 @@
     | undefined;
   router("/", (_) => {
     route = "home";
+    params = undefined;
+  });
+  router("/sign-in", () => {
+    route = "sign_in";
+    params = undefined;
   });
   router("/share", (_) => {
     sharedParams = readShareParams();
@@ -49,10 +55,12 @@
   let inbox: Inbox | null;
   let conversation: Conversation | null;
   let state = Sync.initial();
-  let installPrompt: () => Promise<{
-    outcome: "accepted" | "dismissed";
-    platform: string;
-  }> | null;
+  let installPrompt:
+    | (() => Promise<{
+        outcome: "accepted" | "dismissed";
+        platform: string;
+      }>)
+    | null;
 
   $: inbox = Sync.selectedInbox(state);
   $: conversation = inbox && Sync.selectedConversation(inbox, params);
@@ -282,8 +290,12 @@
   }
 </script>
 
-<Layout inboxes={state.inboxes} bind:inboxSelection={state.inboxSelection} />
-<div class="w-full max-w-3xl mx-auto">
+<Layout
+  inboxes={state.inboxes}
+  loading={state.loading}
+  bind:inboxSelection={state.inboxSelection}
+/>
+<div class="w-full max-w-2xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
       <article
@@ -307,6 +319,7 @@
   {/each}
   {#if installPrompt}
     <article
+      on:click={() => (installPrompt = null)}
       class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
     >
       <h2 class="font-bold">Web-app available to install</h2>
@@ -337,12 +350,22 @@
   {#if inbox}
     <Home {inbox} />
   {:else if state.loading === false}
-    <SignIn />
+    <Introduce contactEmailAddress={"team@sendmemo.app"} {pullMemos} />
   {/if}
+{:else if route === "sign_in"}
+  <SignIn />
 {:else if route === "contact"}
   <!-- There should always be params on this route -->
   {#if !inbox}
-    <SignIn />
+    {#if params && "emailAddress" in params}
+      <div class="text-center my-4">
+        <h1 class="text-2xl">{params.emailAddress}</h1>
+        <h2 class="text-gray-500" />
+      </div>
+      <Introduce contactEmailAddress={params.emailAddress} {pullMemos} />
+    {:else}
+      <SignIn />
+    {/if}
   {:else if params}
     {#if "emailAddress" in params && inbox.identifier.emailAddress === params.emailAddress}
       <Profile identifier={inbox.identifier} {saveGreeting} />

@@ -26,7 +26,7 @@
       event.preventDefault();
       message = "Working";
 
-      let response = await API.authenticateByEmail(emailAddress);
+      let response = await API.authenticateByEmail(emailAddress, "/");
       await delay;
       if ("error" in response) {
         throw "Bad email ";

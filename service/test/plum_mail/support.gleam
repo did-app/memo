@@ -5,6 +5,7 @@ import gleam/string
 import gleam/crypto
 import gleam/http
 import gleam/pgo
+import gleam_sentry
 import plum_mail/config
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
@@ -15,6 +16,12 @@ pub fn test_config() {
     client_origin: "https://app.plummail.test",
     postmark_api_token: "POSTMARK_TEST_TOKEN",
     secret: <<"DUMMY_SECRET":utf8>>,
+    sentry_client: gleam_sentry.Client(
+      "https://sentry.test",
+      "key",
+      "123",
+      "test",
+    ),
   )
 }
 

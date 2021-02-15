@@ -126,21 +126,36 @@ export function summary(blocks: Block[]): Span[] {
   return spans
 }
 
-export function elementAtPoint(blocks: Block[], point: Point) {
-  try {
-    let line = getLine(blocks, point.path)
-    let [index] = spanFromOffset(line, point.offset)
-    return line[index]
-  } catch (error) {
-    console.warn(error)
-  }
-}
+// export function elementAtPoint(blocks: Block[], point: Point) {
+//   try {
+//     let line = getLine(blocks, point.path)
+//     let [index] = spanFromOffset(line, point.offset)
+//     return line[index]
+//   } catch (error) {
+//     console.warn(error)
+//   }
+// }
 
 export function extractBlocks(blocks: Block[], range: Range): [Block[], Block[], Block[]] {
   const [start, end] = range_module.edges(range)
   const [tempBlocks, postBlocks] = splitBlocks(blocks, end)
   const [preBlocks, slicedBlocks] = splitBlocks(tempBlocks, start)
   return [preBlocks, slicedBlocks, postBlocks]
+}
+
+export function extractFragment(blocks: Block[], range: Range): Block[] {
+  const common = range_module.popCommon(range)
+  if (common) {
+    const [index, innerRange] = common
+    const [_pre, block, _post] = arrayPopIndex(blocks, index)
+    if (block && 'blocks' in block) {
+      return extractFragment(block.blocks, innerRange)
+    } else {
+      return extractBlocks(blocks, range)[1]
+    }
+  } else {
+    return extractBlocks(blocks, range)[1]
+  }
 }
 
 export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
@@ -225,6 +240,26 @@ export function getLine(blocks: Block[], path: Path): Span[] {
   }
 }
 
+export function getBlock(blocks: Block[], path: Path): Block {
+  const [index, ...rest] = path
+  if (index === undefined) {
+    throw "Could not get block"
+  }
+  let block = blocks[index]
+  if (!block) {
+    throw "invalid path"
+  }
+  if (rest.length === 0) {
+    return block
+  } else {
+    if ('blocks' in block) {
+      return getBlock(block.blocks, rest)
+    } else {
+      throw "path has too many steps"
+    }
+  }
+}
+
 export function lineLength(spans: Span[]): number {
   return spans.reduce(function (acc: number, span: Span) {
     if ('text' in span) {
@@ -250,4 +285,27 @@ export function popLine(blocks: Block[]): [Span[], Block[]] {
       return [spans, remainingBlocks]
     }
   }
+}
+
+// Ruby calls this compact
+export function clearEmpty(blocks: Block[]): Block[] {
+  const output: Block[] = []
+  blocks.forEach(function (block) {
+    if ('blocks' in block) {
+      let children = clearEmpty(block.blocks)
+      if (children.length !== 0) {
+        block = { ...block, blocks: children }
+        output.push(block)
+      }
+    } else {
+      let empty = block.spans.every(function (span) {
+        // Any non zero span makes this not empty
+        return 'text' in span && span.text.length === 0
+      })
+      if (!empty) {
+        output.push(block)
+      }
+    }
+  })
+  return output
 }

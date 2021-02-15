@@ -81,7 +81,7 @@
   }
 </script>
 
-<div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
+<div class="w-full mx-auto grid max-w-2xl">
   {#if conversation}
     <div class="text-center my-4">
       <h1 class="text-2xl">{subject(conversation.contact)[0]}</h1>
@@ -112,7 +112,7 @@
           contactEmailAddress ||
             "NOTE SHOULD only start conversation when contact email address"
         )}
-        reply={true}                     
+        reply={true}
       />
     {/if}
   {/await}

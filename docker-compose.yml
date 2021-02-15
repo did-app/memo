@@ -48,6 +48,8 @@ services:
       DATABASE_SSL: "FALSE"
       POSTMARK_API_TOKEN: POSTMARK_DUMMY_TOKEN
       SECRET: DEV_SECRET
+      SENTRY_DSN: https://e3b301fb356a4e61bebf8edb110af5b3@o351506.ingest.sentry.io/5574979
+      ENVIRONMENT: local
     depends_on:
       - db
   db:

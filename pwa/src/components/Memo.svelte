@@ -14,7 +14,7 @@
 {#if open}
   <article
     id={memo.position.toString()}
-    class="border-t mb-2 pt-4 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden"
+    class="border-t mb-2 pt-4 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden w-screen max-w-2xl"
   >
     <header
       class="ml-6 md:ml-12 flex text-gray-600 cursor-pointer pb-6"
@@ -44,7 +44,7 @@
   <article
     id={memo.position.toString()}
     on:click={() => (open = true)}
-    class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer max-w-2xl"
+    class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer w-screen max-w-2xl"
   >
     <header class="ml-6 md:ml-12 mb-2 flex opacity-40">
       <span class="truncate">

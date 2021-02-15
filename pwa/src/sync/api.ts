@@ -130,9 +130,9 @@ export async function authenticateBySession(): Call<Inbox[] | null> {
 }
 
 
-export async function authenticateByEmail(emailAddress: string) {
+export async function authenticateByEmail(emailAddress: string, target: string | undefined) {
   const path = "/authenticate/email"
-  const params = { email_address: emailAddress }
+  const params = { email_address: emailAddress, target: target || "/" }
   let response: Response<null> = await post(path, params);
   return response
 }

@@ -1,5 +1,6 @@
 import gleam/dynamic
 import gleam/io
+import gleam/list
 import gleam/option.{None, Some}
 import gleam/json
 import gleam/pgo
@@ -7,6 +8,7 @@ import plum_mail/error.{Forbidden}
 import plum_mail/identifier.{Personal}
 import plum_mail/support
 import plum_mail/conversation/conversation.{DirectConversation}
+import plum_mail/threads/dispatch_notifications
 import gleam/should
 
 pub fn talking_to_a_unknown_identifier_test() {
@@ -14,7 +16,13 @@ pub fn talking_to_a_unknown_identifier_test() {
   assert Personal(id: alice_id, ..) = alice
   let bob_email = support.generate_email_address("bob.test")
 
-  let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
+  let memo =
+    json.list([
+      json.object([
+        tuple("type", json.string("paragraph")),
+        tuple("spans", json.list([])),
+      ]),
+    ])
   assert Ok(new_conversation) =
     conversation.start_direct(alice_id, alice_id, bob_email, memo)
 
@@ -42,6 +50,16 @@ pub fn talking_to_a_unknown_identifier_test() {
   bob_participation.latest
   |> should.equal(alice_participation.latest)
 
+  let loaded = dispatch_notifications.load()
+  assert Ok(latest) =
+    loaded
+    |> list.at(list.length(loaded) - 1)
+
+  latest.0
+  |> should.equal(bob_id)
+  latest.5
+  |> should.equal(1)
+
   let thread_id = alice_participation.thread_id
   let content = json.list([])
 
@@ -55,6 +73,16 @@ pub fn talking_to_a_unknown_identifier_test() {
   |> should.equal(Error(Forbidden))
   conversation.load_memos(thread_id, eve_id, eve_id)
   |> should.equal(Error(Forbidden))
+
+  let loaded = dispatch_notifications.load()
+  assert Ok(latest) =
+    loaded
+    |> list.at(list.length(loaded) - 1)
+
+  latest.0
+  |> should.equal(alice_id)
+  latest.5
+  |> should.equal(2)
 }
 
 pub fn answering_an_identifier_greeting_test() {
@@ -96,4 +124,14 @@ pub fn answering_an_identifier_greeting_test() {
   |> should.equal(alice)
   clive_participation.latest
   |> should.equal(alice_participation.latest)
+
+  let loaded = dispatch_notifications.load()
+  assert Ok(latest) =
+    loaded
+    |> list.at(list.length(loaded) - 1)
+
+  latest.0
+  |> should.equal(clive_id)
+  latest.5
+  |> should.equal(2)
 }

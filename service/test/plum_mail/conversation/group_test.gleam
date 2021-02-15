@@ -1,8 +1,11 @@
 import gleam/io
+import gleam/list
+import gleam/option.{Some}
 import gleam/json
 import plum_mail/error.{Forbidden}
 import plum_mail/conversation/conversation.{GroupConversation}
 import plum_mail/identifier
+import plum_mail/threads/dispatch_notifications
 import gleam/should
 import plum_mail/support
 
@@ -46,6 +49,18 @@ pub fn participating_in_a_group_conversation_test() {
   |> should.equal("My Group")
   p.acknowledged
   |> should.equal(0)
+
+  let loaded = dispatch_notifications.load()
+  assert Ok(latest) =
+    loaded
+    |> list.at(list.length(loaded) - 1)
+
+  latest.0
+  |> should.equal(bob_id)
+  latest.5
+  |> should.equal(1)
+  latest.6
+  |> should.equal(Some("My Group"))
 }
 // pub fn create_a_group_test() {
 //   // Every identifier start off as a Personal identifier

@@ -8,7 +8,7 @@
   $: favicon = new URL(url).origin + "/favicon.ico";
 </script>
 
-<a class="text-purple-600" href={url} data-span-offset={offset} target="_blank">
+<a class="text-green-600" href={url} data-span-offset={offset} target="_blank">
   <!-- glance needs a mini link view -->
   <!-- Fallback -->
   <!-- https://stackoverflow.com/questions/980855/inputting-a-default-image-in-case-the-src-attribute-of-an-html-img-is-not-vali -->

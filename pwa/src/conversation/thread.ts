@@ -26,13 +26,12 @@ export function followReference(reference: Reference, memos: Memo[]): Block[] {
     throw "This reference has an invalid position " + JSON.stringify(reference)
   }
   if ('blockIndex' in reference) {
-    let element = memo.content[reference.blockIndex]
-    if (!element) {
-      throw "This reference has an invalid blockIndex " + JSON.stringify(reference)
-    }
-    return [element]
+    const path = [reference.blockIndex]
+    return [Writing.getBlock(memo.content, path)]
+  } else if ('path' in reference) {
+    return [Writing.getBlock(memo.content, reference.path)]
   } else {
-    return Writing.extractBlocks(memo.content, reference.range)[1]
+    return Writing.extractFragment(memo.content, reference.range)
   }
 }
 // There is no type that is range or section at the individual memo level
@@ -42,7 +41,7 @@ export function makeSuggestions(blocks: Block[], memoPosition: number): Referenc
     if (block.type === "paragraph" && block.spans.length > 0) {
       // always ends with softbreak
       const lastSpan = block.spans[block.spans.length - 1];
-      if (lastSpan && lastSpan.type === "text" && lastSpan.text.endsWith("?")) {
+      if (lastSpan && lastSpan.type === "text" && lastSpan.text.trimEnd().endsWith("?")) {
         output.push({ blockIndex, memoPosition });
       }
     }
