@@ -92,11 +92,22 @@ pub fn answering_an_identifier_greeting_test() {
   assert Personal(id: clive_id, email_address: clive_email, ..) = clive
 
   let greeting =
-    json.list([json.object([tuple("dummy", json.string("greeting "))])])
+    json.list([
+      json.object([
+        tuple("type", json.string("paragraph")),
+        tuple("spans", json.list([])),
+      ]),
+    ])
   let greeting: json.Json = dynamic.unsafe_coerce(dynamic.from(greeting))
   assert Ok(Some(_)) = identifier.update_greeting(clive_id, greeting)
 
-  let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
+  let memo =
+    json.list([
+      json.object([
+        tuple("type", json.string("paragraph")),
+        tuple("spans", json.list([])),
+      ]),
+    ])
   assert Ok(new_conversation) =
     conversation.start_direct(alice_id, alice_id, clive_email, memo)
 

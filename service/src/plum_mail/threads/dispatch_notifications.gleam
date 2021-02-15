@@ -83,7 +83,7 @@ pub fn load() {
         assert thread_id = run_sql.binary_to_uuid4(thread_id)
 
         assert Ok(content) = dynamic.element(row, 3)
-        // assert Ok(content) = dynamic.typed_list(content, block_from_dynamic)
+        assert content = dynamic.typed_list(content, block_from_dynamic)
         assert Ok(position) = dynamic.element(row, 4)
         assert Ok(position) = dynamic.int(position)
 
@@ -195,6 +195,28 @@ pub type Block {
   Prompt(reference: Reference)
 }
 
+fn block_to_text(block) {
+  case block {
+    Paragraph(spans) ->
+      string.join(
+        list.map(
+          spans,
+          fn(span) {
+            case span {
+              Text(text) -> text
+              Link(title, url) -> option.unwrap(title, url)
+              Softbreak -> "\r\n"
+            }
+          },
+        ),
+        "",
+      )
+    Annotation(blocks: [first, ..], ..) -> block_to_text(first)
+      Annotation(..) -> ""
+    Prompt(..) -> ""
+  }
+}
+
 fn dispatch_to_identifier(record, config) {
   let Config(
     postmark_api_token: postmark_api_token,
@@ -206,12 +228,17 @@ fn dispatch_to_identifier(record, config) {
     recipient_email_address,
     contact,
     thread_id,
-    _content,
+    content,
     position,
     group_name,
     group_id,
     author,
   ) = record
+
+  let preview = case content {
+    Ok([first, ..]) -> Some(block_to_text(first))
+    _ -> None
+  }
 
   let tuple(topic, path) = case contact, group_name, group_id {
     Some(email_address), None, None -> tuple(
@@ -240,6 +267,7 @@ fn dispatch_to_identifier(record, config) {
     json.object([
       tuple("authentication_url", json.string(authentication_url)),
       tuple("email_address", json.string(author)),
+      tuple("content_preview", json.nullable(preview, json.string)),
     ])
   let response =
     postmark.send_email_with_template(

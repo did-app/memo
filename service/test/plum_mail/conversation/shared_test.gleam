@@ -23,7 +23,13 @@ pub fn direct_conversation_from_shared_inbox_test() {
 
   let bob_email = support.generate_email_address("bob.test")
 
-  let memo = json.list([json.object([tuple("type", json.string("paragraph"))])])
+  let memo =
+    json.list([
+      json.object([
+        tuple("type", json.string("paragraph")),
+        tuple("spans", json.list([])),
+      ]),
+    ])
   assert Ok(new_conversation) =
     conversation.start_direct(shared_id, member_id, bob_email, memo)
 
