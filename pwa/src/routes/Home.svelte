@@ -36,7 +36,7 @@
     }) != -1;
 </script>
 
-<main class="w-full mx-auto md:max-w-3xl px-1 md:px-2 mb-8">
+<main class="w-full mx-auto max-w-2xl px-1 md:px-2 mb-8">
   <ol>
     {#each outstanding(inbox.conversations).reverse() as { contact, participation }}
       <li>

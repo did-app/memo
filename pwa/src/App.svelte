@@ -295,7 +295,7 @@
   loading={state.loading}
   bind:inboxSelection={state.inboxSelection}
 />
-<div class="w-full max-w-3xl mx-auto">
+<div class="w-full max-w-2xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
       <article
