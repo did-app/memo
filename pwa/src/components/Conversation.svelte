@@ -188,7 +188,7 @@
         <div
           class="truncate ml-6 md:ml-12 border-gray-600 border-l-4 px-2 text-gray-600"
         >
-          {#each conversation_module.followReference(userFocus, memos || []) as block, index}
+          {#each conversation_module.followReference(userFocus, memos) as block, index}
             <BlockComponent
               {index}
               {block}
