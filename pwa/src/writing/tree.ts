@@ -143,6 +143,21 @@ export function extractBlocks(blocks: Block[], range: Range): [Block[], Block[],
   return [preBlocks, slicedBlocks, postBlocks]
 }
 
+export function extractFragment(blocks: Block[], range: Range): Block[] {
+  const common = range_module.popCommon(range)
+  if (common) {
+    const [index, innerRange] = common
+    const [_pre, block, _post] = arrayPopIndex(blocks, index)
+    if (block && 'blocks' in block) {
+      return extractFragment(block.blocks, innerRange)
+    } else {
+      return extractBlocks(blocks, range)[1]
+    }
+  } else {
+    return extractBlocks(blocks, range)[1]
+  }
+}
+
 export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
 
   const pre: Span[] = []

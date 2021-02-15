@@ -32,7 +32,7 @@ export function followReference(reference: Reference, memos: Memo[]): Block[] {
     }
     return [element]
   } else {
-    return Writing.extractBlocks(memo.content, reference.range)[1]
+    return Writing.extractFragment(memo.content, reference.range)
   }
 }
 // There is no type that is range or section at the individual memo level
