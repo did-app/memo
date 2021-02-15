@@ -50,13 +50,15 @@ pub fn load() {
     memos.position,
     participants.contact,
     participants.group_name,
-    participants.group_id
+    participants.group_id,
+    authors.email_address
   FROM memos
   JOIN participants ON participants.thread_id = memos.thread_id
   LEFT JOIN memo_notifications AS notifications
     ON notifications.thread_id = memos.thread_id
     AND notifications.position = memos.position
     AND notifications.recipient_id = participants.identifier_id
+  LEFT JOIN identifiers AS authors ON authors.id = memos.authored_by
   WHERE notifications IS NULL
   AND participants.email_address <> 'peter@sendmemo.app'
   AND participants.email_address <> 'richard@sendmemo.app'
@@ -105,6 +107,9 @@ pub fn load() {
         let group_id =
           option.map(group_id, fn(id) { run_sql.binary_to_uuid4(id) })
 
+        assert Ok(author) = dynamic.element(row, 8)
+        assert Ok(author) = dynamic.string(author)
+
         // io.debug(group_name)
         tuple(
           recipient_id,
@@ -115,6 +120,7 @@ pub fn load() {
           position,
           group_name,
           group_id,
+          author,
         )
       },
     )
@@ -204,6 +210,7 @@ fn dispatch_to_identifier(record, config) {
     position,
     group_name,
     group_id,
+    author,
   ) = record
 
   let tuple(topic, path) = case contact, group_name, group_id {
@@ -217,19 +224,8 @@ fn dispatch_to_identifier(record, config) {
     )
   }
   // contact link needs to handle adding position because it will be in a hash fragment.
-  let link = contact_link(client_origin, path, recipient_id)
+  let authentication_url = contact_link(client_origin, path, recipient_id)
 
-  let body =
-    string.concat([
-      topic,
-      "\r\n\r\n",
-      "Use this link ",
-      link,
-      " to read more\r\n\r\n",
-      "Regards, the memo team",
-    ])
-
-  let subject = topic
   let to = recipient_email_address.value
   // contact might be nill, we need to change this up to author
   // let from = case topic.value {
@@ -238,8 +234,21 @@ fn dispatch_to_identifier(record, config) {
   //   _ -> "memo <memo@sendmemo.app>"
   // }
   let from = "memo <memo@sendmemo.app>"
+
+  let template_alias = "memo-notification"
+  let template_model =
+    json.object([
+      tuple("authentication_url", json.string(authentication_url)),
+      tuple("email_address", json.string(author)),
+    ])
   let response =
-    postmark.send_email(from, to, subject, body, postmark_api_token)
+    postmark.send_email_with_template(
+      from,
+      to,
+      template_alias,
+      template_model,
+      postmark_api_token,
+    )
   case response {
     Ok(Nil) -> {
       assert Ok(_) = record_sent(thread_id, position, recipient_id)
