@@ -14,14 +14,14 @@
 {#if open}
   <article
     id={memo.position.toString()}
-    class="border-t mb-2 pt-4 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden w-screen max-w-2xl"
+    class="border-t mb-2 pt-1 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden w-screen max-w-2xl"
   >
     <header
       class="ml-6 md:ml-12 flex text-gray-600 cursor-pointer pb-6"
       on:click={() => (open = false)}
     >
       <span class="mr-auto" />
-      <span class="truncate font-bold text-gray-500 text-xs truncate"
+      <span class="truncate font-bold text-gray-400 text-xs truncate"
         >{memo.author}</span
       >
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
@@ -46,7 +46,7 @@
     on:click={() => (open = true)}
     class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer w-screen max-w-2xl"
   >
-    <header class="ml-6 md:ml-12 mb-2 flex opacity-40">
+    <header class="ml-6 md:ml-12 mb-2 flex text-gray-400">
       <span class="truncate">
         <span class="truncate pr-4"
           >{#each Writing.summary(memo.content) as span}
@@ -60,7 +60,7 @@
           {/each}</span
         >
       </span>
-      <span class="ml-auto text-gray-600">{memo.author}</span>
+      <span class="ml-auto font-bold text-gray-400 text-xs">{memo.author}</span>
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
   </article>
