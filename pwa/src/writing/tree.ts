@@ -203,7 +203,9 @@ export function splitSpans(spans: Span[], offset: number): [Span[], Span[]] {
 function splitBlocks(blocks: Block[], point: Point): [Block[], Block[]] {
   const unnested = point_module.unnest(point)
   if (!unnested) {
-    throw "first should always exist in a path"
+    // considers all blocks after the point, because when splitting a range we split from end of range.
+    // Also it should group annotation content with points in the annotation
+    return [[], blocks]
   }
   const [index, inner] = unnested
 

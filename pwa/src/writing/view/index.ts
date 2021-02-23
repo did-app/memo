@@ -33,11 +33,16 @@ function leafElement(node: Node): HTMLElement | null {
 function pathFromElement(element: HTMLElement): [Path, number] | null {
   let path: number[] = []
   while (element) {
+
     // Path is reset because when clicking on elements in a quote the quote elements have path details rendered but are not part of the tree
     if (element.tagName === "BLOCKQUOTE") {
-      path = []
+      // path = []
+      // return null because the offset doesn't exist so can't work untill we make offset optional
+      // Might be sensible to choose first in child blocks of annotation
+      return null
     } else {
       const { blockIndex, memoPosition } = element.dataset
+
 
       // switch to root
       if (blockIndex !== undefined) {
@@ -65,6 +70,7 @@ function pointFromDom(node: Node, domOffset: number): [Point, number] | null {
   }
 
   const result = pathFromElement(element)
+
   if (result === null) {
     return null
   }

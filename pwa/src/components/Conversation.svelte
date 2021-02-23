@@ -102,6 +102,7 @@
       composerRange = null;
     }
   }
+
   // This captures the focus for duration of a click
   document.addEventListener("mousedown", function () {
     focusSnapshot = userFocus;
