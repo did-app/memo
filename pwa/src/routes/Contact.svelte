@@ -68,8 +68,6 @@
   }
 
   function startConversationFactory(contactEmailAddress: string) {
-    console.log("factory", inbox);
-
     return function (content: Block[]) {
       startDirectConversation(
         inbox.identifier.id,
@@ -87,7 +85,11 @@
       <h1 class="text-2xl">{subject(conversation.contact)[0]}</h1>
       <h2 class="text-gray-500">{subject(conversation.contact)[1]}</h2>
     </div>
-  {:else}{/if}
+  {:else}
+    <div class="text-center my-4">
+      <h1 class="text-2xl">Start conversation with {contactEmailAddress}</h1>
+    </div>
+  {/if}
   {#await pullMemos(inbox.identifier.id, conversation || { stranger: contactEmailAddress || "I think this should always be present" })}
     <LoadingComponent />
   {:then memos}
