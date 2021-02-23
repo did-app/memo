@@ -144,7 +144,7 @@
     reply = true;
   }
 
-  function isOpen(memo: Memo): boolean {
+  function isOpen(memo: Memo, target: number | undefined): boolean {
     return memo.position >= acknowledged || memo.position === target;
   }
 </script>
@@ -153,7 +153,7 @@
   <div class="" bind:this={root}>
     {#each memos as memo}
       <!-- Memos should never be empty -->
-      <MemoComponent {memo} open={isOpen(memo)} peers={memos || []} />
+      <MemoComponent {memo} open={isOpen(memo, target)} peers={memos || []} />
     {/each}
   </div>
   <article
