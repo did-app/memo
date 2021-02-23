@@ -27,13 +27,15 @@ pub fn load() {
     FROM pairs
     JOIN identifiers AS recipient ON lower_identifier_id = recipient.id
     JOIN identifiers AS contact ON upper_identifier_id = contact.id
+    WHERE recipient.group_id IS NULL
     
     UNION ALL
     
     SELECT upper_identifier_id AS identifier_id, recipient.email_address, thread_id, contact.email_address AS contact, NULL as group_name, CAST(NULL AS uuid) AS group_id
     FROM pairs
-        JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
+    JOIN identifiers AS recipient ON upper_identifier_id = recipient.id
     JOIN identifiers AS contact ON lower_identifier_id = contact.id
+    WHERE recipient.group_id IS NULL
     
     UNION ALL
 
@@ -212,7 +214,7 @@ fn block_to_text(block) {
         "",
       )
     Annotation(blocks: [first, ..], ..) -> block_to_text(first)
-      Annotation(..) -> ""
+    Annotation(..) -> ""
     Prompt(..) -> ""
   }
 }
@@ -262,7 +264,7 @@ fn dispatch_to_identifier(record, config) {
   // }
   let from = "memo <memo@sendmemo.app>"
 
-io.debug(preview)
+  io.debug(preview)
   let template_alias = "memo-notification"
   let template_model =
     json.object([
