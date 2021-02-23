@@ -196,7 +196,7 @@
           {block}
           {index}
           peers={previous}
-          placeholder={blocks.length === 1 && !isComposing ? "message" : null}
+          placeholder={index === 0 && !isComposing ? "message" : null}
           active={true}
         />
       </div>

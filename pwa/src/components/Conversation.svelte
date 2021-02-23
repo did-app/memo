@@ -117,6 +117,7 @@
   let references = conversation_module.gatherPrompts(memos, emailAddress);
 
   tick().then(function () {
+    // composer.addBlock({ type: "paragraph", spans: [] });
     references.map(function (reference) {
       composer.addAnnotation(reference);
     });

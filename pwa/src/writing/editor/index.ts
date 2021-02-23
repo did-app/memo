@@ -88,7 +88,11 @@ export function addBlock(blocks: Block[], block: Block): Block[] {
   ) {
     before = blocks.slice(0, -1);
   } else {
-    before = blocks;
+    if (blocks.length === 0) {
+      before = [{ type: 'paragraph', spans: [] }]
+    } else {
+      before = blocks;
+    }
   }
   return [...before, block];
 }

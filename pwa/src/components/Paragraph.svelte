@@ -32,12 +32,6 @@
     return output;
   }
 </script>
-<style>
-  p {
-    -webkit-user-select:text;
-    user-select: text;
-  }
-</style>
 
 <p class="py-2 min-w-0 w-full" data-block-index={index} class:truncate>
   {#each render(spans) as { span, offset }, index}
@@ -50,3 +44,10 @@
     />
   {/each}
 </p>
+
+<style>
+  p {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+</style>
