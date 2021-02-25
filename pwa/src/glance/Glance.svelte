@@ -1,6 +1,7 @@
 <script type="typescript">
   import Page from "./Page.svelte";
   import ImageReel from "./ImageReel.svelte";
+  import Table from "./Table.svelte";
   export let href: string;
   export let text: string | undefined;
 
@@ -27,7 +28,13 @@
     | { item: "image_reel"; images: string[]; title: string; url: string }
     | { item: "plain" }
     | { item: "image" }
-    | { item: "embeded_video"; iframe: string };
+    | { item: "embeded_video"; iframe: string }
+    | {
+        item: "table";
+        title: string;
+        fields: string[];
+        rows: (string | number)[][];
+      };
   let preview: Preview, next: string | undefined, running: boolean;
 
   async function updatePreview(href: string) {
@@ -63,6 +70,8 @@
     <Page {...preview} />
   {:else if preview.item === "image_reel"}
     <ImageReel {...preview} />
+  {:else if preview.item === "table"}
+    <Table {...preview} />
   {:else if preview.item === "plain"}
     <a {href}>{text || href}</a>
   {:else if preview.item === "image"}
