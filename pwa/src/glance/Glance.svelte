@@ -64,6 +64,20 @@
     }
   }
   $: updatePreview(href);
+  // TODO remove any
+  function watchResize(obj: any) {
+    let scrollHeight = 0;
+    function resize() {
+      let h = obj.contentWindow.document.documentElement.scrollHeight;
+      if (h !== scrollHeight) {
+        scrollHeight = h;
+        obj.style.height = scrollHeight + "px";
+      }
+      setTimeout(resize, 100);
+    }
+    resize();
+  }
+  let frame: any;
 </script>
 
 {#if preview}
@@ -92,9 +106,11 @@
     <iframe
       title={href}
       class="w-full"
-      height="400px"
-      srcdoc="<!DOCTYPE html><html lang='en'><head><meta
-  charset='utf-8'></head><body>{preview.html}</body></html>"
+      bind:this={frame}
+      on:load={function () {
+        watchResize(frame);
+      }}
+      srcdoc="<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'></head><body>{preview.html}</body></html>"
     />
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->
