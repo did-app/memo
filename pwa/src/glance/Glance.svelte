@@ -29,6 +29,7 @@
     | { item: "plain" }
     | { item: "image" }
     | { item: "embeded_video"; iframe: string }
+    | { item: "embeded_html"; html: string }
     | {
         item: "table";
         title: string;
@@ -87,6 +88,14 @@
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
       />
     </div>
+  {:else if preview.item === "embeded_html"}
+    <iframe
+      title={href}
+      class="w-full"
+      height="400px"
+      srcdoc="<!DOCTYPE html><html lang='en'><head><meta
+  charset='utf-8'></head><body>{preview.html}</body></html>"
+    />
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->
     <a class="underline text-green-400 hover:text-green-600 break-all" {href}
