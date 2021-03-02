@@ -16,6 +16,7 @@ pub fn test_config() {
     client_origin: "https://app.plummail.test",
     postmark_api_token: "POSTMARK_TEST_TOKEN",
     secret: <<"DUMMY_SECRET":utf8>>,
+    google_client: todo("is there a smart way to have lazy or partial creation here"),
     sentry_client: gleam_sentry.Client(
       "https://sentry.test",
       "key",

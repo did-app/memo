@@ -17,6 +17,7 @@ import gleam/pgo
 import gleam_uuid
 // Web/utils let session = utils.extractsession
 import datetime
+import oauth/client as oauth
 import plum_mail
 import plum_mail/config.{Config}
 import plum_mail/error.{Reason}
@@ -294,6 +295,71 @@ pub fn route(
       postmark.handle(params, config)
       |> io.debug
     }
+
+    // Potentially in the future it's another standard authorize endpoint
+    ["oauth", "google", "authorize"] -> {
+      let redirect_uri = "http://localhost:8000/oauth/google/callback"
+      let scopes = [
+        "openid", "profile", "email", "https://www.googleapis.com/auth/drive.file",
+      ]
+      config.google_client
+      |> oauth.authorization_request(redirect_uri, scopes)
+      |> web.redirect()
+      |> Ok()
+    }
+    ["oauth", "google", "callback"] -> {
+      // It must be a backend client because the server needs to keep the refresh token
+      // assert Ok(request) = oauth.token_request(config.google_client, request)
+      // assert Ok(response) =
+      //   request
+      //   |> httpc.send()
+      //   |> io.debug
+      // oauth lib
+      // uploader
+      // uuid, connector_id
+      // connector
+      // email_address, refresh_token, 
+      // case response.status {
+      //   200 -> {
+      //     assert Ok(raw) = json.decode(response.body)
+      //     let raw = dynamic.from(raw)
+      //     assert Ok(token) = dynamic.field(raw, "access_token")
+      //     assert Ok(token) = dynamic.string(token)
+      //     let request =
+      //       http.default_req()
+      //       |> http.set_scheme(http.Https)
+      //       |> http.set_host("openidconnect.googleapis.com")
+      //       |> http.set_path("/v1/userinfo")
+      //       |> http.prepend_req_header(
+      //         "authorization",
+      //         string.concat(["Bearer ", token]),
+      //       )
+      //     let response =
+      //       request
+      //       |> httpc.send()
+      //       |> io.debug
+      //     todo("finish")
+      //   }
+      // }
+      todo("nothing here")
+    }
+    // save the token as google
+    ["uploader", "allow"] -> {
+      assert Ok(body) = bit_string.to_string(request.body)
+      assert Ok(raw) = json.decode(body)
+      let raw = dynamic.from(raw)
+      assert Ok(code) = dynamic.field(raw, "code")
+      assert Ok(code) = dynamic.string(code)
+      // Fetch your google token
+      assert Ok(auth_request) = oauth.token_request(config.google_client, code, "http://localhost:8080")
+      auth_request
+      |> httpc.send()
+      |> io.debug
+      // Save the subject and the token in session creater uploader
+      todo("finish")
+      
+    }
+    // |> Ok
     _ ->
       http.response(404)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
