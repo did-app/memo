@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Upload links to Google Drive with Memo's uploader" />
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+  <title>File Uploader - from Memo</title>
+  <!-- Not async defer so available in startup of svelte -->
+  <script src="https://apis.google.com/js/platform.js"></script>
+  <meta name="google-signin-client_id"
+    content="296333378796-jeod0t6c4vmd26shsodjnqor389ibfmt.apps.googleusercontent.com">
+</head>
+
+<body class="flex flex-col min-h-screen text-gray-800 bg-gray-200" style="background:#F9F5F1;">
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <script type="module" src="/dist/uploader/index.js"></script>
+  <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+</body>
+
+</html>
