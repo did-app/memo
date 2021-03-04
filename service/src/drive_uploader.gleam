@@ -18,7 +18,7 @@ pub fn save_authorization(sub, email_address, refresh_token, access_token) {
     ), new_authorization AS (
       INSERT INTO google_authorizations (sub, email_address, refresh_token, access_token)
       VALUES ($1, $2, $3, $4)
-      ON CONFLICT (email_address) DO NOTHING
+      ON CONFLICT (sub) DO NOTHING
       RETURNING *
     )
     SELECT sub FROM updated_authorization
@@ -88,6 +88,12 @@ pub fn edit_uploader() {
   todo
 }
 
-pub fn delete_uploader() {
-  todo
+pub fn delete_uploader(id) {
+  let sql = "
+  DELETE FROM drive_uploaders
+  WHERE id = $1
+  "
+  let args = [pgo.text(id)]
+  try _ = run_sql.execute(sql, args, fn(_) { Nil })
+  Ok(Nil)
 }
