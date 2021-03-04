@@ -3,14 +3,49 @@
 
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Testing</title>
 </head>
 
 <body>
-  Name drop
+  Upload your file
   <!-- Query for embed or /pub vs /embed -->
+  <form onsubmit="sendFile(event)">
+    <input type="file">
+    <button>Submit</button>
+  </form>
+  <script>
+    let id = window.location.hash.slice(1)
+
+    async function sendFile(event) {
+      event.preventDefault()
+      let response = await fetch("http://localhost:8000/drive_uploaders/" + id + "/start")
+      let { location } = await response.json();
+      let file = document.querySelector('input').files[0]
+      console.log(location);
+      console.log(file);
+      let uploading = await fetch(location, {
+        credentials: 'include',
+        method: "PUT",
+        headers: {
+          "content-range": `bytes 0-${file.size - 1}/${file.size}`
+        },
+        body: file
+      })
+      console.log(uploading);
+    }
+    (async function (params) {
+      let response = await fetch("http://localhost:8000/drive_uploaders/" + id)
+      console.log(response);
+      let { uploader } = await response.json();
+
+
+    }())
+  </script>
 </body>
 
 </html>

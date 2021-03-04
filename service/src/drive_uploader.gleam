@@ -14,8 +14,17 @@ import plum_mail/config.{Config}
 import plum_mail/authentication
 import plum_mail/run_sql
 
+pub type Authorization {
+  Authorization(sub: String, access_token: String, refresh_token: String)
+}
+
+// google drive is an implementation of uploaders
 pub type Uploader {
-  Uploader(id: String, name: String)
+  Uploader(
+    id: String,
+    name: String,
+    authorization: Result(Authorization, String),
+  )
 }
 
 pub fn save_authorization(sub, email_address, refresh_token, access_token) {
@@ -124,6 +133,21 @@ pub fn create_uploader(sub, name) {
   Ok(uploader)
 }
 
+pub fn uploader_by_id(id) {
+  let sql =
+    "
+  SELECT authorization_sub, id, name, refresh_token, access_token
+  FROM drive_uploaders
+  JOIN google_authorizations ON google_authorizations.sub = drive_uploaders.authorization_sub
+  WHERE id = $1
+  "
+  let args = [pgo.text(id)]
+  try uploaders = run_sql.execute(sql, args, row_to_uploader)
+  case uploaders {
+    [uploader] -> Ok(uploader)
+  }
+}
+
 fn row_to_uploader(row) {
   assert Ok(sub) = dynamic.element(row, 0)
   assert Ok(sub) = dynamic.string(sub)
@@ -131,7 +155,19 @@ fn row_to_uploader(row) {
   assert Ok(id) = dynamic.string(id)
   assert Ok(name) = dynamic.element(row, 2)
   assert Ok(name) = dynamic.string(name)
-  Uploader(id, name)
+
+  let refresh_token =
+    dynamic.element(row, 3)
+    |> result.then(dynamic.string)
+  let access_token =
+    dynamic.element(row, 4)
+    |> result.then(dynamic.string)
+
+  case refresh_token, access_token {
+    Ok(refresh_token), Ok(access_token) ->
+      Uploader(id, name, Ok(Authorization(sub, access_token, refresh_token)))
+    _, _ -> Uploader(id, name, Error(sub))
+  }
 }
 
 pub fn edit_uploader() {
@@ -149,8 +185,8 @@ pub fn delete_uploader(id) {
 }
 
 // surface slash representations?
-fn uploader_to_json(u) {
-  let Uploader(id, name) = u
+pub fn uploader_to_json(u) {
+  let Uploader(id, name, ..) = u
   json.object([tuple("id", json.string(id)), tuple("name", json.string(name))])
 }
 

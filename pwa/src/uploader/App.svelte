@@ -14,21 +14,6 @@
     uploaders: Uploader[];
   } | null = null;
 
-  // user = {
-  //   accessToken: "123",
-  //   name: "Bob",
-  //   email: "bobgandalf@btinasdasd.com",
-  //   uploaders: [
-  //     {
-  //       id: "123",
-  //       name: "2021 Reports",
-  //     },
-  //     {
-  //       id: "221",
-  //       name: "Gathering Photos",
-  //     },
-  //   ],
-  // };
   gapi.load("auth2", function () {
     let auth2 = gapi.auth2.init({
       // Scopes to request in addition to 'profile' and 'email'
@@ -212,8 +197,10 @@
               </span>
             </header>
             <p class="my-2 px-2">
-              public link: <a class="underline text-green-600" href=""
-                >http://localhost:8080/uploader/{uploader.id}</a
+              public link: <a
+                class="underline text-green-600"
+                href="http://localhost:8080/uploader#{uploader.id}"
+                >http://localhost:8080/uploader#{uploader.id}</a
               >
             </p>
             <p class="my-2 px-2">

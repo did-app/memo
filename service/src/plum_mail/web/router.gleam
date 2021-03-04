@@ -359,6 +359,43 @@ pub fn route(
         |> result.map_error(fn(_) { todo("this one") })
       uploaders_response(sub, request, config)
     }
+    ["drive_uploaders", id] -> {
+      try uploader = drive_uploader.uploader_by_id(id)
+      let data =
+        json.object([
+          tuple("uploader", drive_uploader.uploader_to_json(uploader)),
+        ])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
+    ["drive_uploaders", id, "start"] -> {
+      try uploader = drive_uploader.uploader_by_id(id)
+      assert Ok(drive_uploader.Authorization(access_token: access_token, ..)) = uploader.authorization
+      let start_request = http.default_req()
+      |> http.set_scheme(http.Https)
+      |> http.set_method(http.Post)
+      |> http.set_host("www.googleapis.com")
+      |> http.set_path("/upload/drive/v3/files")
+      |> http.set_query([tuple("uploadType", "resumable")])
+      |> http.prepend_req_header("content-type", "application/json")
+      // https://stackoverflow.com/questions/27281825/google-storage-api-resumable-upload-ajax-cors-error
+      |> http.prepend_req_header("origin", "http://localhost:8080")
+      |> http.prepend_req_header("authorization", string.concat(["Bearer ", access_token]))
+
+      assert Ok(response) = start_request
+      |> httpc.send()
+      |> io.debug
+
+      assert Ok(location) = http.get_resp_header(response, "location")
+      let data =
+        json.object([
+          tuple("location", json.string(location)),
+        ])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
     // |> Ok
     _ ->
       http.response(404)
@@ -375,7 +412,6 @@ fn uploaders_response(sub, request, config) {
 
   let term = tuple("google_authentication", sub)
   let cookie = signed_message.encode(beam.term_to_binary(term), secret)
-  // TODO set session
   http.response(200)
   |> http.set_resp_cookie(
     "google_authentication",
