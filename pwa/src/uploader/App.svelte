@@ -2,6 +2,7 @@
   export let gapi: any;
   let signIn: (() => void) | null = null;
   let openPicker: ((accessToken: string) => void) | null = null;
+  let picked: { id: string; name: string };
 
   type Uploader = {
     id: string;
@@ -26,7 +27,9 @@
       let authResponse = currentUser.getAuthResponse({
         includeAuthorizationData: true,
       });
-      let { accessToken } = authResponse;
+      console.log(authResponse);
+
+      let { access_token: accessToken } = authResponse;
 
       let name = currentUser.getBasicProfile().getName();
       let email = currentUser.getBasicProfile().getEmail();
@@ -53,14 +56,6 @@
       let data: { uploaders: Uploader[] } = await memoResponse.json();
       let { uploaders } = data;
 
-      // /uploader/create ->
-      // GoogleUser (sub, email address, refresh_token, access_token, expires)
-      // DriveUploader(id, sub FK, name, )
-      // List uploaders
-      // /uploader/uuid/edit -> List uploaders
-      // /uploaders/uuid/delete
-      // On form submit
-      // /uploaders/uuid/start
       // Google user not connected to general user so no way to list all my
       // uploaders accross services, however why have more than one.
       // uploader table google_drive_uploader link to id,
@@ -70,6 +65,8 @@
   });
   gapi.load("picker", function () {
     openPicker = function (accessToken) {
+      console.log(accessToken);
+
       var view = new google.picker.DocsView()
         .setOwnedByMe(true)
         .setIncludeFolders(true)
@@ -83,7 +80,14 @@
         .addView(view)
         .setOAuthToken(accessToken)
         .setDeveloperKey("AIzaSyCnu1REwPCB-GKxUngpiQBAy1zkJYiIqKs")
-        .setCallback(console.log)
+        .setCallback(function (result) {
+          console.log(result);
+
+          if (result.action === "picked") {
+            let { action, id } = result.docs[0];
+            picked = { id, name: result.docs[0].name };
+          }
+        })
         .build();
       picker.setVisible(true);
     };
@@ -178,6 +182,7 @@
 {#if signIn && openPicker}
   <main>
     {#if user}
+      {JSON.stringify(user)}
       <div class="max-w-xl mx-auto mx-2 my-6">
         <p>
           Connected to Google account:
@@ -227,10 +232,17 @@
         </div>
         <div>
           <span>Destination folder</span>
-          <input class="bg-white border" type="text" readonly />
+          <input
+            class="bg-white border"
+            type="text"
+            readonly
+            value={picked?.name}
+          />
           <button
             class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
-            on:click={() => openPicker(user.accessToken)}>Select Folder</button
+            type="button"
+            on:click|preventDefault={() => openPicker(user.accessToken)}
+            >Select Folder</button
           >
         </div>
         <button
