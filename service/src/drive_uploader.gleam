@@ -1,5 +1,16 @@
 import gleam/dynamic
+import gleam/io
+import gleam/list
+import gleam/string
+import gleam/result
+import gleam/beam
+import gleam/http.{Request}
+import gleam/httpc
+import gleam/json
 import gleam/pgo
+import midas/signed_message
+import oauth/client as oauth
+import plum_mail/config.{Config}
 import plum_mail/authentication
 import plum_mail/run_sql
 
@@ -43,6 +54,50 @@ pub fn save_authorization(sub, email_address, refresh_token, access_token) {
   Ok(authorization)
 }
 
+pub fn authorize(code, client) {
+  let auth_request = oauth.token_request(client, code, "http://localhost:8080")
+  try auth_response =
+    httpc.send(auth_request)
+    |> result.map_error(fn(_) { todo("map error for authorize") })
+
+  try raw =
+    json.decode(auth_response.body)
+    |> result.map_error(fn(_) { todo("map error for authorize") })
+
+  try tuple(access_token, refresh_token) =
+    oauth.cast_token_response(dynamic.from(raw))
+    |> result.map_error(fn(_) { todo("map error for authorize") })
+
+  let user_request =
+    http.default_req()
+    |> http.set_scheme(http.Https)
+    |> http.set_host("openidconnect.googleapis.com")
+    |> http.set_path("/v1/userinfo")
+    |> http.prepend_req_header(
+      "authorization",
+      string.concat(["Bearer ", access_token]),
+    )
+  try user_response =
+    user_request
+    |> httpc.send()
+    |> result.map_error(fn(_) { todo("map error for authorize") })
+    |> io.debug
+
+  try raw =
+    json.decode(user_response.body)
+    |> result.map_error(fn(_) { todo("map error for authorize") })
+
+  let raw = dynamic.from(raw)
+  assert Ok(sub) = dynamic.field(raw, "sub")
+  assert Ok(sub) = dynamic.string(sub)
+  assert Ok(email_address) = dynamic.field(raw, "email")
+  assert Ok(email_address) = dynamic.string(email_address)
+
+  try _ = save_authorization(sub, email_address, refresh_token, access_token)
+
+  Ok(sub)
+}
+
 pub fn list_for_authorization(sub) {
   let sql =
     "
@@ -52,11 +107,6 @@ pub fn list_for_authorization(sub) {
   "
   let args = [pgo.text(sub)]
   run_sql.execute(sql, args, row_to_uploader)
-}
-
-pub fn authorize(code, client) {
-  // exchange code
-  todo
 }
 
 // Call them links?
@@ -96,4 +146,34 @@ pub fn delete_uploader(id) {
   let args = [pgo.text(id)]
   try _ = run_sql.execute(sql, args, fn(_) { Nil })
   Ok(Nil)
+}
+
+// surface slash representations?
+fn uploader_to_json(u) {
+  let Uploader(id, name) = u
+  json.object([tuple("id", json.string(id)), tuple("name", json.string(name))])
+}
+
+pub fn uploaders_to_json(uploaders) {
+  json.list(list.map(uploaders, uploader_to_json))
+}
+
+// authentication
+pub fn client_authentication(request, config) {
+  let Config(client_origin: client_origin, secret: secret, ..) = config
+  try Nil = case http.get_req_origin(request) {
+    Ok(from) if from == client_origin -> Ok(Nil)
+    _ -> Error(Nil)
+  }
+  let cookies = http.get_req_cookies(request)
+  case list.key_find(cookies, "google_authentication") {
+    Ok(cookie) -> decode_cookie(cookie, secret)
+  }
+}
+
+pub fn decode_cookie(cookie, secret) {
+  try data = signed_message.decode(cookie, secret)
+  assert Ok(term) = beam.binary_to_term(data)
+  let tuple("google_authentication", sub) = dynamic.unsafe_coerce(term)
+  Ok(sub)
 }

@@ -14,21 +14,21 @@
     uploaders: Uploader[];
   } | null = null;
 
-  user = {
-    accessToken: "123",
-    name: "Bob",
-    email: "bobgandalf@btinasdasd.com",
-    uploaders: [
-      {
-        id: "123",
-        name: "2021 Reports",
-      },
-      {
-        id: "221",
-        name: "Gathering Photos",
-      },
-    ],
-  };
+  // user = {
+  //   accessToken: "123",
+  //   name: "Bob",
+  //   email: "bobgandalf@btinasdasd.com",
+  //   uploaders: [
+  //     {
+  //       id: "123",
+  //       name: "2021 Reports",
+  //     },
+  //     {
+  //       id: "221",
+  //       name: "Gathering Photos",
+  //     },
+  //   ],
+  // };
   gapi.load("auth2", function () {
     let auth2 = gapi.auth2.init({
       // Scopes to request in addition to 'profile' and 'email'
@@ -53,6 +53,11 @@
         "http://localhost:8000/drive_uploaders/authorize",
         {
           method: "POST",
+          credentials: "include",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+          },
           body: JSON.stringify({ code: serverCode }),
         }
       );
@@ -99,7 +104,34 @@
     };
   });
 
-  function createUploader() {}
+  let uploaderName = "";
+  async function createUploader() {
+    if (user) {
+      console.log("Creatin");
+
+      let memoResponse = await fetch(
+        "http://localhost:8000/drive_uploaders/create",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ name: uploaderName }),
+        }
+      );
+      if (memoResponse.status !== 200) {
+        throw "Need to handle this";
+      }
+
+      let data: { uploaders: Uploader[] } = await memoResponse.json();
+      let { uploaders } = data;
+      user = { ...user, uploaders };
+    } else {
+      throw "definetly should be a user";
+    }
+  }
 </script>
 
 <header
@@ -193,11 +225,18 @@
           You have no uploaders, create your first below
         {/each}
       </div>
-      <form class="max-w-xl mx-auto mx-2 my-6">
+      <form
+        class="max-w-xl mx-auto mx-2 my-6"
+        on:submit|preventDefault={createUploader}
+      >
         <h2 class="my-4 text-center text-xl underline">Create an uploader</h2>
         <div>
           <span>name</span>
-          <input class="bg-white border" type="text" />
+          <input
+            class="bg-white border"
+            type="text"
+            bind:value={uploaderName}
+          />
         </div>
         <div>
           <span>Destination folder</span>
@@ -209,7 +248,7 @@
         </div>
         <button
           class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
-          on:submit={createUploader}
+          type="submit"
         >
           Save
         </button>

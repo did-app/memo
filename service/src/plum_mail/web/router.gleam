@@ -9,6 +9,7 @@ import gleam/option.{None, Option, Some}
 import gleam/string
 import gleam/result
 import gleam/uri
+import gleam/beam
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/httpc
@@ -16,8 +17,10 @@ import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid
 // Web/utils let session = utils.extractsession
+import midas/signed_message
 import datetime
 import oauth/client as oauth
+import drive_uploader
 import plum_mail
 import plum_mail/config.{Config}
 import plum_mail/error.{Reason}
@@ -325,19 +328,6 @@ pub fn route(
       //     let raw = dynamic.from(raw)
       //     assert Ok(token) = dynamic.field(raw, "access_token")
       //     assert Ok(token) = dynamic.string(token)
-      //     let request =
-      //       http.default_req()
-      //       |> http.set_scheme(http.Https)
-      //       |> http.set_host("openidconnect.googleapis.com")
-      //       |> http.set_path("/v1/userinfo")
-      //       |> http.prepend_req_header(
-      //         "authorization",
-      //         string.concat(["Bearer ", token]),
-      //       )
-      //     let response =
-      //       request
-      //       |> httpc.send()
-      //       |> io.debug
       //     todo("finish")
       //   }
       // }
@@ -350,20 +340,24 @@ pub fn route(
       let raw = dynamic.from(raw)
       assert Ok(code) = dynamic.field(raw, "code")
       assert Ok(code) = dynamic.string(code)
-      // Fetch your google token
-      assert Ok(auth_request) =
-        oauth.token_request(config.google_client, code, "http://localhost:8080")
-      auth_request
-      |> httpc.send()
+      try sub = drive_uploader.authorize(code, config.google_client)
+      uploaders_response(sub, request, config)
       |> io.debug
-      // TODO set session
-      let uploaders = ["Test uploader", "report uploader"]
-      // Save the subject and the token in session creater uploader
-      let uploaders_data = json.list(list.map(uploaders, json.string))
-      let data = json.object([tuple("uploaders", uploaders_data)])
-      http.response(200)
-      |> web.set_resp_json(data)
-      |> Ok()
+    }
+
+    ["drive_uploaders", "create"] -> {
+      try sub =
+        drive_uploader.client_authentication(request, config)
+        |> result.map_error(fn(_) { todo("this one") })
+      assert Ok(body) = bit_string.to_string(request.body)
+      assert Ok(raw) = json.decode(body)
+      let raw = dynamic.from(raw)
+      assert Ok(name) = dynamic.field(raw, "name")
+      assert Ok(name) = dynamic.string(name)
+      try _ =
+        drive_uploader.create_uploader(sub, name)
+        |> result.map_error(fn(_) { todo("this one") })
+      uploaders_response(sub, request, config)
     }
     // |> Ok
     _ ->
@@ -371,6 +365,38 @@ pub fn route(
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
   }
+}
+
+fn uploaders_response(sub, request, config) {
+  let Config(client_origin: client_origin, secret: secret, ..) = config
+  try uploaders = drive_uploader.list_for_authorization(sub)
+  let uploaders_data = drive_uploader.uploaders_to_json(uploaders)
+  let data = json.object([tuple("uploaders", uploaders_data)])
+
+  let term = tuple("google_authentication", sub)
+  let cookie = signed_message.encode(beam.term_to_binary(term), secret)
+  // TODO set session
+  http.response(200)
+  |> http.set_resp_cookie(
+    "google_authentication",
+    cookie,
+    google_cookie_settings(request),
+  )
+  |> web.set_resp_json(data)
+  |> Ok()
+}
+
+fn google_cookie_settings(request) {
+  let Request(scheme: scheme, ..) = request
+  let defaults = http.cookie_defaults(scheme)
+  let tuple(secure, same_site_policy) = case http.get_req_header(
+    request,
+    "x-forwarded-proto",
+  ) {
+    Ok("https") -> tuple(True, Some(http.None))
+    _ -> tuple(False, Some(http.Lax))
+  }
+  http.CookieAttributes(..defaults, same_site: same_site_policy, secure: secure)
 }
 
 pub fn handle(

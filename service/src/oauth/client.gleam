@@ -1,3 +1,5 @@
+import gleam/dynamic
+import gleam/io
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
@@ -52,13 +54,13 @@ pub fn authorization_request(client, redirect_uri, scopes) {
 }
 
 pub fn cast_authorization_response(raw) {
-  let code = list.key_find(raw, "code")
-  let state = list.key_find(raw, "state")
-  let error = list.key_find(raw, "error")
+  let code = dynamic.field(raw, "code")
+  let state = dynamic.field(raw, "state")
+  let error = dynamic.field(raw, "error")
 
   case code, error {
     // Double depth result
-    Ok(code), Error(Nil) -> Ok(code)
+    Ok(code), Error(_) -> Ok(code)
   }
 }
 
@@ -97,12 +99,25 @@ pub fn token_request(client, code, redirect_uri) {
     "application/x-www-form-urlencoded",
   )
   |> http.set_req_body(uri.query_to_string(query))
-  |> Ok
 }
-// // TODO this is dynamic
-// pub fn cast_token_response(raw) {
-//   let access_token = list.key_find(raw, "access_token")
-//   let token_type = list.key_find(raw, "token_type")
-//   let expires_in = list.key_find(raw, "expires_in")
-//   let refresh_token = list.key_find(raw, "refresh_token")
-// }
+
+pub fn cast_token_response(raw) {
+  io.debug(raw)
+  let access_token =
+    dynamic.field(raw, "access_token")
+    |> result.then(dynamic.string)
+  let refresh_token =
+    dynamic.field(raw, "refresh_token")
+    |> result.then(dynamic.string)
+
+  let state = dynamic.field(raw, "state")
+  let error = dynamic.field(raw, "error")
+
+  case access_token, error {
+    // Double depth result
+    Ok(access_token), Error(_) -> {
+      try refresh_token = refresh_token
+      Ok(tuple(access_token, refresh_token))
+    }
+  }
+}
