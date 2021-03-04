@@ -72,7 +72,7 @@ pub fn auth_token(identifier_id, user_agent, secret) {
 fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try Nil = case http.get_req_origin(request) {
-    Some(from) if from == client_origin -> Ok(Nil)
+    Ok(from) if from == client_origin -> Ok(Nil)
     _ -> Error(Nil)
   }
   let cookies = http.get_req_cookies(request)
