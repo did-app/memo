@@ -344,7 +344,8 @@ pub fn route(
       todo("nothing here")
     }
     // save the token as google
-    ["uploader", "allow"] -> {
+    ["drive_uploaders", "authorize"] -> {
+      io.debug(request)
       assert Ok(body) = bit_string.to_string(request.body)
       assert Ok(raw) = json.decode(body)
       let raw = dynamic.from(raw)
@@ -355,9 +356,16 @@ pub fn route(
       auth_request
       |> httpc.send()
       |> io.debug
+      // TODO set session
+      let uploaders = ["Test uploader", "report uploader"]
       // Save the subject and the token in session creater uploader
-      todo("finish")
-      
+      let uploaders_data = json.list(list.map(uploaders, json.string))
+      let data = json.object([
+        tuple("uploaders", uploaders_data)
+      ])
+            http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
     }
     // |> Ok
     _ ->

@@ -3,47 +3,79 @@
   let signIn: (() => void) | null = null;
   let openPicker: ((accessToken: string) => void) | null = null;
 
-  let user: { accessToken: string; name: string; email: string } | null = null;
+  type Uploader = {
+    id: string;
+    name: string;
+  };
+  let user: {
+    accessToken: string;
+    name: string;
+    email: string;
+    uploaders: Uploader[];
+  } | null = null;
 
+  user = {
+    accessToken: "123",
+    name: "Bob",
+    email: "bobgandalf@btinasdasd.com",
+    uploaders: [
+      {
+        id: "123",
+        name: "2021 Reports",
+      },
+      {
+        id: "221",
+        name: "Gathering Photos",
+      },
+    ],
+  };
   gapi.load("auth2", function () {
     let auth2 = gapi.auth2.init({
       // Scopes to request in addition to 'profile' and 'email'
       scope: "https://www.googleapis.com/auth/drive.file",
     });
-    signIn = function () {
-      auth2.grantOfflineAccess().then(function (authResult: any) {
-        let serverCode: string = authResult["code"];
-        let currentUser = auth2.currentUser.get();
-        let accessToken = currentUser.getAuthResponse({
-          includeAuthorizationData: true,
-        }).access_token;
-
-        console.log(
-          currentUser.getAuthResponse({
-            includeAuthorizationData: true,
-          })
-        );
-        alert("fff");
-        auth2.grantOfflineAccess().then(console.log);
-
-        let name = currentUser.getBasicProfile().getName();
-        let email = currentUser.getBasicProfile().getEmail();
-
-        // Submit to backend grant access
-        // sign in cookie for a session only hit /api
-        // /uploader/authenticate -> List of uploaders
-        // /uploader/create ->
-        // GoogleUser (sub, email address, refresh_token, access_token, expires)
-        // DriveUploader(id, sub FK, name, )
-        // List uploaders
-        // /uploader/uuid/edit -> List uploaders
-        // /uploaders/uuid/delete
-        // On form submit
-        // /uploaders/uuid/start
-        //
-
-        user = { accessToken, name, email };
+    signIn = async function () {
+      let authResult = await auth2.grantOfflineAccess();
+      let serverCode: string = authResult["code"];
+      let currentUser = auth2.currentUser.get();
+      let authResponse = currentUser.getAuthResponse({
+        includeAuthorizationData: true,
       });
+      let { accessToken } = authResponse;
+
+      let name = currentUser.getBasicProfile().getName();
+      let email = currentUser.getBasicProfile().getEmail();
+
+      // sign in cookie for a session only hit /api
+      console.log(serverCode);
+
+      let memoResponse = await fetch(
+        "http://localhost:8000/drive_uploaders/authorize",
+        {
+          method: "POST",
+          body: JSON.stringify({ code: serverCode }),
+        }
+      );
+      if (memoResponse.status !== 200) {
+        throw "Need to handle this";
+      }
+
+      let data: { uploaders: Uploader[] } = await memoResponse.json();
+      let { uploaders } = data;
+
+      // /uploader/create ->
+      // GoogleUser (sub, email address, refresh_token, access_token, expires)
+      // DriveUploader(id, sub FK, name, )
+      // List uploaders
+      // /uploader/uuid/edit -> List uploaders
+      // /uploaders/uuid/delete
+      // On form submit
+      // /uploaders/uuid/start
+      // Google user not connected to general user so no way to list all my
+      // uploaders accross services, however why have more than one.
+      // uploader table google_drive_uploader link to id,
+
+      user = { accessToken, name, email, uploaders };
     };
   });
   gapi.load("picker", function () {
@@ -66,13 +98,17 @@
       picker.setVisible(true);
     };
   });
+
+  function createUploader() {}
 </script>
 
-<header class="w-full max-w-3xl mx-auto border-b p-2 flex items-center">
-  <span class="flex-grow">
+<header
+  class="w-full max-w-3xl mx-auto border-b p-2 flex flex-wrap items-center"
+>
+  <span class="flex-grow mx-2">
     <a class="text-2xl font-light hover:opacity-50 flex items-center" href="/">
       <svg
-        class="float-left w-6 mx-2"
+        class="float-left w-6 mr-2"
         version="1.1"
         id="Layer_1"
         xmlns="http://www.w3.org/2000/svg"
@@ -107,40 +143,83 @@
     </a>
   </span>
   {#if signIn}
-    {#if user}{:else}
-      <button
-        class="bg-green-500 rounded px-2 py-1 text-white font-bold"
-        on:click={signIn}>Sign in</button
-      >
-    {/if}
+    <span class="mx-2">
+      {#if user}
+        <button
+          class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
+          on:click={() => window.location.reload()}>Sign out</button
+        >
+      {:else}
+        <button
+          class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
+          on:click={signIn}>Sign in</button
+        >
+      {/if}
+    </span>
   {/if}
 </header>
 {#if signIn && openPicker}
   <main>
     {#if user}
-      <div class="max-w-3xl mx-auto p-2">
-        <!-- {JSON.stringify(user)} -->
-        uploaders
+      <div class="max-w-xl mx-auto mx-2 my-6">
+        <p>
+          Connected to Google account:
+          <span class="font-bold">{user.name}</span>
+          &lt;<span>{user.email}</span>&gt;
+        </p>
       </div>
-      <div class="max-w-3xl mx-auto p-2">
-        <h1>Create an uploader</h1>
+      <div class="max-w-xl mx-auto mx-2 my-6">
+        <h2 class="my-4 text-center text-xl underline">Uploaders</h2>
+        {#each user.uploaders as uploader}
+          <div class="bg-white border shadow">
+            <header class="flex flex-wrap items-center my-2">
+              <h3 class="px-2 text-lg">{uploader.name}</h3>
+              <span class="flex-grow px-2 text-right">
+                <button>Delete</button>
+                <button>Edit</button>
+              </span>
+            </header>
+            <p class="my-2 px-2">
+              public link: <a class="underline text-green-600" href=""
+                >http://localhost:8080/uploader/{uploader.id}</a
+              >
+            </p>
+            <p class="my-2 px-2">
+              View files in <a class="underline text-green-600" href="">Drive</a
+              >
+            </p>
+          </div>
+        {:else}
+          You have no uploaders, create your first below
+        {/each}
+      </div>
+      <form class="max-w-xl mx-auto mx-2 my-6">
+        <h2 class="my-4 text-center text-xl underline">Create an uploader</h2>
         <div>
           <span>name</span>
-          <input type="text" />
+          <input class="bg-white border" type="text" />
         </div>
-        <p>Destination folder</p>
+        <div>
+          <span>Destination folder</span>
+          <input class="bg-white border" type="text" readonly />
+          <button
+            class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
+            on:click={() => openPicker(user.accessToken)}>Select Folder</button
+          >
+        </div>
         <button
-          class="bg-green-500 rounded px-2 py-1 text-white font-bold"
-          on:click={() => openPicker(user.accessToken)}>Select Folder</button
+          class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
+          on:submit={createUploader}
         >
-      </div>
-      <button> Save </button>
+          Save
+        </button>
+      </form>
     {:else}
       <div class="max-w-xl mx-auto py-20 text-lg">
         <p class="my-4">Connect your cloud storage to receive files.</p>
         <p class="my-4">Files are directly stored in your Google Drive</p>
         <button
-          class="bg-green-500 rounded px-2 py-1 text-white font-bold"
+          class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
           on:click={signIn}>Create an Uploader</button
         >
       </div>
