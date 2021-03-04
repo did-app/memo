@@ -307,7 +307,7 @@ pub fn route(
       |> web.redirect()
       |> Ok()
     }
-    ["oauth", "google", "callback"] -> {
+    ["oauth", "google", "callback"] ->
       // It must be a backend client because the server needs to keep the refresh token
       // assert Ok(request) = oauth.token_request(config.google_client, request)
       // assert Ok(response) =
@@ -342,7 +342,6 @@ pub fn route(
       //   }
       // }
       todo("nothing here")
-    }
     // save the token as google
     ["drive_uploaders", "authorize"] -> {
       io.debug(request)
@@ -352,7 +351,8 @@ pub fn route(
       assert Ok(code) = dynamic.field(raw, "code")
       assert Ok(code) = dynamic.string(code)
       // Fetch your google token
-      assert Ok(auth_request) = oauth.token_request(config.google_client, code, "http://localhost:8080")
+      assert Ok(auth_request) =
+        oauth.token_request(config.google_client, code, "http://localhost:8080")
       auth_request
       |> httpc.send()
       |> io.debug
@@ -360,10 +360,8 @@ pub fn route(
       let uploaders = ["Test uploader", "report uploader"]
       // Save the subject and the token in session creater uploader
       let uploaders_data = json.list(list.map(uploaders, json.string))
-      let data = json.object([
-        tuple("uploaders", uploaders_data)
-      ])
-            http.response(200)
+      let data = json.object([tuple("uploaders", uploaders_data)])
+      http.response(200)
       |> web.set_resp_json(data)
       |> Ok()
     }

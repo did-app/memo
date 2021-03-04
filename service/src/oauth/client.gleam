@@ -75,13 +75,10 @@ pub fn token_request(client, code, redirect_uri) {
 
   // let request_uri = http.req_to_uri(authorization_response)
   // let redirect_uri = Uri(..request_uri, query: None)
-
   // try query =
   //   http.get_query(authorization_response)
   //   |> result.map_error(fn(_) { todo("could not parse query") })
-
   // try code = cast_authorization_response(raw)
-
   let query = [
     tuple("client_id", client_id),
     tuple("client_secret", client_secret),

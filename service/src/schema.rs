@@ -1,4 +1,25 @@
 table! {
+    drive_uploaders (id) {
+        id -> Varchar,
+        authorization_sub -> Nullable<Varchar>,
+        name -> Varchar,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    google_authorizations (sub) {
+        sub -> Varchar,
+        email_address -> Varchar,
+        refresh_token -> Varchar,
+        access_token -> Varchar,
+        inserted_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     groups (id) {
         id -> Uuid,
         name -> Varchar,
@@ -86,6 +107,7 @@ table! {
     }
 }
 
+joinable!(drive_uploaders -> google_authorizations (authorization_sub));
 joinable!(groups -> threads (thread_id));
 joinable!(identifiers -> groups (group_id));
 joinable!(invitations -> groups (group_id));
@@ -98,6 +120,8 @@ joinable!(participations -> identifiers (identifier_id));
 joinable!(participations -> threads (thread_id));
 
 allow_tables_to_appear_in_same_query!(
+    drive_uploaders,
+    google_authorizations,
     groups,
     identifiers,
     invitations,
