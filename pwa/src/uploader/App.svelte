@@ -121,6 +121,13 @@
       throw "definetly should be a user";
     }
   }
+  async function deleteUploader(id: string) {
+    let url = "http://localhost:8000/drive_uploaders/" + id + "/delete";
+    let response = await fetch(url, {
+      credentials: "include",
+    });
+    console.log(response);
+  }
 </script>
 
 <header
@@ -197,8 +204,11 @@
             <header class="flex flex-wrap items-center my-2">
               <h3 class="px-2 text-lg">{uploader.name}</h3>
               <span class="flex-grow px-2 text-right">
-                <button>Delete</button>
-                <button>Edit</button>
+                <button
+                  on:click={() => {
+                    deleteUploader(uploader.id);
+                  }}>Delete</button
+                >
               </span>
             </header>
             <p class="my-2 px-2">
