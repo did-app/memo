@@ -213,14 +213,14 @@
             <p class="my-2 px-2">
               public link: <a
                 class="underline text-green-600"
-                href="http://localhost:8080/uploader#{uploader.id}"
-                >http://localhost:8080/uploader#{uploader.id}</a
+                href="{window.origin}/uploader#{uploader.id}"
+                >{window.origin}/uploader#{uploader.id}</a
               >
             </p>
-            <p class="my-2 px-2">
+            <!-- <p class="my-2 px-2">
               View files in <a class="underline text-green-600" href="">Drive</a
               >
-            </p>
+            </p> -->
           </div>
         {:else}
           You have no uploaders, create your first below
