@@ -72,8 +72,8 @@ pub fn save_authorization(
   Ok(authorization)
 }
 
-pub fn authorize(code, client) {
-  let auth_request = oauth.token_request(client, code, "http://localhost:8080")
+pub fn authorize(code, client, config: Config) {
+  let auth_request = oauth.token_request(client, code, config.client_origin)
   try auth_response =
     httpc.send(auth_request)
     |> result.map_error(fn(_) { todo("map error for authorize") })

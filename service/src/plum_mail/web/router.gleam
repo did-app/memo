@@ -305,7 +305,7 @@ pub fn route(
       let raw = dynamic.from(raw)
       assert Ok(code) = dynamic.field(raw, "code")
       assert Ok(code) = dynamic.string(code)
-      try sub = drive_uploader.authorize(code, config.google_client)
+      try sub = drive_uploader.authorize(code, config.google_client, config)
       uploaders_response(sub, request, config)
     }
 
@@ -371,7 +371,7 @@ pub fn route(
         |> http.set_query([tuple("uploadType", "resumable")])
         |> http.prepend_req_header("content-type", "application/json")
         // https://stackoverflow.com/questions/27281825/google-storage-api-resumable-upload-ajax-cors-error
-        |> http.prepend_req_header("origin", "http://localhost:8080")
+        |> http.prepend_req_header("origin", config.client_origin)
         |> http.prepend_req_header(
           "authorization",
           string.concat(["Bearer ", access_token]),
