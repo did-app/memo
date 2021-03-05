@@ -1,4 +1,5 @@
 import gleam/io
+import gleam/option.{None}
 import gleam/string
 import plum_mail/authentication
 import drive_uploader
@@ -27,8 +28,10 @@ pub fn db_test() {
   )
   |> should.equal(Ok(sub))
 
-  assert Ok(uploader1) = drive_uploader.create_uploader(sub, "First Uploader")
-  assert Ok(uploader2) = drive_uploader.create_uploader(sub, "Second Uploader")
+  assert Ok(uploader1) =
+    drive_uploader.create_uploader(sub, "First Uploader", None, None)
+  assert Ok(uploader2) =
+    drive_uploader.create_uploader(sub, "Second Uploader", None, None)
 
   assert Ok(uploaders) = drive_uploader.list_for_authorization(sub)
   uploaders

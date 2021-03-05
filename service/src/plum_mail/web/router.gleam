@@ -352,10 +352,11 @@ pub fn route(
       assert Ok(body) = bit_string.to_string(request.body)
       assert Ok(raw) = json.decode(body)
       let raw = dynamic.from(raw)
-      assert Ok(name) = dynamic.field(raw, "name")
-      assert Ok(name) = dynamic.string(name)
+      try name = acl.required(raw, "name", acl.as_string)
+      try parent_id = acl.optional(raw, "parent_id", acl.as_string)
+      try parent_name = acl.optional(raw, "parent_name", acl.as_string)
       try _ =
-        drive_uploader.create_uploader(sub, name)
+        drive_uploader.create_uploader(sub, name, parent_id, parent_name)
         |> result.map_error(fn(_) { todo("this one") })
       uploaders_response(sub, request, config)
     }
@@ -381,8 +382,24 @@ pub fn route(
     }
     ["drive_uploaders", id, "start"] -> {
       try uploader = drive_uploader.uploader_by_id(id)
+      assert Ok(body) = bit_string.to_string(request.body)
+      assert Ok(raw) = json.decode(body)
+      let raw = dynamic.from(raw)
+      try name = acl.required(raw, "name", acl.as_string)
+      try mime_type = acl.required(raw, "mime_type", acl.as_string)
       assert Ok(drive_uploader.Authorization(access_token: access_token, ..)) =
         uploader.authorization
+      // https://developers.google.com/drive/api/v3/reference/files/create
+      let parents = case uploader.parent_id {
+        Some(parent_id) -> [json.string(parent_id)]
+        None -> []
+      }
+      let data =
+        json.object([
+          tuple("mimeType", json.string(mime_type)),
+          tuple("name", json.string(name)),
+          tuple("parents", json.list(parents)),
+        ])
       let start_request =
         http.default_req()
         |> http.set_scheme(http.Https)
@@ -397,6 +414,7 @@ pub fn route(
           "authorization",
           string.concat(["Bearer ", access_token]),
         )
+        |> http.set_req_body(json.encode(data))
       assert Ok(response) =
         start_request
         |> httpc.send()

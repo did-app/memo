@@ -1,6 +1,7 @@
 import gleam/dynamic
 import gleam/io
 import gleam/list
+import gleam/option.{None, Option, Some}
 import gleam/string
 import gleam/result
 import gleam/beam
@@ -23,6 +24,7 @@ pub type Uploader {
   Uploader(
     id: String,
     name: String,
+    parent_id: Option(String),
     authorization: Result(Authorization, String),
   )
 }
@@ -110,7 +112,7 @@ pub fn authorize(code, client) {
 pub fn list_for_authorization(sub) {
   let sql =
     "
-  SELECT authorization_sub, id, name
+  SELECT authorization_sub, id, name, parent_id
   FROM drive_uploaders
   WHERE authorization_sub = $1
   "
@@ -119,15 +121,21 @@ pub fn list_for_authorization(sub) {
 }
 
 // Call them links?
-pub fn create_uploader(sub, name) {
+pub fn create_uploader(sub, name, parent_id, parent_name) {
   let id = authentication.random_string(8)
   let sql =
     "
-  INSERT INTO drive_uploaders (authorization_sub, id, name)
-  VALUES ($1, $2, $3)
-  RETURNING authorization_sub, id, name
+  INSERT INTO drive_uploaders (authorization_sub, id, name, parent_id, parent_name)
+  VALUES ($1, $2, $3, $4, $5)
+  RETURNING authorization_sub, id, name, parent_id
   "
-  let args = [pgo.text(sub), pgo.text(id), pgo.text(name)]
+  let args = [
+    pgo.text(sub),
+    pgo.text(id),
+    pgo.text(name),
+    pgo.nullable(parent_id, pgo.text),
+    pgo.nullable(parent_name, pgo.text),
+  ]
   try uploaders = run_sql.execute(sql, args, row_to_uploader)
   assert [uploader] = uploaders
   Ok(uploader)
@@ -136,7 +144,7 @@ pub fn create_uploader(sub, name) {
 pub fn uploader_by_id(id) {
   let sql =
     "
-  SELECT authorization_sub, id, name, refresh_token, access_token
+  SELECT authorization_sub, id, name, parent_id, refresh_token, access_token
   FROM drive_uploaders
   JOIN google_authorizations ON google_authorizations.sub = drive_uploaders.authorization_sub
   WHERE id = $1
@@ -155,18 +163,25 @@ fn row_to_uploader(row) {
   assert Ok(id) = dynamic.string(id)
   assert Ok(name) = dynamic.element(row, 2)
   assert Ok(name) = dynamic.string(name)
+  assert Ok(parent_id) = dynamic.element(row, 3)
+  assert Ok(parent_id) = run_sql.dynamic_option(parent_id, dynamic.string)
 
   let refresh_token =
-    dynamic.element(row, 3)
+    dynamic.element(row, 4)
     |> result.then(dynamic.string)
   let access_token =
-    dynamic.element(row, 4)
+    dynamic.element(row, 5)
     |> result.then(dynamic.string)
 
   case refresh_token, access_token {
     Ok(refresh_token), Ok(access_token) ->
-      Uploader(id, name, Ok(Authorization(sub, access_token, refresh_token)))
-    _, _ -> Uploader(id, name, Error(sub))
+      Uploader(
+        id,
+        name,
+        parent_id,
+        Ok(Authorization(sub, access_token, refresh_token)),
+      )
+    _, _ -> Uploader(id, name, parent_id, Error(sub))
   }
 }
 

@@ -3,6 +3,8 @@ table! {
         id -> Varchar,
         authorization_sub -> Nullable<Varchar>,
         name -> Varchar,
+        parent_id -> Nullable<Varchar>,
+        parent_name -> Nullable<Varchar>,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
     }

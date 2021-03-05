@@ -2,7 +2,7 @@
   export let gapi: any;
   let signIn: (() => void) | null = null;
   let openPicker: ((accessToken: string) => void) | null = null;
-  let picked: { id: string; name: string };
+  let picked: { id: string; name: string } | null = null;
 
   type Uploader = {
     id: string;
@@ -107,7 +107,11 @@
             accept: "application/json",
             "content-type": "application/json",
           },
-          body: JSON.stringify({ name: uploaderName }),
+          body: JSON.stringify({
+            name: uploaderName,
+            parent_id: picked?.id,
+            parent_name: picked?.name,
+          }),
         }
       );
       if (memoResponse.status !== 200) {
