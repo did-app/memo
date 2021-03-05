@@ -1,3 +1,15 @@
+import * as Sentry from "@sentry/browser";
+import { Integrations } from "@sentry/tracing";
+
+const environment = (window.location.hostname === "localhost") ? "local" : "production"
+Sentry.init({
+  dsn: 'https://e3b301fb356a4e61bebf8edb110af5b3@o351506.ingest.sentry.io/5574979',
+  integrations: [
+    new Integrations.BrowserTracing(),
+  ],
+  environment,
+  tracesSampleRate: 1.0,
+});
 import Submit from "./Submit.svelte";
 
 var app = new Submit({
