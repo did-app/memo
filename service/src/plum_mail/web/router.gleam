@@ -299,42 +299,7 @@ pub fn route(
       |> io.debug
     }
 
-    // Potentially in the future it's another standard authorize endpoint
-    ["oauth", "google", "authorize"] -> {
-      let redirect_uri = "http://localhost:8000/oauth/google/callback"
-      let scopes = [
-        "openid", "profile", "email", "https://www.googleapis.com/auth/drive.file",
-      ]
-      config.google_client
-      |> oauth.authorization_request(redirect_uri, scopes)
-      |> web.redirect()
-      |> Ok()
-    }
-    ["oauth", "google", "callback"] ->
-      // It must be a backend client because the server needs to keep the refresh token
-      // assert Ok(request) = oauth.token_request(config.google_client, request)
-      // assert Ok(response) =
-      //   request
-      //   |> httpc.send()
-      //   |> io.debug
-      // oauth lib
-      // uploader
-      // uuid, connector_id
-      // connector
-      // email_address, refresh_token, 
-      // case response.status {
-      //   200 -> {
-      //     assert Ok(raw) = json.decode(response.body)
-      //     let raw = dynamic.from(raw)
-      //     assert Ok(token) = dynamic.field(raw, "access_token")
-      //     assert Ok(token) = dynamic.string(token)
-      //     todo("finish")
-      //   }
-      // }
-      todo("nothing here")
-    // save the token as google
     ["drive_uploaders", "authorize"] -> {
-      io.debug(request)
       assert Ok(body) = bit_string.to_string(request.body)
       assert Ok(raw) = json.decode(body)
       let raw = dynamic.from(raw)
@@ -342,7 +307,6 @@ pub fn route(
       assert Ok(code) = dynamic.string(code)
       try sub = drive_uploader.authorize(code, config.google_client)
       uploaders_response(sub, request, config)
-      |> io.debug
     }
 
     ["drive_uploaders", "create"] -> {
@@ -364,12 +328,10 @@ pub fn route(
       try sub =
         drive_uploader.client_authentication(request, config)
         |> result.map_error(fn(_) { todo("this one") })
-      drive_uploader.delete_uploader(id)
-      // TODO return all the remaining drives
-      http.response(200)
-      |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
-      |> Ok
+      try _ = drive_uploader.delete_uploader(id)
+      uploaders_response(sub, request, config)
     }
+
     ["drive_uploaders", id] -> {
       try uploader = drive_uploader.uploader_by_id(id)
       let data =

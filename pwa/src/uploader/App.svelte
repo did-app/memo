@@ -28,7 +28,6 @@
       let authResponse = currentUser.getAuthResponse({
         includeAuthorizationData: true,
       });
-      console.log(authResponse);
 
       let { access_token: accessToken } = authResponse;
 
@@ -36,7 +35,6 @@
       let email = currentUser.getBasicProfile().getEmail();
 
       // sign in cookie for a session only hit /api
-      console.log(serverCode);
 
       let memoResponse = await fetch(apiOrigin + "/drive_uploaders/authorize", {
         method: "POST",
@@ -63,8 +61,6 @@
   });
   gapi.load("picker", function () {
     openPicker = function (accessToken) {
-      console.log(accessToken);
-
       var view = new google.picker.DocsView()
         .setOwnedByMe(true)
         .setIncludeFolders(true)
@@ -79,8 +75,6 @@
         .setOAuthToken(accessToken)
         .setDeveloperKey("AIzaSyCnu1REwPCB-GKxUngpiQBAy1zkJYiIqKs")
         .setCallback(function (result) {
-          console.log(result);
-
           if (result.action === "picked") {
             let { action, id } = result.docs[0];
             picked = { id, name: result.docs[0].name };
@@ -94,8 +88,6 @@
   let uploaderName = "";
   async function createUploader() {
     if (user) {
-      console.log("Creatin");
-
       let memoResponse = await fetch(apiOrigin + "/drive_uploaders/create", {
         method: "POST",
         credentials: "include",
@@ -121,11 +113,20 @@
     }
   }
   async function deleteUploader(id: string) {
-    let url = apiOrigin + "/drive_uploaders/" + id + "/delete";
-    let response = await fetch(url, {
-      credentials: "include",
-    });
-    console.log(response);
+    if (user) {
+      let url = apiOrigin + "/drive_uploaders/" + id + "/delete";
+      let response = await fetch(url, {
+        credentials: "include",
+      });
+      if (response.status !== 200) {
+        throw "failed to delete";
+      }
+      let data: { uploaders: Uploader[] } = await response.json();
+      let { uploaders } = data;
+      user = { ...user, uploaders };
+    } else {
+      throw "definetly should be a user to delete uploaders";
+    }
   }
 </script>
 
@@ -188,7 +189,6 @@
 {#if signIn && openPicker}
   <main>
     {#if user}
-      {JSON.stringify(user)}
       <div class="max-w-xl mx-auto mx-2 my-6">
         <p>
           Connected to Google account:
