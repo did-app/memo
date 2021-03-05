@@ -6,10 +6,9 @@
   export let text: string | undefined;
 
   const GLANCE_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_GLANCE_ORIGIN;
-  async function fetchPreview(href: string): Preview {
+  async function fetchPreview(href: string): Promise<Preview> {
     let url = new URL(href, window.location.origin);
     if (url.origin === window.location.origin) {
-      // returnurl.origin === window.location.origin
       if ((url.pathname = "/uploader")) {
         return {
           item: "embeded_frame",
@@ -73,12 +72,11 @@
     }
   }
   $: updatePreview(href);
-  // TODO remove any
-  function watchResize(obj: any) {
+  function watchResize(obj: HTMLIFrameElement | null) {
     let scrollHeight = 0;
     function resize() {
-      let h = obj?.contentWindow.document.documentElement.scrollHeight;
-      if (h && h !== scrollHeight) {
+      let h = obj?.contentWindow?.document.documentElement.scrollHeight;
+      if (obj && h && h !== scrollHeight) {
         scrollHeight = h;
         obj.style.height = scrollHeight + "px";
       }
@@ -86,7 +84,7 @@
     }
     resize();
   }
-  let frame: any;
+  let frame: HTMLIFrameElement | null = null;
 </script>
 
 {#if preview}
