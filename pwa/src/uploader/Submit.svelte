@@ -17,6 +17,7 @@
 
     try {
       let form: HTMLFormElement = event.currentTarget;
+      // Could bind to file input
       let input = form.querySelector('input[type="file"]') as HTMLInputElement;
       let file = input.files && input.files[0];
       if (!file) {
@@ -69,7 +70,7 @@
       lastSent
     {/if}
     <form on:submit={sendFile}>
-      <input type="file" />
+      <input type="file" required />
       <button>Submit</button>
     </form>
   {/if}

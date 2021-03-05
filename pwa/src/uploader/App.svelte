@@ -2,7 +2,7 @@
   const apiOrigin = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
   export let gapi: any;
   let signIn: (() => void) | null = null;
-  let openPicker: ((accessToken: string) => void) | null = null;
+  let openPicker: (() => void) | null = null;
   let picked: { id: string; name: string } | null = null;
 
   type Uploader = {
@@ -60,28 +60,32 @@
     };
   });
   gapi.load("picker", function () {
-    openPicker = function (accessToken) {
-      var view = new google.picker.DocsView()
-        .setOwnedByMe(true)
-        .setIncludeFolders(true)
-        .setSelectFolderEnabled(true)
-        // .setEnableTeamDrives(teamDrive)
-        .setMimeTypes("application/vnd.google-apps.folder");
-      var picker = new google.picker.PickerBuilder()
-        .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .enableFeature(google.picker.Feature.SUPPORT_TEAM_DRIVES)
-        .setTitle("Select a folder to use for the uploads")
-        .addView(view)
-        .setOAuthToken(accessToken)
-        .setDeveloperKey("AIzaSyCnu1REwPCB-GKxUngpiQBAy1zkJYiIqKs")
-        .setCallback(function (result) {
-          if (result.action === "picked") {
-            let { action, id } = result.docs[0];
-            picked = { id, name: result.docs[0].name };
-          }
-        })
-        .build();
-      picker.setVisible(true);
+    let google = (window as any).google;
+
+    openPicker = function () {
+      if (user) {
+        var view = new google.picker.DocsView()
+          .setOwnedByMe(true)
+          .setIncludeFolders(true)
+          .setSelectFolderEnabled(true)
+          // .setEnableTeamDrives(teamDrive)
+          .setMimeTypes("application/vnd.google-apps.folder");
+        var picker = new google.picker.PickerBuilder()
+          .enableFeature(google.picker.Feature.NAV_HIDDEN)
+          .enableFeature(google.picker.Feature.SUPPORT_TEAM_DRIVES)
+          .setTitle("Select a folder to use for the uploads")
+          .addView(view)
+          .setOAuthToken(user.accessToken)
+          .setDeveloperKey("AIzaSyCnu1REwPCB-GKxUngpiQBAy1zkJYiIqKs")
+          .setCallback(function (result: any) {
+            if (result.action === "picked") {
+              let { id } = result.docs[0];
+              picked = { id, name: result.docs[0].name };
+            }
+          })
+          .build();
+        picker.setVisible(true);
+      }
     };
   });
 
@@ -237,6 +241,7 @@
             class="bg-white border"
             type="text"
             bind:value={uploaderName}
+            required
           />
         </div>
         <div>
@@ -246,12 +251,12 @@
             type="text"
             readonly
             value={picked?.name}
+            required
           />
           <button
             class="bg-gray-800 rounded px-2 py-1 text-white font-bold"
             type="button"
-            on:click|preventDefault={() => openPicker(user.accessToken)}
-            >Select Folder</button
+            on:click|preventDefault={openPicker}>Select Folder</button
           >
         </div>
         <button
