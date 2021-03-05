@@ -24,6 +24,8 @@ services:
     environment:
       SNOWPACK_PUBLIC_API_ORIGIN: http://localhost:8000
       SNOWPACK_PUBLIC_GLANCE_ORIGIN: http://localhost:9000
+      SNOWPACK_PUBLIC_GOOGLE_CLIENT_ID: 296333378796-jeod0t6c4vmd26shsodjnqor389ibfmt.apps.googleusercontent.com
+
   service:
     build:
       context: ./service

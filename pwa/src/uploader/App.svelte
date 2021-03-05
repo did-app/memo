@@ -1,5 +1,7 @@
 <script lang="typescript">
   const apiOrigin = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
+  const clientId = (import.meta as any).env.SNOWPACK_PUBLIC_GOOGLE_CLIENT_ID;
+
   export let gapi: any;
   let signIn: (() => void) | null = null;
   let openPicker: (() => void) | null = null;
@@ -18,6 +20,7 @@
 
   gapi.load("auth2", function () {
     let auth2 = gapi.auth2.init({
+      client_id: clientId,
       // Scopes to request in addition to 'profile' and 'email'
       scope: "https://www.googleapis.com/auth/drive.file",
     });
