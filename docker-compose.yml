@@ -48,6 +48,9 @@ services:
       DATABASE_SSL: "FALSE"
       POSTMARK_API_TOKEN: POSTMARK_DUMMY_TOKEN
       SECRET: DEV_SECRET
+      # These are test tokens, limited to localhost usage
+      GOOGLE_CLIENT_ID: 296333378796-jeod0t6c4vmd26shsodjnqor389ibfmt.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: IIb09tEkEKlmbD0bAtmNfVpD
       SENTRY_DSN: https://e3b301fb356a4e61bebf8edb110af5b3@o351506.ingest.sentry.io/5574979
       ENVIRONMENT: local
     depends_on:

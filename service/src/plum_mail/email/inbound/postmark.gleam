@@ -36,7 +36,10 @@ pub fn handle(params, config) {
 
   // If domain is in supported domain, 
   case tuple(to_email_address.value, to_hash) {
-    tuple("peter@sendmemo.app", _) | tuple("peter@sendmemo.app", _) | tuple("team@sendmemo.app", _) -> {
+    tuple("peter@sendmemo.app", _) | tuple("peter@sendmemo.app", _) | tuple(
+      "team@sendmemo.app",
+      _,
+    ) -> {
       // We just send back, assuming it is set up properly
       // look up profile/account/contact
       let from = to_email_address

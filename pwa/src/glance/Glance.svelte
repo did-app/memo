@@ -6,10 +6,17 @@
   export let text: string | undefined;
 
   const GLANCE_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_GLANCE_ORIGIN;
-  async function fetchPreview(href: string) {
+  async function fetchPreview(href: string): Promise<Preview> {
     let url = new URL(href, window.location.origin);
     if (url.origin === window.location.origin) {
-      return { preview: "plain" };
+      if ((url.pathname = "/uploader")) {
+        return {
+          item: "embeded_frame",
+          iframe: url.toString(),
+        };
+      } else {
+        return { item: "plain" };
+      }
     } else {
       let r = await fetch(GLANCE_ORIGIN + "/?" + href);
 
@@ -29,6 +36,7 @@
     | { item: "plain" }
     | { item: "image" }
     | { item: "embeded_video"; iframe: string }
+    | { item: "embeded_frame"; iframe: string }
     | { item: "embeded_html"; html: string }
     | {
         item: "table";
@@ -64,12 +72,11 @@
     }
   }
   $: updatePreview(href);
-  // TODO remove any
-  function watchResize(obj: any) {
+  function watchResize(obj: HTMLIFrameElement | null) {
     let scrollHeight = 0;
     function resize() {
-      let h = obj.contentWindow.document.documentElement.scrollHeight;
-      if (h !== scrollHeight) {
+      let h = obj?.contentWindow?.document.documentElement.scrollHeight;
+      if (obj && h && h !== scrollHeight) {
         scrollHeight = h;
         obj.style.height = scrollHeight + "px";
       }
@@ -77,7 +84,7 @@
     }
     resize();
   }
-  let frame: any;
+  let frame: HTMLIFrameElement | null = null;
 </script>
 
 {#if preview}
@@ -102,6 +109,14 @@
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
       />
     </div>
+  {:else if preview.item === "embeded_frame"}
+    <iframe
+      title="name required"
+      src={preview.iframe}
+      frameborder="0"
+      allowfullscreen
+      style="width: 100%;"
+    />
   {:else if preview.item === "embeded_html"}
     <iframe
       title={href}

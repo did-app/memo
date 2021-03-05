@@ -213,7 +213,7 @@ fn block_to_text(block) {
         ),
         "",
       )
-    Annotation(blocks: [first, ..], ..) -> block_to_text(first)
+    Annotation(blocks: [first, .._], ..) -> block_to_text(first)
     Annotation(..) -> ""
     Prompt(..) -> ""
   }
@@ -238,7 +238,7 @@ fn dispatch_to_identifier(record, config) {
   ) = record
 
   let preview = case content {
-    Ok([first, ..]) -> Some(block_to_text(first))
+    Ok([first, .._]) -> Some(block_to_text(first))
     _ -> None
   }
 

@@ -9,6 +9,7 @@ import gleam/option.{None, Option, Some}
 import gleam/string
 import gleam/result
 import gleam/uri
+import gleam/beam
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
 import gleam/httpc
@@ -16,7 +17,10 @@ import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid
 // Web/utils let session = utils.extractsession
+import midas/signed_message
 import datetime
+import oauth/client as oauth
+import drive_uploader
 import plum_mail
 import plum_mail/config.{Config}
 import plum_mail/error.{Reason}
@@ -294,11 +298,132 @@ pub fn route(
       postmark.handle(params, config)
       |> io.debug
     }
+
+    ["drive_uploaders", "authorize"] -> {
+      assert Ok(body) = bit_string.to_string(request.body)
+      assert Ok(raw) = json.decode(body)
+      let raw = dynamic.from(raw)
+      assert Ok(code) = dynamic.field(raw, "code")
+      assert Ok(code) = dynamic.string(code)
+      try sub = drive_uploader.authorize(code, config.google_client, config)
+      uploaders_response(sub, request, config)
+    }
+
+    ["drive_uploaders", "create"] -> {
+      try sub =
+        drive_uploader.client_authentication(request, config)
+        |> result.map_error(fn(_) { todo("this one") })
+      assert Ok(body) = bit_string.to_string(request.body)
+      assert Ok(raw) = json.decode(body)
+      let raw = dynamic.from(raw)
+      try name = acl.required(raw, "name", acl.as_string)
+      try parent_id = acl.optional(raw, "parent_id", acl.as_string)
+      try parent_name = acl.optional(raw, "parent_name", acl.as_string)
+      try _ =
+        drive_uploader.create_uploader(sub, name, parent_id, parent_name)
+        |> result.map_error(fn(_) { todo("this one") })
+      uploaders_response(sub, request, config)
+    }
+    ["drive_uploaders", id, "delete"] -> {
+      try sub =
+        drive_uploader.client_authentication(request, config)
+        |> result.map_error(fn(_) { todo("this one") })
+      try _ = drive_uploader.delete_uploader(id)
+      uploaders_response(sub, request, config)
+    }
+
+    ["drive_uploaders", id] -> {
+      try uploader = drive_uploader.uploader_by_id(id)
+      let data =
+        json.object([
+          tuple("uploader", drive_uploader.uploader_to_json(uploader)),
+        ])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
+    ["drive_uploaders", id, "start"] -> {
+      try uploader = drive_uploader.uploader_by_id(id)
+      assert Ok(body) = bit_string.to_string(request.body)
+      assert Ok(raw) = json.decode(body)
+      let raw = dynamic.from(raw)
+      try name = acl.required(raw, "name", acl.as_string)
+      try mime_type = acl.required(raw, "mime_type", acl.as_string)
+      assert Ok(drive_uploader.Authorization(access_token: access_token, ..)) =
+        uploader.authorization
+      // https://developers.google.com/drive/api/v3/reference/files/create
+      let parents = case uploader.parent_id {
+        Some(parent_id) -> [json.string(parent_id)]
+        None -> []
+      }
+      let data =
+        json.object([
+          tuple("mimeType", json.string(mime_type)),
+          tuple("name", json.string(name)),
+          tuple("parents", json.list(parents)),
+        ])
+      let start_request =
+        http.default_req()
+        |> http.set_scheme(http.Https)
+        |> http.set_method(http.Post)
+        |> http.set_host("www.googleapis.com")
+        |> http.set_path("/upload/drive/v3/files")
+        |> http.set_query([tuple("uploadType", "resumable")])
+        |> http.prepend_req_header("content-type", "application/json")
+        // https://stackoverflow.com/questions/27281825/google-storage-api-resumable-upload-ajax-cors-error
+        |> http.prepend_req_header("origin", config.client_origin)
+        |> http.prepend_req_header(
+          "authorization",
+          string.concat(["Bearer ", access_token]),
+        )
+        |> http.set_req_body(json.encode(data))
+      assert Ok(response) =
+        start_request
+        |> httpc.send()
+        |> io.debug
+      assert Ok(location) = http.get_resp_header(response, "location")
+      let data = json.object([tuple("location", json.string(location))])
+      http.response(200)
+      |> web.set_resp_json(data)
+      |> Ok()
+    }
+    // |> Ok
     _ ->
       http.response(404)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
       |> Ok
   }
+}
+
+fn uploaders_response(sub, request, config) {
+  let Config(client_origin: client_origin, secret: secret, ..) = config
+  try uploaders = drive_uploader.list_for_authorization(sub)
+  let uploaders_data = drive_uploader.uploaders_to_json(uploaders)
+  let data = json.object([tuple("uploaders", uploaders_data)])
+
+  let term = tuple("google_authentication", sub)
+  let cookie = signed_message.encode(beam.term_to_binary(term), secret)
+  http.response(200)
+  |> http.set_resp_cookie(
+    "google_authentication",
+    cookie,
+    google_cookie_settings(request),
+  )
+  |> web.set_resp_json(data)
+  |> Ok()
+}
+
+fn google_cookie_settings(request) {
+  let Request(scheme: scheme, ..) = request
+  let defaults = http.cookie_defaults(scheme)
+  let tuple(secure, same_site_policy) = case http.get_req_header(
+    request,
+    "x-forwarded-proto",
+  ) {
+    Ok("https") -> tuple(True, Some(http.None))
+    _ -> tuple(False, Some(http.Lax))
+  }
+  http.CookieAttributes(..defaults, same_site: same_site_policy, secure: secure)
 }
 
 pub fn handle(

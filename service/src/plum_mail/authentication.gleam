@@ -12,7 +12,7 @@ import plum_mail/run_sql
 import plum_mail/error
 import plum_mail/identifier
 
-fn random_string(entropy) {
+pub fn random_string(entropy) {
   crypto.strong_random_bytes(entropy)
   |> base.url_encode64(False)
 }

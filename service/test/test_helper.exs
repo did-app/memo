@@ -1,6 +1,6 @@
 ExUnit.start()
 
-test_files = Path.wildcard(Path.join(__DIR__, "plum_mail/**/*_test.gleam"))
+test_files = Path.wildcard(Path.join(__DIR__, "**/*_test.gleam"))
 
 for test_file <- test_files do
   gleam_name =
