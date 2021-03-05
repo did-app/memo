@@ -29,17 +29,23 @@ pub type Uploader {
   )
 }
 
-pub fn save_authorization(sub, email_address, refresh_token, access_token) {
+pub fn save_authorization(
+  sub,
+  email_address,
+  refresh_token,
+  expires_in,
+  access_token,
+) {
   let sql =
     "
     WITH updated_authorization AS (
       UPDATE google_authorizations 
-      SET email_address = $2, refresh_token = $3, access_token = $4 
+      SET email_address = $2, refresh_token = $3, expires_in = $4, access_token = $5 
       WHERE sub = $1
       RETURNING *
     ), new_authorization AS (
-      INSERT INTO google_authorizations (sub, email_address, refresh_token, access_token)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO google_authorizations (sub, email_address, refresh_token, expires_in, access_token)
+      VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (sub) DO NOTHING
       RETURNING *
     )
@@ -51,6 +57,7 @@ pub fn save_authorization(sub, email_address, refresh_token, access_token) {
     pgo.text(sub),
     pgo.text(email_address),
     pgo.text(refresh_token),
+    pgo.int(expires_in),
     pgo.text(access_token),
   ]
 
@@ -75,7 +82,7 @@ pub fn authorize(code, client) {
     json.decode(auth_response.body)
     |> result.map_error(fn(_) { todo("map error for authorize") })
 
-  try tuple(access_token, refresh_token) =
+  try tuple(access_token, refresh_token, expires_in) =
     oauth.cast_token_response(dynamic.from(raw))
     |> result.map_error(fn(_) { todo("map error for authorize") })
 
@@ -104,7 +111,14 @@ pub fn authorize(code, client) {
   assert Ok(email_address) = dynamic.field(raw, "email")
   assert Ok(email_address) = dynamic.string(email_address)
 
-  try _ = save_authorization(sub, email_address, refresh_token, access_token)
+  try _ =
+    save_authorization(
+      sub,
+      email_address,
+      refresh_token,
+      expires_in,
+      access_token,
+    )
 
   Ok(sub)
 }

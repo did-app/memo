@@ -75,12 +75,6 @@ pub fn token_request(client, code, redirect_uri) {
   ) = client
   let AbsoluteUri(scheme, host, path) = endpoint
 
-  // let request_uri = http.req_to_uri(authorization_response)
-  // let redirect_uri = Uri(..request_uri, query: None)
-  // try query =
-  //   http.get_query(authorization_response)
-  //   |> result.map_error(fn(_) { todo("could not parse query") })
-  // try code = cast_authorization_response(raw)
   let query = [
     tuple("client_id", client_id),
     tuple("client_secret", client_secret),
@@ -102,22 +96,24 @@ pub fn token_request(client, code, redirect_uri) {
 }
 
 pub fn cast_token_response(raw) {
-  io.debug(raw)
   let access_token =
     dynamic.field(raw, "access_token")
     |> result.then(dynamic.string)
   let refresh_token =
     dynamic.field(raw, "refresh_token")
     |> result.then(dynamic.string)
+  let expires_in =
+    dynamic.field(raw, "expires_in")
+    |> result.then(dynamic.int)
 
-  let state = dynamic.field(raw, "state")
   let error = dynamic.field(raw, "error")
 
   case access_token, error {
     // Double depth result
     Ok(access_token), Error(_) -> {
       try refresh_token = refresh_token
-      Ok(tuple(access_token, refresh_token))
+      try expires_in = expires_in
+      Ok(tuple(access_token, refresh_token, expires_in))
     }
   }
 }

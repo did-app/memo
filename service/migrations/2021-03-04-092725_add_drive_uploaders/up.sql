@@ -2,6 +2,7 @@ CREATE TABLE google_authorizations (
   sub VARCHAR PRIMARY KEY,
   email_address VARCHAR NOT NULL UNIQUE,
   refresh_token VARCHAR NOT NULL,
+  expires_in INTEGER NOT NULL,
   access_token VARCHAR NOT NULL,
 
   inserted_at TIMESTAMP NOT NULL DEFAULT NOW(),

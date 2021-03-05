@@ -15,6 +15,7 @@ table! {
         sub -> Varchar,
         email_address -> Varchar,
         refresh_token -> Varchar,
+        expires_in -> Int4,
         access_token -> Varchar,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,

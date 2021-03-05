@@ -16,6 +16,7 @@ pub fn db_test() {
     sub,
     email_address,
     refresh_token,
+    3599,
     access_token,
   )
   |> should.equal(Ok(sub))
@@ -24,6 +25,7 @@ pub fn db_test() {
     sub,
     email_address,
     "refrest_2323",
+    3599,
     "access_999",
   )
   |> should.equal(Ok(sub))
