@@ -37,8 +37,9 @@
         body: file,
       });
       lastSent = file.name;
-    } catch {
+    } catch (err) {
       error = "Failed to send file";
+      throw err;
     } finally {
       sending = false;
     }
