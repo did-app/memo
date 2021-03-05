@@ -55,7 +55,9 @@
 
 <div class="p-4 border-4 border-dashed">
   {#if uploader}
-    {uploader.name}
+    <h1>
+      {uploader.name || ""}
+    </h1>
   {:else}
     Loading
   {/if}
@@ -67,7 +69,7 @@
       {error}
     {/if}
     {#if lastSent}
-      lastSent
+      Sent: {lastSent}
     {/if}
     <form on:submit={sendFile}>
       <input type="file" required />
