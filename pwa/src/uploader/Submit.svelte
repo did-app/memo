@@ -1,5 +1,5 @@
 <script lang="typescript">
-  // let state: "loading" | "ready" | "uploading" = "loading";
+  const apiOrigin = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
   let id = window.location.hash.slice(1);
   type Uploader = { name: string; parent_id: string; parent_name: string };
   let uploader: Uploader | null = null;
@@ -20,7 +20,7 @@
       }
       console.log(file);
 
-      let url = "http://localhost:8000/drive_uploaders/" + id + "/start";
+      let url = apiOrigin + "/drive_uploaders/" + id + "/start";
       let response = await fetch(url, {
         method: "POST",
         body: JSON.stringify({ name: file.name, mime_type: file.type }),
@@ -41,7 +41,7 @@
     }
   }
   (async function (params) {
-    let response = await fetch("http://localhost:8000/drive_uploaders/" + id);
+    let response = await fetch(apiOrigin + "/drive_uploaders/" + id);
     console.log(response);
     let data = await response.json();
     console.log(data);

@@ -1,4 +1,5 @@
 <script lang="typescript">
+  const apiOrigin = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
   export let gapi: any;
   let signIn: (() => void) | null = null;
   let openPicker: ((accessToken: string) => void) | null = null;
@@ -37,18 +38,15 @@
       // sign in cookie for a session only hit /api
       console.log(serverCode);
 
-      let memoResponse = await fetch(
-        "http://localhost:8000/drive_uploaders/authorize",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            accept: "application/json",
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({ code: serverCode }),
-        }
-      );
+      let memoResponse = await fetch(apiOrigin + "/drive_uploaders/authorize", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ code: serverCode }),
+      });
       if (memoResponse.status !== 200) {
         throw "Need to handle this";
       }
@@ -98,22 +96,19 @@
     if (user) {
       console.log("Creatin");
 
-      let memoResponse = await fetch(
-        "http://localhost:8000/drive_uploaders/create",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            accept: "application/json",
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            name: uploaderName,
-            parent_id: picked?.id,
-            parent_name: picked?.name,
-          }),
-        }
-      );
+      let memoResponse = await fetch(apiOrigin + "/drive_uploaders/create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: uploaderName,
+          parent_id: picked?.id,
+          parent_name: picked?.name,
+        }),
+      });
       if (memoResponse.status !== 200) {
         throw "Need to handle this";
       }
@@ -126,7 +121,7 @@
     }
   }
   async function deleteUploader(id: string) {
-    let url = "http://localhost:8000/drive_uploaders/" + id + "/delete";
+    let url = apiOrigin + "/drive_uploaders/" + id + "/delete";
     let response = await fetch(url, {
       credentials: "include",
     });
