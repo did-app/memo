@@ -26,7 +26,6 @@ import perimeter/scrub
 import plum_mail
 import plum_mail/config.{Config}
 import plum_mail/error.{Reason}
-import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/authentication/authenticate_by_code
@@ -132,7 +131,7 @@ pub fn route(
     }
     // Note cookies wont get set on the ajax auth step
     ["sign_in"] -> {
-      try raw = acl.parse_form(request)
+      try raw = input.parse_form(request)
       try params = authenticate_by_password.from_form(raw)
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)

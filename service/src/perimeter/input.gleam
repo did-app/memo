@@ -2,8 +2,10 @@ import gleam/atom
 import gleam/bit_string
 import gleam/dynamic
 import gleam/list
+import gleam/map
 import gleam/option.{None, Some}
 import gleam/string
+import gleam/uri
 import gleam/http.{Request}
 import gleam/json
 import gleam_uuid
@@ -110,6 +112,20 @@ fn get_body(request) {
         BadInput,
         "Invalid request body",
         "The request body contained invalid UTF-8 values.",
+      ))
+  }
+}
+
+pub fn parse_form(request) {
+  try _ = check_method(request, [http.Post])
+  try body = get_body(request)
+  case uri.parse_query(body) {
+    Ok(params) -> Ok(map.from_list(params))
+    Error(Nil) ->
+      Error(Report(
+        BadInput,
+        "Invalid request form",
+        "The request body contained invalid form data.",
       ))
   }
 }
