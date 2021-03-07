@@ -112,7 +112,12 @@ pub fn validate_link_token(token_string) {
       },
     )
   case challenge_tokens {
-    [] -> todo
+    [] ->
+      Error(Report(
+        Unprocessable,
+        "Forbidden",
+        "Unable to complete action due to invalid link token",
+      ))
     [tuple(identifier, validator, current)] -> {
       try _ =
         validate(secret, validator)

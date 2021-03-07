@@ -39,7 +39,7 @@ pub fn execute(params, config) {
     identifier.find_or_create(email_address)
     |> result.map_error(fn(_) { todo("what is the send error here") })
 
-  assert Ok(token) = authentication.generate_link_token(identifier_id)
+  try token = authentication.generate_link_token(identifier_id)
   let config.Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,

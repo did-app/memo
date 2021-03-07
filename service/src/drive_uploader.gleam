@@ -206,10 +206,6 @@ fn row_to_uploader(row) {
   |> Ok
 }
 
-pub fn edit_uploader() {
-  todo
-}
-
 pub fn delete_uploader(id) {
   let sql = "
   DELETE FROM drive_uploaders
