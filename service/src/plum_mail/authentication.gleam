@@ -79,16 +79,16 @@ pub fn generate_link_token(identifier_id) {
   |> Ok()
 }
 
+const invalid_link_token = Report(
+  Unprocessable,
+  "Forbidden",
+  "Unable to complete action due to invalid link token",
+)
+
 pub fn validate_link_token(token_string) {
   try Token(selector, secret) =
     parse_token(token_string)
-    |> result.map_error(fn(_: Nil) {
-      Report(
-        Unprocessable,
-        "Forbidden",
-        "Unable to complete action due to invalid link token",
-      )
-    })
+    |> result.map_error(fn(_: Nil) { invalid_link_token })
   let sql =
     "
       SELECT i.id, i.email_address, i.greeting, i.group_id, validator, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
@@ -112,30 +112,14 @@ pub fn validate_link_token(token_string) {
       },
     )
   case challenge_tokens {
-    [] ->
-      Error(Report(
-        Unprocessable,
-        "Forbidden",
-        "Unable to complete action due to invalid link token",
-      ))
+    [] -> Error(invalid_link_token)
     [tuple(identifier, validator, current)] -> {
       try _ =
         validate(secret, validator)
-        |> result.map_error(fn(_: Nil) {
-          Report(
-            Unprocessable,
-            "Forbidden",
-            "Unable to complete action due to invalid link token",
-          )
-        })
+        |> result.map_error(fn(_: Nil) { invalid_link_token })
       case current {
         True -> Ok(identifier)
-        False ->
-          Error(Report(
-            Unprocessable,
-            "Forbidden",
-            "Unable to complete action due to invalid link token",
-          ))
+        False -> Error(invalid_link_token)
       }
     }
   }
