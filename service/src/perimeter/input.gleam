@@ -120,7 +120,8 @@ pub fn parse_form(request) {
   try _ = check_method(request, [http.Post])
   try body = get_body(request)
   case uri.parse_query(body) {
-    Ok(params) -> Ok(map.from_list(params))
+    // We make it dynamic to match JSON, there are very few form endpoints fo good enough for now
+    Ok(params) -> Ok(dynamic.from(map.from_list(params)))
     Error(Nil) ->
       Error(Report(
         BadInput,

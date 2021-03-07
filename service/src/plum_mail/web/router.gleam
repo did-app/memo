@@ -131,7 +131,9 @@ pub fn route(
     // Note cookies wont get set on the ajax auth step
     ["sign_in"] -> {
       try raw = input.parse_form(request)
-      try params = authenticate_by_password.from_form(raw)
+      try params =
+        authenticate_by_password.params(raw)
+        |> result.map_error(input.to_report(_, "Form field"))
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       web.redirect(string.append(config.client_origin, "/"))

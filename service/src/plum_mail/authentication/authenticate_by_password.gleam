@@ -1,6 +1,7 @@
 import gleam/dynamic.{Dynamic}
 import gleam/map
 import perimeter/input
+import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
 
@@ -16,32 +17,39 @@ pub fn params(raw: Dynamic) {
   |> Ok
 }
 
-pub fn from_form(raw) {
-  assert Ok(email_address) = map.get(raw, "email_address")
-  assert Ok(email_address) = email_address.validate(email_address)
-  assert Ok(password) = map.get(raw, "password")
-  Params(email_address, password)
-  |> Ok
-}
-
 pub fn run(params) {
   // Hardcoded because we don't want password word field on db model yet.
   // looking at alternative (OAuth) solutions
   // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
   let Params(email_address, password) = params
-  assert Ok(email_address) = case email_address.value {
-    "peter@sendmemo.app" -> {
-      let True = password == "OnionLightningSea"
-      assert Ok(email_address) = email_address.validate("peter@sendmemo.app")
-      Ok(email_address)
-    }
-    "richard@sendmemo.app" -> {
-      let True = password == "SproutGlitterWednesday"
-      assert Ok(email_address) = email_address.validate("richard@sendmemo.app")
-      Ok(email_address)
-    }
+  try email_address = case email_address.value {
+    "peter@sendmemo.app" ->
+      // TODO secure compare
+      case password == "OnionLightningSea" {
+        True -> Ok(email_address)
+        False ->
+          Error(Report(
+            Unprocessable,
+            "Invalid credentials",
+            "Could not sign in with provided email and password.",
+          ))
+      }
+    "richard@sendmemo.app" ->
+      case password == "SproutGlitterWednesday" {
+        True -> Ok(email_address)
+        False ->
+          Error(Report(
+            Unprocessable,
+            "Invalid credentials",
+            "Could not sign in with provided email and password.",
+          ))
+      }
+    _ ->
+      Error(Report(
+        Unprocessable,
+        "Invalid credentials",
+        "Could not sign in with provided email and password.",
+      ))
   }
-  assert Ok(x) = identifier.find_or_create(email_address)
-  // TODO handle DB errors
-  Ok(x)
+  identifier.find_or_create(email_address)
 }
