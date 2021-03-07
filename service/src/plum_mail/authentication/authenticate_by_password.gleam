@@ -13,7 +13,6 @@ pub type Params {
   Params(email_address: EmailAddress, password: String)
 }
 
-// Note params is never used
 pub fn params(raw: Dynamic) {
   try email_address = input.required(raw, "email_address", input.as_email)
   try password = input.required(raw, "password", input.as_string)
