@@ -159,11 +159,10 @@ pub fn route(
     }
     ["authenticate", "session"] -> {
       try client = web.identify_client(request, config)
+      // Could require_authentication but with a handle
       case client {
         Some(identifier_id) -> {
-          try lookup =
-            identifier.fetch_by_id(identifier_id)
-            |> result.map_error(fn(_) { todo("handle db errors") })
+          try lookup = identifier.fetch_by_id(identifier_id)
           case lookup {
             Some(identifier) ->
               // This one doesn't set a session as it already has one
@@ -176,10 +175,7 @@ pub fn route(
       }
     }
     ["authenticate", "email"] -> {
-      try params = input.parse_json(request)
-      try params =
-        claim_email_address.params(params)
-        |> result.map_error(fn(_) { todo("what is the send error here") })
+      try params = claim_email_address.cast(request)
       try _ = claim_email_address.execute(params, config)
       no_content()
     }
@@ -197,9 +193,7 @@ pub fn route(
         assert Ok(greeting) = dynamic.element(row, 0)
         dynamic.unsafe_coerce(greeting)
       }
-      try db_response =
-        run_sql.execute(sql, args, mapper)
-        |> result.map_error(fn(_) { todo("what is the send error here") })
+      try db_response = run_sql.execute(sql, args, mapper)
       let greeting = case db_response {
         [greeting] -> greeting
         [] -> json.null()
@@ -239,7 +233,6 @@ pub fn route(
           email_address,
           content,
         )
-        |> result.map_error(fn(_) { todo("what is the send error here") })
       http.response(200)
       |> web.set_resp_json(conversation.to_json(conversation))
       |> Ok
@@ -254,7 +247,7 @@ pub fn route(
         |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
-      assert Ok(conversation) =
+      try conversation =
         conversation.create_group(name, identifier_id, invitees)
       http.response(200)
       |> web.set_resp_json(conversation.to_json(conversation))
@@ -266,9 +259,7 @@ pub fn route(
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      try memos =
-        conversation.load_memos(thread_id, identifier_id, user_id)
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
+      try memos = conversation.load_memos(thread_id, identifier_id, user_id)
       let data = json.list(memos)
       http.response(200)
       |> web.set_resp_json(data)
@@ -295,7 +286,6 @@ pub fn route(
           author_id,
           blocks,
         )
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       let data = conversation.memo_to_json(latest)
       http.response(200)
       |> web.set_resp_json(data)
@@ -310,40 +300,28 @@ pub fn route(
         |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      // TODO this needs to be on the conversation level
       try _ =
         conversation.acknowledge(identifier_id, user_id, thread_id, position)
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       no_content()
     }
 
     ["inbound"] -> {
       try params = input.parse_json(request)
       postmark.handle(params, config)
-      |> result.map_error(fn(_) { todo("How far down do we work on reports") })
-      // Note this one needs to report somewhere weird  
-      |> io.debug
     }
 
     ["drive_uploaders", "authorize"] -> {
-      assert Ok(body) = bit_string.to_string(request.body)
-      assert Ok(raw) = json.decode(body)
-      let raw = dynamic.from(raw)
-      assert Ok(code) = dynamic.field(raw, "code")
-      assert Ok(code) = dynamic.string(code)
-      try sub =
-        drive_uploader.authorize(code, config.google_client, config)
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
+      try raw = input.parse_json(request)
+      try code =
+        input.required(raw, "code", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try sub = drive_uploader.authorize(code, config.google_client, config)
       uploaders_response(sub, request, config)
     }
 
     ["drive_uploaders", "create"] -> {
-      try sub =
-        drive_uploader.client_authentication(request, config)
-        |> result.map_error(fn(_) { todo("this one") })
-      assert Ok(body) = bit_string.to_string(request.body)
-      assert Ok(raw) = json.decode(body)
-      let raw = dynamic.from(raw)
+      try sub = drive_uploader.client_authentication(request, config)
+      try raw = input.parse_json(request)
       try name =
         input.required(raw, "name", input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
@@ -353,25 +331,17 @@ pub fn route(
       try parent_name =
         input.optional(raw, "parent_name", input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
-      try _ =
-        drive_uploader.create_uploader(sub, name, parent_id, parent_name)
-        |> result.map_error(fn(_) { todo("this one") })
+      try _ = drive_uploader.create_uploader(sub, name, parent_id, parent_name)
       uploaders_response(sub, request, config)
     }
     ["drive_uploaders", id, "delete"] -> {
-      try sub =
-        drive_uploader.client_authentication(request, config)
-        |> result.map_error(fn(_) { todo("this one") })
-      try _ =
-        drive_uploader.delete_uploader(id)
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
+      try sub = drive_uploader.client_authentication(request, config)
+      try _ = drive_uploader.delete_uploader(id)
       uploaders_response(sub, request, config)
     }
 
     ["drive_uploaders", id] -> {
-      try uploader =
-        drive_uploader.uploader_by_id(id)
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
+      try uploader = drive_uploader.uploader_by_id(id)
       let data =
         json.object([
           tuple("uploader", drive_uploader.uploader_to_json(uploader)),
@@ -381,9 +351,7 @@ pub fn route(
       |> Ok()
     }
     ["drive_uploaders", id, "start"] -> {
-      try uploader =
-        drive_uploader.uploader_by_id(id)
-        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
+      try uploader = drive_uploader.uploader_by_id(id)
       assert Ok(body) = bit_string.to_string(request.body)
       assert Ok(raw) = json.decode(body)
       let raw = dynamic.from(raw)
@@ -441,9 +409,7 @@ pub fn route(
 
 fn uploaders_response(sub, request, config) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
-  try uploaders =
-    drive_uploader.list_for_authorization(sub)
-    |> result.map_error(fn(_) { todo })
+  try uploaders = drive_uploader.list_for_authorization(sub)
 
   let uploaders_data = drive_uploader.uploaders_to_json(uploaders)
   let data = json.object([tuple("uploaders", uploaders_data)])

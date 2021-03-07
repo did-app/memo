@@ -20,17 +20,25 @@ pub fn handle(params, config) {
     ..,
   ) = config
 
-  try to_full = input.required(params, "ToFull", input.as_list(_, Ok))
+  try to_full =
+    input.required(params, "ToFull", input.as_list(_, Ok))
+    |> result.map_error(input.to_report(_, "Parameter"))
   assert [to_full] = to_full
-  try to_hash = input.required(to_full, "MailboxHash", input.as_string)
-  try to_email_address = input.required(to_full, "Email", input.as_email)
+  try to_hash =
+    input.required(to_full, "MailboxHash", input.as_string)
+    |> result.map_error(input.to_report(_, "Parameter"))
 
-  try from_email_address = input.required(params, "From", input.as_email)
+  try to_email_address =
+    input.required(to_full, "Email", input.as_email)
+    |> result.map_error(input.to_report(_, "Parameter"))
+
+  try from_email_address =
+    input.required(params, "From", input.as_email)
+    |> result.map_error(input.to_report(_, "Parameter"))
 
   try Personal(identifier_id, ..) =
     identifier.find_or_create(from_email_address)
-    |> result.map_error(fn(_) { todo("THis should have a mapper function") })
-  assert Ok(code) = authentication.generate_link_token(identifier_id)
+  try code = authentication.generate_link_token(identifier_id)
   let link =
     [client_origin, email_address.to_path(to_email_address), "#code=", code]
     |> string.concat()

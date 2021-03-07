@@ -9,6 +9,7 @@ import gleam/http.{Request}
 import gleam/httpc
 import gleam/json
 import gleam/pgo
+import perimeter/scrub.{BadInput, Report}
 import midas/signed_message
 import oauth/client as oauth
 import plum_mail/config.{Config}
@@ -228,16 +229,21 @@ pub fn client_authentication(request, config) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try Nil = case http.get_req_origin(request) {
     Ok(from) if from == client_origin -> Ok(Nil)
-    _ -> Error(Nil)
+    _ -> Error(Report(BadInput, "Forbidden", "Origin not allowed"))
   }
   let cookies = http.get_req_cookies(request)
   case list.key_find(cookies, "google_authentication") {
+    // TODO handle missin here
     Ok(cookie) -> decode_cookie(cookie, secret)
   }
 }
 
 pub fn decode_cookie(cookie, secret) {
-  try data = signed_message.decode(cookie, secret)
+  try data =
+    signed_message.decode(cookie, secret)
+    |> result.map_error(fn(_: Nil) {
+      Report(BadInput, "Invalid Session", "Did not send valid cookie data")
+    })
   assert Ok(term) = beam.binary_to_term(data)
   let tuple("google_authentication", sub) = dynamic.unsafe_coerce(term)
   Ok(sub)

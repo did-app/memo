@@ -14,6 +14,12 @@ import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal}
 
+pub fn cast(request) {
+  try raw = input.parse_json(request)
+  params(raw)
+  |> result.map_error(input.to_report(_, "Parameter"))
+}
+
 pub type Params {
   Params(email_address: EmailAddress, target: Option(String))
 }
