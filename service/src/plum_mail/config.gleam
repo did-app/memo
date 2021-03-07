@@ -1,6 +1,8 @@
 import gleam/map
 import gleam/os
+import gleam/result
 import gleam_sentry
+import perimeter/input.{CastFailure, NotProvided}
 import oauth/client as oauth
 
 pub type Config {
@@ -18,16 +20,18 @@ pub type Config {
 pub fn from_env() {
   let env = os.get_env()
 
-  assert Ok(origin) = map.get(env, "ORIGIN")
-  assert Ok(client_origin) = map.get(env, "CLIENT_ORIGIN")
-  assert Ok(postmark_api_token) = map.get(env, "POSTMARK_API_TOKEN")
-  assert Ok(secret) = map.get(env, "SECRET")
-  assert Ok(environment) = map.get(env, "ENVIRONMENT")
-  assert Ok(sentry_dsn) = map.get(env, "SENTRY_DSN")
-  assert Ok(sentry_client) = gleam_sentry.init(sentry_dsn, environment)
+  try origin = required(env, "ORIGIN")
+  try client_origin = required(env, "CLIENT_ORIGIN")
+  try postmark_api_token = required(env, "POSTMARK_API_TOKEN")
+  try secret = required(env, "SECRET")
+  try environment = required(env, "ENVIRONMENT")
+  try sentry_dsn = required(env, "SENTRY_DSN")
+  try sentry_client =
+    gleam_sentry.init(sentry_dsn, environment)
+    |> result.map_error(fn(_: Nil) { CastFailure("SENTRY_DSN", "dsn") })
 
-  assert Ok(google_client_id) = map.get(env, "GOOGLE_CLIENT_ID")
-  assert Ok(google_client_secret) = map.get(env, "GOOGLE_CLIENT_SECRET")
+  try google_client_id = required(env, "GOOGLE_CLIENT_ID")
+  try google_client_secret = required(env, "GOOGLE_CLIENT_SECRET")
   let google_client =
     oauth.Client(
       google_client_id,
@@ -45,4 +49,12 @@ pub fn from_env() {
     google_client,
     sentry_client,
   )
+  |> Ok
+}
+
+fn required(raw, key) {
+  case map.get(raw, key) {
+    Ok(value) -> Ok(value)
+    Error(_) -> Error(NotProvided(key))
+  }
 }

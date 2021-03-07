@@ -218,11 +218,11 @@ fn block_to_text(block) {
 }
 
 fn dispatch_to_identifier(record, config) {
-  let Config(
+  assert Ok(Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
     ..,
-  ) = config
+  )) = config
   let tuple(
     recipient_id,
     recipient_email_address,

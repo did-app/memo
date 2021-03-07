@@ -193,12 +193,13 @@ pub fn route(
       assert Ok(greetings) =
         list.try_map(
           rows,
-          fn(row) -> Ok(Json) {
+          fn(row) {
             try greeting = dynamic.element(row, 0)
-            Ok(dynamic.unsafe_coerce(greeting))
+            let greeting: Json = dynamic.unsafe_coerce(greeting)
+            Ok(greeting)
           },
         )
-      let greeting = case db_response {
+      let greeting = case greetings {
         [greeting] -> greeting
         [] -> json.null()
       }
