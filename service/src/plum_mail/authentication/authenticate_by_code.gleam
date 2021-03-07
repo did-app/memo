@@ -1,6 +1,7 @@
 import gleam/dynamic.{Dynamic}
 import gleam/result
-import plum_mail/acl
+import perimeter/input
+import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/authentication
 import plum_mail/error
 
@@ -9,7 +10,7 @@ pub type Params {
 }
 
 pub fn params(raw: Dynamic) {
-  try code = acl.required(raw, "code", acl.as_string)
+  try code = input.required(raw, "code", input.as_string)
   Params(code)
   |> Ok
 }
@@ -19,5 +20,11 @@ pub fn run(params) {
   // link tokens last for ever so might as well be a signed message as well
   // delete and use purpose link token
   authentication.validate_link_token(code)
-  |> result.map_error(fn(_: Nil) { error.Forbidden })
+  |> result.map_error(fn(_: Nil) {
+    Report(
+      Unprocessable,
+      "Forbidden",
+      "Unable to complete action due to invalid link token",
+    )
+  })
 }

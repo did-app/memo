@@ -1,6 +1,6 @@
 import gleam/dynamic.{Dynamic}
 import gleam/map
-import plum_mail/acl
+import perimeter/input
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
 
@@ -10,8 +10,8 @@ pub type Params {
 
 // Note params is never used
 pub fn params(raw: Dynamic) {
-  try email_address = acl.required(raw, "email_address", acl.as_email)
-  try password = acl.required(raw, "password", acl.as_string)
+  try email_address = input.required(raw, "email_address", input.as_email)
+  try password = input.required(raw, "password", input.as_string)
   Params(email_address, password)
   |> Ok
 }
@@ -41,5 +41,7 @@ pub fn run(params) {
       Ok(email_address)
     }
   }
-  identifier.find_or_create(email_address)
+  assert Ok(x) = identifier.find_or_create(email_address)
+  // TODO handle DB errors
+  Ok(x)
 }

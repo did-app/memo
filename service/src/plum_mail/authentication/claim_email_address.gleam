@@ -8,7 +8,7 @@ import gleam/http
 import gleam/httpc
 import postmark/client as postmark
 import plum_mail/config
-import plum_mail/acl
+import perimeter/input
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
@@ -19,8 +19,8 @@ pub type Params {
 }
 
 pub fn params(raw: Dynamic) {
-  try email_address = acl.required(raw, "email_address", acl.as_email)
-  try target = acl.optional(raw, "target", acl.as_string)
+  try email_address = input.required(raw, "email_address", input.as_email)
+  try target = input.optional(raw, "target", input.as_string)
   Params(email_address, target)
   |> Ok
 }
@@ -29,7 +29,10 @@ pub fn params(raw: Dynamic) {
 // some accounts have more than one authentication id
 pub fn execute(params, config) {
   let Params(email_address: email_address, target: target) = params
-  try Personal(identifier_id, ..) = identifier.find_or_create(email_address)
+  try Personal(identifier_id, ..) =
+    identifier.find_or_create(email_address)
+    |> result.map_error(fn(_) { todo("what is the send error here") })
+
   assert Ok(token) = authentication.generate_link_token(identifier_id)
   let config.Config(
     postmark_api_token: postmark_api_token,

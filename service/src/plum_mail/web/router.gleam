@@ -21,6 +21,8 @@ import midas/signed_message
 import datetime
 import oauth/client as oauth
 import drive_uploader
+import perimeter/input
+import perimeter/scrub
 import plum_mail
 import plum_mail/config.{Config}
 import plum_mail/error.{Reason}
@@ -109,13 +111,15 @@ fn no_content() {
 pub fn route(
   request,
   config: config.Config,
-) -> Result(Response(BitBuilder), Reason) {
+) -> Result(Response(BitBuilder), scrub.Report(scrub.Code)) {
   case http.path_segments(request) {
     [] -> no_content()
     // Note this endpoint is never used 
     ["authenticate", "password"] -> {
-      try raw = acl.parse_json(request)
-      try params = authenticate_by_password.params(raw)
+      try raw = input.parse_json(request)
+      try params =
+        authenticate_by_password.params(raw)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
@@ -141,8 +145,10 @@ pub fn route(
       |> Ok
     }
     ["authenticate", "code"] -> {
-      try raw = acl.parse_json(request)
-      try params = authenticate_by_code.params(raw)
+      try raw = input.parse_json(request)
+      try params =
+        authenticate_by_code.params(raw)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try identifier = authenticate_by_code.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
@@ -157,7 +163,9 @@ pub fn route(
       try client = web.identify_client(request, config)
       case client {
         Some(identifier_id) -> {
-          try lookup = identifier.fetch_by_id(identifier_id)
+          try lookup =
+            identifier.fetch_by_id(identifier_id)
+            |> result.map_error(fn(_) { todo("handle db errors") })
           case lookup {
             Some(identifier) ->
               // This one doesn't set a session as it already has one
@@ -170,8 +178,10 @@ pub fn route(
       }
     }
     ["authenticate", "email"] -> {
-      try params = acl.parse_json(request)
-      try params = claim_email_address.params(params)
+      try params = input.parse_json(request)
+      try params =
+        claim_email_address.params(params)
+        |> result.map_error(fn(_) { todo("what is the send error here") })
       try _ = claim_email_address.execute(params, config)
       no_content()
     }
@@ -189,7 +199,9 @@ pub fn route(
         assert Ok(greeting) = dynamic.element(row, 0)
         dynamic.unsafe_coerce(greeting)
       }
-      try db_response = run_sql.execute(sql, args, mapper)
+      try db_response =
+        run_sql.execute(sql, args, mapper)
+        |> result.map_error(fn(_) { todo("what is the send error here") })
       let greeting = case db_response {
         [greeting] -> greeting
         [] -> json.null()
@@ -203,7 +215,7 @@ pub fn route(
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
       assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      try raw = acl.parse_json(request)
+      try raw = input.parse_json(request)
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       let _ = conversation.update_greeting(identifier_id, user_id, blocks)
@@ -213,8 +225,10 @@ pub fn route(
     // should return conversation
     // rest would be POST identifiers/id/conversations but is conversations really nested under?
     ["identifiers", identifier_id, "start_direct"] -> {
-      try params = acl.parse_json(request)
-      try email_address = acl.required(params, "email_address", acl.as_email)
+      try params = input.parse_json(request)
+      try email_address =
+        input.required(params, "email_address", input.as_email)
+        |> result.map_error(input.to_report(_, "Parameter"))
       assert Ok(content) = dynamic.field(params, dynamic.from("content"))
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
@@ -227,15 +241,19 @@ pub fn route(
           email_address,
           content,
         )
+        |> result.map_error(fn(_) { todo("what is the send error here") })
       http.response(200)
       |> web.set_resp_json(conversation.to_json(conversation))
       |> Ok
     }
     ["groups", "create"] -> {
-      try params = acl.parse_json(request)
-      try name = acl.required(params, "name", acl.as_string)
+      try params = input.parse_json(request)
+      try name =
+        input.required(params, "name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try invitees =
-        acl.required(params, "invitees", acl.as_list(_, acl.as_uuid))
+        input.required(params, "invitees", input.as_list(_, input.as_uuid))
+        |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
       assert Ok(conversation) =
@@ -250,7 +268,9 @@ pub fn route(
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      try memos = conversation.load_memos(thread_id, identifier_id, user_id)
+      try memos =
+        conversation.load_memos(thread_id, identifier_id, user_id)
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       let data = json.list(memos)
       http.response(200)
       |> web.set_resp_json(data)
@@ -259,8 +279,10 @@ pub fn route(
     ["identifiers", identifier_id, "threads", thread_id, "post"] -> {
       assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
-      try raw = acl.parse_json(request)
-      try position = acl.required(raw, "position", acl.as_int)
+      try raw = input.parse_json(request)
+      try position =
+        input.required(raw, "position", input.as_int)
+        |> result.map_error(input.to_report(_, "Parameter"))
       assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
@@ -275,6 +297,7 @@ pub fn route(
           author_id,
           blocks,
         )
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       let data = conversation.memo_to_json(latest)
       http.response(200)
       |> web.set_resp_json(data)
@@ -283,19 +306,24 @@ pub fn route(
     ["identifiers", identifier_id, "threads", thread_id, "acknowledge"] -> {
       assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
       assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
-      try raw = acl.parse_json(request)
-      try position = acl.required(raw, "position", acl.as_int)
+      try raw = input.parse_json(request)
+      try position =
+        input.required(raw, "position", input.as_int)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
       // TODO this needs to be on the conversation level
       try _ =
         conversation.acknowledge(identifier_id, user_id, thread_id, position)
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       no_content()
     }
 
     ["inbound"] -> {
-      try params = acl.parse_json(request)
+      try params = input.parse_json(request)
       postmark.handle(params, config)
+      |> result.map_error(fn(_) { todo("How far down do we work on reports") })
+      // Note this one needs to report somewhere weird  
       |> io.debug
     }
 
@@ -305,7 +333,9 @@ pub fn route(
       let raw = dynamic.from(raw)
       assert Ok(code) = dynamic.field(raw, "code")
       assert Ok(code) = dynamic.string(code)
-      try sub = drive_uploader.authorize(code, config.google_client, config)
+      try sub =
+        drive_uploader.authorize(code, config.google_client, config)
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       uploaders_response(sub, request, config)
     }
 
@@ -316,9 +346,15 @@ pub fn route(
       assert Ok(body) = bit_string.to_string(request.body)
       assert Ok(raw) = json.decode(body)
       let raw = dynamic.from(raw)
-      try name = acl.required(raw, "name", acl.as_string)
-      try parent_id = acl.optional(raw, "parent_id", acl.as_string)
-      try parent_name = acl.optional(raw, "parent_name", acl.as_string)
+      try name =
+        input.required(raw, "name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try parent_id =
+        input.optional(raw, "parent_id", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try parent_name =
+        input.optional(raw, "parent_name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try _ =
         drive_uploader.create_uploader(sub, name, parent_id, parent_name)
         |> result.map_error(fn(_) { todo("this one") })
@@ -328,12 +364,16 @@ pub fn route(
       try sub =
         drive_uploader.client_authentication(request, config)
         |> result.map_error(fn(_) { todo("this one") })
-      try _ = drive_uploader.delete_uploader(id)
+      try _ =
+        drive_uploader.delete_uploader(id)
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       uploaders_response(sub, request, config)
     }
 
     ["drive_uploaders", id] -> {
-      try uploader = drive_uploader.uploader_by_id(id)
+      try uploader =
+        drive_uploader.uploader_by_id(id)
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       let data =
         json.object([
           tuple("uploader", drive_uploader.uploader_to_json(uploader)),
@@ -343,12 +383,18 @@ pub fn route(
       |> Ok()
     }
     ["drive_uploaders", id, "start"] -> {
-      try uploader = drive_uploader.uploader_by_id(id)
+      try uploader =
+        drive_uploader.uploader_by_id(id)
+        |> result.map_error(fn(_) { todo("How far down do we work on reports") })
       assert Ok(body) = bit_string.to_string(request.body)
       assert Ok(raw) = json.decode(body)
       let raw = dynamic.from(raw)
-      try name = acl.required(raw, "name", acl.as_string)
-      try mime_type = acl.required(raw, "mime_type", acl.as_string)
+      try name =
+        input.required(raw, "name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try mime_type =
+        input.required(raw, "mime_type", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
       assert Ok(drive_uploader.Authorization(access_token: access_token, ..)) =
         uploader.authorization
       // https://developers.google.com/drive/api/v3/reference/files/create
@@ -397,7 +443,10 @@ pub fn route(
 
 fn uploaders_response(sub, request, config) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
-  try uploaders = drive_uploader.list_for_authorization(sub)
+  try uploaders =
+    drive_uploader.list_for_authorization(sub)
+    |> result.map_error(fn(_) { todo })
+
   let uploaders_data = drive_uploader.uploaders_to_json(uploaders)
   let data = json.object([tuple("uploaders", uploaders_data)])
 
@@ -438,7 +487,7 @@ pub fn handle(
     _ ->
       case route(request, config) {
         Ok(response) -> response
-        Error(reason) -> acl.error_response(reason)
+        Error(report) -> scrub.to_response(report)
       }
   }
   case request.path {
