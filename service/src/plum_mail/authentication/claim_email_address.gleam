@@ -6,6 +6,7 @@ import gleam/string
 import gleam/json
 import gleam/http
 import gleam/httpc
+import perimeter/scrub.{Report, UnknownError}
 import postmark/client as postmark
 import plum_mail/config
 import perimeter/input
@@ -35,9 +36,7 @@ pub fn params(raw: Dynamic) {
 // some accounts have more than one authentication id
 pub fn execute(params, config) {
   let Params(email_address: email_address, target: target) = params
-  try Personal(identifier_id, ..) =
-    identifier.find_or_create(email_address)
-    |> result.map_error(fn(_) { todo("what is the send error here") })
+  try Personal(identifier_id, ..) = identifier.find_or_create(email_address)
 
   try token = authentication.generate_link_token(identifier_id)
   let config.Config(
@@ -76,15 +75,18 @@ pub fn execute(params, config) {
         json.nullable(profile_email_address, json.string),
       ),
     ])
-  try _ =
-    postmark.send_email_with_template(
-      from.value,
-      to.value,
-      template_alias,
-      template_model,
-      postmark_api_token,
+  postmark.send_email_with_template(
+    from.value,
+    to.value,
+    template_alias,
+    template_model,
+    postmark_api_token,
+  )
+  |> result.map_error(fn(_) {
+    Report(
+      UnknownError,
+      "Postmark Error",
+      "Failed to send email using Postmark service",
     )
-    |> io.debug()
-    |> result.map_error(fn(_) { todo("what is the send error here") })
-  Ok(Nil)
+  })
 }
