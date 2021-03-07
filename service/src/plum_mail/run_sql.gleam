@@ -59,7 +59,7 @@ pub fn cast_datetime(raw: Dynamic) {
   Ok(dt)
 }
 
-pub fn execute(sql, args, mapper) {
+pub fn execute(sql, args) {
   let conn = atom.create_from_string("default")
   try tuple(_, _, rows) =
     pgo.query(conn, sql, args)
@@ -68,17 +68,5 @@ pub fn execute(sql, args, mapper) {
       io.debug(reason)
       Report(UnknownError, "Database Error", "Database query failed")
     })
-
-  // TODO remove mapping
-  list.map(rows, mapper)
-  |> Ok()
-}
-
-//  return error with a not found type that can use try
-//  replace with list.head
-pub fn single(rows) {
-  case rows {
-    [] -> None
-    [value] -> Some(value)
-  }
+  Ok(rows)
 }

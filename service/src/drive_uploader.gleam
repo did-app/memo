@@ -62,13 +62,15 @@ pub fn save_authorization(
     pgo.text(access_token),
   ]
 
-  let mapper = fn(row) {
-    // Use assert because it's a code error to fail
-    assert Ok(sub) = dynamic.element(row, 0)
-    assert Ok(sub) = dynamic.string(sub)
-    sub
-  }
-  try authorizations = run_sql.execute(sql, args, mapper)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(authorizations) =
+    list.try_map(
+      rows,
+      fn(row) {
+        try sub = dynamic.element(row, 0)
+        dynamic.string(sub)
+      },
+    )
   assert [authorization] = authorizations
   Ok(authorization)
 }
@@ -132,7 +134,9 @@ pub fn list_for_authorization(sub) {
   WHERE authorization_sub = $1
   "
   let args = [pgo.text(sub)]
-  run_sql.execute(sql, args, row_to_uploader)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(uploaders) = list.try_map(rows, row_to_uploader)
+  Ok(uploaders)
 }
 
 // Call them links?
@@ -151,7 +155,8 @@ pub fn create_uploader(sub, name, parent_id, parent_name) {
     pgo.nullable(parent_id, pgo.text),
     pgo.nullable(parent_name, pgo.text),
   ]
-  try uploaders = run_sql.execute(sql, args, row_to_uploader)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(uploaders) = list.try_map(rows, row_to_uploader)
   assert [uploader] = uploaders
   Ok(uploader)
 }
@@ -165,21 +170,21 @@ pub fn uploader_by_id(id) {
   WHERE id = $1
   "
   let args = [pgo.text(id)]
-  try uploaders = run_sql.execute(sql, args, row_to_uploader)
-  case uploaders {
-    [uploader] -> Ok(uploader)
-  }
+  try rows = run_sql.execute(sql, args)
+  assert Ok(uploaders) = list.try_map(rows, row_to_uploader)
+  assert [uploader] = uploaders
+  Ok(uploader)
 }
 
 fn row_to_uploader(row) {
-  assert Ok(sub) = dynamic.element(row, 0)
-  assert Ok(sub) = dynamic.string(sub)
-  assert Ok(id) = dynamic.element(row, 1)
-  assert Ok(id) = dynamic.string(id)
-  assert Ok(name) = dynamic.element(row, 2)
-  assert Ok(name) = dynamic.string(name)
-  assert Ok(parent_id) = dynamic.element(row, 3)
-  assert Ok(parent_id) = run_sql.dynamic_option(parent_id, dynamic.string)
+  try sub = dynamic.element(row, 0)
+  try sub = dynamic.string(sub)
+  try id = dynamic.element(row, 1)
+  try id = dynamic.string(id)
+  try name = dynamic.element(row, 2)
+  try name = dynamic.string(name)
+  try parent_id = dynamic.element(row, 3)
+  try parent_id = run_sql.dynamic_option(parent_id, dynamic.string)
 
   let refresh_token =
     dynamic.element(row, 4)
@@ -198,6 +203,7 @@ fn row_to_uploader(row) {
       )
     _, _ -> Uploader(id, name, parent_id, Error(sub))
   }
+  |> Ok
 }
 
 pub fn edit_uploader() {
@@ -210,7 +216,7 @@ pub fn delete_uploader(id) {
   WHERE id = $1
   "
   let args = [pgo.text(id)]
-  try _ = run_sql.execute(sql, args, fn(_) { Nil })
+  try _ = run_sql.execute(sql, args)
   Ok(Nil)
 }
 

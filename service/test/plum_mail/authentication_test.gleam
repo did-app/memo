@@ -34,8 +34,8 @@ pub fn link_token_should_not_be_valid_after_seven_days_test() {
     WHERE selector = $1
     "
   let args = [pgo.text(selector)]
-  assert Ok(_) = run_sql.execute(sql, args, fn(_) { Nil })
+  assert Ok(_) = run_sql.execute(sql, args)
 
-  authentication.validate_link_token(link_token)
-  |> should.equal(Error(Nil))
+  assert Error(_) = authentication.validate_link_token(link_token)
+  Nil
 }

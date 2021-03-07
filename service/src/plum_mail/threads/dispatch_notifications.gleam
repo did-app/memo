@@ -67,30 +67,30 @@ pub fn load() {
   AND participants.identifier_id <> memos.authored_by
   ORDER BY memos.inserted_at ASC
   "
+  assert Ok(rows) = run_sql.execute(sql, [])
   assert Ok(deliveries) =
-    run_sql.execute(
-      sql,
-      [],
+    list.try_map(
+      rows,
       fn(row) {
-        assert Ok(recipient_id) = dynamic.element(row, 0)
-        assert Ok(recipient_id) = dynamic.bit_string(recipient_id)
+        try recipient_id = dynamic.element(row, 0)
+        try recipient_id = dynamic.bit_string(recipient_id)
         let recipient_id = run_sql.binary_to_uuid4(recipient_id)
-        assert Ok(recipient_email_address) = dynamic.element(row, 1)
-        assert Ok(recipient_email_address) =
-          dynamic.string(recipient_email_address)
-        assert Ok(recipient_email_address) =
+        try recipient_email_address = dynamic.element(row, 1)
+        try recipient_email_address = dynamic.string(recipient_email_address)
+        try recipient_email_address =
           email_address.validate(recipient_email_address)
-        assert Ok(thread_id) = dynamic.element(row, 2)
-        assert Ok(thread_id) = dynamic.bit_string(thread_id)
-        assert thread_id = run_sql.binary_to_uuid4(thread_id)
+          |> result.map_error(fn(_) { todo })
+        try thread_id = dynamic.element(row, 2)
+        try thread_id = dynamic.bit_string(thread_id)
+        let thread_id = run_sql.binary_to_uuid4(thread_id)
 
-        assert Ok(content) = dynamic.element(row, 3)
-        assert content = dynamic.typed_list(content, block_from_dynamic)
-        assert Ok(position) = dynamic.element(row, 4)
-        assert Ok(position) = dynamic.int(position)
+        try content = dynamic.element(row, 3)
+        let content = dynamic.typed_list(content, block_from_dynamic)
+        try position = dynamic.element(row, 4)
+        try position = dynamic.int(position)
 
-        assert Ok(contact) = dynamic.element(row, 5)
-        assert Ok(contact) = run_sql.dynamic_option(contact, dynamic.string)
+        try contact = dynamic.element(row, 5)
+        try contact = run_sql.dynamic_option(contact, dynamic.string)
         let contact =
           option.map(
             contact,
@@ -100,19 +100,16 @@ pub fn load() {
             },
           )
 
-        assert Ok(group_name) = dynamic.element(row, 6)
-        assert Ok(group_name) =
-          run_sql.dynamic_option(group_name, dynamic.string)
-        assert Ok(group_id) = dynamic.element(row, 7)
-        assert Ok(group_id) =
-          run_sql.dynamic_option(group_id, dynamic.bit_string)
+        try group_name = dynamic.element(row, 6)
+        try group_name = run_sql.dynamic_option(group_name, dynamic.string)
+        try group_id = dynamic.element(row, 7)
+        try group_id = run_sql.dynamic_option(group_id, dynamic.bit_string)
         let group_id =
           option.map(group_id, fn(id) { run_sql.binary_to_uuid4(id) })
 
-        assert Ok(author) = dynamic.element(row, 8)
-        assert Ok(author) = dynamic.string(author)
+        try author = dynamic.element(row, 8)
+        try author = dynamic.string(author)
 
-        // io.debug(group_name)
         tuple(
           recipient_id,
           recipient_email_address,
@@ -124,6 +121,7 @@ pub fn load() {
           group_id,
           author,
         )
+        |> Ok
       },
     )
   deliveries
@@ -313,8 +311,7 @@ pub fn record_result(thread_id, position, recipient_id, success) {
     run_sql.uuid(recipient_id),
     pgo.bool(success),
   ]
-  let mapper = fn(x) { x }
-  run_sql.execute(sql, args, mapper)
+  run_sql.execute(sql, args)
 }
 
 pub fn record_sent(thread_id, position, recipient_id) {

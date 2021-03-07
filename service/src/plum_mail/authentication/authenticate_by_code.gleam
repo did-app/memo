@@ -18,11 +18,4 @@ pub fn run(params) {
   // link tokens last for ever so might as well be a signed message as well
   // delete and use purpose link token
   authentication.validate_link_token(code)
-  |> result.map_error(fn(_: Nil) {
-    Report(
-      Unprocessable,
-      "Forbidden",
-      "Unable to complete action due to invalid link token",
-    )
-  })
 }

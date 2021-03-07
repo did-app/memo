@@ -189,12 +189,15 @@ pub fn route(
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
       let args = [pgo.text(email_address)]
-      // TODO remove mapper
-      let mapper = fn(row) -> Json {
-        assert Ok(greeting) = dynamic.element(row, 0)
-        dynamic.unsafe_coerce(greeting)
-      }
-      try db_response = run_sql.execute(sql, args, mapper)
+      try rows = run_sql.execute(sql, args)
+      assert Ok(greetings) =
+        list.try_map(
+          rows,
+          fn(row) -> Ok(Json) {
+            try greeting = dynamic.element(row, 0)
+            Ok(dynamic.unsafe_coerce(greeting))
+          },
+        )
       let greeting = case db_response {
         [greeting] -> greeting
         [] -> json.null()

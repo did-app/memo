@@ -92,5 +92,5 @@ pub fn delete_inactive() {
     RETURNING *;
     "
   let args = []
-  run_sql.execute(sql, args, fn(x) { x })
+  run_sql.execute(sql, args)
 }

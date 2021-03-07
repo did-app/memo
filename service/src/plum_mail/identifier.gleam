@@ -4,6 +4,7 @@ import gleam/dynamic
 import gleam/io
 import gleam/list
 import gleam/option.{None, Option, Some}
+import gleam/result
 import gleam/json.{Json}
 import gleam/pgo
 // Note should this be gleam/uuid
@@ -66,17 +67,23 @@ pub fn to_json(identifier: Identifier) {
 }
 
 pub fn row_to_identifier(row, offset) {
-  assert Ok(id) = dynamic.element(row, offset + 0)
-  assert Ok(id) = dynamic.bit_string(id)
+  try id = dynamic.element(row, offset + 0)
+  try id = dynamic.bit_string(id)
   let id = run_sql.binary_to_uuid4(id)
-  assert Ok(email_address) = dynamic.element(row, offset + 1)
-  assert Ok(email_address) = dynamic.string(email_address)
-  assert Ok(email_address) = email_address.validate(email_address)
-  assert Ok(greeting) = dynamic.element(row, offset + 2)
-  assert Ok(greeting): Result(Option(Json), Nil) =
-    run_sql.dynamic_option(greeting, fn(x) { Ok(dynamic.unsafe_coerce(x)) })
-  assert Ok(group_id) = dynamic.element(row, offset + 3)
-  assert Ok(group_id) =
+  try email_address = dynamic.element(row, offset + 1)
+  try email_address = dynamic.string(email_address)
+  try email_address =
+    email_address.validate(email_address)
+    |> result.map_error(fn(_) { todo("use input") })
+  try greeting = dynamic.element(row, offset + 2)
+
+  try greeting: Option(Json) =
+    run_sql.dynamic_option(
+      greeting,
+      fn(x) -> Result(Json, String) { Ok(dynamic.unsafe_coerce(x)) },
+    )
+  try group_id = dynamic.element(row, offset + 3)
+  try group_id =
     run_sql.dynamic_option(
       group_id,
       fn(id) {
@@ -89,6 +96,7 @@ pub fn row_to_identifier(row, offset) {
     Some(_) -> Shared(id, email_address, greeting)
     None -> Personal(id, email_address, greeting)
   }
+  |> Ok
 }
 
 pub fn find_or_create(email_address: EmailAddress) {
@@ -105,8 +113,9 @@ pub fn find_or_create(email_address: EmailAddress) {
   SELECT id, email_address, greeting, group_id FROM identifiers WHERE email_address = $1
   "
   let args = [pgo.text(email_address.value)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier(_, 0))
-  assert [identifier] = db_result
+  try rows = run_sql.execute(sql, args)
+  assert [row] = rows
+  assert Ok(identifier) = row_to_identifier(row, 0)
   Ok(identifier)
 }
 
@@ -117,9 +126,10 @@ pub fn fetch_by_id(id) {
     FROM identifiers
     WHERE id = $1"
   let args = [run_sql.uuid(id)]
-  try db_result = run_sql.execute(sql, args, row_to_identifier(_, 0))
-  run_sql.single(db_result)
-  |> Ok
+  try rows = run_sql.execute(sql, args)
+  assert [row] = rows
+  assert Ok(identifier) = row_to_identifier(row, 0)
+  Ok(Some(identifier))
 }
 
 pub fn update_greeting(identifier_id, greeting: Json) {
@@ -128,14 +138,14 @@ pub fn update_greeting(identifier_id, greeting: Json) {
     UPDATE identifiers 
     SET greeting = $2 
     WHERE id = $1
-    RETURNING *
+    RETURNING id, email_address, greeting, group_id
     "
   let args = [
     run_sql.uuid(identifier_id),
     dynamic.unsafe_coerce(dynamic.from(greeting)),
   ]
-  try db_result = run_sql.execute(sql, args, fn(x) { x })
-  db_result
-  |> run_sql.single()
-  |> Ok
+  try rows = run_sql.execute(sql, args)
+  assert [row] = rows
+  assert Ok(identifier) = row_to_identifier(row, 0)
+  Ok(identifier)
 }

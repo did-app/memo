@@ -100,7 +100,7 @@ pub fn answering_an_identifier_greeting_test() {
       ]),
     ])
   let greeting: json.Json = dynamic.unsafe_coerce(dynamic.from(greeting))
-  assert Ok(Some(_)) = identifier.update_greeting(clive_id, greeting)
+  assert Ok(_) = identifier.update_greeting(clive_id, greeting)
 
   let memo =
     json.list([

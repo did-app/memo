@@ -13,29 +13,32 @@ pub type Group {
 }
 
 pub fn from_row(row, offset, participants) {
-  assert Ok(id) = dynamic.element(row, offset + 0)
-  assert Ok(id) = dynamic.bit_string(id)
-  assert id = run_sql.binary_to_uuid4(id)
+  try id = dynamic.element(row, offset + 0)
+  try id = dynamic.bit_string(id)
+  let id = run_sql.binary_to_uuid4(id)
 
-  assert Ok(name) = dynamic.element(row, offset + 1)
-  assert Ok(name) = dynamic.string(name)
-  assert Ok(thread_id) = dynamic.element(row, offset + 2)
-  assert Ok(thread_id) = dynamic.bit_string(thread_id)
-  assert thread_id = run_sql.binary_to_uuid4(thread_id)
+  try name = dynamic.element(row, offset + 1)
+  try name = dynamic.string(name)
+  try thread_id = dynamic.element(row, offset + 2)
+  try thread_id = dynamic.bit_string(thread_id)
+  let thread_id = run_sql.binary_to_uuid4(thread_id)
   case participants {
-    Some(participants) -> Group(id, name, thread_id, participants)
+    Some(participants) ->
+      Group(id, name, thread_id, participants)
+      |> Ok
     None -> {
-      assert Ok(participants) = dynamic.element(row, offset + 3)
-      assert Ok(participants) =
+      try participants = dynamic.element(row, offset + 3)
+      try participants =
         dynamic.typed_list(
           participants,
           fn(raw) {
-            assert Ok(email_address) = dynamic.field(raw, "email_address")
-            assert Ok(email_address) = dynamic.string(email_address)
+            try email_address = dynamic.field(raw, "email_address")
+            try email_address = dynamic.string(email_address)
             Ok(email_address)
           },
         )
       Group(id, name, thread_id, participants)
+      |> Ok
     }
   }
 }
@@ -80,8 +83,9 @@ SELECT id, name, thread_id FROM new_group;
 // Uses the same SQL by setting the identifier ($2) to null no identifier is affected in the group identifier clause
 pub fn create_group(name, identifier_id) {
   let args = [pgo.text(name), pgo.null(), run_sql.uuid(identifier_id)]
-  try [group] =
-    run_sql.execute(create_group_sql, args, from_row(_, 0, Some([])))
+  try rows = run_sql.execute(create_group_sql, args)
+  assert [row] = rows
+  assert Ok(group) = from_row(row, 0, Some([]))
   Ok(group)
 }
 
@@ -92,8 +96,9 @@ pub fn create_visible_group(name, shared_identifier_id, first_member_id) {
     run_sql.uuid(shared_identifier_id),
     run_sql.uuid(first_member_id),
   ]
-  try [group] =
-    run_sql.execute(create_group_sql, args, from_row(_, 0, Some([])))
+  try rows = run_sql.execute(create_group_sql, args)
+  assert [row] = rows
+  assert Ok(group) = from_row(row, 0, Some([]))
   Ok(group)
 }
 
@@ -132,6 +137,8 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
     run_sql.uuid(invited_id),
     run_sql.uuid(inviting_id),
   ]
-  try [group] = run_sql.execute(sql, args, from_row(_, 0, None))
+  try rows = run_sql.execute(create_group_sql, args)
+  assert [row] = rows
+  assert Ok(group) = from_row(row, 0, Some([]))
   Ok(group)
 }
