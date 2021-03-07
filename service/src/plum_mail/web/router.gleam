@@ -189,6 +189,7 @@ pub fn route(
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
       let args = [pgo.text(email_address)]
+      // TODO remove mapper
       let mapper = fn(row) -> Json {
         assert Ok(greeting) = dynamic.element(row, 0)
         dynamic.unsafe_coerce(greeting)
@@ -206,9 +207,14 @@ pub fn route(
     ["identifiers", identifier_id, "greeting"] -> {
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       try raw = input.parse_json(request)
-      assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
+      try blocks =
+        input.required(raw, "blocks", Ok)
+        |> result.map_error(input.to_report(_, "Parameter"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       let _ = conversation.update_greeting(identifier_id, user_id, blocks)
       no_content()
@@ -217,14 +223,19 @@ pub fn route(
     // should return conversation
     // rest would be POST identifiers/id/conversations but is conversations really nested under?
     ["identifiers", identifier_id, "start_direct"] -> {
-      try params = input.parse_json(request)
+      try raw = input.parse_json(request)
       try email_address =
-        input.required(params, "email_address", input.as_email)
+        input.required(raw, "email_address", input.as_email)
         |> result.map_error(input.to_report(_, "Parameter"))
-      assert Ok(content) = dynamic.field(params, dynamic.from("content"))
+      try content =
+        input.required(raw, "content", Ok)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       let content: Json = dynamic.unsafe_coerce(content)
       try conversation =
         conversation.start_direct(
@@ -255,8 +266,14 @@ pub fn route(
     }
     // Don't just look up if user is member of group. this allows an individual to talk to group. If ever needed. maybe integrations
     ["identifiers", identifier_id, "threads", thread_id, "memos"] -> {
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try thread_id =
+        input.as_uuid(dynamic.from(thread_id))
+        |> result.map_error(input.CastFailure("thread_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
       try memos = conversation.load_memos(thread_id, identifier_id, user_id)
@@ -266,13 +283,21 @@ pub fn route(
       |> Ok
     }
     ["identifiers", identifier_id, "threads", thread_id, "post"] -> {
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try thread_id =
+        input.as_uuid(dynamic.from(thread_id))
+        |> result.map_error(input.CastFailure("thread_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       try raw = input.parse_json(request)
       try position =
         input.required(raw, "position", input.as_int)
         |> result.map_error(input.to_report(_, "Parameter"))
-      assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
+      try blocks =
+        input.required(raw, "content", Ok)
+        |> result.map_error(input.to_report(_, "Parameter"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       try client_state = web.identify_client(request, config)
@@ -292,8 +317,14 @@ pub fn route(
       |> Ok
     }
     ["identifiers", identifier_id, "threads", thread_id, "acknowledge"] -> {
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try thread_id =
+        input.as_uuid(dynamic.from(thread_id))
+        |> result.map_error(input.CastFailure("thread_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       try raw = input.parse_json(request)
       try position =
         input.required(raw, "position", input.as_int)
@@ -352,9 +383,7 @@ pub fn route(
     }
     ["drive_uploaders", id, "start"] -> {
       try uploader = drive_uploader.uploader_by_id(id)
-      assert Ok(body) = bit_string.to_string(request.body)
-      assert Ok(raw) = json.decode(body)
-      let raw = dynamic.from(raw)
+      try raw = input.parse_json(request)
       try name =
         input.required(raw, "name", input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
