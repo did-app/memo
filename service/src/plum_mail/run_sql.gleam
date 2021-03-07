@@ -7,8 +7,8 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/pgo
 import gleam_uuid.{UUID}
+import perimeter/scrub.{Report, UnknownError}
 import datetime
-import plum_mail/error.{InternalServerError}
 
 pub fn dynamic_option(raw, cast) {
   let null = dynamic.from(atom.create_from_string("null"))
@@ -63,12 +63,13 @@ pub fn execute(sql, args, mapper) {
   let conn = atom.create_from_string("default")
   try tuple(_, _, rows) =
     pgo.query(conn, sql, args)
-    |> result.map_error(fn(err) {
+    |> result.map_error(fn(reason) {
       // this should have a bug report and bug report id, but we can see it in the heroku SQL view perhaps
-      io.debug(err)
-      InternalServerError("Failed to connect to the database")
+      io.debug(reason)
+      Report(UnknownError, "Database Error", "Database query failed")
     })
 
+  // TODO remove mapping
   list.map(rows, mapper)
   |> Ok()
 }

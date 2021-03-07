@@ -2,7 +2,6 @@ import gleam/io
 import gleam/list
 import gleam/option.{Some}
 import gleam/json
-import plum_mail/error.{Forbidden}
 import plum_mail/conversation/conversation.{GroupConversation}
 import plum_mail/identifier
 import plum_mail/threads/dispatch_notifications
@@ -23,11 +22,11 @@ pub fn participating_in_a_group_conversation_test() {
   let thread_id = group.thread_id
 
   // Eve can't view the thread or add_members
-  assert Error(error) = conversation.invite_member(group.id, bob_id, eve_id)
-  assert Error(Forbidden) =
+  assert Error(_) = conversation.invite_member(group.id, bob_id, eve_id)
+  assert Error(_) =
     conversation.post_memo(thread_id, 1, eve_id, eve_id, json.list([]))
-  assert Error(Forbidden) = conversation.load_memos(thread_id, eve_id, eve_id)
-  assert Error(Forbidden) = conversation.load_memos(thread_id, bob_id, eve_id)
+  assert Error(_) = conversation.load_memos(thread_id, eve_id, eve_id)
+  assert Error(_) = conversation.load_memos(thread_id, bob_id, eve_id)
 
   // assert Ok(_) = conversation.invite_member(group.id, bob_id, alice_id)
   assert Ok(_) =

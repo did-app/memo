@@ -16,7 +16,6 @@ import gleam_uuid.{UUID}
 import midas/signed_message
 import perimeter/scrub.{BadInput, Report, Unprocessable}
 import plum_mail/config.{Config}
-import plum_mail/error
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =

@@ -7,7 +7,7 @@ import datetime.{DateTime}
 import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid.{UUID}
-import plum_mail/error
+import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier, Personal, Shared}
 import plum_mail/threads/thread.{Memo}
@@ -64,7 +64,7 @@ type Permission {
   Invited(identifier_id: UUID, author_id: UUID)
 }
 
-fn check_permission(thread_id, identifier_id) {
+fn check_permission(thread_id, identifier_id) -> Result(Nil, Report(scrub.Code)) {
   let sql =
     "
   SELECT 'invited' 
@@ -88,10 +88,15 @@ fn check_permission(thread_id, identifier_id) {
   AND pairs.upper_identifier_id = $2
   "
   let args = [run_sql.uuid(thread_id), run_sql.uuid(identifier_id)]
-  try db_response = run_sql.execute(sql, args, fn(x) { x })
+  // This needs to be Report level because mixing SQL and lacking permission error 
+  // OR 
+  // Result(Bool, SQLError)
+  try db_response =
+    run_sql.execute(sql, args, fn(x) { x })
+    |> result.map_error(fn(_) { todo("db.run might always return report") })
   case db_response {
     [_] -> Ok(Nil)
-    [] -> Error(error.Forbidden)
+    [] -> Error(Report(Unprocessable, "Forbidden", "Could not proceed"))
   }
 }
 
@@ -137,7 +142,7 @@ pub fn to_json(conversation) {
   }
 }
 
-fn check_role(identifier_id, author_id) {
+fn check_role(identifier_id, author_id) -> Result(Nil, Report(scrub.Code)) {
   case identifier_id == author_id {
     True -> {
       assert Ok(Some(identifier)) = identifier.fetch_by_id(identifier_id)
@@ -160,7 +165,12 @@ fn check_role(identifier_id, author_id) {
       try db_result = run_sql.execute(sql, args, fn(x) { x })
       case db_result {
         [_] -> Ok(Nil)
-        [] -> Error(error.Forbidden)
+        [] ->
+          Error(Report(
+            Unprocessable,
+            "Forbidden",
+            "Action forbidden lacking permissions",
+          ))
       }
     }
   }

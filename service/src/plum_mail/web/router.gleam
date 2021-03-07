@@ -25,7 +25,6 @@ import perimeter/input
 import perimeter/scrub
 import plum_mail
 import plum_mail/config.{Config}
-import plum_mail/error.{Reason}
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/authentication/authenticate_by_code

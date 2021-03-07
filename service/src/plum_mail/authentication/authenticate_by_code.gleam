@@ -1,15 +1,13 @@
-import gleam/dynamic.{Dynamic}
 import gleam/result
 import perimeter/input
 import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/authentication
-import plum_mail/error
 
 pub type Params {
   Params(code: String)
 }
 
-pub fn params(raw: Dynamic) {
+pub fn params(raw) {
   try code = input.required(raw, "code", input.as_string)
   Params(code)
   |> Ok

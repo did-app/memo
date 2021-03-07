@@ -9,7 +9,6 @@ import gleam/crypto
 import gleam/json
 import gleam/pgo
 import plum_mail/run_sql
-import plum_mail/error
 import plum_mail/identifier
 
 pub fn random_string(entropy) {
