@@ -1,6 +1,11 @@
+import gleam/bit_string
 import gleam/dynamic.{Dynamic}
+import gleam/list
 import gleam/map
-import plum_mail/acl
+import gleam/result
+import gleam/crypto
+import perimeter/input
+import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
 
@@ -8,38 +13,36 @@ pub type Params {
   Params(email_address: EmailAddress, password: String)
 }
 
-// Note params is never used
 pub fn params(raw: Dynamic) {
-  try email_address = acl.required(raw, "email_address", acl.as_email)
-  try password = acl.required(raw, "password", acl.as_string)
+  try email_address = input.required(raw, "email_address", input.as_email)
+  try password = input.required(raw, "password", input.as_string)
   Params(email_address, password)
   |> Ok
 }
 
-pub fn from_form(raw) {
-  assert Ok(email_address) = map.get(raw, "email_address")
-  assert Ok(email_address) = email_address.validate(email_address)
-  assert Ok(password) = map.get(raw, "password")
-  Params(email_address, password)
-  |> Ok
-}
+// Hardcoded because we don't want password word field on db model yet.
+const accounts = [
+  tuple("peter@sendmemo.app", "OnionLightningSea"),
+  tuple("richard@sendmemo.app", "SproutGlitterWednesday"),
+]
+
+const denied = Report(
+  Unprocessable,
+  "Invalid credentials",
+  "Could not sign in with provided email and password.",
+)
 
 pub fn run(params) {
-  // Hardcoded because we don't want password word field on db model yet.
-  // looking at alternative (OAuth) solutions
-  // This doesn't work properly, but we want to down grade the complexity of authentication for a bit.
   let Params(email_address, password) = params
-  assert Ok(email_address) = case email_address.value {
-    "peter@sendmemo.app" -> {
-      let True = password == "OnionLightningSea"
-      assert Ok(email_address) = email_address.validate("peter@sendmemo.app")
-      Ok(email_address)
-    }
-    "richard@sendmemo.app" -> {
-      let True = password == "SproutGlitterWednesday"
-      assert Ok(email_address) = email_address.validate("richard@sendmemo.app")
-      Ok(email_address)
-    }
+  try correct =
+    list.key_find(accounts, email_address.value)
+    |> result.map_error(fn(_) { denied })
+  try Nil = case crypto.secure_compare(
+    bit_string.from_string(password),
+    bit_string.from_string(correct),
+  ) {
+    True -> Ok(Nil)
+    False -> Error(denied)
   }
   identifier.find_or_create(email_address)
 }

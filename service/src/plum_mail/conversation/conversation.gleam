@@ -7,7 +7,7 @@ import datetime.{DateTime}
 import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid.{UUID}
-import plum_mail/error
+import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier, Personal, Shared}
 import plum_mail/threads/thread.{Memo}
@@ -16,7 +16,6 @@ import plum_mail/conversation/group.{Group}
 
 pub fn create_group(name, identifier_id, invitees) {
   try group = group.create_group(name, identifier_id)
-  // should assert on return from invite member, even upgrade to transaction
   list.each(invitees, invite_member(group.id, _, identifier_id))
   Ok(GroupConversation(
     group,
@@ -64,7 +63,7 @@ type Permission {
   Invited(identifier_id: UUID, author_id: UUID)
 }
 
-fn check_permission(thread_id, identifier_id) {
+fn check_permission(thread_id, identifier_id) -> Result(Nil, Report(scrub.Code)) {
   let sql =
     "
   SELECT 'invited' 
@@ -88,10 +87,13 @@ fn check_permission(thread_id, identifier_id) {
   AND pairs.upper_identifier_id = $2
   "
   let args = [run_sql.uuid(thread_id), run_sql.uuid(identifier_id)]
-  try db_response = run_sql.execute(sql, args, fn(x) { x })
+  // This needs to be Report level because mixing SQL and lacking permission error 
+  // OR 
+  // Result(Bool, SQLError)
+  try db_response = run_sql.execute(sql, args)
   case db_response {
     [_] -> Ok(Nil)
-    [] -> Error(error.Forbidden)
+    [] -> Error(Report(Unprocessable, "Forbidden", "Could not proceed"))
   }
 }
 
@@ -137,10 +139,10 @@ pub fn to_json(conversation) {
   }
 }
 
-fn check_role(identifier_id, author_id) {
+fn check_role(identifier_id, author_id) -> Result(Nil, Report(scrub.Code)) {
   case identifier_id == author_id {
     True -> {
-      assert Ok(Some(identifier)) = identifier.fetch_by_id(identifier_id)
+      try Some(identifier) = identifier.fetch_by_id(identifier_id)
       case identifier {
         Personal(..) -> Ok(Nil)
         Shared(..) -> Error(todo("error type"))
@@ -157,10 +159,15 @@ fn check_role(identifier_id, author_id) {
       AND invitations.identifier_id = $2
       "
       let args = [run_sql.uuid(identifier_id), run_sql.uuid(author_id)]
-      try db_result = run_sql.execute(sql, args, fn(x) { x })
-      case db_result {
+      try rows = run_sql.execute(sql, args)
+      case rows {
         [_] -> Ok(Nil)
-        [] -> Error(error.Forbidden)
+        [] ->
+          Error(Report(
+            Unprocessable,
+            "Forbidden",
+            "Action forbidden lacking permissions",
+          ))
       }
     }
   }
@@ -184,7 +191,7 @@ pub fn start_direct(identifier_id, author_id, email_address, content) {
     Some(greeting) -> {
       // check that identifier id has permission for the thread
       // the check that author has permision for role
-      assert Ok(_) =
+      try _ =
         thread.post_memo(
           participation.thread_id,
           1,
@@ -251,20 +258,23 @@ fn new_direct_contact(identifier_id, email_address) {
   SELECT (SELECT thread_id FROM new_pair), id, email_address, greeting, group_id FROM invited
   "
   let args = [run_sql.uuid(identifier_id), pgo.text(email_address)]
-  try [participation] =
-    run_sql.execute(
-      sql,
-      args,
-      fn(row) {
-        assert Ok(thread_id) = dynamic.element(row, 0)
-        assert Ok(thread_id) = dynamic.bit_string(thread_id)
-        assert thread_id = run_sql.binary_to_uuid4(thread_id)
+  try rows = run_sql.execute(sql, args)
 
-        let contact = identifier.row_to_identifier(row, 1)
+  assert Ok(participations) =
+    list.try_map(
+      rows,
+      fn(row) {
+        try thread_id = dynamic.element(row, 0)
+        try thread_id = dynamic.bit_string(thread_id)
+        let thread_id = run_sql.binary_to_uuid4(thread_id)
+
+        try contact = identifier.row_to_identifier(row, 1)
         let participation = Participation(thread_id, 0, None)
         DirectConversation(contact, participation)
+        |> Ok
       },
     )
+  assert [participation] = participations
   participation
   |> Ok
 }
@@ -279,7 +289,9 @@ fn all_shared_inboxes(personal_id) {
   WHERE invitations.identifier_id = $1
   "
   let args = [run_sql.uuid(personal_id)]
-  run_sql.execute(sql, args, identifier.row_to_identifier(_, 0))
+  try rows = run_sql.execute(sql, args)
+  list.try_map(rows, identifier.row_to_identifier(_, 0))
+  |> result.map_error(fn(_) { todo("shouldn't error") })
 }
 
 // thread_latest
@@ -288,6 +300,7 @@ fn all_shared_inboxes(personal_id) {
 // NOTE this needs to be private or check identifier + member
 pub fn all_inboxes(personal_id) {
   try Some(personal) = identifier.fetch_by_id(personal_id)
+  // This should only ever be called with personal id
   assert Personal(..) = personal
   try shared = all_shared_inboxes(personal_id)
   list.try_map(
@@ -365,41 +378,45 @@ pub fn all_participating(identifier_id) {
   ORDER BY latest.inserted_at DESC
   "
   let args = [run_sql.uuid(identifier_id)]
-  run_sql.execute(
-    sql,
-    args,
-    fn(row) {
-      assert Ok(thread_id) = dynamic.element(row, 0)
-      assert Ok(thread_id) = dynamic.bit_string(thread_id)
-      assert thread_id = run_sql.binary_to_uuid4(thread_id)
-      assert Ok(acknowledged) = dynamic.element(row, 1)
-      assert Ok(acknowledged) = dynamic.int(acknowledged)
-      assert Ok(inserted_at) = dynamic.element(row, 2)
-      assert Ok(inserted_at) =
-        run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(conversations) =
+    list.try_map(
+      rows,
+      fn(row) {
+        try thread_id = dynamic.element(row, 0)
+        try thread_id = dynamic.bit_string(thread_id)
+        let thread_id = run_sql.binary_to_uuid4(thread_id)
+        try acknowledged = dynamic.element(row, 1)
+        try acknowledged = dynamic.int(acknowledged)
+        try inserted_at = dynamic.element(row, 2)
+        try inserted_at =
+          run_sql.dynamic_option(inserted_at, run_sql.cast_datetime)
 
-      assert Ok(content) = dynamic.element(row, 3)
-      let content: json.Json = dynamic.unsafe_coerce(content)
+        try content = dynamic.element(row, 3)
+        let content: json.Json = dynamic.unsafe_coerce(content)
 
-      assert Ok(position) = dynamic.element(row, 4)
-      assert Ok(position) = run_sql.dynamic_option(position, dynamic.int)
-      let latest = case inserted_at, position {
-        Some(posted_at), Some(position) ->
-          Some(Memo(posted_at, content, position))
-        None, None -> None
-      }
-      let participation = Participation(thread_id, acknowledged, latest)
-      let null_atom = dynamic.from(pgo.null())
-      case dynamic.element(row, 5) {
-        Ok(null) if null == null_atom -> {
-          let group = group.from_row(row, 9, None)
-          GroupConversation(group: group, participation: participation)
+        try position = dynamic.element(row, 4)
+        try position = run_sql.dynamic_option(position, dynamic.int)
+        let latest = case inserted_at, position {
+          Some(posted_at), Some(position) ->
+            Some(Memo(posted_at, content, position))
+          None, None -> None
         }
-        _ -> {
-          let contact = identifier.row_to_identifier(row, 5)
-          DirectConversation(contact, participation)
+        let participation = Participation(thread_id, acknowledged, latest)
+        let null_atom = dynamic.from(pgo.null())
+        case dynamic.element(row, 5) {
+          Ok(null) if null == null_atom -> {
+            try group = group.from_row(row, 9, None)
+            GroupConversation(group: group, participation: participation)
+            |> Ok
+          }
+          _ -> {
+            try contact = identifier.row_to_identifier(row, 5)
+            DirectConversation(contact, participation)
+            |> Ok
+          }
         }
-      }
-    },
-  )
+      },
+    )
+  Ok(conversations)
 }

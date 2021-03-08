@@ -7,7 +7,6 @@ import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import gleam/http
-import gleam/httpc
 import gleam/json
 import gleam/pgo
 import gleam_uuid
@@ -67,52 +66,50 @@ pub fn load() {
   AND participants.identifier_id <> memos.authored_by
   ORDER BY memos.inserted_at ASC
   "
+  try rows = run_sql.execute(sql, [])
   assert Ok(deliveries) =
-    run_sql.execute(
-      sql,
-      [],
+    list.try_map(
+      rows,
       fn(row) {
-        assert Ok(recipient_id) = dynamic.element(row, 0)
-        assert Ok(recipient_id) = dynamic.bit_string(recipient_id)
+        try recipient_id = dynamic.element(row, 0)
+        try recipient_id = dynamic.bit_string(recipient_id)
         let recipient_id = run_sql.binary_to_uuid4(recipient_id)
-        assert Ok(recipient_email_address) = dynamic.element(row, 1)
-        assert Ok(recipient_email_address) =
-          dynamic.string(recipient_email_address)
-        assert Ok(recipient_email_address) =
+        try recipient_email_address = dynamic.element(row, 1)
+        try recipient_email_address = dynamic.string(recipient_email_address)
+        try recipient_email_address =
           email_address.validate(recipient_email_address)
-        assert Ok(thread_id) = dynamic.element(row, 2)
-        assert Ok(thread_id) = dynamic.bit_string(thread_id)
-        assert thread_id = run_sql.binary_to_uuid4(thread_id)
+          |> result.map_error(fn(_) { todo })
+        try thread_id = dynamic.element(row, 2)
+        try thread_id = dynamic.bit_string(thread_id)
+        let thread_id = run_sql.binary_to_uuid4(thread_id)
 
-        assert Ok(content) = dynamic.element(row, 3)
-        assert content = dynamic.typed_list(content, block_from_dynamic)
-        assert Ok(position) = dynamic.element(row, 4)
-        assert Ok(position) = dynamic.int(position)
+        try content = dynamic.element(row, 3)
+        let content = dynamic.typed_list(content, block_from_dynamic)
+        try position = dynamic.element(row, 4)
+        try position = dynamic.int(position)
 
-        assert Ok(contact) = dynamic.element(row, 5)
-        assert Ok(contact) = run_sql.dynamic_option(contact, dynamic.string)
+        try contact = dynamic.element(row, 5)
+        try contact = run_sql.dynamic_option(contact, dynamic.string)
         let contact =
           option.map(
             contact,
             fn(contact) {
+              // This is easiest handled by an input.required/optional that works for rows returned from pgo
               assert Ok(contact) = email_address.validate(contact)
               contact
             },
           )
 
-        assert Ok(group_name) = dynamic.element(row, 6)
-        assert Ok(group_name) =
-          run_sql.dynamic_option(group_name, dynamic.string)
-        assert Ok(group_id) = dynamic.element(row, 7)
-        assert Ok(group_id) =
-          run_sql.dynamic_option(group_id, dynamic.bit_string)
+        try group_name = dynamic.element(row, 6)
+        try group_name = run_sql.dynamic_option(group_name, dynamic.string)
+        try group_id = dynamic.element(row, 7)
+        try group_id = run_sql.dynamic_option(group_id, dynamic.bit_string)
         let group_id =
           option.map(group_id, fn(id) { run_sql.binary_to_uuid4(id) })
 
-        assert Ok(author) = dynamic.element(row, 8)
-        assert Ok(author) = dynamic.string(author)
+        try author = dynamic.element(row, 8)
+        try author = dynamic.string(author)
 
-        // io.debug(group_name)
         tuple(
           recipient_id,
           recipient_email_address,
@@ -124,30 +121,34 @@ pub fn load() {
           group_id,
           author,
         )
+        |> Ok
       },
     )
-  deliveries
+  Ok(deliveries)
 }
 
 pub fn run() {
-  let config = config.from_env()
+  try config =
+    config.from_env()
+    |> result.map_error(config.to_report)
 
-  load()
-  |> list.each(dispatch_to_identifier(_, config))
+  try outstanding = load()
+  list.each(outstanding, dispatch_to_identifier(_, config))
+  |> Ok
 }
 
 fn block_from_dynamic(raw) {
-  assert Ok(block_type) = dynamic.field(raw, "type")
-  assert Ok(block_type) = dynamic.string(block_type)
+  try block_type = dynamic.field(raw, "type")
+  try block_type = dynamic.string(block_type)
   case block_type {
     "paragraph" -> {
-      assert Ok(spans) = dynamic.field(raw, "spans")
-      assert Ok(spans) = dynamic.typed_list(spans, span_from_dynamic)
+      try spans = dynamic.field(raw, "spans")
+      try spans = dynamic.typed_list(spans, span_from_dynamic)
       Ok(Paragraph(spans))
     }
     "annotation" -> {
-      assert Ok(blocks) = dynamic.field(raw, "blocks")
-      assert Ok(blocks) = dynamic.typed_list(blocks, block_from_dynamic)
+      try blocks = dynamic.field(raw, "blocks")
+      try blocks = dynamic.typed_list(blocks, block_from_dynamic)
       let reference = RangeReference
       Ok(Annotation(reference, blocks))
     }
@@ -159,17 +160,17 @@ fn block_from_dynamic(raw) {
 }
 
 fn span_from_dynamic(raw) {
-  assert Ok(span_type) = dynamic.field(raw, "type")
-  assert Ok(span_type) = dynamic.string(span_type)
+  try span_type = dynamic.field(raw, "type")
+  try span_type = dynamic.string(span_type)
   case span_type {
     "text" -> {
-      assert Ok(text) = dynamic.field(raw, "text")
-      assert Ok(text) = dynamic.string(text)
+      try text = dynamic.field(raw, "text")
+      try text = dynamic.string(text)
       Ok(Text(text))
     }
     "link" -> {
-      assert Ok(url) = dynamic.field(raw, "url")
-      assert Ok(url) = dynamic.string(url)
+      try url = dynamic.field(raw, "url")
+      try url = dynamic.string(url)
       let title =
         dynamic.field(raw, "title")
         |> result.then(dynamic.string)
@@ -253,15 +254,9 @@ fn dispatch_to_identifier(record, config) {
     )
   }
   // contact link needs to handle adding position because it will be in a hash fragment.
-  let authentication_url = contact_link(client_origin, path, recipient_id)
+  try authentication_url = contact_link(client_origin, path, recipient_id)
 
   let to = recipient_email_address.value
-  // contact might be nill, we need to change this up to author
-  // let from = case topic.value {
-  //   "richard@sendmemo.app" -> "Richard Shepherd <richard@sendmemo.app>"
-  //   "peter@sendmemo.app" -> "Peter Saxton <peter@sendmemo.app>"
-  //   _ -> "memo <memo@sendmemo.app>"
-  // }
   let from = "memo <memo@sendmemo.app>"
 
   io.debug(preview)
@@ -272,7 +267,7 @@ fn dispatch_to_identifier(record, config) {
       tuple("email_address", json.string(author)),
       tuple("content_preview", json.nullable(preview, json.string)),
     ])
-  let response =
+  try response =
     postmark.send_email_with_template(
       from,
       to,
@@ -282,22 +277,23 @@ fn dispatch_to_identifier(record, config) {
     )
   case response {
     Ok(Nil) -> {
-      assert Ok(_) = record_sent(thread_id, position, recipient_id)
+      try _ = record_sent(thread_id, position, recipient_id)
       Ok(Nil)
     }
     // why was that, handle case of bad email addresses
     Error(postmark.Failure(retry: True)) -> Ok(Nil)
     Error(postmark.Failure(retry: False)) -> {
-      record_failed(thread_id, position, recipient_id)
+      try _ = record_failed(thread_id, position, recipient_id)
       Ok(Nil)
     }
   }
 }
 
 fn contact_link(origin, path, recipient_id) {
-  assert Ok(code) = authentication.generate_link_token(recipient_id)
+  try code = authentication.generate_link_token(recipient_id)
   [origin, path, "#code=", code]
   |> string.join("")
+  |> Ok
 }
 
 pub fn record_result(thread_id, position, recipient_id, success) {
@@ -313,8 +309,7 @@ pub fn record_result(thread_id, position, recipient_id, success) {
     run_sql.uuid(recipient_id),
     pgo.bool(success),
   ]
-  let mapper = fn(x) { x }
-  run_sql.execute(sql, args, mapper)
+  run_sql.execute(sql, args)
 }
 
 pub fn record_sent(thread_id, position, recipient_id) {

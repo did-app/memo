@@ -12,7 +12,6 @@ import gleam/uri
 import gleam/beam
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
-import gleam/httpc
 import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid
@@ -21,10 +20,11 @@ import midas/signed_message
 import datetime
 import oauth/client as oauth
 import drive_uploader
+import perimeter/input
+import perimeter/scrub
+import perimeter/services/http_client
 import plum_mail
 import plum_mail/config.{Config}
-import plum_mail/error.{Reason}
-import plum_mail/acl
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/authentication/authenticate_by_code
@@ -65,16 +65,18 @@ fn token_cookie_settings(request) {
 fn authentication_token(identifier, request, config) {
   let Personal(id: identifier_id, ..) = identifier
   let Config(secret: secret, ..) = config
-  assert Ok(user_agent) = http.get_req_header(request, "user-agent")
+  let user_agent =
+    http.get_req_header(request, "user-agent")
+    |> result.unwrap("")
   web.auth_token(identifier_id, user_agent, secret)
 }
 
 fn successful_authentication(identifier) {
   let identifier_id = identifier.id(identifier)
-  assert Ok(inboxs) = conversation.all_inboxes(identifier_id)
-  let inboxs_data =
+  try inboxes = conversation.all_inboxes(identifier_id)
+  let inboxes_data =
     json.list(list.map(
-      inboxs,
+      inboxes,
       fn(inbox) {
         let tuple(identifier, role, conversations) = inbox
         let role = case role {
@@ -97,7 +99,8 @@ fn successful_authentication(identifier) {
       },
     ))
   http.response(200)
-  |> web.set_resp_json(json.object([tuple("inboxes", inboxs_data)]))
+  |> web.set_resp_json(json.object([tuple("inboxes", inboxes_data)]))
+  |> Ok
 }
 
 fn no_content() {
@@ -109,27 +112,31 @@ fn no_content() {
 pub fn route(
   request,
   config: config.Config,
-) -> Result(Response(BitBuilder), Reason) {
+) -> Result(Response(BitBuilder), scrub.Report(scrub.Code)) {
   case http.path_segments(request) {
     [] -> no_content()
     // Note this endpoint is never used 
     ["authenticate", "password"] -> {
-      try raw = acl.parse_json(request)
-      try params = authenticate_by_password.params(raw)
+      try raw = input.parse_json(request)
+      try params =
+        authenticate_by_password.params(raw)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> http.set_resp_cookie(
+      |> result.map(http.set_resp_cookie(
+        _,
         "authentication",
         token,
         token_cookie_settings(request),
-      )
-      |> Ok
+      ))
     }
     // Note cookies wont get set on the ajax auth step
     ["sign_in"] -> {
-      try raw = acl.parse_form(request)
-      try params = authenticate_by_password.from_form(raw)
+      try raw = input.parse_form(request)
+      try params =
+        authenticate_by_password.params(raw)
+        |> result.map_error(input.to_report(_, "Form field"))
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       web.redirect(string.append(config.client_origin, "/"))
@@ -141,28 +148,30 @@ pub fn route(
       |> Ok
     }
     ["authenticate", "code"] -> {
-      try raw = acl.parse_json(request)
-      try params = authenticate_by_code.params(raw)
+      try raw = input.parse_json(request)
+      try params =
+        authenticate_by_code.params(raw)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try identifier = authenticate_by_code.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> http.set_resp_cookie(
+      |> result.map(http.set_resp_cookie(
+        _,
         "authentication",
         token,
         token_cookie_settings(request),
-      )
-      |> Ok
+      ))
     }
     ["authenticate", "session"] -> {
       try client = web.identify_client(request, config)
+      // Could require_authentication but with a handle
       case client {
         Some(identifier_id) -> {
           try lookup = identifier.fetch_by_id(identifier_id)
           case lookup {
             Some(identifier) ->
-              // This one doesn't set a session as it already has one
+              // This one doesn't set a cookie as it already has one
               successful_authentication(identifier)
-              |> Ok
             None -> no_content()
           }
         }
@@ -170,8 +179,7 @@ pub fn route(
       }
     }
     ["authenticate", "email"] -> {
-      try params = acl.parse_json(request)
-      try params = claim_email_address.params(params)
+      try params = claim_email_address.cast(request)
       try _ = claim_email_address.execute(params, config)
       no_content()
     }
@@ -185,12 +193,17 @@ pub fn route(
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
       let args = [pgo.text(email_address)]
-      let mapper = fn(row) -> Json {
-        assert Ok(greeting) = dynamic.element(row, 0)
-        dynamic.unsafe_coerce(greeting)
-      }
-      try db_response = run_sql.execute(sql, args, mapper)
-      let greeting = case db_response {
+      try rows = run_sql.execute(sql, args)
+      assert Ok(greetings) =
+        list.try_map(
+          rows,
+          fn(row) {
+            try greeting = dynamic.element(row, 0)
+            let greeting: Json = dynamic.unsafe_coerce(greeting)
+            Ok(greeting)
+          },
+        )
+      let greeting = case greetings {
         [greeting] -> greeting
         [] -> json.null()
       }
@@ -202,9 +215,14 @@ pub fn route(
     ["identifiers", identifier_id, "greeting"] -> {
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      try raw = acl.parse_json(request)
-      assert Ok(blocks) = dynamic.field(raw, dynamic.from("blocks"))
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try raw = input.parse_json(request)
+      try blocks =
+        input.required(raw, "blocks", Ok)
+        |> result.map_error(input.to_report(_, "Parameter"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       let _ = conversation.update_greeting(identifier_id, user_id, blocks)
       no_content()
@@ -213,12 +231,19 @@ pub fn route(
     // should return conversation
     // rest would be POST identifiers/id/conversations but is conversations really nested under?
     ["identifiers", identifier_id, "start_direct"] -> {
-      try params = acl.parse_json(request)
-      try email_address = acl.required(params, "email_address", acl.as_email)
-      assert Ok(content) = dynamic.field(params, dynamic.from("content"))
+      try raw = input.parse_json(request)
+      try email_address =
+        input.required(raw, "email_address", input.as_email)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try content =
+        input.required(raw, "content", Ok)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try author_id = web.require_authenticated(client_state)
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       let content: Json = dynamic.unsafe_coerce(content)
       try conversation =
         conversation.start_direct(
@@ -232,13 +257,16 @@ pub fn route(
       |> Ok
     }
     ["groups", "create"] -> {
-      try params = acl.parse_json(request)
-      try name = acl.required(params, "name", acl.as_string)
+      try params = input.parse_json(request)
+      try name =
+        input.required(params, "name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try invitees =
-        acl.required(params, "invitees", acl.as_list(_, acl.as_uuid))
+        input.required(params, "invitees", input.as_list(_, input.as_uuid))
+        |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try identifier_id = web.require_authenticated(client_state)
-      assert Ok(conversation) =
+      try conversation =
         conversation.create_group(name, identifier_id, invitees)
       http.response(200)
       |> web.set_resp_json(conversation.to_json(conversation))
@@ -246,8 +274,14 @@ pub fn route(
     }
     // Don't just look up if user is member of group. this allows an individual to talk to group. If ever needed. maybe integrations
     ["identifiers", identifier_id, "threads", thread_id, "memos"] -> {
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try thread_id =
+        input.as_uuid(dynamic.from(thread_id))
+        |> result.map_error(input.CastFailure("thread_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
       try memos = conversation.load_memos(thread_id, identifier_id, user_id)
@@ -257,11 +291,21 @@ pub fn route(
       |> Ok
     }
     ["identifiers", identifier_id, "threads", thread_id, "post"] -> {
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
-      try raw = acl.parse_json(request)
-      try position = acl.required(raw, "position", acl.as_int)
-      assert Ok(blocks) = dynamic.field(raw, dynamic.from("content"))
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try thread_id =
+        input.as_uuid(dynamic.from(thread_id))
+        |> result.map_error(input.CastFailure("thread_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try raw = input.parse_json(request)
+      try position =
+        input.required(raw, "position", input.as_int)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try blocks =
+        input.required(raw, "content", Ok)
+        |> result.map_error(input.to_report(_, "Parameter"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       try client_state = web.identify_client(request, config)
@@ -281,53 +325,56 @@ pub fn route(
       |> Ok
     }
     ["identifiers", identifier_id, "threads", thread_id, "acknowledge"] -> {
-      assert Ok(identifier_id) = gleam_uuid.from_string(identifier_id)
-      assert Ok(thread_id) = gleam_uuid.from_string(thread_id)
-      try raw = acl.parse_json(request)
-      try position = acl.required(raw, "position", acl.as_int)
+      try identifier_id =
+        input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try thread_id =
+        input.as_uuid(dynamic.from(thread_id))
+        |> result.map_error(input.CastFailure("thread_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try raw = input.parse_json(request)
+      try position =
+        input.required(raw, "position", input.as_int)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.identify_client(request, config)
       try user_id = web.require_authenticated(client_state)
-      // TODO this needs to be on the conversation level
       try _ =
         conversation.acknowledge(identifier_id, user_id, thread_id, position)
       no_content()
     }
 
     ["inbound"] -> {
-      try params = acl.parse_json(request)
+      try params = input.parse_json(request)
       postmark.handle(params, config)
-      |> io.debug
     }
 
     ["drive_uploaders", "authorize"] -> {
-      assert Ok(body) = bit_string.to_string(request.body)
-      assert Ok(raw) = json.decode(body)
-      let raw = dynamic.from(raw)
-      assert Ok(code) = dynamic.field(raw, "code")
-      assert Ok(code) = dynamic.string(code)
+      try raw = input.parse_json(request)
+      try code =
+        input.required(raw, "code", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
       try sub = drive_uploader.authorize(code, config.google_client, config)
       uploaders_response(sub, request, config)
     }
 
     ["drive_uploaders", "create"] -> {
-      try sub =
-        drive_uploader.client_authentication(request, config)
-        |> result.map_error(fn(_) { todo("this one") })
-      assert Ok(body) = bit_string.to_string(request.body)
-      assert Ok(raw) = json.decode(body)
-      let raw = dynamic.from(raw)
-      try name = acl.required(raw, "name", acl.as_string)
-      try parent_id = acl.optional(raw, "parent_id", acl.as_string)
-      try parent_name = acl.optional(raw, "parent_name", acl.as_string)
-      try _ =
-        drive_uploader.create_uploader(sub, name, parent_id, parent_name)
-        |> result.map_error(fn(_) { todo("this one") })
+      try sub = drive_uploader.client_authentication(request, config)
+      try raw = input.parse_json(request)
+      try name =
+        input.required(raw, "name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try parent_id =
+        input.optional(raw, "parent_id", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try parent_name =
+        input.optional(raw, "parent_name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try _ = drive_uploader.create_uploader(sub, name, parent_id, parent_name)
       uploaders_response(sub, request, config)
     }
     ["drive_uploaders", id, "delete"] -> {
-      try sub =
-        drive_uploader.client_authentication(request, config)
-        |> result.map_error(fn(_) { todo("this one") })
+      try sub = drive_uploader.client_authentication(request, config)
       try _ = drive_uploader.delete_uploader(id)
       uploaders_response(sub, request, config)
     }
@@ -344,11 +391,13 @@ pub fn route(
     }
     ["drive_uploaders", id, "start"] -> {
       try uploader = drive_uploader.uploader_by_id(id)
-      assert Ok(body) = bit_string.to_string(request.body)
-      assert Ok(raw) = json.decode(body)
-      let raw = dynamic.from(raw)
-      try name = acl.required(raw, "name", acl.as_string)
-      try mime_type = acl.required(raw, "mime_type", acl.as_string)
+      try raw = input.parse_json(request)
+      try name =
+        input.required(raw, "name", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try mime_type =
+        input.required(raw, "mime_type", input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
       assert Ok(drive_uploader.Authorization(access_token: access_token, ..)) =
         uploader.authorization
       // https://developers.google.com/drive/api/v3/reference/files/create
@@ -377,17 +426,24 @@ pub fn route(
           string.concat(["Bearer ", access_token]),
         )
         |> http.set_req_body(json.encode(data))
-      assert Ok(response) =
+      try response =
         start_request
-        |> httpc.send()
-        |> io.debug
-      assert Ok(location) = http.get_resp_header(response, "location")
+        |> http_client.send()
+        |> result.map_error(http_client.to_report)
+      try location =
+        http.get_resp_header(response, "location")
+        |> result.map_error(fn(_: Nil) {
+          scrub.Report(
+            scrub.ServiceError,
+            "Missing location",
+            "No upload target created",
+          )
+        })
       let data = json.object([tuple("location", json.string(location))])
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok()
     }
-    // |> Ok
     _ ->
       http.response(404)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))
@@ -398,6 +454,7 @@ pub fn route(
 fn uploaders_response(sub, request, config) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try uploaders = drive_uploader.list_for_authorization(sub)
+
   let uploaders_data = drive_uploader.uploaders_to_json(uploaders)
   let data = json.object([tuple("uploaders", uploaders_data)])
 
@@ -438,7 +495,7 @@ pub fn handle(
     _ ->
       case route(request, config) {
         Ok(response) -> response
-        Error(reason) -> acl.error_response(reason)
+        Error(report) -> scrub.to_response(report)
       }
   }
   case request.path {

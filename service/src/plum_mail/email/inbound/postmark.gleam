@@ -6,7 +6,7 @@ import gleam/result
 import gleam/string
 import gleam/http
 import postmark/client
-import plum_mail/acl
+import perimeter/input
 import plum_mail/config.{Config}
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/authentication
@@ -20,16 +20,27 @@ pub fn handle(params, config) {
     ..,
   ) = config
 
-  try to_full = acl.required(params, "ToFull", Ok)
-  assert Ok([to_full]) = dynamic.list(to_full)
-  try to_hash = acl.required(to_full, "MailboxHash", acl.as_string)
-  try to_email_address = acl.required(to_full, "Email", acl.as_email)
+  try to_full =
+    input.required(params, "ToFull", input.as_list(_, Ok))
+    |> result.map_error(input.to_report(_, "Parameter"))
+  // I think there might be ways to get more than one but we don't care now.
+  // Does the postmark logging include non-200 responses
+  assert [to_full] = to_full
+  try to_hash =
+    input.required(to_full, "MailboxHash", input.as_string)
+    |> result.map_error(input.to_report(_, "Parameter"))
 
-  try from_email_address = acl.required(params, "From", acl.as_email)
+  try to_email_address =
+    input.required(to_full, "Email", input.as_email)
+    |> result.map_error(input.to_report(_, "Parameter"))
+
+  try from_email_address =
+    input.required(params, "From", input.as_email)
+    |> result.map_error(input.to_report(_, "Parameter"))
 
   try Personal(identifier_id, ..) =
     identifier.find_or_create(from_email_address)
-  assert Ok(code) = authentication.generate_link_token(identifier_id)
+  try code = authentication.generate_link_token(identifier_id)
   let link =
     [client_origin, email_address.to_path(to_email_address), "#code=", code]
     |> string.concat()

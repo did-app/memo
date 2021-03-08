@@ -1,8 +1,11 @@
 import gleam/dynamic
 import gleam/io
+import gleam/result
 import gleam/http
-import gleam/httpc
 import gleam/json
+import perimeter/input
+import perimeter/scrub.{Report, ServiceError}
+import perimeter/services/http_client
 import plum_mail/email_address.{EmailAddress}
 
 pub type Failure {
@@ -18,7 +21,7 @@ pub fn send_email(from, to, subject, text_body, api_token) {
       io.debug(to)
       io.debug(subject)
       io.debug(text_body)
-      Ok(Nil)
+      Ok(Ok(Nil))
     }
     _ -> {
       // let EmailAddress(from_string) = from
@@ -52,7 +55,7 @@ pub fn send_email_with_template(
       io.debug(to)
       io.debug(template_alias)
       io.debug(template_model)
-      Ok(Nil)
+      Ok(Ok(Nil))
     }
     _ -> {
       // let EmailAddress(from_string) = from
@@ -85,24 +88,36 @@ pub fn api_post(path, api_token, data) {
 }
 
 pub fn dispatch(request) {
-  assert Ok(response) = httpc.send(request)
+  try response =
+    http_client.send(request)
+    |> result.map_error(http_client.to_report)
   case response {
-    http.Response(status: 200, ..) -> Ok(Nil)
+    http.Response(status: 200, ..) -> Ok(Ok(Nil))
     http.Response(status: 422, body: body, ..) -> {
-      assert Ok(data) = json.decode(body)
-      let data = dynamic.from(data)
-      assert Ok(error_code) = dynamic.field(data, "ErrorCode")
-      assert Ok(error_code) = dynamic.int(error_code)
+      // Can't use input parse json because that's all on responses
+      try raw =
+        json.decode(response.body)
+        |> result.map_error(fn(_) {
+          Report(
+            ServiceError,
+            "Invalid response from service",
+            "The authentication service returned invalid JSON",
+          )
+        })
+      let raw = dynamic.from(raw)
+      try error_code =
+        input.required(raw, "ErrorCode", input.as_int)
+        |> result.map_error(input.to_service_report(_, "Data"))
       case error_code {
         406 ->
           Failure(retry: False)
           |> Error
+          |> Ok
         // Other error code retry
-        _ -> {
-          io.debug(data)
+        _ ->
           Failure(retry: True)
           |> Error
-        }
+          |> Ok
       }
     }
   }

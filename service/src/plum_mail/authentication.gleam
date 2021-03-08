@@ -2,14 +2,15 @@ import gleam/bit_string
 import gleam/base
 import gleam/dynamic
 import gleam/io
+import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import gleam/crypto
 import gleam/json
 import gleam/pgo
+import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/run_sql
-import plum_mail/error
 import plum_mail/identifier
 
 pub fn random_string(entropy) {
@@ -71,15 +72,23 @@ pub fn generate_link_token(identifier_id) {
     pgo.text(hash_string(secret)),
     run_sql.uuid(identifier_id),
   ]
-  let mapper = fn(_row) { Nil }
-  try [Nil] = run_sql.execute(sql, args, mapper)
+  try rows = run_sql.execute(sql, args)
+  assert [_] = rows
   Token(selector, secret)
   |> serialize_token()
   |> Ok()
 }
 
+const invalid_link_token = Report(
+  Unprocessable,
+  "Forbidden",
+  "Unable to complete action due to invalid link token",
+)
+
 pub fn validate_link_token(token_string) {
-  try Token(selector, secret) = parse_token(token_string)
+  try Token(selector, secret) =
+    parse_token(token_string)
+    |> result.map_error(fn(_: Nil) { invalid_link_token })
   let sql =
     "
       SELECT i.id, i.email_address, i.greeting, i.group_id, validator, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
@@ -88,24 +97,29 @@ pub fn validate_link_token(token_string) {
       WHERE selector = $1
       "
   let args = [pgo.text(selector)]
-  let mapper = fn(row) {
-    let identifier = identifier.row_to_identifier(row, 0)
-    assert Ok(validator) = dynamic.element(row, 4)
-    assert Ok(validator) = dynamic.string(validator)
-    assert Ok(current) = dynamic.element(row, 5)
-    assert Ok(current) = dynamic.bool(current)
-    tuple(identifier, validator, current)
-  }
-  try challenge_tokens =
-    run_sql.execute(sql, args, mapper)
-    |> result.map_error(fn(_) { todo("map error when validating link token") })
+  try rows = run_sql.execute(sql, args)
+  assert Ok(challenge_tokens) =
+    list.try_map(
+      rows,
+      fn(row) {
+        try identifier = identifier.row_to_identifier(row, 0)
+        try validator = dynamic.element(row, 4)
+        try validator = dynamic.string(validator)
+        try current = dynamic.element(row, 5)
+        try current = dynamic.bool(current)
+        tuple(identifier, validator, current)
+        |> Ok
+      },
+    )
   case challenge_tokens {
-    [] -> todo
+    [] -> Error(invalid_link_token)
     [tuple(identifier, validator, current)] -> {
-      try _ = validate(secret, validator)
+      try _ =
+        validate(secret, validator)
+        |> result.map_error(fn(_: Nil) { invalid_link_token })
       case current {
         True -> Ok(identifier)
-        False -> Error(Nil)
+        False -> Error(invalid_link_token)
       }
     }
   }

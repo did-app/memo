@@ -7,8 +7,8 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/pgo
 import gleam_uuid.{UUID}
+import perimeter/scrub.{Report, UnknownError}
 import datetime
-import plum_mail/error.{InternalServerError}
 
 pub fn dynamic_option(raw, cast) {
   let null = dynamic.from(atom.create_from_string("null"))
@@ -19,6 +19,7 @@ pub fn dynamic_option(raw, cast) {
 }
 
 pub fn uuid(uuid: UUID) -> pgo.PgType {
+  // Could be done by unsafe coerce to tuple, in reality need to bits on the uuid module
   assert Ok(bits) =
     uuid
     |> dynamic.from
@@ -59,25 +60,14 @@ pub fn cast_datetime(raw: Dynamic) {
   Ok(dt)
 }
 
-pub fn execute(sql, args, mapper) {
+pub fn execute(sql, args) {
   let conn = atom.create_from_string("default")
   try tuple(_, _, rows) =
     pgo.query(conn, sql, args)
-    |> result.map_error(fn(err) {
+    |> result.map_error(fn(reason) {
       // this should have a bug report and bug report id, but we can see it in the heroku SQL view perhaps
-      io.debug(err)
-      InternalServerError("Failed to connect to the database")
+      io.debug(reason)
+      Report(UnknownError, "Database Error", "Database query failed")
     })
-
-  list.map(rows, mapper)
-  |> Ok()
-}
-
-//  return error with a not found type that can use try
-//  replace with list.head
-pub fn single(rows) {
-  case rows {
-    [] -> None
-    [value] -> Some(value)
-  }
+  Ok(rows)
 }

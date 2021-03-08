@@ -5,22 +5,28 @@ import gleam/result
 import gleam/string
 import gleam/json
 import gleam/http
-import gleam/httpc
+import perimeter/scrub.{Report, UnknownError}
 import postmark/client as postmark
 import plum_mail/config
-import plum_mail/acl
+import perimeter/input
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal}
+
+pub fn cast(request) {
+  try raw = input.parse_json(request)
+  params(raw)
+  |> result.map_error(input.to_report(_, "Parameter"))
+}
 
 pub type Params {
   Params(email_address: EmailAddress, target: Option(String))
 }
 
 pub fn params(raw: Dynamic) {
-  try email_address = acl.required(raw, "email_address", acl.as_email)
-  try target = acl.optional(raw, "target", acl.as_string)
+  try email_address = input.required(raw, "email_address", input.as_email)
+  try target = input.optional(raw, "target", input.as_string)
   Params(email_address, target)
   |> Ok
 }
@@ -30,7 +36,8 @@ pub fn params(raw: Dynamic) {
 pub fn execute(params, config) {
   let Params(email_address: email_address, target: target) = params
   try Personal(identifier_id, ..) = identifier.find_or_create(email_address)
-  assert Ok(token) = authentication.generate_link_token(identifier_id)
+
+  try token = authentication.generate_link_token(identifier_id)
   let config.Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
@@ -67,15 +74,18 @@ pub fn execute(params, config) {
         json.nullable(profile_email_address, json.string),
       ),
     ])
-  try _ =
-    postmark.send_email_with_template(
-      from.value,
-      to.value,
-      template_alias,
-      template_model,
-      postmark_api_token,
+  postmark.send_email_with_template(
+    from.value,
+    to.value,
+    template_alias,
+    template_model,
+    postmark_api_token,
+  )
+  |> result.map_error(fn(_) {
+    Report(
+      UnknownError,
+      "Postmark Error",
+      "Failed to send email using Postmark service",
     )
-    |> io.debug()
-    |> result.map_error(fn(_) { todo("what is the send error here") })
-  Ok(Nil)
+  })
 }

@@ -6,9 +6,10 @@ import gleam/string
 import gleam/result
 import gleam/beam
 import gleam/http.{Request}
-import gleam/httpc
 import gleam/json
 import gleam/pgo
+import perimeter/scrub.{BadInput, LogicError, Report, ServiceError}
+import perimeter/services/http_client
 import midas/signed_message
 import oauth/client as oauth
 import plum_mail/config.{Config}
@@ -61,13 +62,15 @@ pub fn save_authorization(
     pgo.text(access_token),
   ]
 
-  let mapper = fn(row) {
-    // Use assert because it's a code error to fail
-    assert Ok(sub) = dynamic.element(row, 0)
-    assert Ok(sub) = dynamic.string(sub)
-    sub
-  }
-  try authorizations = run_sql.execute(sql, args, mapper)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(authorizations) =
+    list.try_map(
+      rows,
+      fn(row) {
+        try sub = dynamic.element(row, 0)
+        dynamic.string(sub)
+      },
+    )
   assert [authorization] = authorizations
   Ok(authorization)
 }
@@ -75,16 +78,30 @@ pub fn save_authorization(
 pub fn authorize(code, client, config: Config) {
   let auth_request = oauth.token_request(client, code, config.client_origin)
   try auth_response =
-    httpc.send(auth_request)
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+    http_client.send(auth_request)
+    |> result.map_error(http_client.to_report)
 
-  try raw =
-    json.decode(auth_response.body)
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+  try oauth_response = oauth.cast_token_response(auth_response)
+  try oauth_response =
+    oauth_response
+    |> result.map_error(fn(reason) {
+      let tuple(code, description) = reason
+      let description = option.unwrap(description, code)
+      // Most of these errors are from the programming making the wrong call
+      Report(LogicError, code, description)
+    })
 
-  try tuple(access_token, refresh_token, expires_in) =
-    oauth.cast_token_response(dynamic.from(raw))
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+  let access_token = oauth_response.access_token
+  try expires_in =
+    option.to_result(
+      oauth_response.expires_in,
+      Report(ServiceError, "Missing Data", "expected value for 'expires_in'"),
+    )
+  try refresh_token =
+    option.to_result(
+      oauth_response.refresh_token,
+      Report(ServiceError, "Missing Data", "expected value for 'refresh_token'"),
+    )
 
   let user_request =
     http.default_req()
@@ -97,13 +114,18 @@ pub fn authorize(code, client, config: Config) {
     )
   try user_response =
     user_request
-    |> httpc.send()
-    |> result.map_error(fn(_) { todo("map error for authorize") })
-    |> io.debug
+    |> http_client.send()
+    |> result.map_error(http_client.to_report)
 
   try raw =
     json.decode(user_response.body)
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+    |> result.map_error(fn(_) {
+      Report(
+        ServiceError,
+        "Invalid response from service",
+        "The authentication service returned invalid JSON",
+      )
+    })
 
   let raw = dynamic.from(raw)
   assert Ok(sub) = dynamic.field(raw, "sub")
@@ -131,7 +153,9 @@ pub fn list_for_authorization(sub) {
   WHERE authorization_sub = $1
   "
   let args = [pgo.text(sub)]
-  run_sql.execute(sql, args, row_to_uploader)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(uploaders) = list.try_map(rows, row_to_uploader)
+  Ok(uploaders)
 }
 
 // Call them links?
@@ -150,7 +174,8 @@ pub fn create_uploader(sub, name, parent_id, parent_name) {
     pgo.nullable(parent_id, pgo.text),
     pgo.nullable(parent_name, pgo.text),
   ]
-  try uploaders = run_sql.execute(sql, args, row_to_uploader)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(uploaders) = list.try_map(rows, row_to_uploader)
   assert [uploader] = uploaders
   Ok(uploader)
 }
@@ -164,21 +189,21 @@ pub fn uploader_by_id(id) {
   WHERE id = $1
   "
   let args = [pgo.text(id)]
-  try uploaders = run_sql.execute(sql, args, row_to_uploader)
-  case uploaders {
-    [uploader] -> Ok(uploader)
-  }
+  try rows = run_sql.execute(sql, args)
+  assert Ok(uploaders) = list.try_map(rows, row_to_uploader)
+  assert [uploader] = uploaders
+  Ok(uploader)
 }
 
 fn row_to_uploader(row) {
-  assert Ok(sub) = dynamic.element(row, 0)
-  assert Ok(sub) = dynamic.string(sub)
-  assert Ok(id) = dynamic.element(row, 1)
-  assert Ok(id) = dynamic.string(id)
-  assert Ok(name) = dynamic.element(row, 2)
-  assert Ok(name) = dynamic.string(name)
-  assert Ok(parent_id) = dynamic.element(row, 3)
-  assert Ok(parent_id) = run_sql.dynamic_option(parent_id, dynamic.string)
+  try sub = dynamic.element(row, 0)
+  try sub = dynamic.string(sub)
+  try id = dynamic.element(row, 1)
+  try id = dynamic.string(id)
+  try name = dynamic.element(row, 2)
+  try name = dynamic.string(name)
+  try parent_id = dynamic.element(row, 3)
+  try parent_id = run_sql.dynamic_option(parent_id, dynamic.string)
 
   let refresh_token =
     dynamic.element(row, 4)
@@ -197,10 +222,7 @@ fn row_to_uploader(row) {
       )
     _, _ -> Uploader(id, name, parent_id, Error(sub))
   }
-}
-
-pub fn edit_uploader() {
-  todo
+  |> Ok
 }
 
 pub fn delete_uploader(id) {
@@ -209,7 +231,7 @@ pub fn delete_uploader(id) {
   WHERE id = $1
   "
   let args = [pgo.text(id)]
-  try _ = run_sql.execute(sql, args, fn(_) { Nil })
+  try _ = run_sql.execute(sql, args)
   Ok(Nil)
 }
 
@@ -228,16 +250,22 @@ pub fn client_authentication(request, config) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try Nil = case http.get_req_origin(request) {
     Ok(from) if from == client_origin -> Ok(Nil)
-    _ -> Error(Nil)
+    _ -> Error(Report(BadInput, "Forbidden", "Origin not allowed"))
   }
   let cookies = http.get_req_cookies(request)
   case list.key_find(cookies, "google_authentication") {
+    // TODO handle missin here
     Ok(cookie) -> decode_cookie(cookie, secret)
   }
 }
 
 pub fn decode_cookie(cookie, secret) {
-  try data = signed_message.decode(cookie, secret)
+  try data =
+    signed_message.decode(cookie, secret)
+    |> result.map_error(fn(_: Nil) {
+      Report(BadInput, "Invalid Session", "Did not send valid cookie data")
+    })
+  // Used because by this point it's signed
   assert Ok(term) = beam.binary_to_term(data)
   let tuple("google_authentication", sub) = dynamic.unsafe_coerce(term)
   Ok(sub)

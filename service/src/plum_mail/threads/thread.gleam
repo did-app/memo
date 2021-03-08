@@ -1,5 +1,6 @@
 import gleam/dynamic
 import gleam/io
+import gleam/list
 import gleam/pgo
 import gleam/json.{Json}
 import datetime.{DateTime}
@@ -48,23 +49,21 @@ pub fn post_memo(
     dynamic.unsafe_coerce(dynamic.from(content)),
     run_sql.uuid(identifier_id),
   ]
-  try [memo] =
-    run_sql.execute(
-      sql,
-      args,
-      fn(row) {
-        assert Ok(content) = dynamic.element(row, 0)
-        let content: json.Json = dynamic.unsafe_coerce(content)
-        assert Ok(posted_at) = dynamic.element(row, 1)
-        assert Ok(posted_at) = run_sql.cast_datetime(posted_at)
-        assert Ok(position) = dynamic.element(row, 2)
-        assert Ok(position) = dynamic.int(position)
+  try rows = run_sql.execute(sql, args)
+  assert [row] = rows
+  assert Ok(memo) = row_to_memo(row)
+  Ok(memo)
+}
 
-        Memo(posted_at, content, position)
-      },
-    )
-  memo
-  |> Ok
+fn row_to_memo(row) {
+  try content = dynamic.element(row, 0)
+  let content: json.Json = dynamic.unsafe_coerce(content)
+  try posted_at = dynamic.element(row, 1)
+  try posted_at = run_sql.cast_datetime(posted_at)
+  try position = dynamic.element(row, 2)
+  try position = dynamic.int(position)
+
+  Ok(Memo(posted_at, content, position))
 }
 
 pub fn load_memos(thread_id) {
@@ -77,23 +76,27 @@ pub fn load_memos(thread_id) {
     ORDER BY n.position ASC
     "
   let args = [run_sql.uuid(thread_id)]
-  let mapper = fn(row) {
-    assert Ok(position) = dynamic.element(row, 0)
-    assert Ok(position) = dynamic.int(position)
-    assert Ok(content) = dynamic.element(row, 1)
-    // assert Ok(blocks) = dynamic.field(content, "blocks")
-    assert Ok(author) = dynamic.element(row, 2)
-    assert Ok(author) = dynamic.string(author)
-    assert Ok(inserted_at) = dynamic.element(row, 3)
-    assert Ok(inserted_at) = run_sql.cast_datetime(inserted_at)
-    json.object([
-      tuple("position", json.int(position)),
-      tuple("content", dynamic.unsafe_coerce(content)),
-      tuple("author", json.string(author)),
-      tuple("posted_at", json.string(datetime.to_iso8601(inserted_at))),
-    ])
-  }
-  run_sql.execute(sql, args, mapper)
+  try rows = run_sql.execute(sql, args)
+  assert Ok(memos) = list.try_map(rows, row_to_memo_json)
+  Ok(memos)
+}
+
+fn row_to_memo_json(row) {
+  try position = dynamic.element(row, 0)
+  try position = dynamic.int(position)
+  try content = dynamic.element(row, 1)
+  // try blocks = dynamic.field(content, "blocks")
+  try author = dynamic.element(row, 2)
+  try author = dynamic.string(author)
+  try inserted_at = dynamic.element(row, 3)
+  try inserted_at = run_sql.cast_datetime(inserted_at)
+  json.object([
+    tuple("position", json.int(position)),
+    tuple("content", dynamic.unsafe_coerce(content)),
+    tuple("author", json.string(author)),
+    tuple("posted_at", json.string(datetime.to_iso8601(inserted_at))),
+  ])
+  |> Ok
 }
 
 pub fn acknowledge(identifier_id, thread_id, position) {
@@ -115,6 +118,7 @@ pub fn acknowledge(identifier_id, thread_id, position) {
     run_sql.uuid(identifier_id),
     pgo.int(position),
   ]
-  try [_] = run_sql.execute(sql, args, fn(x) { x })
+  try rows = run_sql.execute(sql, args)
+  assert [_] = rows
   Ok(Nil)
 }

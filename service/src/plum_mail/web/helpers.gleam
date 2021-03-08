@@ -14,8 +14,8 @@ import gleam/http.{Response}
 import gleam/json
 import gleam_uuid.{UUID}
 import midas/signed_message
+import perimeter/scrub.{BadInput, Report, Unprocessable}
 import plum_mail/config.{Config}
-import plum_mail/error
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -79,6 +79,7 @@ fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
   case list.key_find(cookies, "authentication") {
     Ok(token) -> {
       try data = signed_message.decode(token, secret)
+      // Use because signed binary
       assert Ok(term) = beam.binary_to_term(data)
       // security flaw if you issue tokens for other purpose
       let tuple(
@@ -105,10 +106,20 @@ fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
 pub fn identify_client(request, config) {
   let now = os.system_time(os.Second)
   do_identify_client(request, config, now)
-  |> result.map_error(fn(_) { error.Forbidden })
+  |> result.map_error(fn(_) {
+    Report(
+      Unprocessable,
+      "Forbidden",
+      "Unable to complete action due to invalid session",
+    )
+  })
 }
 
 pub fn require_authenticated(client_state) {
   client_state
-  |> option.to_result(error.Unauthenticated)
+  |> option.to_result(Report(
+    BadInput,
+    "Unauthenticated",
+    "Unable to complete action due to missing authentication",
+  ))
 }
