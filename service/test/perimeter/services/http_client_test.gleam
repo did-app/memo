@@ -1,10 +1,14 @@
 import gleam/io
 import gleam/http
-import gleam/httpc
+import perimeter/services/http_client
+import perimeter/scrub
+import gleam/should
 
 pub fn invalid_domain_test() {
-  httpc.send(http.default_req())
-  |> io.debug
+  assert Error(failure) = http_client.send(http.default_req())
+  let report = http_client.to_report(failure)
+  report.code
+  |> should.equal(scrub.Unprocessable)
 }
 // All kinds of errors.
 // failed_connect

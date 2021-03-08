@@ -6,10 +6,10 @@ import gleam/string
 import gleam/result
 import gleam/beam
 import gleam/http.{Request}
-import gleam/httpc
 import gleam/json
 import gleam/pgo
-import perimeter/scrub.{BadInput, Report}
+import perimeter/scrub.{BadInput, LogicError, Report, ServiceError}
+import perimeter/services/http_client
 import midas/signed_message
 import oauth/client as oauth
 import plum_mail/config.{Config}
@@ -78,16 +78,30 @@ pub fn save_authorization(
 pub fn authorize(code, client, config: Config) {
   let auth_request = oauth.token_request(client, code, config.client_origin)
   try auth_response =
-    httpc.send(auth_request)
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+    http_client.send(auth_request)
+    |> result.map_error(http_client.to_report)
 
-  try raw =
-    json.decode(auth_response.body)
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+  try oauth_response = oauth.cast_token_response(auth_response)
+  try oauth_response =
+    oauth_response
+    |> result.map_error(fn(reason) {
+      let tuple(code, description) = reason
+      let description = option.unwrap(description, code)
+      // Most of these errors are from the programming making the wrong call
+      Report(LogicError, code, description)
+    })
 
-  try tuple(access_token, refresh_token, expires_in) =
-    oauth.cast_token_response(dynamic.from(raw))
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+  let access_token = oauth_response.access_token
+  try expires_in =
+    option.to_result(
+      oauth_response.expires_in,
+      Report(ServiceError, "Missing Data", "expected value for 'expires_in'"),
+    )
+  try refresh_token =
+    option.to_result(
+      oauth_response.refresh_token,
+      Report(ServiceError, "Missing Data", "expected value for 'refresh_token'"),
+    )
 
   let user_request =
     http.default_req()
@@ -100,13 +114,18 @@ pub fn authorize(code, client, config: Config) {
     )
   try user_response =
     user_request
-    |> httpc.send()
-    |> result.map_error(fn(_) { todo("map error for authorize") })
-    |> io.debug
+    |> http_client.send()
+    |> result.map_error(http_client.to_report)
 
   try raw =
     json.decode(user_response.body)
-    |> result.map_error(fn(_) { todo("map error for authorize") })
+    |> result.map_error(fn(_) {
+      Report(
+        ServiceError,
+        "Invalid response from service",
+        "The authentication service returned invalid JSON",
+      )
+    })
 
   let raw = dynamic.from(raw)
   assert Ok(sub) = dynamic.field(raw, "sub")

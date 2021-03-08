@@ -10,7 +10,7 @@ import gleam/http.{Request}
 import gleam/json
 import gleam_uuid
 import plum_mail/email_address
-import perimeter/scrub.{BadInput, Report}
+import perimeter/scrub.{BadInput, Report, ServiceError}
 
 pub type Invalid {
   NotProvided(key: String)
@@ -145,8 +145,6 @@ pub fn parse_json(request) {
   }
 }
 
-// pub fn as_int() {
-// }
 pub fn to_report(reason, field_type) {
   case reason {
     NotProvided(key) ->
@@ -159,6 +157,23 @@ pub fn to_report(reason, field_type) {
       Report(
         BadInput,
         string.concat(["Invalid ", field_type]),
+        string.concat([field_type, " '", key, "' is not a valid ", to]),
+      )
+  }
+}
+
+pub fn to_service_report(reason, field_type) {
+  case reason {
+    NotProvided(key) ->
+      Report(
+        ServiceError,
+        "Invalid response from service",
+        string.concat([field_type, " '", key, "' is required"]),
+      )
+    CastFailure(key, to) ->
+      Report(
+        ServiceError,
+        "Invalid response from service",
         string.concat([field_type, " '", key, "' is not a valid ", to]),
       )
   }

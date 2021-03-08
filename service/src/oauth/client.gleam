@@ -1,11 +1,14 @@
 import gleam/dynamic
 import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import gleam/uri.{Uri}
-import gleam/http
+import gleam/http.{Response}
+import gleam/json
+import perimeter/input
+import perimeter/scrub.{Report, ServiceError}
 
 pub type AbsoluteUri {
   AbsoluteUri(scheme: String, host: String, path: String)
@@ -95,25 +98,52 @@ pub fn token_request(client, code, redirect_uri) {
   |> http.set_req_body(uri.query_to_string(query))
 }
 
-pub fn cast_token_response(raw) {
-  let access_token =
-    dynamic.field(raw, "access_token")
-    |> result.then(dynamic.string)
-  let refresh_token =
-    dynamic.field(raw, "refresh_token")
-    |> result.then(dynamic.string)
-  let expires_in =
-    dynamic.field(raw, "expires_in")
-    |> result.then(dynamic.int)
+pub fn cast_token_response(http_response) {
+  let Response(body: body, ..) = http_response
+  try raw =
+    json.decode(body)
+    |> result.map_error(fn(_) {
+      Report(
+        ServiceError,
+        "Invalid response from service",
+        "The authentication service returned invalid JSON",
+      )
+    })
+  token_response_parameters(dynamic.from(raw))
+  |> result.map_error(input.to_service_report(_, "Data"))
+}
 
-  let error = dynamic.field(raw, "error")
+pub type TokenResponse {
+  TokenResponse(
+    access_token: String,
+    token_type: String,
+    expires_in: Option(Int),
+    refresh_token: Option(String),
+    scope: Option(String),
+  )
+}
 
-  case access_token, error {
-    // Double depth result
-    Ok(access_token), Error(_) -> {
-      try refresh_token = refresh_token
-      try expires_in = expires_in
-      Ok(tuple(access_token, refresh_token, expires_in))
+pub fn token_response_parameters(raw) {
+  try error = input.optional(raw, "error", input.as_string)
+  case error {
+    Some(error) -> {
+      try error_description =
+        input.optional(raw, "error_description", input.as_string)
+      Ok(Error(tuple(error, error_description)))
+    }
+    None -> {
+      try access_token = input.required(raw, "access_token", input.as_string)
+      try token_type = input.required(raw, "token_type", input.as_string)
+      try expires_in = input.optional(raw, "expires_in", input.as_int)
+      try refresh_token = input.optional(raw, "refresh_token", input.as_string)
+      try scope = input.optional(raw, "scope", input.as_string)
+      Ok(Ok(TokenResponse(
+        access_token,
+        token_type,
+        expires_in,
+        refresh_token,
+        scope,
+      )))
     }
   }
 }

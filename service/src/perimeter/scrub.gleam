@@ -21,7 +21,7 @@ pub type Code {
 
   // Phone C-suite strategy
   // When the programmer has made a mistake, or when invalid data has been sent to a downstream service
-  ImplementationError
+  LogicError
 
   // Phone the Devs
   // Network error, Filesystem error
@@ -46,7 +46,7 @@ pub fn to_response(report) {
   let tuple(status, code) = case code {
     BadInput -> tuple(400, "bad_input")
     Unprocessable -> tuple(422, "unprocessable")
-    ImplementationError -> tuple(500, "implementation_error")
+    LogicError -> tuple(500, "implementation_error")
     ServiceUnreachable -> tuple(502, "service_unreachable")
     ServiceError -> tuple(502, "service_error")
     UnknownError -> tuple(500, "unknown_error")
