@@ -19,6 +19,7 @@ pub fn dynamic_option(raw, cast) {
 }
 
 pub fn uuid(uuid: UUID) -> pgo.PgType {
+  // Could be done by unsafe coerce to tuple, in reality need to bits on the uuid module
   assert Ok(bits) =
     uuid
     |> dynamic.from

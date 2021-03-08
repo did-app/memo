@@ -65,7 +65,9 @@ fn token_cookie_settings(request) {
 fn authentication_token(identifier, request, config) {
   let Personal(id: identifier_id, ..) = identifier
   let Config(secret: secret, ..) = config
-  assert Ok(user_agent) = http.get_req_header(request, "user-agent")
+  let user_agent =
+    http.get_req_header(request, "user-agent")
+    |> result.unwrap("")
   web.auth_token(identifier_id, user_agent, secret)
 }
 
@@ -428,7 +430,15 @@ pub fn route(
         start_request
         |> http_client.send()
         |> result.map_error(http_client.to_report)
-      assert Ok(location) = http.get_resp_header(response, "location")
+      try location =
+        http.get_resp_header(response, "location")
+        |> result.map_error(fn(_: Nil) {
+          scrub.Report(
+            scrub.ServiceError,
+            "Missing location",
+            "No upload target created",
+          )
+        })
       let data = json.object([tuple("location", json.string(location))])
       http.response(200)
       |> web.set_resp_json(data)

@@ -52,6 +52,10 @@ pub fn from_env() {
   |> Ok
 }
 
+pub fn to_report(error) {
+  input.to_report(error, "Environment variable")
+}
+
 fn required(raw, key) {
   case map.get(raw, key) {
     Ok(value) -> Ok(value)

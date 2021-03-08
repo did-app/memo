@@ -49,7 +49,7 @@ pub fn participating_in_a_group_conversation_test() {
   p.acknowledged
   |> should.equal(0)
 
-  let loaded = dispatch_notifications.load()
+  assert Ok(loaded) = dispatch_notifications.load()
   assert Ok(latest) =
     loaded
     |> list.at(list.length(loaded) - 1)

@@ -66,7 +66,7 @@ pub fn load() {
   AND participants.identifier_id <> memos.authored_by
   ORDER BY memos.inserted_at ASC
   "
-  assert Ok(rows) = run_sql.execute(sql, [])
+  try rows = run_sql.execute(sql, [])
   assert Ok(deliveries) =
     list.try_map(
       rows,
@@ -124,14 +124,17 @@ pub fn load() {
         |> Ok
       },
     )
-  deliveries
+  Ok(deliveries)
 }
 
 pub fn run() {
-  let config = config.from_env()
+  try config =
+    config.from_env()
+    |> result.map_error(config.to_report)
 
-  load()
-  |> list.each(dispatch_to_identifier(_, config))
+  try outstanding = load()
+  list.each(outstanding, dispatch_to_identifier(_, config))
+  |> Ok
 }
 
 fn block_from_dynamic(raw) {
@@ -218,11 +221,11 @@ fn block_to_text(block) {
 }
 
 fn dispatch_to_identifier(record, config) {
-  assert Ok(Config(
+  let Config(
     postmark_api_token: postmark_api_token,
     client_origin: client_origin,
     ..,
-  )) = config
+  ) = config
   let tuple(
     recipient_id,
     recipient_email_address,
@@ -251,15 +254,9 @@ fn dispatch_to_identifier(record, config) {
     )
   }
   // contact link needs to handle adding position because it will be in a hash fragment.
-  let authentication_url = contact_link(client_origin, path, recipient_id)
+  try authentication_url = contact_link(client_origin, path, recipient_id)
 
   let to = recipient_email_address.value
-  // contact might be nill, we need to change this up to author
-  // let from = case topic.value {
-  //   "richard@sendmemo.app" -> "Richard Shepherd <richard@sendmemo.app>"
-  //   "peter@sendmemo.app" -> "Peter Saxton <peter@sendmemo.app>"
-  //   _ -> "memo <memo@sendmemo.app>"
-  // }
   let from = "memo <memo@sendmemo.app>"
 
   io.debug(preview)
@@ -270,7 +267,7 @@ fn dispatch_to_identifier(record, config) {
       tuple("email_address", json.string(author)),
       tuple("content_preview", json.nullable(preview, json.string)),
     ])
-  let response =
+  try response =
     postmark.send_email_with_template(
       from,
       to,
@@ -280,22 +277,23 @@ fn dispatch_to_identifier(record, config) {
     )
   case response {
     Ok(Nil) -> {
-      assert Ok(_) = record_sent(thread_id, position, recipient_id)
+      try _ = record_sent(thread_id, position, recipient_id)
       Ok(Nil)
     }
     // why was that, handle case of bad email addresses
     Error(postmark.Failure(retry: True)) -> Ok(Nil)
     Error(postmark.Failure(retry: False)) -> {
-      record_failed(thread_id, position, recipient_id)
+      try _ = record_failed(thread_id, position, recipient_id)
       Ok(Nil)
     }
   }
 }
 
 fn contact_link(origin, path, recipient_id) {
-  assert Ok(code) = authentication.generate_link_token(recipient_id)
+  try code = authentication.generate_link_token(recipient_id)
   [origin, path, "#code=", code]
   |> string.join("")
+  |> Ok
 }
 
 pub fn record_result(thread_id, position, recipient_id, success) {

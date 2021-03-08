@@ -49,7 +49,7 @@ pub fn talking_to_a_unknown_identifier_test() {
   bob_participation.latest
   |> should.equal(alice_participation.latest)
 
-  let loaded = dispatch_notifications.load()
+  assert Ok(loaded) = dispatch_notifications.load()
   assert Ok(latest) =
     loaded
     |> list.at(list.length(loaded) - 1)
@@ -75,7 +75,8 @@ pub fn talking_to_a_unknown_identifier_test() {
 
   // TODO make sure these return reports with Unprocessable
   // |> should.equal(Error(Forbidden))
-  let loaded = dispatch_notifications.load()
+  assert Ok(loaded) = dispatch_notifications.load()
+
   assert Ok(latest) =
     loaded
     |> list.at(list.length(loaded) - 1)
@@ -137,7 +138,8 @@ pub fn answering_an_identifier_greeting_test() {
   clive_participation.latest
   |> should.equal(alice_participation.latest)
 
-  let loaded = dispatch_notifications.load()
+  assert Ok(loaded) = dispatch_notifications.load()
+
   assert Ok(latest) =
     loaded
     |> list.at(list.length(loaded) - 1)

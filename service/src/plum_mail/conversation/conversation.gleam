@@ -16,7 +16,6 @@ import plum_mail/conversation/group.{Group}
 
 pub fn create_group(name, identifier_id, invitees) {
   try group = group.create_group(name, identifier_id)
-  // should assert on return from invite member, even upgrade to transaction
   list.each(invitees, invite_member(group.id, _, identifier_id))
   Ok(GroupConversation(
     group,

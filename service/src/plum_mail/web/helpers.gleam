@@ -79,6 +79,7 @@ fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
   case list.key_find(cookies, "authentication") {
     Ok(token) -> {
       try data = signed_message.decode(token, secret)
+      // Use because signed binary
       assert Ok(term) = beam.binary_to_term(data)
       // security flaw if you issue tokens for other purpose
       let tuple(
