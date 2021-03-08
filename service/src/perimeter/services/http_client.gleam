@@ -5,6 +5,7 @@ import gleam/result
 import gleam/httpc
 import perimeter/scrub.{Report, Unprocessable}
 
+// Could just use report when no further context to be given
 pub type Failure {
   ConnectionFailure(List(Dynamic))
 }

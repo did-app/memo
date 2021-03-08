@@ -5,7 +5,6 @@ import gleam/result
 import gleam/string
 import gleam/json
 import gleam/http
-import gleam/httpc
 import perimeter/scrub.{Report, UnknownError}
 import postmark/client as postmark
 import plum_mail/config

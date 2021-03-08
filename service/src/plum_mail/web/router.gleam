@@ -12,7 +12,6 @@ import gleam/uri
 import gleam/beam
 import gleam/http/cowboy
 import gleam/http.{Request, Response}
-import gleam/httpc
 import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid
@@ -23,6 +22,7 @@ import oauth/client as oauth
 import drive_uploader
 import perimeter/input
 import perimeter/scrub
+import perimeter/services/http_client
 import plum_mail
 import plum_mail/config.{Config}
 import plum_mail/run_sql
@@ -424,17 +424,16 @@ pub fn route(
           string.concat(["Bearer ", access_token]),
         )
         |> http.set_req_body(json.encode(data))
-      assert Ok(response) =
+      try response =
         start_request
-        |> httpc.send()
-        |> io.debug
+        |> http_client.send()
+        |> result.map_error(http_client.to_report)
       assert Ok(location) = http.get_resp_header(response, "location")
       let data = json.object([tuple("location", json.string(location))])
       http.response(200)
       |> web.set_resp_json(data)
       |> Ok()
     }
-    // |> Ok
     _ ->
       http.response(404)
       |> http.set_resp_body(bit_builder.from_bit_string(<<>>))

@@ -7,7 +7,6 @@ import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import gleam/http
-import gleam/httpc
 import gleam/json
 import gleam/pgo
 import gleam_uuid
