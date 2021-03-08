@@ -16,7 +16,7 @@ defmodule PlumMail.Application do
     db_ssl = System.get_env("DATABASE_SSL") != "FALSE"
     db_config = [{:ssl, db_ssl} | db_config]
 
-    config = :plum_mail@config.from_env()
+    {:ok, config} = :plum_mail@config.from_env()
     nil = :gleam@beam@logger.add_handler(&:plum_mail@logger.handle(config, &1, &2, &3))
 
     children = [

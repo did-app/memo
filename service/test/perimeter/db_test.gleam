@@ -9,16 +9,9 @@
 import gleam/atom
 import gleam/io
 import gleam/pgo
-
 // Constrain can be part of migrations, non null
 // contstaint can be unknowable because of uniqueness
 // Let's say that if the constraint is known then the query should have an on conflict value
 // Therefore it's a programmer error
-pub fn invalid_syntax_query_test() {
-  let conn = atom.create_from_string("default")
-  pgo.query(conn, "SELECT 42", [])
-  |> io.debug()
-  todo
-}
 // Errors are meant to be pgo_error but seem to most come out as pgsql_error types
 // https://github.com/erleans/pgo/blob/6bbd5478ac08ae184cdd8f2331ff81fd94b66610/src/pgo.erl#L37

@@ -137,7 +137,7 @@ pub fn invite_member(group_id, invited_id, inviting_id) {
     run_sql.uuid(invited_id),
     run_sql.uuid(inviting_id),
   ]
-  try rows = run_sql.execute(create_group_sql, args)
+  try rows = run_sql.execute(sql, args)
   assert [row] = rows
   assert Ok(group) = from_row(row, 0, Some([]))
   Ok(group)
