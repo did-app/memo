@@ -24,6 +24,7 @@ pub fn validate(email_address) {
 
 pub fn to_path(email_address) {
   let EmailAddress(value) = email_address
+  // This assertion is valid because using value from email address, we should have a function to get parts or save in record deconstructed
   assert [username, domain] = string.split(value, "@")
   string.join(["/", domain, "/", username], "")
 }

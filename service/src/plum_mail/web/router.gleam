@@ -71,10 +71,10 @@ fn authentication_token(identifier, request, config) {
 
 fn successful_authentication(identifier) {
   let identifier_id = identifier.id(identifier)
-  assert Ok(inboxs) = conversation.all_inboxes(identifier_id)
-  let inboxs_data =
+  try inboxes = conversation.all_inboxes(identifier_id)
+  let inboxes_data =
     json.list(list.map(
-      inboxs,
+      inboxes,
       fn(inbox) {
         let tuple(identifier, role, conversations) = inbox
         let role = case role {
@@ -97,7 +97,8 @@ fn successful_authentication(identifier) {
       },
     ))
   http.response(200)
-  |> web.set_resp_json(json.object([tuple("inboxes", inboxs_data)]))
+  |> web.set_resp_json(json.object([tuple("inboxes", inboxes_data)]))
+  |> Ok
 }
 
 fn no_content() {
@@ -121,12 +122,12 @@ pub fn route(
       try identifier = authenticate_by_password.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> http.set_resp_cookie(
+      |> result.map(http.set_resp_cookie(
+        _,
         "authentication",
         token,
         token_cookie_settings(request),
-      )
-      |> Ok
+      ))
     }
     // Note cookies wont get set on the ajax auth step
     ["sign_in"] -> {
@@ -152,12 +153,12 @@ pub fn route(
       try identifier = authenticate_by_code.run(params)
       let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> http.set_resp_cookie(
+      |> result.map(http.set_resp_cookie(
+        _,
         "authentication",
         token,
         token_cookie_settings(request),
-      )
-      |> Ok
+      ))
     }
     ["authenticate", "session"] -> {
       try client = web.identify_client(request, config)
@@ -167,9 +168,8 @@ pub fn route(
           try lookup = identifier.fetch_by_id(identifier_id)
           case lookup {
             Some(identifier) ->
-              // This one doesn't set a session as it already has one
+              // This one doesn't set a cookie as it already has one
               successful_authentication(identifier)
-              |> Ok
             None -> no_content()
           }
         }

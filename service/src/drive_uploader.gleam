@@ -265,6 +265,7 @@ pub fn decode_cookie(cookie, secret) {
     |> result.map_error(fn(_: Nil) {
       Report(BadInput, "Invalid Session", "Did not send valid cookie data")
     })
+  // Use assert because by this point it's signed
   assert Ok(term) = beam.binary_to_term(data)
   let tuple("google_authentication", sub) = dynamic.unsafe_coerce(term)
   Ok(sub)

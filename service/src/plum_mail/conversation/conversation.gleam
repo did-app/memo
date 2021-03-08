@@ -192,7 +192,7 @@ pub fn start_direct(identifier_id, author_id, email_address, content) {
     Some(greeting) -> {
       // check that identifier id has permission for the thread
       // the check that author has permision for role
-      assert Ok(_) =
+      try _ =
         thread.post_memo(
           participation.thread_id,
           1,
@@ -301,6 +301,7 @@ fn all_shared_inboxes(personal_id) {
 // NOTE this needs to be private or check identifier + member
 pub fn all_inboxes(personal_id) {
   try Some(personal) = identifier.fetch_by_id(personal_id)
+  // This should only ever be called with personal id
   assert Personal(..) = personal
   try shared = all_shared_inboxes(personal_id)
   list.try_map(
