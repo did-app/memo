@@ -94,6 +94,7 @@ pub fn load() {
           option.map(
             contact,
             fn(contact) {
+              // This is easiest handled by an input.required/optional that works for rows returned from pgo
               assert Ok(contact) = email_address.validate(contact)
               contact
             },
@@ -134,17 +135,17 @@ pub fn run() {
 }
 
 fn block_from_dynamic(raw) {
-  assert Ok(block_type) = dynamic.field(raw, "type")
-  assert Ok(block_type) = dynamic.string(block_type)
+  try block_type = dynamic.field(raw, "type")
+  try block_type = dynamic.string(block_type)
   case block_type {
     "paragraph" -> {
-      assert Ok(spans) = dynamic.field(raw, "spans")
-      assert Ok(spans) = dynamic.typed_list(spans, span_from_dynamic)
+      try spans = dynamic.field(raw, "spans")
+      try spans = dynamic.typed_list(spans, span_from_dynamic)
       Ok(Paragraph(spans))
     }
     "annotation" -> {
-      assert Ok(blocks) = dynamic.field(raw, "blocks")
-      assert Ok(blocks) = dynamic.typed_list(blocks, block_from_dynamic)
+      try blocks = dynamic.field(raw, "blocks")
+      try blocks = dynamic.typed_list(blocks, block_from_dynamic)
       let reference = RangeReference
       Ok(Annotation(reference, blocks))
     }
@@ -156,17 +157,17 @@ fn block_from_dynamic(raw) {
 }
 
 fn span_from_dynamic(raw) {
-  assert Ok(span_type) = dynamic.field(raw, "type")
-  assert Ok(span_type) = dynamic.string(span_type)
+  try span_type = dynamic.field(raw, "type")
+  try span_type = dynamic.string(span_type)
   case span_type {
     "text" -> {
-      assert Ok(text) = dynamic.field(raw, "text")
-      assert Ok(text) = dynamic.string(text)
+      try text = dynamic.field(raw, "text")
+      try text = dynamic.string(text)
       Ok(Text(text))
     }
     "link" -> {
-      assert Ok(url) = dynamic.field(raw, "url")
-      assert Ok(url) = dynamic.string(url)
+      try url = dynamic.field(raw, "url")
+      try url = dynamic.string(url)
       let title =
         dynamic.field(raw, "title")
         |> result.then(dynamic.string)

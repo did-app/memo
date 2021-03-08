@@ -386,7 +386,7 @@ pub fn all_participating(identifier_id) {
       fn(row) {
         try thread_id = dynamic.element(row, 0)
         try thread_id = dynamic.bit_string(thread_id)
-        assert thread_id = run_sql.binary_to_uuid4(thread_id)
+        let thread_id = run_sql.binary_to_uuid4(thread_id)
         try acknowledged = dynamic.element(row, 1)
         try acknowledged = dynamic.int(acknowledged)
         try inserted_at = dynamic.element(row, 2)

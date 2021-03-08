@@ -23,6 +23,8 @@ pub fn handle(params, config) {
   try to_full =
     input.required(params, "ToFull", input.as_list(_, Ok))
     |> result.map_error(input.to_report(_, "Parameter"))
+  // I think there might be ways to get more than one but we don't care now.
+  // Does the postmark logging include non-200 responses
   assert [to_full] = to_full
   try to_hash =
     input.required(to_full, "MailboxHash", input.as_string)
