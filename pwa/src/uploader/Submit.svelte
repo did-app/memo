@@ -53,27 +53,46 @@
   })();
 </script>
 
-<div class="p-4 border-4 border-dashed">
-  {#if uploader}
-    <h1>
+<div class="bg-gray-100 border-2 border-dashed rounded-lg text-center">
+  <h1 class="my-4 text-xl">
+    {#if uploader}
       {uploader.name || ""}
-    </h1>
-  {:else}
-    Loading
-  {/if}
+    {:else}
+      Loading
+    {/if}
+  </h1>
 
-  {#if sending}
-    Working
-  {:else}
-    {#if error}
+  <form on:submit={sendFile}>
+    {#if sending}
+      <div class="my-4">Uploading file</div>
+    {:else if error}
       {error}
+    {:else if lastSent}
+      <div class="my-4">
+        Thank you! Successfully sent: <span class="italic">{lastSent}</span>
+      </div>
+      <div class="my-4">
+        <button
+          class="bg-gray-800 border-2 text-lg border-gray-800 text-white rounded px-2 ml-2"
+          type="reset"
+          on:click={() => {
+            lastSent = null;
+            document.querySelector("form")?.reset();
+          }}>Send another</button
+        >
+      </div>
+    {:else}
+      <div class="my-4">
+        <label for="">
+          <input class="bg-white" type="file" required />
+        </label>
+      </div>
+      <div class="my-4">
+        <button
+          class="bg-gray-800 border-2 text-lg border-gray-800 text-white rounded px-2 ml-2"
+          >Submit</button
+        >
+      </div>
     {/if}
-    {#if lastSent}
-      Sent: {lastSent}
-    {/if}
-    <form on:submit={sendFile}>
-      <input type="file" required />
-      <button>Submit</button>
-    </form>
-  {/if}
+  </form>
 </div>
