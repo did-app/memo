@@ -95,7 +95,9 @@
   {:else if preview.item === "table"}
     <Table {...preview} />
   {:else if preview.item === "plain"}
-    <a {href}>{text || href}</a>
+    <a class="underline text-green-400 hover:text-green-600 break-all" {href}
+      >{text || href}</a
+    >
   {:else if preview.item === "image"}
     <img class="mx-auto" src={href} alt="" />
   {:else if preview.item === "embeded_video"}
