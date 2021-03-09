@@ -1,4 +1,6 @@
-## Call it perimeter or shell for imperitive shell
-Don't call it shell because of Bash etc
-scrub is a thing in it
+
+Input validation Anti corruption Layer
+THis includes user input, responses from external services and configuration input at startup.
+
+
 

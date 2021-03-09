@@ -14,29 +14,7 @@ Because of this my assertion is:
 
 There is probably a pretty useful version 
 
-## What is a Program
 
-input + state -> logic + services -> output
-
-This works for function call, API call, CLI execution
-
-Error attributes.
-
-## Problems with input. Smarter type systems can reduce this but it's always possible.
-With an API call there's far more options for bad input.
-RejectedInput
-
-## Problem with the logic, 
-So called Bugs and can be fixed by a programmer
-
-## Problem with the state.
-These aren't really errors at all. 
-For example a user tries to reserve a username that's already taken.
-
-The input is good, there is no way to the client to know the username is taken so it makes the request
-The server knows the username is taken and so performs properly and disallows the request.
-
-These are 
 
 ## Design outcomes
 
@@ -70,20 +48,4 @@ The http library can always say that getting an invalid url is a program error, 
 
 This principle works for all service calls,
 
-A call is made to service A which in turn makes a call to service B.
-If B returns early because of rejected input. 
-A should return early due to a Logic Error, because it is assumed that it should validate it's own input before calling downstream.
 
-
-
-Calling stuff error's one of the biggest mistakes.
-
-- RejectedInput -> LogicError
-- Unprocessable -> Unprocessable
-- LogicError -> ServiceError
-- ServiceUnavailable -> ServiceUnavailable
-- ServiceError -> ServiceError
-
-Added to the set
-UnknownError (treated as logic error by client)
-AlreadyDone (maybe, not using it)
