@@ -115,7 +115,7 @@
       src={preview.iframe}
       frameborder="0"
       allowfullscreen
-      style="width: 100%;"
+      style="width: 100%; min-height: 180px"
     />
   {:else if preview.item === "embeded_html"}
     <iframe

@@ -53,7 +53,10 @@
   })();
 </script>
 
-<div class="bg-gray-100 border-2 border-dashed rounded-lg text-center">
+<div
+  class="bg-gray-100 border-2 border-dashed rounded-lg text-center"
+  style="min-height: 180px"
+>
   <h1 class="my-4 text-xl">
     {#if uploader}
       {uploader.name || ""}
@@ -64,9 +67,22 @@
 
   <form on:submit={sendFile}>
     {#if sending}
-      <div class="my-4">Uploading file</div>
+      <div class="my-4">Uploading file ...</div>
+      <div class="my-4">Please wait</div>
     {:else if error}
-      {error}
+      <div class="my-4">
+        {error}
+      </div>
+      <div class="my-4">
+        <button
+          class="bg-gray-800 border-2 text-lg border-gray-800 text-white rounded px-2 ml-2"
+          type="reset"
+          on:click={() => {
+            lastSent = null;
+            document.querySelector("form")?.reset();
+          }}>Retry</button
+        >
+      </div>
     {:else if lastSent}
       <div class="my-4">
         Thank you! Successfully sent: <span class="italic">{lastSent}</span>
