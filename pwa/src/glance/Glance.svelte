@@ -9,7 +9,7 @@
   async function fetchPreview(href: string): Promise<Preview> {
     let url = new URL(href, window.location.origin);
     if (url.origin === window.location.origin) {
-      if ((url.pathname = "/uploader")) {
+      if (url.pathname == "/uploader") {
         return {
           item: "embeded_frame",
           iframe: url.toString(),
