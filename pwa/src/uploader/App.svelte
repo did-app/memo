@@ -253,7 +253,7 @@
             class="bg-white border"
             type="text"
             readonly
-            value={picked?.name}
+            value={picked?.name || ""}
             required
           />
           <button
