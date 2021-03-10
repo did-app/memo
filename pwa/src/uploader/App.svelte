@@ -281,3 +281,20 @@
     {/if}
   </main>
 {/if}
+<footer
+  class="w-full max-w-3xl mx-auto border-t p-2 flex flex-wrap items-center"
+  >
+  <div class="w-full max-w-xl mx-auto">
+    <h2 class="text-lg font-bold my-4" id="#privacy-policy">Privacy Policy</h2>  
+    <p>
+      All files are send directly to Google's servers and their content is not visible to the Memo Uploader application.
+    </p> 
+    <p>
+      Your connected Google account is identified by its email address and this information is saved on the Memo Uploader servers.
+    </p>
+    <p class="my-4">
+      Memo is a trading style of Kno Me Limited
+    </p>
+
+  </div>
+</footer>
