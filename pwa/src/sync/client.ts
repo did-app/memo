@@ -41,7 +41,7 @@ async function doFetch(path: string, options: any): Call<any> {
       return parseJSON(response)
     } else if (response.status === 204) {
       return { data: null }
-    } else if (response.status === 403) {
+    } else if (response.status === 422) {
       return { error: { code: "forbidden", detail: "Action was forbidden" } }
     } else {
       throw "handle other responses" + response.status
