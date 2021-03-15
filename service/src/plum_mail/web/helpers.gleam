@@ -10,12 +10,13 @@ import gleam/order
 import gleam/os
 import gleam/result
 import gleam/string
-import gleam/http.{Response}
+import gleam/http.{Request, Response}
 import gleam/json
 import gleam_uuid.{UUID}
 import midas/signed_message
 import perimeter/scrub.{BadInput, Report, Unprocessable}
 import plum_mail/config.{Config}
+import plum_mail/identifier.{Personal}
 
 pub fn redirect(uri: String) -> Response(BitBuilder) {
   let body =
@@ -62,57 +63,99 @@ fn check_timestamp(issued, duration, now) {
   }
 }
 
-pub fn auth_token(identifier_id, user_agent, secret) {
-  let now = os.system_time(os.Second)
-  let term = tuple("cookie_token", identifier_id, now, now, user_agent)
-  let data = beam.term_to_binary(term)
-  signed_message.encode(data, secret)
+const email_authentication = "email_authentication"
+
+const one_month = 2_592_000
+
+fn token_cookie_settings(request) {
+  let Request(scheme: scheme, ..) = request
+  let defaults = http.cookie_defaults(scheme)
+  // The policy needs to be none because we call from memo.did.app to herokuapp
+  // let same_site_policy = case defaults.secure {
+  //   True -> http.None
+  //   False -> http.Lax
+  // }
+  // NOTE need x-request
+  // this breaks it if api call is made over http, need to handle redirect
+  // motion removing from gleam_http
+  let tuple(secure, same_site_policy) = case http.get_req_header(
+    request,
+    "x-forwarded-proto",
+  ) {
+    Ok("https") -> tuple(True, Some(http.None))
+    _ -> tuple(False, Some(http.Lax))
+  }
+  http.CookieAttributes(
+    ..defaults,
+    max_age: Some(one_month),
+    same_site: same_site_policy,
+    secure: secure,
+  )
 }
 
-fn do_identify_client(request, config, now) -> Result(Option(UUID), Nil) {
-  let Config(client_origin: client_origin, secret: secret, ..) = config
-  try Nil = case http.get_req_origin(request) {
+pub fn set_email_authentication_cookie(response, identifier, request, config) {
+  let Personal(id: identifier_id, ..) = identifier
+  let Config(secret: secret, ..) = config
+  let cookie =
+    tuple(email_authentication, identifier_id)
+    |> beam.term_to_binary()
+    |> signed_message.encode(secret)
+
+  http.set_resp_cookie(
+    response,
+    email_authentication,
+    cookie,
+    token_cookie_settings(request),
+  )
+}
+
+fn check_request_origin(request, client_origin) {
+  case http.get_req_origin(request) {
     Ok(from) if from == client_origin -> Ok(Nil)
-    _ -> Error(Nil)
+    _ ->
+      Error(Report(
+        // TODO RejectedInput
+        BadInput,
+        "Unacceptable origin",
+        "Unable to complete action due to invalid origin",
+      ))
   }
+}
+
+pub fn get_email_authentication(request, config) {
+  let Config(client_origin: client_origin, secret: secret, ..) = config
+  try Nil = check_request_origin(request, client_origin)
   let cookies = http.get_req_cookies(request)
-  case list.key_find(cookies, "authentication") {
-    Ok(token) -> {
-      try data = signed_message.decode(token, secret)
+
+  case list.key_find(cookies, email_authentication) {
+    Ok(cookie) -> {
+      try data =
+        signed_message.decode(cookie, secret)
+        |> result.map_error(fn(_: Nil) {
+          Report(
+            BadInput,
+            "Invalid cookie",
+            "Unable to complete action due to invalid cookie",
+          )
+        })
       // Use because signed binary
       assert Ok(term) = beam.binary_to_term(data)
-      // security flaw if you issue tokens for other purpose
-      let tuple(
-        "cookie_token",
-        identifier_id,
-        identified_at,
-        active_at,
-        user_agent,
-      ) = dynamic.unsafe_coerce(term)
-      try _ = check_timestamp(identified_at, Days(30), now)
-      try _ = check_timestamp(active_at, Days(3), now)
-      try _ = case http.get_req_header(request, "user-agent") {
-        Ok(ua) if ua == user_agent -> Ok(Nil)
-        _ -> // we're not currently checking user agents match
-          // NOTE putting a mobile view on chrome inspector tools changes the user agent.
-          Ok(Nil)
+      let term: tuple(String, UUID) = dynamic.unsafe_coerce(term)
+      case term {
+        tuple(key, identifier_id) if key == email_authentication ->
+          Ok(Some(identifier_id))
       }
-      Ok(Some(identifier_id))
     }
     Error(Nil) -> Ok(None)
   }
 }
 
-pub fn identify_client(request, config) {
-  let now = os.system_time(os.Second)
-  do_identify_client(request, config, now)
-  |> result.map_error(fn(_) {
-    Report(
-      Unprocessable,
-      "Forbidden",
-      "Unable to complete action due to invalid session",
-    )
-  })
+pub fn expire_email_authentication_cookie(response, request) {
+  http.expire_resp_cookie(
+    response,
+    email_authentication,
+    token_cookie_settings(request),
+  )
 }
 
 pub fn require_authenticated(client_state) {

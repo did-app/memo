@@ -32,44 +32,9 @@ import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/conversation/conversation
 import plum_mail/email_address.{EmailAddress}
-import plum_mail/identifier.{Personal, Shared}
+import plum_mail/identifier
 import plum_mail/web/helpers as web
 import plum_mail/email/inbound/postmark
-
-fn token_cookie_settings(request) {
-  let Request(scheme: scheme, ..) = request
-  let defaults = http.cookie_defaults(scheme)
-  // The policy needs to be none because we call from memo.did.app to herokuapp
-  // let same_site_policy = case defaults.secure {
-  //   True -> http.None
-  //   False -> http.Lax
-  // }
-  // NOTE need x-request
-  // this breaks it if api call is made over http, need to handle redirect
-  // motion removing from gleam_http
-  let tuple(secure, same_site_policy) = case http.get_req_header(
-    request,
-    "x-forwarded-proto",
-  ) {
-    Ok("https") -> tuple(True, Some(http.None))
-    _ -> tuple(False, Some(http.Lax))
-  }
-  http.CookieAttributes(
-    ..defaults,
-    max_age: Some(604800),
-    same_site: same_site_policy,
-    secure: secure,
-  )
-}
-
-fn authentication_token(identifier, request, config) {
-  let Personal(id: identifier_id, ..) = identifier
-  let Config(secret: secret, ..) = config
-  let user_agent =
-    http.get_req_header(request, "user-agent")
-    |> result.unwrap("")
-  web.auth_token(identifier_id, user_agent, secret)
-}
 
 fn successful_authentication(identifier) {
   let identifier_id = identifier.id(identifier)
@@ -122,13 +87,12 @@ pub fn route(
         authenticate_by_password.params(raw)
         |> result.map_error(input.to_report(_, "Parameter"))
       try identifier = authenticate_by_password.run(params)
-      let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> result.map(http.set_resp_cookie(
+      |> result.map(web.set_email_authentication_cookie(
         _,
-        "authentication",
-        token,
-        token_cookie_settings(request),
+        identifier,
+        request,
+        config,
       ))
     }
     // Note cookies wont get set on the ajax auth step
@@ -138,13 +102,8 @@ pub fn route(
         authenticate_by_password.params(raw)
         |> result.map_error(input.to_report(_, "Form field"))
       try identifier = authenticate_by_password.run(params)
-      let token = authentication_token(identifier, request, config)
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.set_resp_cookie(
-        "authentication",
-        token,
-        token_cookie_settings(request),
-      )
+      |> web.set_email_authentication_cookie(identifier, request, config)
       |> Ok
     }
     ["authenticate", "code"] -> {
@@ -153,17 +112,16 @@ pub fn route(
         authenticate_by_code.params(raw)
         |> result.map_error(input.to_report(_, "Parameter"))
       try identifier = authenticate_by_code.run(params)
-      let token = authentication_token(identifier, request, config)
       successful_authentication(identifier)
-      |> result.map(http.set_resp_cookie(
+      |> result.map(web.set_email_authentication_cookie(
         _,
-        "authentication",
-        token,
-        token_cookie_settings(request),
+        identifier,
+        request,
+        config,
       ))
     }
     ["authenticate", "session"] -> {
-      try client = web.identify_client(request, config)
+      try client = web.get_email_authentication(request, config)
       // Could require_authentication but with a handle
       case client {
         Some(identifier_id) -> {
@@ -185,10 +143,7 @@ pub fn route(
     }
     ["sign_out"] ->
       web.redirect(string.append(config.client_origin, "/"))
-      |> http.expire_resp_cookie(
-        "authentication",
-        token_cookie_settings(request),
-      )
+      |> web.expire_email_authentication_cookie(request)
       |> Ok
     ["identifiers", email_address] -> {
       let sql = "SELECT greeting FROM identifiers WHERE email_address = $1"
@@ -213,7 +168,7 @@ pub fn route(
       |> Ok()
     }
     ["identifiers", identifier_id, "greeting"] -> {
-      try client_state = web.identify_client(request, config)
+      try client_state = web.get_email_authentication(request, config)
       try user_id = web.require_authenticated(client_state)
       try identifier_id =
         input.as_uuid(dynamic.from(identifier_id))
@@ -238,7 +193,7 @@ pub fn route(
       try content =
         input.required(raw, "content", Ok)
         |> result.map_error(input.to_report(_, "Parameter"))
-      try client_state = web.identify_client(request, config)
+      try client_state = web.get_email_authentication(request, config)
       try author_id = web.require_authenticated(client_state)
       try identifier_id =
         input.as_uuid(dynamic.from(identifier_id))
@@ -264,7 +219,7 @@ pub fn route(
       try invitees =
         input.required(params, "invitees", input.as_list(_, input.as_uuid))
         |> result.map_error(input.to_report(_, "Parameter"))
-      try client_state = web.identify_client(request, config)
+      try client_state = web.get_email_authentication(request, config)
       try identifier_id = web.require_authenticated(client_state)
       try conversation =
         conversation.create_group(name, identifier_id, invitees)
@@ -282,7 +237,7 @@ pub fn route(
         input.as_uuid(dynamic.from(thread_id))
         |> result.map_error(input.CastFailure("thread_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
-      try client_state = web.identify_client(request, config)
+      try client_state = web.get_email_authentication(request, config)
       try user_id = web.require_authenticated(client_state)
       try memos = conversation.load_memos(thread_id, identifier_id, user_id)
       let data = json.list(memos)
@@ -308,7 +263,7 @@ pub fn route(
         |> result.map_error(input.to_report(_, "Parameter"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
-      try client_state = web.identify_client(request, config)
+      try client_state = web.get_email_authentication(request, config)
       try author_id = web.require_authenticated(client_state)
       // // Needs a participation thing again
       try latest =
@@ -337,7 +292,7 @@ pub fn route(
       try position =
         input.required(raw, "position", input.as_int)
         |> result.map_error(input.to_report(_, "Parameter"))
-      try client_state = web.identify_client(request, config)
+      try client_state = web.get_email_authentication(request, config)
       try user_id = web.require_authenticated(client_state)
       try _ =
         conversation.acknowledge(identifier_id, user_id, thread_id, position)
