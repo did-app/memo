@@ -43,7 +43,7 @@
         title: string;
         fields: string[];
         rows: (string | number)[][];
-      };
+      } | {item: "schema.recipe", name: string, image: string, recipe_instructions: string[]};
   let preview: Preview, next: string | undefined, running: boolean;
 
   async function updatePreview(href: string) {
@@ -129,6 +129,20 @@
       }}
       srcdoc="<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'></head><body>{preview.html}</body></html>"
     />
+    {:else if preview.item === "schema.recipe"}
+      <div class="rounded-2xl overflow-hidden border shadow bg-gray-100 border-gray-100">
+        <img class="w-full max-h-72 object-cover" src="{preview.image}" alt="">
+        <h3 class="text-center font-bold">{preview.name}</h3>
+        <ol class="list-inside list-decimal px-3">
+          {#each preview.recipe_instructions as step}
+          <li class="my-2">
+            {step}
+          </li>
+          {/each}
+        </ol>
+        <p class="px-3 underline text-green-400 hover:text-green-600 text-center"><a href="{href}">view original ...</a></p>
+      </div>
+    <!-- {JSON.stringify(preview)} -->
   {:else}
     <!-- Note that Glance returns the promise even if non 200 response -->
     <a class="underline text-green-400 hover:text-green-600 break-all" {href}
