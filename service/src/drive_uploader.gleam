@@ -8,7 +8,9 @@ import gleam/beam
 import gleam/http.{Request}
 import gleam/json
 import gleam/pgo
-import perimeter/scrub.{BadInput, LogicError, Report, ServiceError}
+import perimeter/input/http_response
+import perimeter/input/json as json_input
+import perimeter/scrub.{LogicError, RejectedInput, Report, ServiceError}
 import perimeter/services/http_client
 import midas/signed_message
 import oauth/client as oauth
@@ -117,21 +119,11 @@ pub fn authorize(code, client, config: Config) {
     |> http_client.send()
     |> result.map_error(http_client.to_report)
 
-  try raw =
-    json.decode(user_response.body)
-    |> result.map_error(fn(_) {
-      Report(
-        ServiceError,
-        "Invalid response from service",
-        "The authentication service returned invalid JSON",
-      )
-    })
+  try raw = http_response.get_json(user_response)
 
-  let raw = dynamic.from(raw)
-  assert Ok(sub) = dynamic.field(raw, "sub")
-  assert Ok(sub) = dynamic.string(sub)
-  assert Ok(email_address) = dynamic.field(raw, "email")
-  assert Ok(email_address) = dynamic.string(email_address)
+  assert Ok(sub) = json_input.required(raw, "sub", json_input.as_string)
+  assert Ok(email_address) =
+    json_input.required(raw, "email", json_input.as_string)
 
   try _ =
     save_authorization(
@@ -250,7 +242,7 @@ pub fn client_authentication(request, config) {
   let Config(client_origin: client_origin, secret: secret, ..) = config
   try Nil = case http.get_req_origin(request) {
     Ok(from) if from == client_origin -> Ok(Nil)
-    _ -> Error(Report(BadInput, "Forbidden", "Origin not allowed"))
+    _ -> Error(Report(RejectedInput, "Forbidden", "Origin not allowed"))
   }
   let cookies = http.get_req_cookies(request)
   case list.key_find(cookies, "google_authentication") {
@@ -263,7 +255,7 @@ pub fn decode_cookie(cookie, secret) {
   try data =
     signed_message.decode(cookie, secret)
     |> result.map_error(fn(_: Nil) {
-      Report(BadInput, "Invalid Session", "Did not send valid cookie data")
+      Report(RejectedInput, "Invalid Session", "Did not send valid cookie data")
     })
   // Used because by this point it's signed
   assert Ok(term) = beam.binary_to_term(data)

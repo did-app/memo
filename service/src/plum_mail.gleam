@@ -5,7 +5,7 @@ import gleam/option.{None, Some}
 import gleam/string
 import gleam/pgo
 import gleam_uuid
-import plum_mail/email_address
+import perimeter/email_address
 import plum_mail/run_sql
 import plum_mail/authentication
 import plum_mail/identifier

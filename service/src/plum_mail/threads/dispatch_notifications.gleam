@@ -14,7 +14,7 @@ import postmark/client as postmark
 import plum_mail/config.{Config}
 import plum_mail/run_sql
 import plum_mail/authentication
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier}
 
 pub fn load() {

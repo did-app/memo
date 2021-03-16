@@ -14,7 +14,7 @@ import gleam/http.{Request, Response}
 import gleam/json
 import gleam_uuid.{UUID}
 import midas/signed_message
-import perimeter/scrub.{BadInput, Report, Unprocessable}
+import perimeter/scrub.{RejectedInput, Report, Unprocessable}
 import plum_mail/config.{Config}
 import plum_mail/identifier.{Personal}
 
@@ -115,7 +115,7 @@ fn check_request_origin(request, client_origin) {
     _ ->
       Error(Report(
         // TODO RejectedInput
-        BadInput,
+        RejectedInput,
         "Unacceptable origin",
         "Unable to complete action due to invalid origin",
       ))
@@ -133,7 +133,7 @@ pub fn get_email_authentication(request, config) {
         signed_message.decode(cookie, secret)
         |> result.map_error(fn(_: Nil) {
           Report(
-            BadInput,
+            RejectedInput,
             "Invalid cookie",
             "Unable to complete action due to invalid cookie",
           )
@@ -161,7 +161,7 @@ pub fn expire_email_authentication_cookie(response, request) {
 pub fn require_authenticated(client_state) {
   client_state
   |> option.to_result(Report(
-    BadInput,
+    RejectedInput,
     "Unauthenticated",
     "Unable to complete action due to missing authentication",
   ))

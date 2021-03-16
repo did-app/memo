@@ -4,9 +4,11 @@ import gleam/result
 import gleam/http
 import gleam/json
 import perimeter/input
+import perimeter/input/json as json_input
+import perimeter/input/http_response
 import perimeter/scrub.{Report, ServiceError}
 import perimeter/services/http_client
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 
 pub type Failure {
   Failure(retry: Bool)
@@ -95,18 +97,9 @@ pub fn dispatch(request) {
     http.Response(status: 200, ..) -> Ok(Ok(Nil))
     http.Response(status: 422, body: body, ..) -> {
       // Can't use input parse json because that's all on responses
-      try raw =
-        json.decode(response.body)
-        |> result.map_error(fn(_) {
-          Report(
-            ServiceError,
-            "Invalid response from service",
-            "The authentication service returned invalid JSON",
-          )
-        })
-      let raw = dynamic.from(raw)
+      try raw = http_response.get_json(response)
       try error_code =
-        input.required(raw, "ErrorCode", input.as_int)
+        json_input.required(raw, "ErrorCode", json_input.as_int)
         |> result.map_error(input.to_service_report(_, "Data"))
       case error_code {
         406 ->

@@ -1,5 +1,5 @@
 import gleam/result
-import perimeter/input
+import perimeter/input/json
 import perimeter/scrub.{Report, Unprocessable}
 import plum_mail/authentication
 
@@ -8,7 +8,7 @@ pub type Params {
 }
 
 pub fn params(raw) {
-  try code = input.required(raw, "code", input.as_string)
+  try code = json.required(raw, "code", json.as_string)
   Params(code)
   |> Ok
 }

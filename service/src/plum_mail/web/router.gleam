@@ -20,7 +20,10 @@ import midas/signed_message
 import datetime
 import oauth/client as oauth
 import drive_uploader
+import perimeter/email_address.{EmailAddress}
 import perimeter/input
+import perimeter/input/http_request
+import perimeter/input/json as json_input
 import perimeter/scrub
 import perimeter/services/http_client
 import plum_mail
@@ -31,7 +34,6 @@ import plum_mail/authentication/authenticate_by_code
 import plum_mail/authentication/authenticate_by_password
 import plum_mail/authentication/claim_email_address
 import plum_mail/conversation/conversation
-import plum_mail/email_address.{EmailAddress}
 import plum_mail/identifier
 import plum_mail/web/helpers as web
 import plum_mail/email/inbound/postmark
@@ -80,24 +82,9 @@ pub fn route(
 ) -> Result(Response(BitBuilder), scrub.Report(scrub.Code)) {
   case http.path_segments(request) {
     [] -> no_content()
-    // Note this endpoint is never used 
-    ["authenticate", "password"] -> {
-      try raw = input.parse_json(request)
-      try params =
-        authenticate_by_password.params(raw)
-        |> result.map_error(input.to_report(_, "Parameter"))
-      try identifier = authenticate_by_password.run(params)
-      successful_authentication(identifier)
-      |> result.map(web.set_email_authentication_cookie(
-        _,
-        identifier,
-        request,
-        config,
-      ))
-    }
-    // Note cookies wont get set on the ajax auth step
+    // Note cookies wont get set on the ajax auth step so we use a form submission
     ["sign_in"] -> {
-      try raw = input.parse_form(request)
+      try raw = http_request.get_form(request)
       try params =
         authenticate_by_password.params(raw)
         |> result.map_error(input.to_report(_, "Form field"))
@@ -107,7 +94,7 @@ pub fn route(
       |> Ok
     }
     ["authenticate", "code"] -> {
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try params =
         authenticate_by_code.params(raw)
         |> result.map_error(input.to_report(_, "Parameter"))
@@ -171,12 +158,12 @@ pub fn route(
       try client_state = web.get_email_authentication(request, config)
       try user_id = web.require_authenticated(client_state)
       try identifier_id =
-        input.as_uuid(dynamic.from(identifier_id))
+        json_input.as_uuid(dynamic.from(identifier_id))
         |> result.map_error(input.CastFailure("identifier_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try blocks =
-        input.required(raw, "blocks", Ok)
+        json_input.required(raw, "blocks", Ok)
         |> result.map_error(input.to_report(_, "Parameter"))
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
       let _ = conversation.update_greeting(identifier_id, user_id, blocks)
@@ -186,17 +173,17 @@ pub fn route(
     // should return conversation
     // rest would be POST identifiers/id/conversations but is conversations really nested under?
     ["identifiers", identifier_id, "start_direct"] -> {
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try email_address =
-        input.required(raw, "email_address", input.as_email)
+        json_input.required(raw, "email_address", json_input.as_email)
         |> result.map_error(input.to_report(_, "Parameter"))
       try content =
-        input.required(raw, "content", Ok)
+        json_input.required(raw, "content", Ok)
         |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.get_email_authentication(request, config)
       try author_id = web.require_authenticated(client_state)
       try identifier_id =
-        input.as_uuid(dynamic.from(identifier_id))
+        json_input.as_uuid(dynamic.from(identifier_id))
         |> result.map_error(input.CastFailure("identifier_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
       let content: Json = dynamic.unsafe_coerce(content)
@@ -212,12 +199,16 @@ pub fn route(
       |> Ok
     }
     ["groups", "create"] -> {
-      try params = input.parse_json(request)
+      try params = http_request.get_json(request)
       try name =
-        input.required(params, "name", input.as_string)
+        json_input.required(params, "name", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       try invitees =
-        input.required(params, "invitees", input.as_list(_, input.as_uuid))
+        json_input.required(
+          params,
+          "invitees",
+          json_input.as_list(_, json_input.as_uuid),
+        )
         |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.get_email_authentication(request, config)
       try identifier_id = web.require_authenticated(client_state)
@@ -230,11 +221,11 @@ pub fn route(
     // Don't just look up if user is member of group. this allows an individual to talk to group. If ever needed. maybe integrations
     ["identifiers", identifier_id, "threads", thread_id, "memos"] -> {
       try identifier_id =
-        input.as_uuid(dynamic.from(identifier_id))
+        json_input.as_uuid(dynamic.from(identifier_id))
         |> result.map_error(input.CastFailure("identifier_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
       try thread_id =
-        input.as_uuid(dynamic.from(thread_id))
+        json_input.as_uuid(dynamic.from(thread_id))
         |> result.map_error(input.CastFailure("thread_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
       try client_state = web.get_email_authentication(request, config)
@@ -247,19 +238,19 @@ pub fn route(
     }
     ["identifiers", identifier_id, "threads", thread_id, "post"] -> {
       try identifier_id =
-        input.as_uuid(dynamic.from(identifier_id))
+        json_input.as_uuid(dynamic.from(identifier_id))
         |> result.map_error(input.CastFailure("identifier_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
       try thread_id =
-        input.as_uuid(dynamic.from(thread_id))
+        json_input.as_uuid(dynamic.from(thread_id))
         |> result.map_error(input.CastFailure("thread_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try position =
-        input.required(raw, "position", input.as_int)
+        json_input.required(raw, "position", json_input.as_int)
         |> result.map_error(input.to_report(_, "Parameter"))
       try blocks =
-        input.required(raw, "content", Ok)
+        json_input.required(raw, "content", Ok)
         |> result.map_error(input.to_report(_, "Parameter"))
       // We can pass validity
       let blocks: json.Json = dynamic.unsafe_coerce(blocks)
@@ -281,16 +272,16 @@ pub fn route(
     }
     ["identifiers", identifier_id, "threads", thread_id, "acknowledge"] -> {
       try identifier_id =
-        input.as_uuid(dynamic.from(identifier_id))
+        json_input.as_uuid(dynamic.from(identifier_id))
         |> result.map_error(input.CastFailure("identifier_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
       try thread_id =
-        input.as_uuid(dynamic.from(thread_id))
+        json_input.as_uuid(dynamic.from(thread_id))
         |> result.map_error(input.CastFailure("thread_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try position =
-        input.required(raw, "position", input.as_int)
+        json_input.required(raw, "position", json_input.as_int)
         |> result.map_error(input.to_report(_, "Parameter"))
       try client_state = web.get_email_authentication(request, config)
       try user_id = web.require_authenticated(client_state)
@@ -300,14 +291,14 @@ pub fn route(
     }
 
     ["inbound"] -> {
-      try params = input.parse_json(request)
+      try params = http_request.get_json(request)
       postmark.handle(params, config)
     }
 
     ["drive_uploaders", "authorize"] -> {
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try code =
-        input.required(raw, "code", input.as_string)
+        json_input.required(raw, "code", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       try sub = drive_uploader.authorize(code, config.google_client, config)
       uploaders_response(sub, request, config)
@@ -315,15 +306,15 @@ pub fn route(
 
     ["drive_uploaders", "create"] -> {
       try sub = drive_uploader.client_authentication(request, config)
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try name =
-        input.required(raw, "name", input.as_string)
+        json_input.required(raw, "name", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       try parent_id =
-        input.optional(raw, "parent_id", input.as_string)
+        json_input.optional(raw, "parent_id", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       try parent_name =
-        input.optional(raw, "parent_name", input.as_string)
+        json_input.optional(raw, "parent_name", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       try _ = drive_uploader.create_uploader(sub, name, parent_id, parent_name)
       uploaders_response(sub, request, config)
@@ -346,12 +337,12 @@ pub fn route(
     }
     ["drive_uploaders", id, "start"] -> {
       try uploader = drive_uploader.uploader_by_id(id)
-      try raw = input.parse_json(request)
+      try raw = http_request.get_json(request)
       try name =
-        input.required(raw, "name", input.as_string)
+        json_input.required(raw, "name", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       try mime_type =
-        input.required(raw, "mime_type", input.as_string)
+        json_input.required(raw, "mime_type", json_input.as_string)
         |> result.map_error(input.to_report(_, "Parameter"))
       assert Ok(drive_uploader.Authorization(access_token: access_token, ..)) =
         uploader.authorization

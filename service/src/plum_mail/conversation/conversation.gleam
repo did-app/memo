@@ -8,7 +8,7 @@ import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid.{UUID}
 import perimeter/scrub.{Report, Unprocessable}
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/identifier.{Identifier, Personal, Shared}
 import plum_mail/threads/thread.{Memo}
 import plum_mail/run_sql

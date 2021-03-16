@@ -7,7 +7,7 @@ import gleam/http
 import gleam/pgo
 import gleam_sentry
 import plum_mail/config
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/identifier
 
 pub fn test_config() {

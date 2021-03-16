@@ -1,4 +1,4 @@
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import gleam/should
 
 pub fn validate_email_test() {

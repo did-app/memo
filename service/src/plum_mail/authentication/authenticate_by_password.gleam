@@ -4,18 +4,19 @@ import gleam/list
 import gleam/map
 import gleam/result
 import gleam/crypto
-import perimeter/input
+import perimeter/input/http_query
 import perimeter/scrub.{Report, Unprocessable}
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/identifier
 
 pub type Params {
   Params(email_address: EmailAddress, password: String)
 }
 
-pub fn params(raw: Dynamic) {
-  try email_address = input.required(raw, "email_address", input.as_email)
-  try password = input.required(raw, "password", input.as_string)
+pub fn params(raw) {
+  try email_address =
+    http_query.required(raw, "email_address", http_query.as_email)
+  try password = http_query.required(raw, "password", http_query.as_string)
   Params(email_address, password)
   |> Ok
 }
