@@ -353,8 +353,7 @@
           Personalise your profile by setting a name.
           Along with you email this will be your identity on Memo.
         </p>
-        <form on:submit|preventDefault={() => setName(prompt.identifier.id, chosenName)}>
-
+        <form on:submit|preventDefault={() => {prompt && setName(prompt.identifier.id, chosenName)}}>
           <input
           bind:value={chosenName}
           required
