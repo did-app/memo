@@ -393,7 +393,6 @@
             Have the first word in every conversation!
           </p>
           <p class="my-2">
-            {prompt.identifier.emailAddress}
             <a href={conversation_module.emailAddressToPath(prompt.identifier.emailAddress)} class="hover:underline focus:underline cursor-pointer">
               Set up your personal greetings page here...
             </a>

@@ -74,8 +74,6 @@
 
       <p class="my-2">
         The greeting below is an example and will not be shared with anyone until you save it.
-      </p>
-      <p class="my-2">
         Feel free to edit as you like, or clear and start over.
       </p>
     </div>
@@ -83,6 +81,8 @@
     <p class="my-2">
       Greeting for <strong>{identifier.emailAddress}</strong>
     </p>
+    {/if}
+
     <p class="my-2">
       Share your contact page:
       <a class="underline" href={conversation_module.url(identifier)}
@@ -137,7 +137,6 @@
   </div>
 </a>
 
-    {/if}
   </article>
   <article
     class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top"
