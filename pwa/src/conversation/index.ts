@@ -57,15 +57,21 @@ export function isOutstanding(participation: Participation): boolean {
 }
 
 export function subject(contact: Group | Identifier): [string, string] {
-  if ('name' in contact) {
+  if (contact.type === "group") {
     return [contact.name, contact.participants.join(", ")]
   } else {
-    return [contact.emailAddress, ""]
+    let display
+    if (contact.name) {
+      display = `${contact.name} <${contact.emailAddress}>`
+    } else {
+      display = contact.emailAddress
+    }
+    return [display, ""]
   }
 }
 
 export function url(contact: Group | Identifier): string {
-  if ('name' in contact) {
+  if (contact.type === "group") {
     return "/groups/" + contact.id
   } else {
     return emailAddressToPath(contact.emailAddress)

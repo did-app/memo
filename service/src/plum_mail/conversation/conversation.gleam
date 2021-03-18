@@ -351,7 +351,8 @@ pub fn all_participating(identifier_id) {
     WHERE identifier_id = $1
     AND identifiers.id IS NULL
   ), my_conversations AS (
-    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, NULL as name, NULL as participants
+    -- WE have a horrible double loading of name but because of the if statement on groups vs direct contacts it works
+    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, i.name, NULL as participants
     FROM my_contacts
     JOIN identifiers AS i ON i.id = my_contacts.contact_id
     
