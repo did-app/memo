@@ -128,11 +128,14 @@ export async function authenticateBySession(): Call<Inbox[] | null> {
     return data?.inboxes.map(inboxFromDTO) || null
   })
 }
-
+let plausible = (window as any).plausible
 
 export async function authenticateByEmail(emailAddress: string, target: string | undefined) {
+  target = target || "/"
+  plausible("startAuthentication", {props: {target}})
+
   const path = "/authenticate/email"
-  const params = { email_address: emailAddress, target: target || "/" }
+  const params = { email_address: emailAddress, target }
   let response: Response<null> = await post(path, params);
   return response
 }
