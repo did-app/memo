@@ -11,11 +11,13 @@ import plum_mail/config
 import perimeter/input
 import plum_mail/run_sql
 import plum_mail/authentication
-import plum_mail/email_address.{EmailAddress}
+import perimeter/input/http_request
+import perimeter/input/json as json_input
+import perimeter/email_address.{EmailAddress}
 import plum_mail/identifier.{Personal}
 
 pub fn cast(request) {
-  try raw = input.parse_json(request)
+  try raw = http_request.get_json(request)
   params(raw)
   |> result.map_error(input.to_report(_, "Parameter"))
 }
@@ -25,8 +27,9 @@ pub type Params {
 }
 
 pub fn params(raw: Dynamic) {
-  try email_address = input.required(raw, "email_address", input.as_email)
-  try target = input.optional(raw, "target", input.as_string)
+  try email_address =
+    json_input.required(raw, "email_address", json_input.as_email)
+  try target = json_input.optional(raw, "target", json_input.as_string)
   Params(email_address, target)
   |> Ok
 }

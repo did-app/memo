@@ -6,9 +6,10 @@ import gleam/result
 import gleam/string
 import gleam/uri.{Uri}
 import gleam/http.{Response}
-import gleam/json
 import perimeter/input
-import perimeter/scrub.{Report, ServiceError}
+import perimeter/input/http_response
+import perimeter/input/json
+import perimeter/scrub.{Report}
 
 pub type AbsoluteUri {
   AbsoluteUri(scheme: String, host: String, path: String)
@@ -99,17 +100,8 @@ pub fn token_request(client, code, redirect_uri) {
 }
 
 pub fn cast_token_response(http_response) {
-  let Response(body: body, ..) = http_response
-  try raw =
-    json.decode(body)
-    |> result.map_error(fn(_) {
-      Report(
-        ServiceError,
-        "Invalid response from service",
-        "The authentication service returned invalid JSON",
-      )
-    })
-  token_response_parameters(dynamic.from(raw))
+  try raw = http_response.get_json(http_response)
+  token_response_parameters(raw)
   |> result.map_error(input.to_service_report(_, "Data"))
 }
 
@@ -124,19 +116,19 @@ pub type TokenResponse {
 }
 
 pub fn token_response_parameters(raw) {
-  try error = input.optional(raw, "error", input.as_string)
+  try error = json.optional(raw, "error", json.as_string)
   case error {
     Some(error) -> {
       try error_description =
-        input.optional(raw, "error_description", input.as_string)
+        json.optional(raw, "error_description", json.as_string)
       Ok(Error(tuple(error, error_description)))
     }
     None -> {
-      try access_token = input.required(raw, "access_token", input.as_string)
-      try token_type = input.required(raw, "token_type", input.as_string)
-      try expires_in = input.optional(raw, "expires_in", input.as_int)
-      try refresh_token = input.optional(raw, "refresh_token", input.as_string)
-      try scope = input.optional(raw, "scope", input.as_string)
+      try access_token = json.required(raw, "access_token", json.as_string)
+      try token_type = json.required(raw, "token_type", json.as_string)
+      try expires_in = json.optional(raw, "expires_in", json.as_int)
+      try refresh_token = json.optional(raw, "refresh_token", json.as_string)
+      try scope = json.optional(raw, "scope", json.as_string)
       Ok(Ok(TokenResponse(
         access_token,
         token_type,

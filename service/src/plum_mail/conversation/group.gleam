@@ -5,7 +5,7 @@ import gleam/option.{None, Some}
 import gleam/json.{Json}
 import gleam/pgo
 import gleam_uuid.{UUID}
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/run_sql
 
 pub type Group {

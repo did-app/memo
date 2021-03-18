@@ -33,12 +33,11 @@ defmodule PlumMail.MixProject do
       {:gleam_bitwise, "~> 1.0"},
       {:gleam_crypto, "~> 0.2"},
       {:gleam_http, "~> 2.0", override: true},
-      {:gleam_httpc, "~> 1.0"},
+      {:gleam_httpc, "~> 1.0", override: true},
       {:gleam_json, "~> 0.1.0"},
       {:gleam_pgo, "~> 0.1.1"},
       {:gleam_sentry, "~> 0.1.1"},
-      # {:gleam_uuid, "~> 0.1.1"}
-      {:gleam_uuid, git: "https://gitlab.com/ImmaculatePine/gleam_uuid", branch: "gleam-0.14"}
+      {:perimeter, github: "midas-framework/perimeter"}
     ]
   end
 end

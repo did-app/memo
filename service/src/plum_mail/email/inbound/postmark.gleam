@@ -7,8 +7,9 @@ import gleam/string
 import gleam/http
 import postmark/client
 import perimeter/input
+import perimeter/input/json
 import plum_mail/config.{Config}
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/authentication
 import plum_mail/identifier.{Personal}
 
@@ -21,21 +22,21 @@ pub fn handle(params, config) {
   ) = config
 
   try to_full =
-    input.required(params, "ToFull", input.as_list(_, Ok))
+    json.required(params, "ToFull", json.as_list(_, Ok))
     |> result.map_error(input.to_report(_, "Parameter"))
   // I think there might be ways to get more than one but we don't care now.
   // Does the postmark logging include non-200 responses
   assert [to_full] = to_full
   try to_hash =
-    input.required(to_full, "MailboxHash", input.as_string)
+    json.required(to_full, "MailboxHash", json.as_string)
     |> result.map_error(input.to_report(_, "Parameter"))
 
   try to_email_address =
-    input.required(to_full, "Email", input.as_email)
+    json.required(to_full, "Email", json.as_email)
     |> result.map_error(input.to_report(_, "Parameter"))
 
   try from_email_address =
-    input.required(params, "From", input.as_email)
+    json.required(params, "From", json.as_email)
     |> result.map_error(input.to_report(_, "Parameter"))
 
   try Personal(identifier_id, ..) =

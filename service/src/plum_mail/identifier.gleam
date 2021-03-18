@@ -9,7 +9,7 @@ import gleam/json.{Json}
 import gleam/pgo
 // Note should this be gleam/uuid
 import gleam_uuid.{UUID}
-import plum_mail/email_address.{EmailAddress}
+import perimeter/email_address.{EmailAddress}
 import plum_mail/run_sql
 
 // identification or discovery or contacts contact or network social graph
