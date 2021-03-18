@@ -142,9 +142,15 @@ pub fn fetch_by_id(id) {
     WHERE id = $1"
   let args = [run_sql.uuid(id)]
   try rows = run_sql.execute(sql, args)
-  assert [row] = rows
+  case rows {
+    [row] -> {
   assert Ok(identifier) = row_to_identifier(row, 0)
   Ok(Some(identifier))
+
+    }
+    [] ->
+    Ok(None)
+  }
 }
 
 pub fn update_greeting(identifier_id, greeting: Json) {

@@ -22,12 +22,14 @@ function identifierFromDTO(data: IdentifierDTO): Identifier {
 export type SharedDTO = {
   type: "shared"
   id: string,
+  name: string | null,
   email_address: string,
   greeting: Block[] | null
 }
 export type PersonalDTO = {
   type: "personal",
   id: string,
+  name: string | null,
   email_address: string,
   greeting: Block[] | null
 }
