@@ -1,6 +1,8 @@
 import gleam/dynamic
 import gleam/io
 import gleam/list
+import gleam/option
+import gleam/string
 import gleam/pgo
 import gleam/json.{Json}
 import datetime.{DateTime}
@@ -69,7 +71,7 @@ fn row_to_memo(row) {
 pub fn load_memos(thread_id) {
   let sql =
     "
-    SELECT n.position, n.content, a.email_address, n.inserted_at
+    SELECT n.position, n.content, a.name, a.email_address, n.inserted_at
     FROM memos AS n
     JOIN identifiers AS a ON a.id = n.authored_by
     WHERE n.thread_id = $1
@@ -86,10 +88,19 @@ fn row_to_memo_json(row) {
   try position = dynamic.int(position)
   try content = dynamic.element(row, 1)
   // try blocks = dynamic.field(content, "blocks")
-  try author = dynamic.element(row, 2)
-  try author = dynamic.string(author)
-  try inserted_at = dynamic.element(row, 3)
+  try author_name = dynamic.element(row, 2)
+  try author_name = run_sql.dynamic_option(author_name, dynamic.string)
+
+  try author_email = dynamic.element(row, 3)
+  try author_email = dynamic.string(author_email)
+  try inserted_at = dynamic.element(row, 4)
   try inserted_at = run_sql.cast_datetime(inserted_at)
+
+  // let author = option.map(author_name, fn(name) {
+  //   string.concat([name, " <", author_email, ">"])
+  // })
+  // |> option.unwrap(author_email)
+  let author = option.unwrap(author_name, author_email)
   json.object([
     tuple("position", json.int(position)),
     tuple("content", dynamic.unsafe_coerce(content)),

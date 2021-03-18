@@ -52,7 +52,8 @@ pub fn load() {
     participants.contact,
     participants.group_name,
     participants.group_id,
-    authors.email_address
+    authors.email_address,
+    authors.name
   FROM memos
   JOIN participants ON participants.thread_id = memos.thread_id
   LEFT JOIN memo_notifications AS notifications
@@ -107,8 +108,18 @@ pub fn load() {
         let group_id =
           option.map(group_id, fn(id) { run_sql.binary_to_uuid4(id) })
 
-        try author = dynamic.element(row, 8)
-        try author = dynamic.string(author)
+        try author_email = dynamic.element(row, 8)
+        try author_email = dynamic.string(author_email)
+
+        try author_name = dynamic.element(row, 8)
+        try author_name = run_sql.dynamic_option(author_name, dynamic.string)
+
+        let author =
+          option.map(
+            author_name,
+            fn(name) { string.concat([name, " <", author_email, ">"]) },
+          )
+          |> option.unwrap(author_email)
 
         tuple(
           recipient_id,
