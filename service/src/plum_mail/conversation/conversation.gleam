@@ -49,6 +49,11 @@ pub fn load_memos(thread_id, identifier_id, author_id) {
   thread.load_memos(thread_id)
 }
 
+pub fn update_name(identifier_id, author_id, name) {
+  try Nil = check_role(identifier_id, author_id)
+  identifier.update_name(identifier_id, name)
+}
+
 pub fn update_greeting(identifier_id, author_id, greeting) {
   try Nil = check_role(identifier_id, author_id)
   identifier.update_greeting(identifier_id, greeting)
@@ -255,7 +260,7 @@ fn new_direct_contact(identifier_id, email_address) {
     VALUES (LEAST($1, (SELECT id FROM invited)), GREATEST($1, (SELECT id FROM invited)), (SELECT id FROM new_thread))
     RETURNING thread_id
   )
-  SELECT (SELECT thread_id FROM new_pair), id, email_address, greeting, group_id FROM invited
+  SELECT (SELECT thread_id FROM new_pair), id, email_address, name, greeting, group_id FROM invited
   "
   let args = [run_sql.uuid(identifier_id), pgo.text(email_address)]
   try rows = run_sql.execute(sql, args)
@@ -282,7 +287,7 @@ fn new_direct_contact(identifier_id, email_address) {
 fn all_shared_inboxes(personal_id) {
   let sql =
     "
-  SELECT identifiers.id, identifiers.email_address, identifiers.greeting, identifiers.group_id
+  SELECT identifiers.id, identifiers.email_address, identifiers.name, identifiers.greeting, identifiers.group_id
   FROM identifiers
   JOIN groups ON groups.id = identifiers.group_id
   JOIN invitations ON invitations.group_id = groups.id
@@ -346,7 +351,8 @@ pub fn all_participating(identifier_id) {
     WHERE identifier_id = $1
     AND identifiers.id IS NULL
   ), my_conversations AS (
-    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, NULL as name, NULL as participants
+    -- WE have a horrible double loading of name but because of the if statement on groups vs direct contacts it works
+    SELECT thread_id, 'DIRECT', contact_id, i.email_address, i.greeting, i.group_id, NULL as participating_group_id, i.name, NULL as participants
     FROM my_contacts
     JOIN identifiers AS i ON i.id = my_contacts.contact_id
     
@@ -364,6 +370,7 @@ pub fn all_participating(identifier_id) {
     latest.position, 
     my_conversations.contact_id,
     my_conversations.email_address,
+    my_conversations.name,
     my_conversations.greeting,
     my_conversations.group_id,
     my_conversations.participating_group_id,
@@ -406,7 +413,7 @@ pub fn all_participating(identifier_id) {
         let null_atom = dynamic.from(pgo.null())
         case dynamic.element(row, 5) {
           Ok(null) if null == null_atom -> {
-            try group = group.from_row(row, 9, None)
+            try group = group.from_row(row, 10, None)
             GroupConversation(group: group, participation: participation)
             |> Ok
           }

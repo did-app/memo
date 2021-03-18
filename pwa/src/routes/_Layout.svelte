@@ -7,9 +7,13 @@
   export let inboxes: Inbox[];
   export let inboxSelection: number | null = 0;
 
-  function emailAddresses(inboxes: Inbox[]): string[] {
+  function identities(inboxes: Inbox[]): string[] {
     return inboxes.map(function ({ identifier }) {
-      return identifier.emailAddress;
+      if (identifier.name) {
+        return `${identifier.name} <${identifier.emailAddress}>`
+      } else {
+       return identifier.emailAddress;
+      }
     });
   }
 </script>
@@ -60,7 +64,7 @@
           bind:value={inboxSelection}
           on:change={() => router.redirect("/")}
         >
-          {#each emailAddresses(inboxes) as emailAddress, index}
+          {#each identities(inboxes) as emailAddress, index}
             <option style="background:#F9F5F1;" value={index}>
               {emailAddress}
             </option>
