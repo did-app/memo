@@ -1,5 +1,6 @@
 <script lang="typescript">
   import type { Memo, Conversation, Identifier } from "./conversation";
+  import * as conversation_module from "./conversation";
   import type { State, Inbox } from "./sync";
   import * as Sync from "./sync";
   import * as API from "./sync/api";
@@ -65,11 +66,18 @@
     | null;
 
   $: inbox = Sync.selectedInbox(state);
-  let prompt: {kind: "set_name", identifier: Identifier, } | null = null
-  $: prompt = (function name(inbox: Inbox | null): {kind: "set_name", identifier: Identifier} | null {
+  // sync/inbox nextPrompt
+  // 
+  type Prompt = {kind: "set_name" | "set_greeting", identifier: Identifier}
+  let prompt: Prompt | null = null
+  $: prompt = (function name(inbox: Inbox | null): Prompt | null {
     if (inbox) {
       if (inbox.identifier.name) {
-        return null
+        if (inbox.identifier.greeting) {
+          return null
+        } else {
+          return {kind: "set_greeting", identifier: inbox.identifier }
+        }
       } else {
         return {kind: "set_name", identifier: inbox.identifier }
       }
@@ -322,6 +330,7 @@
   loading={state.loading}
   bind:inboxSelection={state.inboxSelection}
 />
+
 <div class="w-full max-w-2xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
@@ -344,8 +353,10 @@
       </article>
     {/if}
   {/each}
-  {#if prompt?.kind === "set_name"}
+  {#if prompt && route === "home"}
       <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-2xl">
+        {#if prompt.kind === "set_name"}
+          
         <p>
           Welcome to Memo. 
         </p>
@@ -377,6 +388,17 @@
         </button>
         </p>
         </form>
+        {:else if prompt.kind === "set_greeting"}
+          <p class="my-2">
+            Have the first word in every conversation!
+          </p>
+          <p class="my-2">
+            {prompt.identifier.emailAddress}
+            <a href={conversation_module.emailAddressToPath(prompt.identifier.emailAddress)} class="hover:underline focus:underline cursor-pointer">
+              Set up your personal greetings page here...
+            </a>
+          </p>
+        {/if}
 
       </div>
   {/if}
