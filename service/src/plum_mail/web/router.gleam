@@ -154,6 +154,21 @@ pub fn route(
       |> web.set_resp_json(data)
       |> Ok()
     }
+    ["identifiers", identifier_id, "name"] -> {
+      try client_state = web.get_email_authentication(request, config)
+      try user_id = web.require_authenticated(client_state)
+      try identifier_id =
+        json_input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try raw = http_request.get_json(request)
+      try name =
+        json_input.required(raw, "name", json_input.as_string)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      let _ = conversation.update_name(identifier_id, user_id, name)
+      no_content()
+    }
+
     ["identifiers", identifier_id, "greeting"] -> {
       try client_state = web.get_email_authentication(request, config)
       try user_id = web.require_authenticated(client_state)

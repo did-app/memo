@@ -1,5 +1,5 @@
 <script lang="typescript">
-  import type { Memo, Conversation } from "./conversation";
+  import type { Memo, Conversation, Identifier } from "./conversation";
   import type { State, Inbox } from "./sync";
   import * as Sync from "./sync";
   import * as API from "./sync/api";
@@ -11,6 +11,8 @@
   import Profile from "./routes/Profile.svelte";
   import SignIn from "./components/SignIn.svelte";
   import Introduce from "./routes/Introduce.svelte";
+  import * as Icons from "./icons";
+
   import router from "page";
 
   let route: string;
@@ -63,6 +65,18 @@
     | null;
 
   $: inbox = Sync.selectedInbox(state);
+  let prompt: {kind: "set_name", identifier: Identifier, } | null = null
+  $: prompt = (function name(inbox: Inbox | null): {kind: "set_name", identifier: Identifier} | null {
+    if (inbox) {
+      if (inbox.identifier.name) {
+        return null
+      } else {
+        return {kind: "set_name", identifier: inbox.identifier }
+      }
+    } else {
+      return null
+    }
+  }(inbox))
   $: conversation = inbox && Sync.selectedConversation(inbox, params);
 
   initialize();
@@ -260,6 +274,18 @@
       });
     }
   }
+  
+    async function setName(inboxId: string, name: string) {
+      let response = await API.setName(inboxId, name);
+      if ("error" in response) {
+        throw "Wonder what wen't wrong with the saving name";
+      } else {
+        state = updateInbox(state, inboxId, function (inbox) {
+          let identifier = { ...inbox.identifier, name };
+          return { ...inbox, identifier };
+        });
+      }
+    }
 
   async function saveGreeting(inboxId: string, greeting: Block[]) {
     let message = "Saving your new greeting";
@@ -288,6 +314,7 @@
       return { title, text, url };
     }
   }
+  let chosenName = ""
 </script>
 
 <Layout
@@ -317,7 +344,44 @@
       </article>
     {/if}
   {/each}
-  {#if installPrompt}
+  {#if prompt?.kind === "set_name"}
+      <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-2xl">
+        <p>
+          Welcome to Memo. 
+        </p>
+        <p class="my-2">
+          Personalise your profile by setting a name.
+          Along with you email this will be your identity on Memo.
+        </p>
+        <form on:submit|preventDefault={() => setName(prompt.identifier.id, chosenName)}>
+
+          <input
+          bind:value={chosenName}
+          required
+          class="text-right w-36 px-2 rounded border border-gray-100 bg-gray-100 focus:bg-white text-black outline-none"
+          placeholder="e.g. Dan"
+        />
+        <span class="py-1">
+  
+          &lt;{prompt.identifier.emailAddress}&gt;
+        </span>
+        <p class="my-2">
+  
+          <button
+          type="submit"
+          class="rounded px-2 inline-block border-gray-300 hover:border-gray-500 border"
+          >
+          <span class="w-3 mr-1 inline-block">
+            <Icons.Check />
+          </span>
+          <span class="">Save</span>
+        </button>
+        </p>
+        </form>
+
+      </div>
+  {/if}
+  {#if !prompt && installPrompt}
     <article
       on:click={() => (installPrompt = null)}
       class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"

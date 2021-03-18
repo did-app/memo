@@ -49,6 +49,11 @@ pub fn load_memos(thread_id, identifier_id, author_id) {
   thread.load_memos(thread_id)
 }
 
+pub fn update_name(identifier_id, author_id, name) {
+  try Nil = check_role(identifier_id, author_id)
+  identifier.update_name(identifier_id, name)
+}
+
 pub fn update_greeting(identifier_id, author_id, greeting) {
   try Nil = check_role(identifier_id, author_id)
   identifier.update_greeting(identifier_id, greeting)

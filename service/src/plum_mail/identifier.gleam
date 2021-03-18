@@ -144,13 +144,27 @@ pub fn fetch_by_id(id) {
   try rows = run_sql.execute(sql, args)
   case rows {
     [row] -> {
-  assert Ok(identifier) = row_to_identifier(row, 0)
-  Ok(Some(identifier))
-
+      assert Ok(identifier) = row_to_identifier(row, 0)
+      Ok(Some(identifier))
     }
-    [] ->
-    Ok(None)
+
+    [] -> Ok(None)
   }
+}
+
+pub fn update_name(identifier_id, name) {
+  let sql =
+    "
+    UPDATE identifiers 
+    SET name = $2 
+    WHERE id = $1
+    RETURNING id, email_address, name, name, group_id
+    "
+  let args = [run_sql.uuid(identifier_id), pgo.text(name)]
+  try rows = run_sql.execute(sql, args)
+  assert [row] = rows
+  assert Ok(identifier) = row_to_identifier(row, 0)
+  Ok(identifier)
 }
 
 pub fn update_greeting(identifier_id, greeting: Json) {

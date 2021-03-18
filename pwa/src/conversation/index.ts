@@ -19,12 +19,14 @@ export type Participation = {
 export type Shared = {
   type: "shared"
   id: string,
+  name: string | null,
   emailAddress: string,
   greeting: Block[] | null
 }
 export type Personal = {
   type: "personal",
   id: string,
+  name: string | null,
   emailAddress: string,
   greeting: Block[] | null
 }

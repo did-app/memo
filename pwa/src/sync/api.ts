@@ -15,8 +15,8 @@ function mapData<D, T>(response: Response<D>, mapper: (_: D) => T): Response<T> 
 }
 
 function identifierFromDTO(data: IdentifierDTO): Identifier {
-  const { id, type, email_address: emailAddress, greeting, } = data
-  return { id, type, emailAddress, greeting }
+  const { id, type, email_address: emailAddress, name, greeting, } = data
+  return { id, type, emailAddress, name, greeting }
 }
 
 export type SharedDTO = {
@@ -153,6 +153,14 @@ export async function authenticateByPassword(emailAddress: string, password: str
 
 
 // User Accont calls
+
+export async function setName(identifierId: string, name: string): Call<null> {
+  const path = "/identifiers/" + identifierId + "/name"
+  const params = { name }
+  let response: Response<null> = await post(path, params)
+  return response
+}
+
 
 export async function saveGreeting(identifierId: string, blocks: Block[] | null): Call<null> {
   const path = "/identifiers/" + identifierId + "/greeting"
