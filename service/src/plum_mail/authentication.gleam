@@ -91,7 +91,7 @@ pub fn validate_link_token(token_string) {
     |> result.map_error(fn(_: Nil) { invalid_link_token })
   let sql =
     "
-      SELECT i.id, i.email_address, i.greeting, i.group_id, validator, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
+      SELECT i.id, i.email_address, i.name, i.greeting, i.group_id, validator, lt.inserted_at > NOW() - INTERVAL '7 DAYS'
       FROM link_tokens AS lt
       JOIN identifiers AS i ON i.id = lt.identifier_id
       WHERE selector = $1
@@ -103,9 +103,9 @@ pub fn validate_link_token(token_string) {
       rows,
       fn(row) {
         try identifier = identifier.row_to_identifier(row, 0)
-        try validator = dynamic.element(row, 4)
+        try validator = dynamic.element(row, 5)
         try validator = dynamic.string(validator)
-        try current = dynamic.element(row, 5)
+        try current = dynamic.element(row, 6)
         try current = dynamic.bool(current)
         tuple(identifier, validator, current)
         |> Ok

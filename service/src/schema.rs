@@ -40,6 +40,7 @@ table! {
         group_id -> Nullable<Uuid>,
         inserted_at -> Timestamp,
         updated_at -> Timestamp,
+        name -> Nullable<Varchar>,
     }
 }
 
