@@ -102,6 +102,7 @@
     <section class="w-full max-w-xs mx-auto py-2 border-b-2 border-gray-200">
       <span class="block px-4">Switch inbox</span>
       {#each inboxes as inbox, index}
+      {#if index !== inboxSelection}
         <button class="block w-full text-left px-4 hover:bg-gray-300 hover:text-white" on:click={() => inboxSelection = index}>
           <strong>
             {#if inbox.identifier.name}
@@ -111,6 +112,7 @@
             {/if}
           </strong>
         </button>
+      {/if}
       {/each}
     </section>
   {/if}
