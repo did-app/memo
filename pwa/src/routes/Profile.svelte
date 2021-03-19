@@ -42,7 +42,7 @@
   }, {
     type: "paragraph", spans: [
       {
-        type: "text", text: "Thanks you, " + name
+        type: "text", text: "Thank you, " + name
       }
     ]
   }]}
