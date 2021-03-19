@@ -111,7 +111,7 @@ pub fn load() {
         try author_email = dynamic.element(row, 8)
         try author_email = dynamic.string(author_email)
 
-        try author_name = dynamic.element(row, 8)
+        try author_name = dynamic.element(row, 9)
         try author_name = run_sql.dynamic_option(author_name, dynamic.string)
 
         let author =
