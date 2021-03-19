@@ -178,6 +178,13 @@ fn check_role(identifier_id, author_id) -> Result(Nil, Report(scrub.Code)) {
   }
 }
 
+// These two id's are different when you are acting onbehald of a team identity
+pub fn add_contact(identifier_id, author_id, email_address) {
+  try Nil = check_role(identifier_id, author_id)
+
+  new_direct_contact(identifier_id, email_address)
+}
+
 pub fn start_direct(identifier_id, author_id, email_address, content) {
   try Nil = check_role(identifier_id, author_id)
 

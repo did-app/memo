@@ -10,6 +10,20 @@ import plum_mail/conversation/conversation.{DirectConversation}
 import plum_mail/threads/dispatch_notifications
 import gleam/should
 
+pub fn adding_a_contact_test() {
+  let alice = support.generate_personal_identifier("alice.test")
+  assert Personal(id: alice_id, ..) = alice
+  let bob_email = support.generate_email_address("bob.test")
+
+  let contact =
+    conversation.add_contact(alice_id, alice_id, bob_email)
+    |> io.debug()
+  assert Ok([conversation]) =
+    conversation.all_participating(alice_id)
+    |> io.debug()
+  todo
+}
+
 pub fn talking_to_a_unknown_identifier_test() {
   let alice = support.generate_personal_identifier("alice.test")
   assert Personal(id: alice_id, ..) = alice

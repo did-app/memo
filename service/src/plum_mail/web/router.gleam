@@ -187,6 +187,23 @@ pub fn route(
     // connect | start_direct
     // should return conversation
     // rest would be POST identifiers/id/conversations but is conversations really nested under?
+    ["identifiers", identifier_id, "add_contact"] -> {
+      try identifier_id =
+        json_input.as_uuid(dynamic.from(identifier_id))
+        |> result.map_error(input.CastFailure("identifier_id", _))
+        |> result.map_error(input.to_report(_, "Url Parameter"))
+      try raw = http_request.get_json(request)
+      try email_address =
+        json_input.required(raw, "email_address", json_input.as_email)
+        |> result.map_error(input.to_report(_, "Parameter"))
+      try client_state = web.get_email_authentication(request, config)
+      try author_id = web.require_authenticated(client_state)
+      try conversation =
+        conversation.add_contact(identifier_id, author_id, email_address)
+      http.response(200)
+      |> web.set_resp_json(conversation.to_json(conversation))
+      |> Ok
+    }
     ["identifiers", identifier_id, "start_direct"] -> {
       try raw = http_request.get_json(request)
       try email_address =
@@ -195,13 +212,13 @@ pub fn route(
       try content =
         json_input.required(raw, "content", Ok)
         |> result.map_error(input.to_report(_, "Parameter"))
+      let content: Json = dynamic.unsafe_coerce(content)
       try client_state = web.get_email_authentication(request, config)
       try author_id = web.require_authenticated(client_state)
       try identifier_id =
         json_input.as_uuid(dynamic.from(identifier_id))
         |> result.map_error(input.CastFailure("identifier_id", _))
         |> result.map_error(input.to_report(_, "Url Parameter"))
-      let content: Json = dynamic.unsafe_coerce(content)
       try conversation =
         conversation.start_direct(
           identifier_id,
