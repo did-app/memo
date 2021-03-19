@@ -1,21 +1,22 @@
 <script lang="typescript">
   import router from "page";
   import type { Inbox } from "../sync";
+  import {emailAddressToPath} from "../conversation"
 
   const API_ORIGIN = (import.meta as any).env.SNOWPACK_PUBLIC_API_ORIGIN;
   export let loading: boolean;
   export let inboxes: Inbox[];
   export let inboxSelection: number | null = 0;
-
-  function identities(inboxes: Inbox[]): string[] {
-    return inboxes.map(function ({ identifier }) {
-      if (identifier.name) {
-        return `${identifier.name} <${identifier.emailAddress}>`
-      } else {
-       return identifier.emailAddress;
-      }
-    });
-  }
+  export let installPrompt:
+     (() => Promise<{
+        outcome: "accepted" | "dismissed";
+        platform: string;
+      }>)
+    | null;
+  
+  let menuOpen = false
+  let inbox: Inbox | null = null
+  $: inbox = inboxSelection === null ? null : (inboxes[inboxSelection] || null)
 </script>
 
 <!-- $store.attribute does not get properly collapsed types with typescript -->
@@ -58,19 +59,7 @@
         </svg>
         memo
       </a>
-      {#if inboxes.length !== 0}
-        <select
-          class="bg-transparent px-2 text-gray-800 outline-none"
-          bind:value={inboxSelection}
-          on:change={() => router.redirect("/")}
-        >
-          {#each identities(inboxes) as emailAddress, index}
-            <option style="background:#F9F5F1;" value={index}>
-              {emailAddress}
-            </option>
-          {/each}
-        </select>
-      {/if}
+ 
     </span>
     <span class="my-1 ml-4">
       {#if loading}
@@ -78,42 +67,74 @@
       {:else if inboxes.length === 0}
         <a href="/sign-in">Sign in</a>
       {:else}
-        <!-- explicitly set target so page.js ignores it -->
         <a
-          target="_self"
-          class="text-xs flex items-centere"
-          href="{API_ORIGIN}/sign_out"
+          class="cursor-pointer"
+          on:click|preventDefault={() => menuOpen = true}
         >
-          <svg
-            class="w-4 mr-2"
-            enable-background="new 0 0 24 24"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            ><g
-              ><path
-                d="m13.5 21h-4c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h4c.827 0 1.5-.673 1.5-1.5v-5c0-.276.224-.5.5-.5s.5.224.5.5v5c0 1.378-1.121 2.5-2.5 2.5z"
-              /></g
-            ><g
-              ><path
-                d="m23.5 11h-10c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h10c.276 0 .5.224.5.5s-.224.5-.5.5z"
-              /></g
-            ><g
-              ><path
-                d="m8 24c-.22 0-.435-.037-.638-.109l-5.99-1.997c-.82-.273-1.372-1.035-1.372-1.894v-18c0-1.103.897-2 2-2 .222 0 .438.037.639.11l5.989 1.996c.82.272 1.372 1.034 1.372 1.894v18c0 1.103-.897 2-2 2zm-6-23c-.552 0-1 .449-1 1v18c0 .428.276.808.688.946l6 2c.656.233 1.312-.292 1.312-.946v-18c0-.429-.276-.809-.688-.945l-6-2c-.103-.037-.208-.055-.312-.055z"
-              /></g
-            ><g
-              ><path
-                d="m15.5 8c-.276 0-.5-.224-.5-.5v-5c0-.827-.673-1.5-1.5-1.5h-11.5c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h11.5c1.379 0 2.5 1.122 2.5 2.5v5c0 .276-.224.5-.5.5z"
-              /></g
-            ><g
-              ><path
-                d="m19.5 15c-.128 0-.256-.049-.354-.146-.195-.195-.195-.512 0-.707l3.646-3.646-3.646-3.646c-.195-.195-.195-.512 0-.707s.512-.195.707 0l4 4c.195.195.195.512 0 .707l-4 4c-.097.096-.225.145-.353.145z"
-              /></g
-            ></svg
-          >
-          <span> Sign out </span>
+          Menu
         </a>
       {/if}
     </span>
   </nav>
 </header>
+{#if inbox && menuOpen}
+<!-- github makes them details and summary -->
+  <aside class="absolute z-10 top-0 right-0 min-h-screen w-full sm:max-w-xs shadow flex flex-col bg-white leading-relaxed">
+    <section class="w-full max-w-xs mx-auto mt-2 py-2 border-b-2 border-gray-200">
+      <a class="block text-right px-4" on:click|preventDefault={() => menuOpen = false} href="">
+        close
+      </a>
+      <a class="block px-4" href="">
+        <span>
+          Signed in as 
+        </span>
+        <br>
+        <strong>
+          {#if inbox.identifier.name}
+          {inbox.identifier.name} <span class="font-normal">&lt;{inbox.identifier.emailAddress}&gt;</span>
+            {:else}
+            {inbox.identifier.emailAddress}
+          {/if}
+        </strong>
+      </a>
+    </section>
+    {#if inboxes.length > 1}
+    <section class="w-full max-w-xs mx-auto py-2 border-b-2 border-gray-200">
+      <span class="block px-4">Switch inbox</span>
+      {#each inboxes as inbox, index}
+        <button class="block w-full text-left px-4 hover:bg-gray-300 hover:text-white" on:click={() => inboxSelection = index}>
+          <strong>
+            {#if inbox.identifier.name}
+            {inbox.identifier.name} <span class="font-normal">&lt;{inbox.identifier.emailAddress}&gt;</span>
+              {:else}
+              {inbox.identifier.emailAddress}
+            {/if}
+          </strong>
+        </button>
+      {/each}
+    </section>
+  {/if}
+    <section class="w-full max-w-xs mx-auto py-2">
+      <a class="block px-4 hover:bg-gray-300 hover:text-white" on:click={() => menuOpen=false} href="{emailAddressToPath(inbox.identifier.emailAddress)}">
+        Your Profile
+      </a>
+      <!-- <a class="block px-4 hover:bg-gray-300 hover:text-white" href="">
+        Billing
+      </a> -->
+    </section>
+    <footer class="mt-auto w-full max-w-xs mx-auto mb-4 py-2 border-t-2 border-gray-200">
+      {#if installPrompt}
+        
+      <button class="block w-full text-left px-4 hover:bg-gray-300 hover:text-white cursor-pointer" on:click={installPrompt}>
+        Install
+      </button>
+      {/if}
+      <a class="block px-4 hover:bg-gray-300 hover:text-white"           target="_self"
+      href="{API_ORIGIN}/sign_out">
+        <strong>
+          Sign out
+        </strong>
+      </a>
+    </footer>
+  </aside>
+{/if}

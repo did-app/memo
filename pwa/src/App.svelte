@@ -328,6 +328,7 @@
 <Layout
   inboxes={state.inboxes}
   loading={state.loading}
+  {installPrompt}
   bind:inboxSelection={state.inboxSelection}
 />
 
