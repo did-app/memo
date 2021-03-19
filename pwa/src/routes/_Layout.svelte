@@ -103,7 +103,7 @@
       <span class="block px-4">Switch inbox</span>
       {#each inboxes as inbox, index}
       {#if index !== inboxSelection}
-        <button class="block w-full text-left px-4 hover:bg-gray-300 hover:text-white" on:click={() => inboxSelection = index}>
+        <button class="block w-full text-left px-4 hover:bg-gray-300 hover:text-white" on:click={() => {inboxSelection = index; menuOpen = false}}>
           <strong>
             {#if inbox.identifier.name}
             {inbox.identifier.name} <span class="font-normal">&lt;{inbox.identifier.emailAddress}&gt;</span>
