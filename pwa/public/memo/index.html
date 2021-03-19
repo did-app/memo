@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Web site created using create-snowpack-app" />
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+  <title>Memo's Features</title>
+  <link rel="manifest" href="/manifest.json">
+  <script async defer data-domain="sendmemo.app" src="https://plausible.io/js/plausible.js"></script>
+
+</head>
+
+<body class="flex flex-col min-h-screen text-gray-800 bg-gray-200" style="background:#F9F5F1;">
+  <header class="px-6 bg-gradient-to-r from-green-400 to-blue-500">
+    <nav class="mx-auto flex flex-wrap items-center">
+      <span class="my-1 flex-grow">
+        <a class=" text-2xl text-white font-light hover:opacity-50" href="/">
+          <svg class="float-left mr-2 mt-1.5 w-6" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 301.4 356.4"
+            enable-background="new 0 0 301.4 356.4" xml:space="preserve">
+            <g>
+              <g>
+                <path fill="#fff" d="M150.7,2.6l149.1,304.7h-93.7l-33.3-69.2L150.7,2.6z"></path>
+                <path fill="#f2f2f2" d="M150.7,2.6L1.6,307.3h93.7l33.3-69.2L150.7,2.6z"></path>
+                <g>
+                  <path fill="#e5e5e5" d="M150.7,2.6l55.4,304.7l-55.4,47.5L143.4,216L150.7,2.6z"></path>
+                  <path fill="#fff" d="M150.7,2.6L95.4,307.3l55.4,47.5V2.6z"></path>
+                </g>
+              </g>
+            </g>
+          </svg>
+          memo
+        </a>
+      </span>
+      <span class="text-white py-2">
+        <a class="px-4" href="">Awesome Conversations</a>
+        <a class="px-4" href="">For Teams</a>
+        <a class="px-4" href="">For Influencers</a>
+        <a class="px-4" href="">Pricing</a>
+        <a class="px-4" href="https://sendmemo.app/sign-in">Sign Up</a>
+      </span>
+    </nav>
+  </header>
+  <section class="py-16 w-full bg-gradient-to-r from-green-400 to-blue-500">
+    <div class="max-w-4xl w-full mx-auto flex gap-6">
+      <div class="w-2/3">
+        <h1 class="font-medium text-3xl text-white pr-6 pt-2">Memo is a smarter way to communicate with your friends, fans and team.</h1>
+      </div>
+      <div class="w-1/3">
+        <div class="bg-white border rounded-lg px-4 pt-2 pb-4 shadow-lg">
+          <h3 class="block text-lg pb-2 font-bold text-gray-600 text-center">Get Started</h3>
+          <input class="w-full px-4 py-2 border border-gray-600 rounded" type="email" placeholder="email address">
+          <input class="w-full px-4 py-2 border rounded bg-green-500 mt-4 text-white" type="submit" value="Create Account">
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="py-24 w-full bg-white">
+    <div class="max-w-4xl w-full mx-auto flex gap-8">
+      <div class="w-1/2">
+        <h2 class="text-2xl font-bold text-gray-600 mb-4">Awesome Conversations</h2>
+        <p class="py-2">Memo enrinches your conversations making it super fun to share links.  Using links, you can embed these content types into your message:</p>
+        <img class="relative pt-4 w-1/6" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\content.png">
+        <img class="border-2 rounded shadow-lg mr-6 -mt-10 " src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\images\features\gifs-975x675\rich-content.gif">
+      </div>
+      <div class="w-1/2">
+        <div class="border rounded p-2 mt-4">
+          <div class="flex">
+            <a class="hover:bg-gray-100 m-4 flex-1 p-2 border rounded text-center" href="">
+              <img class="p-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\gallery.png">
+             Galleries          
+            </a>
+            <a class="hover:bg-gray-100 m-4 flex-1 p-2 border rounded text-center" href="">
+              <img class="p-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\youtube.png">
+              Videos
+            </a>
+            <a class="hover:bg-gray-100 m-4 flex-1 p-2 border rounded text-center" href="">
+              <img class="p-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\tweet.png">
+              Tweets
+            </a>
+          </div>
+          <div class="flex">
+            <a class="hover:bg-gray-100 m-4 flex-1 p-2 border rounded text-center" href="">
+              <img class="p-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\recipe-book.png">
+              Recipes
+            </a>
+            <a class="hover:bg-gray-100 m-4 flex-1 p-2 border rounded text-center" href="">
+              <img class="p-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\statistics.png">
+              Presentations
+            </a>
+            <a class="hover:bg-gray-100 m-4 flex-1 p-2 border rounded text-center" href="">
+              <img class="p-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\documents.png">
+              Documents
+            </a>
+          </div>
+        </div>
+        <a class="px-4 py-4 bg-green-400 text-white rounded text-center block mt-8 hover:bg-green-600" href="">Start Sending Awesome Messages Now</a>
+      </div>
+    </div>
+  </section>
+  <section class="py-24 w-full bg-none">
+    <div class="max-w-4xl w-full mx-auto flex gap-8">
+      <div class="w-1/2">
+        <h2 class="text-2xl font-bold text-gray-600 mb-4">React, Answer, Comment</h2>
+        <p class="py-2">Comment on any word, sentence or paragraph in Memo making it super easy to 'reply in line'.  It makes replying to longer messages a breeze.</p>
+        <p class="py-2">And, when you ask a question in a Memo, it is automatically highlighted to the reader for a direct response.</p>
+        <hr class="border-b-4 border-t-0 my-6 border-gray-600"/>
+        <h3 class="text-xl font-bold text-gray-600">
+          <img class="w-6 h-6 inline" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\play.png">
+          Watch a Memo Demo</h3>
+        <div class="flex mt-2">
+          <div class="flex-shrink">
+            <div class="border border-gray-600 p-2 rounded mx-2 hover:bg-gray-200 hover:shadow-xl">
+              <img class="mx-auto w-20 border border-white rounded" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\images\features\gif-325x225\highlighted-questions.gif">
+              <p class="block text-gray-600 text-sm text-center font-bold">Short Demo</p>
+            </div>
+          </div>
+          <div class="flex-shrink">
+            <div class="border border-gray-600 p-2 rounded mx-2 hover:bg-gray-200 hover:shadow-xl">
+              <img class="mx-auto w-20 border border-white rounded" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\images\features\gif-325x225\highlighted-questions.gif">
+            <p class="block text-gray-600 text-sm text-center font-bold">Long Demo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="w-1/2">
+        <img class="relative pt-4 -mt-10 w-1/6 -ml-6" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\speech-bubble.png">
+        <img class="w-full border-2 rounded shadow-lg -mt-10" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\images\features\gifs-975x675\quote-in-reply.gif">
+      </div>
+    </div>
+  </section>
+  <section class="py-24 w-full bg-white">
+    <div class="max-w-4xl w-full mx-auto flex gap-8">
+      <div class="w-1/2">
+        <h2 class="text-2xl font-bold text-gray-600 mb-4">Your Friends Are Already Here</h2>
+        <p class="py-2">Everyone uses Memo with their email address.</p>
+        <p class="py-2">Connect with anyone, no invite needed - simply add them as a contact and Memo does the rest.</p>
+      </div>
+      <div class="w-1/2">
+        <div class="flex gap-8 ">
+          <img class="w-16 h-16 mt-2" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\fireworks.png">
+          <form > 
+            <label>Enter your email to get started...</label>
+            <input class="w-full px-4 py-2 border border-gray-600 rounded" type="email" placeholder="email">
+            <input class="block px-4 py-2 border rounded bg-green-500 mt-4 text-white" type="submit" value="Create Account">
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class=" max-w-4xl w-full mx-auto flex gap-8 pt-8">
+      <div class="mt-6 p-4 border bg-green-100 rounded-lg border-green-600 flex-1">
+        <p class="italic">Been using Memo lately and the explicit replies to questions is <span class="font-bold">so clever</span>.</p>
+        <p class="w-full pt-4 text-sm text-right">
+          <span class="py-1 px-2 rounded-lg bg-green-300 -mr-6 -mb-6">Louis Pilfold</span>
+        </p>
+       
+      </div>
+      <div class="mt-6 p-4 border bg-green-100 rounded-lg border-green-600 flex-1">
+        <p class="italic">Memo is <span class="font-bold">really cool</span> with multiple threads to discuss, makes life so much simpler.</p>
+        <p class="w-full pt-4 text-sm text-right">
+          <span class="py-1 px-2 rounded-lg bg-green-300 -mr-6 -mb-6">Harry</span>
+        </p>
+      </div>
+      <div class="mt-6 p-4 border bg-green-100 rounded-lg border-green-600 flex-1">
+        <p class="italic">Memo is <span class="font-bold">massively improving</span> the incoming messages from my followers.</p>
+        <p class="w-full pt-4 text-sm text-right">
+          <span class="py-1 px-2 rounded-lg bg-green-300 -mr-6 -mb-6">Lewis</span>
+        </p>
+      </div>
+    </div>
+    <div class="italic max-w-4xl w-full mx-auto flex  gap-8">
+      <div class="mt-6 p-4 border bg-green-100 rounded-lg border-green-600 flex-1">
+        <p class="italic">This is <span class="font-bold">very awesome!</span> I get a fill in box to answer your questions!</p>
+        <p class="w-full pt-4 text-sm text-right">
+          <span class="py-1 px-2 rounded-lg bg-green-300 -mr-6 -mb-6">Diana Narahara</span>
+        </p>
+      </div>
+      <div class="mt-6 p-4 border bg-green-100 rounded-lg border-green-600 flex-1">
+        <p class="italic">I would like to find an email replacement. Memo is a <span class="font-bold">great tool</span> to solve this problem.</p>
+        <p class="w-full pt-4 text-sm text-right">
+          <span class="py-1 px-2 rounded-lg bg-green-300 -mr-6 -mb-6">Adontai Mason</span>
+        </p>
+      </div>
+      <div class="mt-6 p-4 border bg-green-100 rounded-lg border-green-600 flex-1">
+        <p class="italic">I am using Memo because it means to get back <span class="font-bold">quality time</span>. </p>
+        <p class="w-full pt-4 text-sm text-right">
+          <span class="py-1 px-2 rounded-lg bg-green-300 -mr-6 -mb-6">Emmanuele Serafini</span>
+        </p>
+      </div>
+    </div>
+  </section>
+  <section class="py-24 w-full bg-none">
+    <h3 class="font-bold text-3xl text-center text-gray-600">Everyday Memos</h3>
+    <div class="max-w-4xl w-full mx-auto flex gap-8 pt-8">
+      <div class="flex-1 border border-gray-300 rounded-lg p-4">
+        <h3 class="text-center font-bold pb-4 text-lg text-gray-600">Organising a great trip</h3>
+        <img class="px-16" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\map.png">
+        <p class="py-2">Organising a trip is a lot of fun in Memo.  It's super easy to create a message group and share links to hotels or attractions.</p>
+        <p class="py-2">You know those super long Booking.com links?  Well, Memo makes them real pretty and pulls in a picture automatically too.</p>
+        <p class="py-2">The world is your oyster!</p>
+      </div>
+      <div class="flex-1 border border-gray-300 rounded-lg p-4">
+        <h3 class="text-center font-bold pb-4 text-lg text-gray-600">Connecting with friends</h3>
+        <img class="px-16" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\laugh.png">
+        <p class="py-2">Email is way too formal and texting is too bitty.  In Memo, you can connect properly with your friends and family.</p>
+        <p class="py-2">Share a photo gallery from your holidays or ask Grandma to send you that lovely Simnel cake recipe you've been meaning to make.</p>
+        <p class="py-2">Why not set up a family group message that your relatives can actually use?</p>
+      </div>
+      <div class="flex-1 border border-gray-300 rounded-lg p-4">
+        <h3 class="text-center font-bold pb-4 text-lg text-gray-600">Getting stuff done</h3>
+        <img class="px-16" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\tasks.png">
+        <p class="py-2">Use Memo to have those important conversations in life.</p>
+        <p class="py-2">Highlighting questions and commenting inline really can make communicating with professionals easy.</p>
+        <p class="py-2">Next time you need to quiz your accountant, send them a Memo.</p>
+      </div>
+    </div>
+    <div class="max-w-4xl w-full mx-auto flex gap-8 pt-8">
+      <div class="flex-1">
+        <a class="block my-4 text-white bg-green-500 px-4 py-2 rounded-lg text-center w-full" href="">Read in Memo: Group Trip</a>
+      </div>
+      <div class="flex-1">
+        <a class="block my-4 text-white bg-green-500 px-4 py-2 rounded-lg text-center w-full" href="">Read in Memo: Family Chat</a>
+      </div>
+      <div class="flex-1">
+        <a class="block my-4 text-white bg-green-500 px-4 py-2 rounded-lg text-center w-full" href="">Read in Memo: Important Mail</a>
+      </div>
+    </div>
+  </section>
+  <section class="py-24 w-full bg-white">
+    <div class="max-w-4xl w-full mx-auto flex gap-8">
+      <div class="flex-1 border border-gray-300 rounded-lg p-4">
+        <h3 class="text-center font-bold pb-4 text-2xl text-gray-600">For Individuals</h3>
+        <img class="px-16" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\blogger.png">
+        <p class="py-2">Perfect for personal use and free forever.  Use Memo to chat with your favourite people.</p>
+        
+      </div>
+      <div class="flex-1 border border-gray-300 rounded-lg p-4">
+        <h3 class="text-center font-bold pb-4 text-2xl text-gray-600">For Influencers</h3>
+        <img class="px-16" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\youtubermale.png">
+        <p class="py-2">Create your personal contact page and always get the first word in every new conversation.  Fantastic for managing large volumes of incoming fanmail and sponsorship requests.</p>
+        
+      </div>
+      <div class="flex-1 border border-gray-300 rounded-lg p-4">
+        <h3 class="text-center font-bold pb-4 text-2xl text-gray-600">For Teams</h3>
+        <img class="px-16" src="C:\Users\richa\OneDrive\Documents\GitHub\memo\pwa\public\memo\img\networking.png">
+        <p class="py-2">Memo in the workplace is a welcome alternative to email and Slack that helps teams communicate without distractions. </p>
+        
+      </div>
+    </div>
+    <div class="max-w-4xl w-full mx-auto flex gap-8 pt-8">
+      <div class="flex-1">
+        <a class="block my-4 text-white bg-green-500 px-4 py-2 rounded-lg text-center w-full" href="">Get Your Free Account</a>
+      </div>
+      <div class="flex-1">
+        <a class="block my-4 text-white bg-green-500 px-4 py-2 rounded-lg text-center w-full" href="">Learn More: Memo and Fanmail</a>
+      </div>
+      <div class="flex-1">
+        <a class="block my-4 text-white bg-green-500 px-4 py-2 rounded-lg text-center w-full" href="">Learn More: Memo for Teams</a>
+      </div>
+    </div>
+  </section>
+  <div class="text-center my-8">
+    Funded by
+    <img class="w-40 mx-auto"
+      src="data:image/png;base64,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"
+      alt="Y Combinator Logo">
+  </div>
+  <div class="text-center my-8 text-sm">
+    Memo is a trading style of Kno Me Limited
+  </div>
+
+</body>
+
+</html>
