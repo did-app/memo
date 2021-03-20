@@ -119,7 +119,7 @@
       if (greeting) {
         return [
           {
-            author: conversation.stranger,
+            author: {name: null, emailAddress: conversation.stranger},
             position: 1,
             content: greeting,
             postedAt: new Date(),
