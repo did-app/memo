@@ -9,6 +9,10 @@
   // This used to be called thread but we just pass the list of memos.
   // This could be called previous but lookup might work both ways when collecting all answers.
   export let peers: Memo[];
+
+  function displayIdentifier({name, emailAddress}: {name: string | null, emailAddress: string}): string {
+    return name || emailAddress
+  }
 </script>
 
 {#if open}
@@ -22,7 +26,7 @@
     >
       <span class="mr-auto" />
       <span class="truncate font-bold text-gray-400 text-xs truncate"
-        >{memo.author}</span
+        >{displayIdentifier(memo.author)}</span
       >
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
@@ -60,7 +64,7 @@
           {/each}</span
         >
       </span>
-      <span class="ml-auto font-bold text-gray-400 text-xs">{memo.author}</span>
+      <span class="ml-auto font-bold text-gray-400 text-xs">{displayIdentifier(memo.author)}</span>
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
   </article>

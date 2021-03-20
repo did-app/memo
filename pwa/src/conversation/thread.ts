@@ -52,7 +52,7 @@ export function makeSuggestions(blocks: Block[], memoPosition: number): Referenc
 export function gatherPrompts(memos: Memo[], viewer: string) {
   let output: Reference[] = [];
   memos.forEach(function (memo: Memo, threadPosition: number) {
-    if (memo.author === viewer) {
+    if (memo.author.emailAddress === viewer) {
       memo.content.forEach(function (block: Block) {
         if (block.type === "annotation") {
 

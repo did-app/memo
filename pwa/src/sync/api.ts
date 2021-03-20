@@ -51,7 +51,7 @@ function contactFromDTO(contact: IdentifierDTO | GroupDTO): Identifier | Group {
 }
 
 export type MemoDTO = {
-  author: string,
+  author: {name: string | null, email_address: string},
   content: Block[]
   // NOTE string is human string
   posted_at: string,
@@ -60,7 +60,8 @@ export type MemoDTO = {
 
 function memoFromDTO(data: MemoDTO): Memo {
   let { author, content, posted_at: postedAt, position } = data
-  return { author, content, postedAt: new Date(postedAt), position }
+  let {name, email_address} = author
+  return { author: {name, emailAddress: email_address}, content, postedAt: new Date(postedAt), position }
 }
 
 

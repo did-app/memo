@@ -1,4 +1,4 @@
-<script>
+<script lang="typescript">
   import type { Memo } from "../conversation";
   import * as Conversation from "../conversation";
   import type { Annotation } from "../writing";
@@ -7,16 +7,6 @@
   export let annotation: Annotation;
   export let index: number;
   export let peers: Memo[];
-
-  function referenceAuthor(peers: Memo[], annotation: Annotation) {
-    let memo = peers[annotation.reference.memoPosition - 1];
-    if (memo) {
-      return memo.author;
-    } else {
-      throw "Should have crashed on referemce";
-    }
-    // Probably follow reference should return author
-  }
 </script>
 
 <!-- The horizontal rule at the bottom of here was able to be a content editable target, could not fix -->

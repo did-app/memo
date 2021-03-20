@@ -18,6 +18,7 @@ pub fn memo_to_json(memo) {
     tuple("posted_at", json.string(datetime.to_iso8601(posted_at))),
     tuple("content", content),
     tuple("position", json.int(position)),
+    tuple("author", json.object([]))
   ])
 }
 
@@ -87,7 +88,6 @@ fn row_to_memo_json(row) {
   try position = dynamic.element(row, 0)
   try position = dynamic.int(position)
   try content = dynamic.element(row, 1)
-  // try blocks = dynamic.field(content, "blocks")
   try author_name = dynamic.element(row, 2)
   try author_name = run_sql.dynamic_option(author_name, dynamic.string)
 
@@ -96,15 +96,13 @@ fn row_to_memo_json(row) {
   try inserted_at = dynamic.element(row, 4)
   try inserted_at = run_sql.cast_datetime(inserted_at)
 
-  // let author = option.map(author_name, fn(name) {
-  //   string.concat([name, " <", author_email, ">"])
-  // })
-  // |> option.unwrap(author_email)
-  let author = option.unwrap(author_name, author_email)
   json.object([
     tuple("position", json.int(position)),
     tuple("content", dynamic.unsafe_coerce(content)),
-    tuple("author", json.string(author)),
+    tuple("author", json.object([
+      tuple("name", json.nullable(author_name, json.string)),
+      tuple("email_address", json.string(author_email))
+    ])),
     tuple("posted_at", json.string(datetime.to_iso8601(inserted_at))),
   ])
   |> Ok
