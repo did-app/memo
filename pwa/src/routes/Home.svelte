@@ -7,10 +7,12 @@
   import SpanComponent from "../components/Span.svelte";
   import ContactComponent from "../components/Contact.svelte";
 
-  type Prompt = {
-    kind: "set_name" | "set_greeting" | "add_contact";
-    identifier: Identifier;
-  };
+  type Prompt =
+    | {
+        kind: "set_name" | "set_greeting";
+        identifier: Identifier;
+      }
+    | { kind: "add_contact"; contactCount: number };
   export let inbox: Inbox;
   export let prompt: Prompt | null;
   let contactEmailAddress = "";
@@ -90,7 +92,15 @@
           their emails.
         </p>
         <p class="my-2">
-          Enter an email address below to start a conversation on Memo.
+          {#if prompt.contactCount === 0}
+            Add an email address below to start your first conversation on Memo. <span
+              class="text-green-500 font-bold">(0/5)</span
+            >
+          {:else}
+            Add an email address below to start your next conversation on Memo. <span
+              class="text-green-500 font-bold">({prompt.contactCount}/5)</span
+            >
+          {/if}
         </p>
       {/if}
       <form on:submit|preventDefault={findContact} class="mb-8">

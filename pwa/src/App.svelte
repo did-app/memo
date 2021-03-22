@@ -68,10 +68,12 @@
   $: inbox = Sync.selectedInbox(state);
   // sync/inbox nextPrompt
   //
-  type Prompt = {
-    kind: "set_name" | "set_greeting" | "add_contact";
-    identifier: Identifier;
-  };
+  type Prompt =
+    | {
+        kind: "set_name" | "set_greeting";
+        identifier: Identifier;
+      }
+    | { kind: "add_contact"; contactCount: number };
   let prompt: Prompt | null = null;
   $: prompt = (function name(inbox: Inbox | null): Prompt | null {
     if (inbox) {
@@ -80,7 +82,10 @@
           if (inbox.conversations.length > 5) {
             return null;
           } else {
-            return { kind: "add_contact", identifier: inbox.identifier };
+            return {
+              kind: "add_contact",
+              contactCount: inbox.conversations.length,
+            };
           }
         } else {
           return { kind: "set_greeting", identifier: inbox.identifier };
@@ -339,7 +344,7 @@
   bind:inboxSelection={state.inboxSelection}
 />
 
-<div class="w-full max-w-2xl mx-auto">
+<div class="w-full max-w-3xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
       <article
@@ -350,7 +355,7 @@
         <p>We are working to fix this issue as soon as possible.</p>
       </article>
     {:else}
-      <article
+      <!-- <article
         on:click={() => (state = Sync.removeTask(state, task.counter))}
         class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
       >
@@ -358,12 +363,12 @@
           {task.type === "running" ? "Running" : "Success"}
         </h2>
         <p>{task.message}</p>
-      </article>
+      </article> -->
     {/if}
   {/each}
   {#if prompt && route === "home" && prompt.kind === "set_name"}
     <div
-      class="md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow max-w-2xl border md:border-white"
+      class="md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow max-w-3xl border md:border-white"
     >
       <p>Welcome to Memo.</p>
       <p class="my-2">
@@ -398,7 +403,7 @@
       </form>
     </div>
   {:else if prompt && route === "home" && prompt.kind === "set_greeting"}
-    <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-2xl">
+    <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl">
       <p class="my-2">Have the first word in every conversation!</p>
       <p class="my-2">
         <a
