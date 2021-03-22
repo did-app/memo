@@ -79,7 +79,7 @@
     if (inbox) {
       if (inbox.identifier.name) {
         if (inbox.identifier.greeting) {
-          if (inbox.conversations.length > 5) {
+          if (inbox.conversations.length >= 5) {
             return null;
           } else {
             return {
