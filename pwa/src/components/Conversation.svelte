@@ -158,7 +158,7 @@
     {/each}
   </div>
   <article
-    class="my-4 py-6  pr-6 md:pr-12 bg-white rounded-lg sticky bottom-0 border shadow-top max-w-2xl"
+    class="my-4 py-6 pr-6 md:pr-12 bg-white md:rounded sticky bottom-0 border border-t-6 shadow-md overflow-hidden w-screen max-w-2xl"
   >
     <div class:hidden={!reply}>
       <Composer
