@@ -73,7 +73,7 @@
         kind: "set_name" | "set_greeting";
         identifier: Identifier;
       }
-    | { kind: "add_contact"; contactCount: number };
+    | { kind: "add_contact"; contactCount: number; identifier: Identifier };
   let prompt: Prompt | null = null;
   $: prompt = (function name(inbox: Inbox | null): Prompt | null {
     if (inbox) {
@@ -84,6 +84,7 @@
           } else {
             return {
               kind: "add_contact",
+              identifier: inbox.identifier,
               contactCount: inbox.conversations.length,
             };
           }
