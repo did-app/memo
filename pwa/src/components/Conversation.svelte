@@ -18,6 +18,7 @@
   export let emailAddress: string;
   export let acknowledged: number;
   export let memos: Memo[];
+  // This is not really used, only thing that matters is is userfocus set
   export let reply: boolean;
   export let sharedParams:
     | { title: string | null; text: string | null; url: string | null }
@@ -93,6 +94,7 @@
 
       reply = false;
     } else {
+      reply = true;
       userFocus = null;
     }
     if (result && result[1] == currentPosition + 1) {
@@ -171,7 +173,7 @@
       >
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
           <div class="flex flex-1" />
-          <button
+          <!-- <button
             on:click={() => {
               reply = false;
             }}
@@ -181,7 +183,7 @@
               <Icons.ReplyAll />
             </span>
             <span class="py-1">Back</span>
-          </button>
+          </button> -->
           {#if blocks.length === 0}
             <button
               class="flex items-center bg-gray-400 border-2 border-gray-400 text-white rounded px-2 ml-2 cursor-not-allowed"
@@ -226,6 +228,7 @@
         {#if userFocus}
           <button
             on:click={() => {
+              reply = true;
               userFocus = null;
             }}
             class="flex items-center rounded px-2 inline-block border-gray-500 border-2"
