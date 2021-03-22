@@ -11,7 +11,7 @@
 </script>
 
 <a
-  class="block md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow max-w-3xl border border-l-4 md:border-white hover:border-gray-600"
+  class="block md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow-inner md:shadow max-w-3xl border md:border-0 md:border-l-4  md:border-white hover:border-gray-600"
   href={link}
 >
   <p class="flex items-center">
@@ -25,7 +25,7 @@
     {description || ""}
   </p>
   {#if summary}
-    <p class="mt-1 p-1 truncate text-gray-500">
+    <p class="md:mt-1 px-1 py-0 md:py-1 truncate text-gray-500">
       {#each summary as span}
         <SpanComponent
           {span}
