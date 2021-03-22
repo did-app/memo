@@ -67,24 +67,37 @@
 
   $: inbox = Sync.selectedInbox(state);
   // sync/inbox nextPrompt
-  // 
-  type Prompt = {kind: "set_name" | "set_greeting", identifier: Identifier}
-  let prompt: Prompt | null = null
+  //
+  type Prompt =
+    | {
+        kind: "set_name" | "set_greeting";
+        identifier: Identifier;
+      }
+    | { kind: "add_contact"; contactCount: number; identifier: Identifier };
+  let prompt: Prompt | null = null;
   $: prompt = (function name(inbox: Inbox | null): Prompt | null {
     if (inbox) {
       if (inbox.identifier.name) {
         if (inbox.identifier.greeting) {
-          return null
+          if (inbox.conversations.length > 5) {
+            return null;
+          } else {
+            return {
+              kind: "add_contact",
+              identifier: inbox.identifier,
+              contactCount: inbox.conversations.length,
+            };
+          }
         } else {
-          return {kind: "set_greeting", identifier: inbox.identifier }
+          return { kind: "set_greeting", identifier: inbox.identifier };
         }
       } else {
-        return {kind: "set_name", identifier: inbox.identifier }
+        return { kind: "set_name", identifier: inbox.identifier };
       }
     } else {
-      return null
+      return null;
     }
-  }(inbox))
+  })(inbox);
   $: conversation = inbox && Sync.selectedConversation(inbox, params);
 
   initialize();
@@ -119,7 +132,7 @@
       if (greeting) {
         return [
           {
-            author: {name: null, emailAddress: conversation.stranger},
+            author: { name: null, emailAddress: conversation.stranger },
             position: 1,
             content: greeting,
             postedAt: new Date(),
@@ -282,18 +295,18 @@
       });
     }
   }
-  
-    async function setName(inboxId: string, name: string) {
-      let response = await API.setName(inboxId, name);
-      if ("error" in response) {
-        throw "Wonder what wen't wrong with the saving name";
-      } else {
-        state = updateInbox(state, inboxId, function (inbox) {
-          let identifier = { ...inbox.identifier, name };
-          return { ...inbox, identifier };
-        });
-      }
+
+  async function setName(inboxId: string, name: string) {
+    let response = await API.setName(inboxId, name);
+    if ("error" in response) {
+      throw "Wonder what wen't wrong with the saving name";
+    } else {
+      state = updateInbox(state, inboxId, function (inbox) {
+        let identifier = { ...inbox.identifier, name };
+        return { ...inbox, identifier };
+      });
     }
+  }
 
   async function saveGreeting(inboxId: string, greeting: Block[]) {
     let message = "Saving your new greeting";
@@ -322,7 +335,7 @@
       return { title, text, url };
     }
   }
-  let chosenName = ""
+  let chosenName = "";
 </script>
 
 <Layout
@@ -332,7 +345,7 @@
   bind:inboxSelection={state.inboxSelection}
 />
 
-<div class="w-full max-w-2xl mx-auto">
+<div class="w-full max-w-3xl mx-auto">
   {#each state.tasks as task}
     {#if task.type === "failure"}
       <article
@@ -343,7 +356,7 @@
         <p>We are working to fix this issue as soon as possible.</p>
       </article>
     {:else}
-      <article
+      <!-- <article
         on:click={() => (state = Sync.removeTask(state, task.counter))}
         class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
       >
@@ -351,56 +364,59 @@
           {task.type === "running" ? "Running" : "Success"}
         </h2>
         <p>{task.message}</p>
-      </article>
+      </article> -->
     {/if}
   {/each}
-  {#if prompt && route === "home"}
-      <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-2xl">
-        {#if prompt.kind === "set_name"}
-          
-        <p>
-          Welcome to Memo. 
-        </p>
-        <p class="my-2">
-          Personalise your profile by setting a name.
-          Along with your email this will be your identity on Memo.
-        </p>
-        <form on:submit|preventDefault={() => {prompt && setName(prompt.identifier.id, chosenName)}}>
-          <input
+  {#if prompt && route === "home" && prompt.kind === "set_name"}
+    <div
+      class="md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow max-w-3xl border md:border-white"
+    >
+      <p>Welcome to Memo.</p>
+      <p class="my-2">
+        Personalise your profile by setting a name. Along with your email this
+        will be your identity on Memo.
+      </p>
+      <form
+        on:submit|preventDefault={() => {
+          prompt && setName(prompt.identifier.id, chosenName);
+        }}
+      >
+        <input
           bind:value={chosenName}
           required
           class="text-right w-36 px-2 rounded border border-gray-100 bg-gray-100 focus:bg-white text-black outline-none"
           placeholder="e.g. Dan"
         />
         <span class="py-1">
-  
           &lt;{prompt.identifier.emailAddress}&gt;
         </span>
         <p class="my-2">
-  
           <button
-          type="submit"
-          class="rounded px-2 inline-block border-gray-300 hover:border-gray-500 border"
+            type="submit"
+            class="rounded px-2 inline-block border-gray-300 hover:border-gray-500 border"
           >
-          <span class="w-3 mr-1 inline-block">
-            <Icons.Check />
-          </span>
-          <span class="">Save</span>
-        </button>
+            <span class="w-3 mr-1 inline-block">
+              <Icons.Check />
+            </span>
+            <span class="">Save</span>
+          </button>
         </p>
-        </form>
-        {:else if prompt.kind === "set_greeting"}
-          <p class="my-2">
-            Have the first word in every conversation!
-          </p>
-          <p class="my-2">
-            <a href={conversation_module.emailAddressToPath(prompt.identifier.emailAddress)} class="hover:underline focus:underline cursor-pointer">
-              Set up your personal greetings page here...
-            </a>
-          </p>
-        {/if}
-
-      </div>
+      </form>
+    </div>
+  {:else if prompt && route === "home" && prompt.kind === "set_greeting"}
+    <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl">
+      <p class="my-2">Have the first word in every conversation!</p>
+      <p class="my-2">
+        <a
+          href={conversation_module.emailAddressToPath(
+            prompt.identifier.emailAddress
+          )}
+          class="hover:underline focus:underline cursor-pointer"
+        >
+          Set up your personal greetings page here...
+        </a>
+      </p>
+    </div>
   {/if}
   {#if !prompt && installPrompt}
     <article
@@ -433,7 +449,7 @@
 </div>
 {#if route === "home"}
   {#if inbox}
-    <Home {inbox} />
+    <Home {inbox} {prompt} />
   {:else if state.loading === false}
     <Introduce contactEmailAddress={"team@sendmemo.app"} {pullMemos} />
   {/if}
