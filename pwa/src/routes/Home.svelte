@@ -42,7 +42,7 @@
     }) != -1;
 </script>
 
-<main class="w-full mx-auto max-w-3xl px-1 md:px-2 mb-8">
+<main class="w-full mx-auto max-w-3xl md:px-2 mb-8">
   <ol>
     {#each outstanding(inbox.conversations).reverse() as { contact, participation }}
       <li>
@@ -79,7 +79,9 @@
         </a>
       </li>
     {/each}
-    <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl">
+    <div
+      class="md:my-4 py-4 px-6 md:px-12 bg-white md:rounded shadow max-w-3xl border md:border-white"
+    >
       {#if prompt && prompt.kind === "add_contact"}
         <h2 class="my-4 text-lg font-bold">Let's get chatting</h2>
         <p>

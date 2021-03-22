@@ -362,7 +362,9 @@
     {/if}
   {/each}
   {#if prompt && route === "home" && prompt.kind === "set_name"}
-    <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-2xl">
+    <div
+      class="md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow max-w-2xl border md:border-white"
+    >
       <p>Welcome to Memo.</p>
       <p class="my-2">
         Personalise your profile by setting a name. Along with your email this

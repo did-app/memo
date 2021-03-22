@@ -11,11 +11,11 @@
 </script>
 
 <a
-  class="block my-2 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl border-l-4 border-white hover:border-gray-600"
+  class="block md:my-2 py-2 px-4 md:px-12 bg-white md:rounded shadow max-w-3xl border border-l-4 md:border-white hover:border-gray-600"
   href={link}
 >
   <p class="flex items-center">
-    <span class="font-bold text-base">{subject}</span>
+    <span class="font-bold ">{subject}</span>
     <span class="ml-auto text-gray-500">
       {datetime?.toLocaleDateString()}
     </span>
@@ -25,7 +25,7 @@
     {description || ""}
   </p>
   {#if summary}
-    <p class="mt-2 p-1 truncate border">
+    <p class="mt-1 p-1 truncate text-gray-500">
       {#each summary as span}
         <SpanComponent
           {span}
