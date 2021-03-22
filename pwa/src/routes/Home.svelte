@@ -5,6 +5,7 @@
   import * as Writing from "../writing";
   import type { Inbox } from "../sync";
   import SpanComponent from "../components/Span.svelte";
+  import ContactComponent from "../components/Contact.svelte";
 
   type Prompt = {
     kind: "set_name" | "set_greeting" | "add_contact";
@@ -77,35 +78,7 @@
           {/if}
         </a>
       </li>
-    {:else}
-      <li>
-        <span class="text-center w-full block font-bold mb-3"
-          >No outstanding messages</span
-        >
-      </li>
     {/each}
-    {#if !hasSupport && !inbox.identifier.emailAddress.includes("sendmemo.app")}
-      <li>
-        <a
-          class="text-xs block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:border-gray-400 hover:border-gray-400 focus:shadow-xl hover:shadow-xl"
-          href="/team"
-        >
-          <span class="font-bold text-base">team@sendmemo.app</span>
-          <!-- could be My group <5 participants> whatsapp doesnot show members very much -->
-          <br />
-          <p class="mt-2">
-            <!-- {conversation_module.subject(contact)[1]} -->
-            Need any help? Get in touch with the Memo team
-          </p>
-        </a>
-      </li>
-    {/if}
-    <li>
-      <hr />
-      <small class="text-center w-full block font-bold text-gray-500"
-        >archive</small
-      >
-    </li>
     <div class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl">
       {#if prompt && prompt.kind === "add_contact"}
         <h2 class="my-4 text-lg font-bold">Let's get chatting</h2>
@@ -139,41 +112,30 @@
         </a>
       {/if}
     </div>
+    {#if !hasSupport && !inbox.identifier.emailAddress.includes("sendmemo.app")}
+      <ContactComponent
+        link={"/team"}
+        subject={"Team Memo <team@sendmemo.app>"}
+        description={null}
+        datetime={new Date()}
+        summary={[
+          {
+            type: "text",
+            text: "Need any help? Get in touch with the Memo team",
+          },
+        ]}
+      />
+    {/if}
     {#each older(inbox.conversations) as { contact, participation }}
-      <li>
-        <a
-          class="block my-2 py-4 px-6 rounded border border-l-8 text-gray-800 bg-white focus:outline-none focus:border-gray-400 hover:border-gray-400 focus:shadow-xl hover:shadow-xl"
-          href={conversation_module.url(contact) +
-            "#" +
-            participation.acknowledged}
-        >
-          <p class="flex items-center">
-            <span class="font-bold text-base"
-              >{conversation_module.subject(contact)[0]}</span
-            >
-            <span class="ml-auto text-gray-500">
-              {participation.latest.postedAt.toLocaleDateString()}
-            </span>
-          </p>
-          <!-- could be My group <5 participants> whatsapp doesnot show members very much -->
-          <p>
-            {conversation_module.subject(contact)[1]}
-          </p>
-          {#if participation.latest}
-            <p class="mt-2 truncate">
-              {#each Writing.summary(participation.latest.content) as span}
-                <SpanComponent
-                  {span}
-                  offset={0}
-                  unfurled={false}
-                  placeholder={null}
-                  active={false}
-                />
-              {/each}
-            </p>
-          {/if}
-        </a>
-      </li>
+      <ContactComponent
+        link={conversation_module.url(contact) +
+          "#" +
+          participation.acknowledged}
+        subject={conversation_module.subject(contact)[0]}
+        description={conversation_module.subject(contact)[1]}
+        datetime={participation.latest?.postedAt || null}
+        summary={Writing.summary(participation.latest?.content || [])}
+      />
     {/each}
   </ol>
 </main>
