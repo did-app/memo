@@ -45,7 +45,7 @@
 
 <div class="absolute bottom-0 flex flex-col left-0  p-4 right-0 top-0 bg-body">
   <div
-    class="md:rounded-2xl m-auto w-full max-w-2xl my-shadow p-6 rounded-lg text-center z-0 bg-white border"
+    class="md:rounded-2xl m-auto w-full max-w-3xl my-shadow p-6 rounded-lg text-center z-0 bg-white border"
   >
     <p class="text-gray-800 text-lg">Sign-in to Memo</p>
     {#if emailSent}
