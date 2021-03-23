@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Web site created using create-snowpack-app" />
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+  <title>Memo's Features</title>
+  <link rel="manifest" href="/manifest.json">
+  <script async defer data-domain="sendmemo.app" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    .overlay {
+      background: rgba(229, 231, 235, 0.7);
+    }
+
+    .highlighted-questions+label {
+      display: none;
+    }
+
+    .highlighted-questions:checked+label {
+      display: block;
+    }
+
+    .quote-in-reply+label {
+      display: none;
+    }
+
+    .quote-in-reply:checked+label {
+      display: block;
+    }
+
+    .personal-contact-page+label {
+      display: none;
+    }
+
+    .personal-contact-page:checked+label {
+      display: block;
+    }
+
+    .recipe+label {
+      display: none;
+    }
+
+    .recipe:checked+label {
+      display: block;
+    }
+
+    .tweet+label {
+      display: none;
+    }
+
+    .tweet:checked+label {
+      display: block;
+    }
+
+    .video+label {
+      display: none;
+    }
+
+    .video:checked+label {
+      display: block;
+    }
+
+    .presentation+label {
+      display: none;
+    }
+
+    .presentation:checked+label {
+      display: block;
+    }
+
+    .photo-gallery+label {
+      display: none;
+    }
+
+    .photo-gallery:checked+label {
+      display: block;
+    }
+
+    .easy-groups+label {
+      display: none;
+    }
+
+    .easy-groups:checked+label {
+      display: block;
+    }
+
+    .documents+label {
+      display: none;
+    }
+
+    .documents:checked+label {
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen text-gray-800 bg-gray-200" style="background:#F9F5F1;">
+  <header class="px-6 bg-gradient-to-r from-green-400 to-blue-500">
+    <nav class="mx-auto flex flex-wrap items-center">
+      <span class="my-1 flex-grow">
+        <a class=" text-2xl text-white font-light hover:opacity-50" href="https://sendmemo.app/memo">
+          <svg class="float-left mr-2 mt-1.5 w-6" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 301.4 356.4"
+            enable-background="new 0 0 301.4 356.4" xml:space="preserve">
+            <g>
+              <g>
+                <path fill="#fff" d="M150.7,2.6l149.1,304.7h-93.7l-33.3-69.2L150.7,2.6z"></path>
+                <path fill="#f2f2f2" d="M150.7,2.6L1.6,307.3h93.7l33.3-69.2L150.7,2.6z"></path>
+                <g>
+                  <path fill="#e5e5e5" d="M150.7,2.6l55.4,304.7l-55.4,47.5L143.4,216L150.7,2.6z"></path>
+                  <path fill="#fff" d="M150.7,2.6L95.4,307.3l55.4,47.5V2.6z"></path>
+                </g>
+              </g>
+            </g>
+          </svg>
+          memo
+        </a>
+      </span>
+      <span class="text-white py-2">
+        <a class="hover:underline px-4" href="https://sendmemo.app/personal-conversations">Personal</a>
+        <a class="hover:underline px-4" href="https://sendmemo.app/for-teams">Teams</a>
+        <a class="hover:underline px-4" href="https://sendmemo.app/pricing">Pricing</a>
+        <a class="hover:underline px-4" href="https://sendmemo.app/sign-in">Sign Up</a>
+      </span>
+    </nav>
+  </header>
+  <section class="py-16 px-4 w-full bg-gradient-to-r from-green-400 to-blue-500">
+    <div class="max-w-2xl w-full mx-auto">
+      <div class="w-full">
+        <h1 class="font-medium text-3xl text-white pt-2 text-center">Have great conversations with your friends and family.</h1>
+        <a class="hover:bg-gray-200 hover:text-gray-800 hover:shadow-xl hover:pointer-cursor block w-60 text-center text-white font-bold border border-white p-2 mt-6 rounded-lg mx-auto" href="https://sendmemo.app/sign-in">Start a Conversation</a>
+      </div>
+    </div>
+  </section>
+  <div
+    class="mx-2 md:mx-auto md:text-lg z-20 md:w-full max-w-3xl bg-white shadow-md rounded mb-6 mt-4 py-10 border px-8 md:px-16 text-gray-800">
+    <a name="photos-and-galleries" id="photos-and-galleries"></a>
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Share Photos and Galleries</h3>
+        <p class="my-4">Easily share photos and galleries with friends and family.</p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="photo-gallery">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/photo-gallery-325x225.jpg">
+        </label>
+      </div>
+      <input type="checkbox" id="photo-gallery" class="photo-gallery" style="display:none;">
+      <label for="photo-gallery" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Share Photos and Galleries</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/photo-gallery-975x675.jpg">
+      </label>
+    </section>
+    <a name="recipes" id="recipes"></a>
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Embed Online Recipes</h3>
+        <p class="my-4">Share a link to your favourite recipe and Memo embeds the ingredients and method right into the message.</p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="recipe">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/recipe-325x225.jpg">
+        </label>
+      </div>
+      <input type="checkbox" id="recipe" class="recipe" style="display:none;">
+      <label for="recipe" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Embed Online Recipes</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/recipe-975x675.jpg">
+      </label>
+    </section>
+    
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Personal contact page</h3>
+        <p class="my-4">Create a personal contact message that lets others know how best to reach you. </p>
+        <p class="my-4">It helps filter out unwanted messages and gets the conversation off to a great start on your
+          terms. For example try; <a class="text-underline text-green-500"
+            href="https://sendmemo.app/richard">sendmemo.app/richard</a></p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="personal-contact-page">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/personal-greeting.gif">
+        </label>
+      </div>
+      <input type="checkbox" id="personal-contact-page" class="personal-contact-page" style="display:none;">
+      <label for="personal-contact-page" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Personal Contact Page</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/personal-greeting.gif">
+      </label>
+    </section>
+
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Highlighted Questions</h3>
+        <p class="my-4">
+          Ask questions, get answers. 
+        </p>
+        <p class="my-4">
+          Highlighted questions have a higher response rate than regular questions.
+        </p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="highlighted-questions">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/highlighted-questions.gif">
+        </label>
+      </div>
+      <input type="checkbox" id="highlighted-questions" class="highlighted-questions" style="display:none;">
+      <label for="highlighted-questions" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Highlighted Questions</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/highlighted-questions.gif">
+      </label>
+    </section>
+
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Quote in reply</h3>
+        <p class="my-4">
+          Respond inline for the best context. Makes reading and writing longer messages better.
+        </p>
+        <p class="my-4">
+          Quotes are deep-linked to their origin even if the quote is from a different conversation thread.
+        </p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="quote-in-reply">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/quote-in-reply.gif">
+        </label>
+      </div>
+      <input type="checkbox" id="quote-in-reply" class="quote-in-reply" style="display:none;">
+      <label for="quote-in-reply" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Quote in Reply</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/quote-in-reply.gif">
+      </label>
+    </section>
+    <a name="videos" id="videos"></a>
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Share Videos</h3>
+        <p class="my-4">Grab a link from Vimeo, Loom or YouTube and paste it into your Memo to embed.</p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="video">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/video-325x225.jpg">
+        </label>
+      </div>
+      <input type="checkbox" id="video" class="video" style="display:none;">
+      <label for="tweet" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Share Videos</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/video-975x675.jpg">
+      </label>
+    </section>
+    <a name="tweets" id="tweets"></a>
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Share Tweets</h3>
+        <p class="my-4">Tweet links auto-embed the tweet itself.  Makes sharing relevant tweets easier and prevents the reader getting distracted by endless Twitter.</p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="tweet">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/tweet-325x225.jpg">
+        </label>
+      </div>
+      <input type="checkbox" id="tweet" class="tweet" style="display:none;">
+      <label for="tweet" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Share Tweets</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/tweet-975x675.jpg">
+      </label>
+    </section>
+    <a name="presentations" id="presentations"></a>
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Share Presentations</h3>
+        <p class="my-4">For college or work, share presentations in Memo so your reader can view and comment very easily.</p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="presentation">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/presentation-325x225.jpg">
+        </label>
+      </div>
+      <input type="checkbox" id="presentation" class="presentation" style="display:none;">
+      <label for="tweet" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Share Presentations</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/presentation-975x675.jpg">
+      </label>
+    </section>
+
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Easy groups</h3>
+        <p class="my-4">
+          Memo makes email groups a doddle. No more 'please reply all' or confusion over CC and BCC.
+        </p>
+        <p class="my-4">
+          Create groups and easily start new conversations within those groups.
+        </p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="easy-groups">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/group-creation.gif">
+        </label>
+      </div>
+      <input type="checkbox" id="easy-groups" class="easy-groups" style="display:none;">
+      <label for="easy-groups" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Easy Groups</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/group-creation.gif">
+      </label>
+    </section>
+    <a name="documents" id="documents"></a>
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-1/2 w-full">
+        <h3 class="mb-4 font-bold text-xl">Documents</h3>
+        <p class="my-4">
+          Share documents inline where they make most sense.
+        </p>
+        <p class="my-4">
+          Request files be uploaded direct to your Google Drive from within a Memo (on team plans).
+        </p>
+      </div>
+      <div class="md:w-1/2 w-full">
+        <label for="documents">
+          <img class="border rounded hover:shadow-lg cursor-pointer"
+            src="/images/features/gif-325x225/live-attachments.gif">
+        </label>
+      </div>
+      <input type="checkbox" id="documents" class="documents" style="display:none;">
+      <label for="documents" class="overlay fixed h-screen left-0 top-0 w-full z-40">
+        <p class="text-center text-xl mt-4 mb-2 font-bold">Documents</p>
+        <img class="mx-auto w-full max-w-3xl rounded-xl border shadow-xl"
+          src="/images/features/gifs-975x675/live-attachments.gif">
+      </label>
+    </section>
+
+    <section class="md:flex md:gap-6 mb-12 border-b pb-12">
+      <div class="md:w-2/3 w-full">
+        <h3 class="mb-4 font-bold text-xl">Outstanding</h3>
+        <p class="my-4">
+          Memo replaces 'unread email' with 'outstanding conversations'.
+        </p>
+        <p class="my-4">
+          Read things, leave then return when you're ready without ever having to 'mark things as unread'.
+        </p>
+        <p class="my-4">
+          Memo's outstanding message state helps you manage actions in your inbox with less effort.
+        </p>
+      </div>
+    </section>
+    <div class="w-full max-w-md mx-auto mt-8 mb-4">
+      <a class="bg-green-500 text-2xl text-center block rounded-lg px-4 py-4 hover:bg-green-600 text-white font-bold mx-auto"
+        href="https://sendmemo.app/team">Interested? Message us</a>
+    </div>
+  </div>
+  
+  <div class="text-center my-8">
+    Funded by
+    <img class="w-40 mx-auto"
+      src="data:image/png;base64,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"
+      alt="Y Combinator Logo">
+  </div>
+  <div class="text-center my-8 text-sm">
+    Memo is a trading style of Kno Me Limited
+  </div>
+
+</body>
+
+</html>
