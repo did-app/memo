@@ -90,6 +90,7 @@
       <h1 class="text-2xl">Start conversation with {contactEmailAddress}</h1>
     </div>
   {/if}
+
   {#await pullMemos(inbox.identifier.id, conversation || { stranger: contactEmailAddress || "I think this should always be present" })}
     <LoadingComponent />
   {:then memos}
@@ -97,6 +98,7 @@
       <ConversationComponent
         emailAddress={inbox.identifier.emailAddress}
         acknowledged={conversation.participation.acknowledged}
+        recipient={subject(conversation.contact)[0]}
         {memos}
         {sharedParams}
         acknowledge={acknowledgeFactory(conversation)}
@@ -107,6 +109,7 @@
       <ConversationComponent
         emailAddress={inbox.identifier.emailAddress}
         acknowledged={0}
+        recipient={contactEmailAddress || ""}
         {memos}
         {sharedParams}
         acknowledge={undefined}

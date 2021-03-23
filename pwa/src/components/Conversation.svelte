@@ -16,6 +16,7 @@
   // Only need the reader id for pulling out questions
   // export let identifier: Identifier;
   export let emailAddress: string;
+  export let recipient: string;
   export let acknowledged: number;
   export let memos: Memo[];
   // This is not really used, only thing that matters is is userfocus set
@@ -150,6 +151,7 @@
   function isOpen(memo: Memo, target: number | undefined): boolean {
     return memo.position >= acknowledged || memo.position === target;
   }
+  let empty = true;
 </script>
 
 <div class="">
@@ -157,6 +159,21 @@
     {#each memos as memo}
       <!-- Memos should never be empty -->
       <MemoComponent {memo} open={isOpen(memo, target)} peers={memos || []} />
+    {:else}
+      {empty}
+      {#if empty}
+        <div
+          class="md:my-4 py-4 px-6 md:px-12 bg-white md:rounded shadow-inner md:shadow max-w-3xl"
+        >
+          <!-- <h2 class="my-4 text-lg font-bold">Writing Memos</h2> -->
+          <p class="my-2">
+            This is your first Memo to {recipient} not sure what to say?<br />
+            <a class="underline" href=""
+              >click here to introduce them to Memo.</a
+            >
+          </p>
+        </div>
+      {/if}
     {/each}
   </div>
   <article
@@ -167,6 +184,7 @@
       <Composer
         previous={memos || []}
         bind:this={composer}
+        bind:empty
         selected={composerRange}
         position={(memos?.length || 0) + 1}
         let:blocks

@@ -11,6 +11,7 @@
   export let blocks: Block[] = [];
   export let position: number;
   export let selected: Range | null;
+  export let empty = false;
 
   export function addAnnotation(reference: Reference) {
     blocks = Writing.addAnnotation(blocks, reference);
@@ -19,6 +20,8 @@
   export function addBlock(block: Block) {
     blocks = Writing.addBlock(blocks, block);
   }
+
+  $: empty = blocks.length < 1;
 
   let composer: HTMLElement;
   let composition: { updated: Block[]; cursor: Point } | null = null;
@@ -99,6 +102,7 @@
   let doubleInput = false;
 </script>
 
+{empty}
 {#if supported}
   <div
     bind:this={composer}
