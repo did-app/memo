@@ -19,7 +19,6 @@
   export let recipient: string;
   export let acknowledged: number;
   export let memos: Memo[];
-  // This is not really used, only thing that matters is is userfocus set
   export let reply: boolean;
   export let sharedParams:
     | { title: string | null; text: string | null; url: string | null }
@@ -95,7 +94,6 @@
 
       reply = false;
     } else {
-      reply = true;
       userFocus = null;
     }
     if (result && result[1] == currentPosition + 1) {
@@ -177,7 +175,7 @@
     {/each}
   </div>
   <article
-    class="my-4 py-6 pr-6 md:pr-12 bg-white md:rounded sticky bottom-0 border shadow-md overflow-hidden w-screen max-w-2xl"
+    class="my-4 py-6 pr-6 md:pr-12 bg-white md:rounded sticky bottom-0 border shadow-md overflow-hidden w-screen max-w-3xl"
     style="box-shadow:#f9f5f1 0px 0px 2px 12px;"
   >
     <div class:hidden={!reply}>
@@ -191,7 +189,7 @@
       >
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
           <div class="flex flex-1" />
-          <!-- <button
+          <button
             on:click={() => {
               reply = false;
             }}
@@ -201,7 +199,7 @@
               <Icons.ReplyAll />
             </span>
             <span class="py-1">Back</span>
-          </button> -->
+          </button>
           {#if blocks.length === 0}
             <button
               class="flex items-center bg-gray-400 border-2 border-gray-400 text-white rounded px-2 ml-2 cursor-not-allowed"
@@ -242,17 +240,8 @@
           {/each}
         </div>
       {/if}
-      <nav class="flex pl-6 md:pl-12">
+      <nav class="flex flex-row-reverse pl-6 md:pl-12">
         {#if userFocus}
-          <button
-            on:click={() => {
-              reply = true;
-              userFocus = null;
-            }}
-            class="flex items-center rounded px-2 inline-block border-gray-500 border-2"
-          >
-            <span class="py-1">Clear</span>
-          </button>
           <button
             on:click={quoteInReply}
             class="flex items-center bg-gray-800 text-white ml-2 rounded px-2"
@@ -262,19 +251,16 @@
             </span>
             <span class="py-1">Quote in Reply</span>
           </button>
+          <button
+            on:click={() => {
+              reply = true;
+              userFocus = null;
+            }}
+            class="flex items-center rounded px-2 inline-block border-gray-500 border-2"
+          >
+            <span class="py-1">Cancel Quotation</span>
+          </button>
         {:else}
-          {#if acknowledge}
-            <button
-              on:click={acknowledge}
-              class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2"
-            >
-              <span class="w-5 mr-2 inline-block">
-                <Icons.Check />
-              </span>
-              <span class="py-1">Acknowledge</span>
-            </button>
-          {/if}
-
           <button
             on:click={() => {
               reply = true;
@@ -288,6 +274,17 @@
               {#if false}Draft{:else}Reply{/if}
             </span>
           </button>
+          {#if acknowledge}
+            <button
+              on:click={acknowledge}
+              class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2"
+            >
+              <span class="w-5 mr-2 inline-block">
+                <Icons.Check />
+              </span>
+              <span class="py-1">Acknowledge</span>
+            </button>
+          {/if}
         {/if}
       </nav>
     {/if}

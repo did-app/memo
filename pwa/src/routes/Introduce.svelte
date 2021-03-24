@@ -4,7 +4,6 @@
   import * as API from "../sync/api";
   import MemoComponent from "../components/Memo.svelte";
 
-
   export let contactEmailAddress: string;
   export let pullMemos: (
     identifierId: string,
@@ -19,11 +18,8 @@
 
   async function authenticate(event: Event) {
     event.preventDefault();
-    let target = conversation_module.emailAddressToPath(contactEmailAddress)
-    let response = await API.authenticateByEmail(
-      emailAddress,
-      target
-    );
+    let target = conversation_module.emailAddressToPath(contactEmailAddress);
+    let response = await API.authenticateByEmail(emailAddress, target);
     if ("error" in response) {
       throw "Bad email when going to public profile";
     }
@@ -31,7 +27,7 @@
   }
 </script>
 
-<div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
+<div class="w-full mx-auto max-w-3xl grid md:max-w-3xl">
   {#await pullMemos("", { stranger: contactEmailAddress })}
     <!-- Nought -->
     <!-- Note always only one memo -->
@@ -41,7 +37,7 @@
       <MemoComponent {memo} open={true} peers={memos} />
     {/each}
     <article
-      class="my-4 py-6  px-6 md:px-12 bg-white rounded-lg sticky bottom-0 border shadow-top max-w-2xl"
+      class="my-4 py-6  px-6 md:px-12 bg-white rounded-lg sticky bottom-0 border shadow-top max-w-3xl"
     >
       {#if emailSent}
         <p>

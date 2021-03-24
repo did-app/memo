@@ -10,15 +10,21 @@
   // This could be called previous but lookup might work both ways when collecting all answers.
   export let peers: Memo[];
 
-  function displayIdentifier({name, emailAddress}: {name: string | null, emailAddress: string}): string {
-    return name || emailAddress
+  function displayIdentifier({
+    name,
+    emailAddress,
+  }: {
+    name: string | null;
+    emailAddress: string;
+  }): string {
+    return name || emailAddress;
   }
 </script>
 
 {#if open}
   <article
     id={memo.position.toString()}
-    class="border-t mb-2 pt-1 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden w-screen max-w-2xl"
+    class="border-t mb-2 pt-1 pb-16 pr-6 md:pr-12 bg-white md:rounded shadow-md overflow-hidden w-screen max-w-3xl"
   >
     <header
       class="ml-6 md:ml-12 flex text-gray-600 cursor-pointer pb-6"
@@ -48,7 +54,7 @@
   <article
     id={memo.position.toString()}
     on:click={() => (open = true)}
-    class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer w-screen max-w-2xl"
+    class="-mb-2 border-t py-1  pr-6 md:pr-12 bg-white md:rounded-t shadow-md cursor-pointer w-screen max-w-3xl"
   >
     <header class="ml-6 md:ml-12 mb-2 flex text-gray-400">
       <span class="truncate">
@@ -64,7 +70,9 @@
           {/each}</span
         >
       </span>
-      <span class="ml-auto font-bold text-gray-400 text-xs">{displayIdentifier(memo.author)}</span>
+      <span class="ml-auto font-bold text-gray-400 text-xs"
+        >{displayIdentifier(memo.author)}</span
+      >
       <!-- <span class="ml-auto">{memo.posted_at.toLocaleDateString()}</span> -->
     </header>
   </article>

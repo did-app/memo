@@ -2,7 +2,7 @@
   console.log("Under construction");
 </script>
 
-<div class="w-full mx-auto max-w-3xl grid md:max-w-2xl">
+<div class="w-full mx-auto max-w-3xl grid md:max-w-3xl">
   <article
     class="border-t mb-2 pt-4 pb-16 px-6 md:px-12 bg-white md:rounded shadow-md overflow-hidden"
   >

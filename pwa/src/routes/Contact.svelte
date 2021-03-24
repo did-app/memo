@@ -79,7 +79,7 @@
   }
 </script>
 
-<div class="w-full mx-auto grid max-w-2xl">
+<div class="w-full mx-auto grid max-w-3xl">
   {#if conversation}
     <div class="text-center my-4">
       <h1 class="text-2xl">{subject(conversation.contact)[0]}</h1>
@@ -103,7 +103,7 @@
         {sharedParams}
         acknowledge={acknowledgeFactory(conversation)}
         dispatchMemo={postMemoFactory(conversation)}
-        reply={true}
+        reply={false}
       />
     {:else}
       <ConversationComponent
