@@ -101,7 +101,7 @@
         {sharedParams}
         acknowledge={acknowledgeFactory(conversation)}
         dispatchMemo={postMemoFactory(conversation)}
-        reply={true}
+        reply={false}
       />
     {:else}
       <ConversationComponent
