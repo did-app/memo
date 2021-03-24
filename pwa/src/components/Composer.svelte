@@ -22,8 +22,6 @@
   }
   $: blockCount = blocks.length;
 
-  $: empty = blocks.length < 1;
-
   let composer: HTMLElement;
   let composition: { updated: Block[]; cursor: Point } | null = null;
   const supported = Writing.isBeforeInputEventAvailable();
@@ -103,7 +101,6 @@
   let doubleInput = false;
 </script>
 
-{empty}
 {#if supported}
   <div
     bind:this={composer}

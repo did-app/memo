@@ -118,10 +118,50 @@
   let references = conversation_module.gatherPrompts(memos, emailAddress);
 
   tick().then(function () {
-    // composer.addBlock({ type: "paragraph", spans: [] });
     references.map(function (reference) {
       composer.addAnnotation(reference);
     });
+    console.log(composer.addBlock);
+
+    if (memos.length === 0) {
+      composer.addBlock({
+        type: "paragraph",
+        spans: [
+          {
+            type: "text",
+            text:
+              "Hi, I'm trying out Memo to take control of my inbox and have better conversations than are possible with just email.",
+          },
+        ],
+      });
+      composer.addBlock({
+        type: "paragraph",
+        spans: [
+          {
+            type: "text",
+            text: "Do you think we could try it out for a bit?",
+          },
+        ],
+      });
+      composer.addBlock({
+        type: "paragraph",
+        spans: [
+          {
+            type: "link",
+            url: "https://www.youtube.com/watch?v=NV5lqfEy7O0",
+          },
+        ],
+      });
+      composer.addBlock({
+        type: "paragraph",
+        spans: [
+          {
+            type: "text",
+            text: "All the best ...",
+          },
+        ],
+      });
+    }
     if (sharedParams) {
       composer.addBlock({
         type: "paragraph",
@@ -158,20 +198,17 @@
       <!-- Memos should never be empty -->
       <MemoComponent {memo} open={isOpen(memo, target)} peers={memos || []} />
     {:else}
-      {empty}
-      {#if empty}
-        <div
-          class="md:my-4 py-4 px-6 md:px-12 bg-white md:rounded shadow-inner md:shadow max-w-3xl"
-        >
-          <!-- <h2 class="my-4 text-lg font-bold">Writing Memos</h2> -->
-          <p class="my-2">
-            This is your first Memo to {recipient} not sure what to say?<br />
-            <a class="underline" href=""
-              >click here to introduce them to Memo.</a
-            >
-          </p>
-        </div>
-      {/if}
+      <div
+        class="md:my-4 py-4 px-6 md:px-12 bg-white md:rounded shadow-inner md:shadow max-w-3xl"
+      >
+        <p>
+          This is your first Memo to <strong>{recipient}</strong><br />
+        </p>
+        <p>
+          We've drafted a quick message to help you introduce them to Memo.
+          Tweek it or delete it as you see fit.
+        </p>
+      </div>
     {/each}
   </div>
   <article
@@ -182,18 +219,15 @@
       <Composer
         previous={memos || []}
         bind:this={composer}
-<<<<<<< Updated upstream
-        bind:empty
-=======
         bind:blockCount
->>>>>>> Stashed changes
         selected={composerRange}
         position={(memos?.length || 0) + 1}
         let:blocks
       >
         <div class="mt-2 pl-6 md:pl-12 flex items-center">
           <div class="flex flex-1" />
-          <button
+          <!-- Theres no need to back and to keep the message, refresh the page if REALLY want acknowledge button -->
+          <!-- <button
             on:click={() => {
               reply = false;
             }}
@@ -203,7 +237,7 @@
               <Icons.ReplyAll />
             </span>
             <span class="py-1">Back</span>
-          </button>
+          </button> -->
           {#if blocks.length === 0}
             <button
               class="flex items-center bg-gray-400 border-2 border-gray-400 text-white rounded px-2 ml-2 cursor-not-allowed"
@@ -225,6 +259,15 @@
             </button>
           {/if}
         </div>
+        {#if memos.length === 0}
+          <p
+            class="ml-6 md:ml-12 my-2 border-l-4 border-pink-300 pl-2 bg-gray-100 rounded py-1"
+          >
+            Please note, emails are only sent
+            <strong>once an hour</strong>. Read more about why in
+            <a class="underline" href="">our mission</a>
+          </p>
+        {/if}
       </Composer>
     </div>
     {#if !reply}
