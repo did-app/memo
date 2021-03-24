@@ -149,7 +149,7 @@
   function isOpen(memo: Memo, target: number | undefined): boolean {
     return memo.position >= acknowledged || memo.position === target;
   }
-  let empty = true;
+  let blockCount: number;
 </script>
 
 <div class="">
@@ -182,7 +182,11 @@
       <Composer
         previous={memos || []}
         bind:this={composer}
+<<<<<<< Updated upstream
         bind:empty
+=======
+        bind:blockCount
+>>>>>>> Stashed changes
         selected={composerRange}
         position={(memos?.length || 0) + 1}
         let:blocks
