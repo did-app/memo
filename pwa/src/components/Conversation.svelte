@@ -216,6 +216,19 @@
     style="box-shadow:#f9f5f1 0px 0px 2px 12px;"
   >
     <div class:hidden={!reply}>
+      <!--     {#if memos.length === 0}
+      <div
+        class="md:my-2 p-2 ml-6 md:ml-12 bg-white md:rounded shadow-inner md:shadow max-w-3xl bg-gray-100"
+      >
+        <p>
+          This is your first Memo to <strong>{recipient}</strong><br />
+        </p>
+        <p>
+          We've drafted a quick message to help you introduce them to Memo.
+          Tweek it or delete it as you see fit.
+        </p>
+      </div>
+    {/if} -->
       <Composer
         previous={memos || []}
         bind:this={composer}

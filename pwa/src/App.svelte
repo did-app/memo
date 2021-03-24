@@ -308,7 +308,28 @@
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
-      let s = Sync.resolveTask(state, counter, "conversation started");
+      let now = new Date();
+      let hour = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDay(),
+        now.getHours() + 1
+      ).getHours();
+      let time;
+      if (hour === 0) {
+        time = "Midnight";
+      } else if (hour === 12) {
+        time = "Noon";
+      } else if (hour < 12) {
+        time = hour + " am";
+      } else {
+        time = hour - 12 + " pm";
+      }
+      let s = Sync.resolveTask(
+        state,
+        counter,
+        "Conversation started, memo will be delivered after " + time
+      );
       let data = response.data;
       state = updateInbox(s, inboxId, function (inbox) {
         let conversations = [data, ...inbox.conversations];
