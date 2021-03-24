@@ -43,7 +43,8 @@ export function initial(): State {
 
 export function startTask({ tasks, taskCounter, ...rest }: State, message: string) {
   let task: Task = { type: "running", message, counter: taskCounter }
-  tasks = [task, ...tasks]
+  // tasks = [task, ...tasks]
+  tasks = [task]
   taskCounter += 1
   let updated: State = { ...rest, tasks, taskCounter }
   return { updated, counter: task.counter }
