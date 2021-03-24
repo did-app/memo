@@ -1,6 +1,5 @@
 <script lang="typescript">
   import type { Span } from "../writing";
-  import * as Writing from "../writing";
   import SpanComponent from "../components/Span.svelte";
 
   export let link: string;

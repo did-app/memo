@@ -1,6 +1,6 @@
 import type { Reference } from "../../conversation"
 
-import type { Block } from "../elements"
+import type { Block, Span } from "../elements"
 import type { Point } from "../point"
 import type { Range } from "../range"
 import { lineLength } from "../tree"
@@ -70,21 +70,18 @@ export function handleInput(blocks: Block[], range: Range, event: Event): [Block
 }
 
 export function addAnnotation(blocks: Block[], reference: Reference): Block[] {
-  return addBlock(blocks, {
+  let block: Block = {
     type: "annotation",
     reference,
     // This can probably be removed when fragment is collected to handle empty blocks
     blocks: [{ type: "paragraph", spans: [] }],
-  })
-}
-
-export function addBlock(blocks: Block[], block: Block): Block[] {
+  }
   let lastBlock = blocks[blocks.length - 1];
   let before: Block[];
   if (
     lastBlock &&
     "spans" in lastBlock &&
-    lineLength(lastBlock.spans) === 0
+    isEmptyLine(lastBlock.spans)
   ) {
     before = blocks.slice(0, -1);
   } else {
@@ -95,4 +92,36 @@ export function addBlock(blocks: Block[], block: Block): Block[] {
     }
   }
   return [...before, block];
+}
+
+export function addBlock(blocks: Block[], block: Block): Block[] {
+  let lastBlock = blocks[blocks.length - 1];
+  let before: Block[];
+  if (
+    lastBlock &&
+    "spans" in lastBlock &&
+    isEmptyLine(lastBlock.spans)
+  ) {
+    before = blocks.slice(0, -1);
+  } else {
+    before = blocks
+    // if (blocks.length === 0) {
+    //   before = [{ type: 'paragraph', spans: [] }]
+    //   before = []
+    // } else {
+    //   before = blocks;
+    // }
+  }
+  return [...before, block];
+}
+
+function isEmptyLine(spans: Span[]) {
+  let span = spans[0]
+  if (span === undefined) {
+    return true
+  } else if (spans.length === 1) {
+    return span.type === "text" && span.text === ""
+  } else {
+    return false
+  }
 }

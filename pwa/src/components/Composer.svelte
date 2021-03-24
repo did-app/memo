@@ -11,6 +11,7 @@
   export let blocks: Block[] = [];
   export let position: number;
   export let selected: Range | null;
+  export let blockCount: number = 0;
 
   export function addAnnotation(reference: Reference) {
     blocks = Writing.addAnnotation(blocks, reference);
@@ -19,6 +20,7 @@
   export function addBlock(block: Block) {
     blocks = Writing.addBlock(blocks, block);
   }
+  $: blockCount = blocks.length;
 
   let composer: HTMLElement;
   let composition: { updated: Block[]; cursor: Point } | null = null;

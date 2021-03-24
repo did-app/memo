@@ -233,7 +233,28 @@
     if ("error" in response) {
       throw "Well this should be handled";
     } else {
-      let s = Sync.resolveTask(state, counter, "Memo posted");
+      let now = new Date();
+      let hour = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDay(),
+        now.getHours() + 1
+      ).getHours();
+      let time;
+      if (hour === 0) {
+        time = "Midnight";
+      } else if (hour === 12) {
+        time = "Noon";
+      } else if (hour < 12) {
+        time = hour + " am";
+      } else {
+        time = hour - 12 + " pm";
+      }
+      let s = Sync.resolveTask(
+        state,
+        counter,
+        "Memo dispatched, it will be delivered after " + time
+      );
       let latest = response.data;
       state = updateInbox(s, inboxId, function (inbox) {
         return updateConversation(inbox, threadId, function (conversation) {
@@ -354,17 +375,29 @@
       >
         <h2 class="font-bold">{task.message}</h2>
         <p>We are working to fix this issue as soon as possible.</p>
+        <nav class="flex flex-row-reverse pl-6 md:pl-12">
+          <button
+            class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2"
+          >
+            <span class="py-1">Dismiss</span>
+          </button>
+        </nav>
       </article>
-    {:else}
-      <!-- <article
+    {:else if task.type === "success"}
+      <article
         on:click={() => (state = Sync.removeTask(state, task.counter))}
-        class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+        class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl border md:border-0 md:border-l-4 border-green-300"
       >
-        <h2 class="font-bold">
-          {task.type === "running" ? "Running" : "Success"}
-        </h2>
+        <h2 class="font-bold">Success</h2>
         <p>{task.message}</p>
-      </article> -->
+        <nav class="flex flex-row-reverse pl-6 md:pl-12">
+          <button
+            class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2"
+          >
+            <span class="py-1">Dismiss</span>
+          </button>
+        </nav>
+      </article>
     {/if}
   {/each}
   {#if prompt && route === "home" && prompt.kind === "set_name"}
@@ -418,27 +451,34 @@
       </p>
     </div>
   {/if}
-  {#if !prompt && installPrompt}
+  {#if !prompt && installPrompt && state.tasks.length === 0}
     <article
       on:click={() => (installPrompt = null)}
-      class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+      class="my-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl border md:border-0 md:border-l-4 border-green-300"
     >
       <h2 class="font-bold">Web-app available to install</h2>
-      <p>
+      <p class="my-2">
         Install Memo's web-app on your computer, tablet or smartphone for faster
         access.
       </p>
-      <button
-        on:click={installPrompt}
-        class="bg-green-500 flex hover:bg-green-600 items-center mt-4 px-4 rounded text-white"
-      >
-        <span class="py-1"> Install </span>
-      </button>
+      <nav class="flex flex-row-reverse pl-6 md:pl-12">
+        <button
+          on:click={installPrompt}
+          class="flex items-center bg-gray-800 text-white rounded px-2 ml-2"
+        >
+          <span class="py-1"> Install </span>
+        </button>
+        <button
+          class="flex items-center rounded px-2 inline-block ml-2 border-gray-500 border-2"
+        >
+          <span class="py-1">Dismiss</span>
+        </button>
+      </nav>
     </article>
   {/if}
   {#if sharedParams}
     <article
-      class="bg-gray-800 border-l-8 border-r-8 border-green-500 md:px-12 my-4 p-4 rounded shadow-md text-white"
+      class="bmy-4 py-4 px-6 md:px-12 bg-white rounded shadow max-w-3xl border md:border-0 md:border-l-4 border-gray-300"
     >
       <h2 class="font-bold">Select a conversation to share the following</h2>
       <p>
