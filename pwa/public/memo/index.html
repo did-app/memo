@@ -21,6 +21,14 @@
     .short-demo:checked+label {
       display: block;
     }
+
+    .long-demo+label {
+      display: none;
+    }
+
+    .long-demo:checked+label {
+      display: block;
+    }
   </style>
 </head>
 
@@ -113,36 +121,47 @@
         <p class="py-2">Comment on any word, sentence or paragraph in Memo messages, it makes replying to chunky messages a breeze.</p>
         <p class="py-2">And, when you ask a question, it is automatically highlighted to the reader for a direct response.</p>
         <hr class="border-b-4 border-t-0 my-6 border-gray-600"/>
-        <label for="short-demo" class="text-xl hover:underline font-bold text-gray-600">
+        <div class="text-xl hover:underline font-bold text-gray-600">
           <img class="w-6 h-6 inline" src="https://sendmemo.app/memo/img/play.png">
-          Watch a Memo Demo</label>
-          <input type="checkbox" id="short-demo" class="short-demo" style="display:none;">
+          Watch a Memo Demo</div>
+        <div class="flex mt-2">
+          <div class="flex-shrink">
+            <label for="short-demo">
+              <div class="border border-gray-600 p-2 rounded mx-2 hover:pointer-cursor hover:bg-gray-200 hover:shadow-xl">
+                <img class="mx-auto w-20 border border-white rounded" src="https://sendmemo.app/memo/img/short-demo-thumb.jpg">
+                <p class="block text-gray-600 text-sm text-center font-bold">Short Demo</p>
+                <p class="text-gray-600 text-xs text-center">01:08</p>
+              </div>
+            </label>
+            <input type="checkbox" id="short-demo" class="short-demo" style="display:none;">
             <label for="short-demo" class=" overlay fixed h-screen left-0 top-0 w-full z-40 bg-white">
               <div class="mx-auto w-full mt-6 rounded-xl">
-                <p class="text-center py-4 text-2xl font-bold">Memo Demo Video</p>
+                <p class="text-center py-4 text-2xl font-bold">Short Memo Demo Video</p>
                 <iframe class="mx-auto border-2" width="616" height="346" src="https://www.youtube.com/embed/NV5lqfEy7O0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 <a class="bg-green-400 block font-bold hover:bg-green-600 mt-8 mx-auto px-4 py-4 rounded text-center text-white w-72" href="https://sendmemo.app/sign-in">Get Started With Memo Today</a>
                 <p class="text-sm text-center text-gray-800 italic mt-4">Click here to exit video</p>
               </div>
             </label>
-       <!-- <div class="flex mt-2">
-          <div class="flex-shrink">
-            <label for="short-demo">
-              <div class="border border-gray-600 p-2 rounded mx-2 hover:pointer-cursor hover:bg-gray-200 hover:shadow-xl">
-                <img class="mx-auto w-20 border border-white rounded" src="https://sendmemo.app/images/features/gif-325x225/highlighted-questions.gif">
-                <p class="block text-gray-600 text-sm text-center font-bold">Short Demo</p>
-                <p class="text-gray-600 text-xs text-center">00:30</p>
+          </div>
+        <div class="flex-shrink">
+          <label for="long-demo">
+            <div class="border border-gray-600 p-2 rounded mx-2 hover:bg-gray-200 hover:shadow-xl">
+              <img class="mx-auto w-20 border border-white rounded" src="https://sendmemo.app/memo/img/long-demo-thumb.jpg">
+              <p class="block text-gray-600 text-sm text-center font-bold">Long Demo</p>
+              <p class="text-gray-600 text-xs text-center">12:55</p>
+            </div>
+          </label>
+          <input type="checkbox" id="long-demo" class="long-demo" style="display:none;">
+            <label for="long-demo" class=" overlay fixed h-screen left-0 top-0 w-full z-40 bg-white">
+              <div class="mx-auto w-full mt-6 rounded-xl">
+                <p class="text-center py-4 text-2xl font-bold">Long Memo Demo Video</p>
+                <iframe class="mx-auto border-2" width="616" height="346" src="https://www.youtube.com/embed/tdZBLI0dDVY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <a class="bg-green-400 block font-bold hover:bg-green-600 mt-8 mx-auto px-4 py-4 rounded text-center text-white w-72" href="https://sendmemo.app/sign-in">Get Started With Memo Today</a>
+                <p class="text-sm text-center text-gray-800 italic mt-4">Click here to exit video</p>
               </div>
             </label>
           </div>
-      <div class="flex-shrink">
-            <div class="border border-gray-600 p-2 rounded mx-2 hover:bg-gray-200 hover:shadow-xl">
-              <img class="mx-auto w-20 border border-white rounded" src="https://sendmemo.app/images/features/gif-325x225/highlighted-questions.gif">
-            <p class="block text-gray-600 text-sm text-center font-bold">Long Demo</p>
-            <p class="text-gray-600 text-xs text-center">12:15</p>
-            </div>
-          </div>
-        </div>-->
+        </div>
       </div>
       <div class="md:w-1/2 mt-8 md:mt-0">
         <img class="relative pt-4 -mt-10 w-1/6 -ml-6" src="https://sendmemo.app/memo/img/speech-bubble.png">
