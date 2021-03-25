@@ -278,7 +278,7 @@
           >
             Please note, emails are only sent
             <strong>once an hour</strong>. Read more about why in
-            <a class="underline" href="">our mission</a>
+            <a class="underline" href="/mission">our mission</a>
           </p>
         {/if}
       </Composer>
